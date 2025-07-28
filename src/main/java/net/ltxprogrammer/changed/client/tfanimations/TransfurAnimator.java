@@ -93,43 +93,35 @@ public abstract class TransfurAnimator {
 
     private static final Map<ModelPart, ModelPose> CAPTURED_MODELS = new HashMap<>();
 
-    private static ModelPart.Cube copyCube(ModelPart.Cube cube) {
-        ModelPart.Cube newCube = new ModelPart.Cube(0, 0, cube.minX, cube.minY, cube.minZ,
-                cube.maxX - cube.minX, cube.maxY - cube.minY, cube.maxZ - cube.minZ,
-                0.0f, 0.0f, 0.0f, false, 1.0f, 1.0f, ALL_VISIBLE);
-        ((CubeExtender)newCube).copyPolygonsFrom(cube);
-        return newCube;
+    private static EntityGeometry.Cube copyCube(EntityGeometry.Cube cube) {
+        return new EntityGeometry.Cube(cube);
     }
 
-    private static ModelPart deepCopyPart(@Nullable ModelPart part, boolean copyVisibility) {
+    private static EntityGeometry deepCopyPart(@Nullable EntityGeometry part, boolean copyVisibility) {
         if (part == null)
             return null;
-        ModelPart copied = new ModelPart(
-                part.cubes.stream().map(TransfurAnimator::copyCube).toList(),
-                part.children.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> deepCopyPart(entry.getValue(), copyVisibility))));
-        copied.loadPose(part.storePose());
-        if (copyVisibility)
-            copied.visible = part.visible;
+        EntityGeometry copied = new EntityGeometry(part);
+        if (!copyVisibility)
+            copied.visit(visited -> visited.visible = true);
         return copied;
     }
 
-    private static ModelPart deepCopyPart(@Nullable ModelPart part, Predicate<ModelPart> predicate, boolean copyVisibility) {
+    private static EntityGeometry deepCopyPart(@Nullable ModelPart part, Predicate<ModelPart> predicate, boolean copyVisibility) {
         if (part == null)
             return null;
-        ModelPart copied = new ModelPart(
-                part.cubes.stream().map(TransfurAnimator::copyCube).toList(),
-                part.children.entrySet().stream().filter(entry -> predicate.test(entry.getValue())).collect(Collectors.toMap(Map.Entry::getKey, entry -> deepCopyPart(entry.getValue(), predicate, copyVisibility))));
-        copied.loadPose(part.storePose());
-        if (copyVisibility)
-            copied.visible = part.visible;
+        EntityGeometry copied = new EntityGeometry(part, predicate);
+        if (!copyVisibility)
+            copied.visit(visited -> visited.visible = true);
         return copied;
     }
 
-    private static ModelPart.Cube clampCube(ModelPart.Cube a, ModelPart.Cube clampBy) {
+    private static EntityGeometry.Cube clampCube(EntityGeometry.Cube a, EntityGeometry.Cube clampBy) {
         if (clampBy == null)
             return a;
 
-        float minX = Mth.clamp(a.minX, clampBy.minX, clampBy.maxX);
+        return a.clampToFit(clampBy);
+
+        /*float minX = Mth.clamp(a.minX, clampBy.minX, clampBy.maxX);
         float minY = Mth.clamp(a.minY, clampBy.minY, clampBy.maxY);
         float minZ = Mth.clamp(a.minZ, clampBy.minZ, clampBy.maxZ);
 
@@ -147,23 +139,23 @@ public abstract class TransfurAnimator {
                 polyCube[i].vertices[v] = polyCube[i].vertices[v].remap(polyClamp[i].vertices[v].u, polyClamp[i].vertices[v].v);
             }
         }
-        return newCube;
+        return newCube;*/
     }
 
-    private static ModelPart replaceCubesAndZeroParts(ModelPart part, ModelPart.Cube cube) {
-        ModelPart ret = new ModelPart(
+    private static EntityGeometry replaceCubesAndZeroParts(EntityGeometry part, EntityGeometry.Cube cube) {
+        EntityGeometry ret = new EntityGeometry(
                 part.cubes.stream().map(otherCube -> clampCube(otherCube, cube)).toList(),
                 part.children.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> replaceCubesAndZeroParts(entry.getValue(), cube))));
         ret.loadPose(PartPose.ZERO);
         return ret;
     }
 
-    private static ModelPart shallowCopyPart(ModelPart part) {
-        return new ModelPart(part.cubes.stream().map(TransfurAnimator::copyCube).toList(), Map.of());
+    private static EntityGeometry shallowCopyPart(EntityGeometry part) {
+        return new EntityGeometry(part.cubes.stream().map(EntityGeometry.Cube::new).toList(), Map.of());
     }
 
-    private static ModelPart matchCubeCount(ModelPart to, ModelPart from, ModelPart.Cube copyWith, boolean copyVisibility) {
-        List<ModelPart.Cube> cubes = new ArrayList<>();
+    private static EntityGeometry matchCubeCount(EntityGeometry to, EntityGeometry from, EntityGeometry.Cube copyWith, boolean copyVisibility) {
+        List<EntityGeometry.Cube> cubes = new ArrayList<>();
 
         final int targetCubeCount = Math.max(to.cubes.size(), from.cubes.size());
         int cubeCount = 0;
@@ -171,21 +163,23 @@ public abstract class TransfurAnimator {
         for (var cube : to.cubes) {
             if (cubeCount >= targetCubeCount) break;
 
-            cubes.add(copyCube(cube));
+            cubes.add(copyCube(new EntityGeometry.Cube(cube)));
             cubeCount++;
         }
 
         for (var cube : from.cubes) {
             if (cubeCount >= targetCubeCount) break;
 
-            cubes.add(clampCube(cube, copyWith));
+            cubes.add(clampCube(new EntityGeometry.Cube(cube), copyWith));
             cubeCount++;
         }
 
         cubes.sort((c1, c2) -> {
-            int yCompare = Float.compare(c1.maxY, c2.maxY);
-            int xCompare = Float.compare(c1.maxX, c2.maxX);
-            int zCompare = Float.compare(c1.maxZ, c2.maxZ);
+            var c1max = c1.getMax();
+            var c2max = c2.getMax();
+            int yCompare = Float.compare(c1max.y, c2max.y);
+            int xCompare = Float.compare(c1max.x, c2max.x);
+            int zCompare = Float.compare(c1max.z, c2max.z);
 
             if (yCompare == 0) {
                 if (xCompare == 0)
@@ -195,13 +189,13 @@ public abstract class TransfurAnimator {
             return yCompare;
         });
 
-        Map<String, ModelPart> children = new HashMap<>();
+        Map<String, EntityGeometry> children = new HashMap<>();
 
         for (var k : to.children.keySet()) {
-            children.put(k, deepCopyPart(to.children.get(k), copyVisibility));
+            children.put(k, deepCopyPart(new EntityGeometry(to.children.get(k)), copyVisibility));
         }
 
-        ModelPart.Cube copyOverride = !to.cubes.isEmpty() ? to.cubes.get(0) : copyWith;
+        EntityGeometry.Cube copyOverride = !to.cubes.isEmpty() ? to.cubes.get(0) : copyWith;
 
         for (var k : from.children.keySet()) {
             if (to.children.containsKey(k)) {
@@ -213,18 +207,18 @@ public abstract class TransfurAnimator {
             }
         }
 
-        final ModelPart matched = new ModelPart(cubes, children);
+        final EntityGeometry matched = new EntityGeometry(cubes, children);
         if (copyVisibility)
             matched.visible = to.visible;
         return matched;
     }
 
-    private static ModelPart matchCubeCount(ModelPart to, ModelPart from, boolean copyVisibility) {
+    private static EntityGeometry matchCubeCount(EntityGeometry to, EntityGeometry from, boolean copyVisibility) {
         return matchCubeCount(to, from, findCube(to), copyVisibility);
     }
 
-    private static ModelPart.Vertex lerpVertex(ModelPart.Vertex a, ModelPart.Vertex b, float lerp) {
-        return new ModelPart.Vertex(
+    private static EntityGeometry.Vertex lerpVertex(EntityGeometry.Vertex a, EntityGeometry.Vertex b, float lerp) {
+        return new EntityGeometry.Vertex(
                 Mth.lerp(lerp, a.pos.x(), b.pos.x()),
                 Mth.lerp(lerp, a.pos.y(), b.pos.y()),
                 Mth.lerp(lerp, a.pos.z(), b.pos.z()),
@@ -236,11 +230,8 @@ public abstract class TransfurAnimator {
     private static final float GOOP_CUBE_WIDTH = 16.0f;
     private static final float GOOP_CUBE_HEIGHT = 16.0f;
 
-    private static ModelPart.Polygon lerpPolygon(ModelPart.Polygon a, ModelPart.Polygon b, float lerp, boolean remapUV) {
-        ModelPart.Vertex[] copied = new ModelPart.Vertex[a.vertices.length];
-        System.arraycopy(a.vertices, 0, copied, 0, a.vertices.length);
-        ModelPart.Polygon ret = new ModelPart.Polygon(copied, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, false,
-                Direction.getNearest(a.normal.x(), a.normal.y(), a.normal.z()));
+    private static EntityGeometry.Polygon lerpPolygon(EntityGeometry.Polygon a, EntityGeometry.Polygon b, float lerp, boolean remapUV) {
+        EntityGeometry.Polygon ret = new EntityGeometry.Polygon(a);
 
         for (int i = 0; i < ret.vertices.length; ++i) {
             ret.vertices[i] = lerpVertex(a.vertices[i], b.vertices[i], lerp);
@@ -273,20 +264,12 @@ public abstract class TransfurAnimator {
         return ret;
     }
 
-    private static ModelPart.Cube lerpCube(ModelPart.Cube a, ModelPart.Cube b, float lerp, boolean remapUV) {
-        float lerpMinX = Mth.lerp(lerp, a.minX, b.minX);
-        float lerpMinY = Mth.lerp(lerp, a.minY, b.minY);
-        float lerpMinZ = Mth.lerp(lerp, a.minZ, b.minZ);
-        float lerpMaxX = Mth.lerp(lerp, a.maxX, b.maxX);
-        float lerpMaxY = Mth.lerp(lerp, a.maxY, b.maxY);
-        float lerpMaxZ = Mth.lerp(lerp, a.maxZ, b.maxZ);
+    private static EntityGeometry.Cube lerpCube(EntityGeometry.Cube a, EntityGeometry.Cube b, float lerp, boolean remapUV) {
+        EntityGeometry.Cube ret = new EntityGeometry.Cube(a);
 
-        ModelPart.Cube ret = new ModelPart.Cube(0, 0, lerpMinX, lerpMinY, lerpMinZ, lerpMaxX - lerpMinX, lerpMaxY - lerpMinY, lerpMaxZ - lerpMinZ,
-                0.0f, 0.0f, 0.0f, false, 0.0f, 0.0f, ALL_VISIBLE);
-
-        final var polyA = ((CubeExtender)a).getPolygons();
-        final var polyB = ((CubeExtender)b).getPolygons();
-        final var polyR = ((CubeExtender)ret).getPolygons();
+        final var polyA = a.polygons;
+        final var polyB = b.polygons;
+        final var polyR = ret.polygons;
 
         for (int i = 0; i < polyR.length; ++i) {
             polyR[i] = lerpPolygon(polyA[i], polyB[i], lerp, remapUV);
@@ -295,15 +278,15 @@ public abstract class TransfurAnimator {
         return ret;
     }
 
-    private static ModelPart lerpModelPart(ModelPart a, ModelPart b, float lerp, boolean remapUV) {
-        List<ModelPart.Cube> copiedCubes = new ArrayList<>();
+    private static EntityGeometry lerpModelPart(EntityGeometry a, EntityGeometry b, float lerp, boolean remapUV) {
+        List<EntityGeometry.Cube> copiedCubes = new ArrayList<>();
         for (int i = 0; i < a.cubes.size(); ++i)
             copiedCubes.add(lerpCube(a.cubes.get(i), b.cubes.get(i), lerp, remapUV));
-        Map<String, ModelPart> copiedChildren = new HashMap<>();
+        Map<String, EntityGeometry> copiedChildren = new HashMap<>();
         for (var k : a.children.keySet())
             copiedChildren.put(k, lerpModelPart(a.children.get(k), b.children.get(k), lerp, remapUV));
 
-        var lerped = new ModelPart(copiedCubes, copiedChildren);
+        var lerped = new EntityGeometry(copiedCubes, copiedChildren);
         lerped.x = Mth.lerp(lerp, a.x, b.x);
         lerped.y = Mth.lerp(lerp, a.y, b.y);
         lerped.z = Mth.lerp(lerp, a.z, b.z);
@@ -314,19 +297,20 @@ public abstract class TransfurAnimator {
         return lerped;
     }
 
-    private static ModelPart.Cube findCube(ModelPart part) {
-        final AtomicReference<ModelPart.Cube> cubeReturn = new AtomicReference<>(null);
+    private static EntityGeometry.Cube findCube(EntityGeometry part) {
+        final AtomicReference<EntityGeometry.Cube> cubeReturn = new AtomicReference<>(null);
 
-        part.visit(new PoseStack(), (pose, name, id, cube) -> {
-            cubeReturn.compareAndSet(null, cube);
+        part.visit(visited -> {
+            for (var cube : visited.cubes)
+                cubeReturn.compareAndSet(null, cube);
         });
 
         return cubeReturn.getAcquire();
     }
 
-    private static ModelPart transitionModelPart(ModelPart before, ModelPart after, float lerp, boolean remapUV, boolean copyAfterVisibility) {
-        ModelPart beforeCopy = matchCubeCount(deepCopyPart(before, false), after, false);
-        ModelPart afterCopy = matchCubeCount(deepCopyPart(after, copyAfterVisibility), before, copyAfterVisibility);
+    private static EntityGeometry transitionModelPart(EntityGeometry before, EntityGeometry after, float lerp, boolean remapUV, boolean copyAfterVisibility) {
+        EntityGeometry beforeCopy = matchCubeCount(deepCopyPart(before, false), after, false);
+        EntityGeometry afterCopy = matchCubeCount(deepCopyPart(after, copyAfterVisibility), before, copyAfterVisibility);
 
         return lerpModelPart(beforeCopy, afterCopy, lerp, remapUV);
     }
@@ -407,8 +391,8 @@ public abstract class TransfurAnimator {
             before = helper.map(HelperModel::getModelPart).orElse(before);
         }
 
-        final ModelPart afterCopied = deepCopyPart(limb.getModelPart(afterModel), afterModel::shouldPartTransfur, listenToAfterVisible);
-        final ModelPart transitionPart = transitionModelPart(before, afterCopied, morphProgress, texture == null, listenToAfterVisible);
+        final EntityGeometry afterCopied = deepCopyPart(limb.getModelPart(afterModel), afterModel::shouldPartTransfur, listenToAfterVisible);
+        final EntityGeometry transitionPart = transitionModelPart(new EntityGeometry(before), afterCopied, morphProgress, texture == null, listenToAfterVisible);
         final ModelPose transitionPose = transitionModelPose(beforePose, afterPose, morphProgress);
 
         if (texture == null)
@@ -427,7 +411,7 @@ public abstract class TransfurAnimator {
         transitionPart.loadPose(transitionPose.pose);
 
         ((ClientLivingEntityExtender)entity).getOrderedAnimations().forEach(instance -> {
-            instance.animatePartAs(limb, transitionPart, partialTicks);
+            transitionPart.loadPose(instance.animatePartAs(limb, transitionPart.storePose(), partialTicks));
         });
 
         transitionPart.render(stack, vertexConsumer, light, overlay, color.red(), color.green(), color.blue(), alpha);
@@ -506,7 +490,7 @@ public abstract class TransfurAnimator {
 
         final float shrink = (coverAlpha - 1.0f) * 0.5f;
 
-        final ModelPart copiedPart = extendModelPartCubes(deepCopyPart(part, false), shrink, shrink, shrink);
+        final EntityGeometry copiedPart = deepCopyPart(part, pred -> true, false).offsetSize(shrink, shrink, shrink);
         final ModelPose pose = CAPTURED_MODELS.getOrDefault(part, NULL_POSE);
 
         stack.pushPose();
@@ -522,7 +506,7 @@ public abstract class TransfurAnimator {
 
         copiedPart.loadPose(pose.pose);
         ((ClientLivingEntityExtender)entity).getOrderedAnimations().forEach(instance -> {
-            instance.animatePartAs(limb, copiedPart, partialTicks);
+            copiedPart.loadPose(instance.animatePartAs(limb, copiedPart.storePose(), partialTicks));
         });
         copiedPart.render(stack, vertexConsumer, light, LivingEntityRenderer.getOverlayCoords(entity, 0.0f), color.red(), color.green(), color.blue(), alpha);
 

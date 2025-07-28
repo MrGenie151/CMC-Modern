@@ -5,6 +5,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraftforge.common.IExtensibleEnum;
@@ -123,6 +124,18 @@ public class AnimationChannel {
                 part.zRot = (float) result.z();
                 break;
         }
+    }
+
+    public PartPose animate(AnimationDefinition definition, PartPose part, float time) {
+        final var result = getValue(definition, time);
+
+        return switch (target) {
+            case POSITION ->
+                    PartPose.offsetAndRotation(result.x(), -result.y(), result.z(), part.xRot, part.yRot, part.zRot);
+            case ROTATION ->
+                    PartPose.offsetAndRotation(part.x, part.y, part.z, result.x(), result.y(), result.z());
+            default -> part;
+        };
     }
 
     public enum Target implements StringRepresentable, IExtensibleEnum {

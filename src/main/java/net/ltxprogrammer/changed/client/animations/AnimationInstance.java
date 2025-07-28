@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class AnimationInstance {
     private final AnimationDefinition animation;
@@ -147,6 +148,43 @@ public class AnimationInstance {
         part.loadPose(TransfurAnimator.lerpPartPose(part.storePose(), base, transition));
     }
 
+    private PartPose animateLimb(Limb limb, PartPose part, Map<Limb, PartPose> baseline, float time, float transition) {
+        if (part == null)
+            return part;
+
+        final var base = baseline.get(limb);
+        if (base == null)
+            return part; // Don't touch limb unless it has been saved
+
+        final var channelList = animation.channels.get(limb);
+        if (channelList == null)
+            return part;
+
+        AtomicReference<PartPose> partPoseRef = new AtomicReference<>(part);
+
+        channelList.forEach(channel -> {
+            if (channel.isDone(time))
+                return;
+
+            PartPose preStore = channel.animate(animation, partPoseRef.get(), time);
+            if (channel.getTarget() == AnimationChannel.Target.POSITION) {
+                partPoseRef.set(PartPose.offsetAndRotation(
+                        preStore.x + base.x,
+                        preStore.y + base.y,
+                        preStore.z + base.z,
+                        preStore.xRot,
+                        preStore.yRot,
+                        preStore.zRot));
+            }
+
+            else {
+                partPoseRef.set(preStore);
+            }
+        });
+
+        return TransfurAnimator.lerpPartPose(partPoseRef.getAcquire(), base, transition);
+    }
+
     public Vector3f getTargetValue(Limb limb, AnimationChannel.Target target, float partialTicks) {
         final var channelList = animation.channels.get(limb);
         if (channelList == null)
@@ -200,11 +238,11 @@ public class AnimationInstance {
         animation.channels.keySet().forEach(limb -> animateLimb(limb, limb.getModelPart(model), baselineAH, time, transition));
     }
 
-    public void animatePartAs(Limb limb, ModelPart modelPart, float partialTicks) {
+    public PartPose animatePartAs(Limb limb, PartPose modelPart, float partialTicks) {
         final float time = computeTime(partialTicks);
         final float transition = computeTransition(partialTicks);
 
-        animateLimb(limb, modelPart, Map.of(limb, modelPart.storePose()), time, transition);
+        return animateLimb(limb, modelPart, Map.of(limb, modelPart), time, transition);
     }
 
     private void playSounds(float timeO, float time) {
