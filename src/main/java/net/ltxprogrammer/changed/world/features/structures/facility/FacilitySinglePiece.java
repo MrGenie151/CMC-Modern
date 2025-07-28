@@ -59,7 +59,7 @@ public abstract class FacilitySinglePiece extends FacilityPiece {
             super(ChangedStructurePieceTypes.FACILITY_SINGLE.get(), genDepth, box);
             this.templateName = templateName;
             this.lootTable = lootTable.orElse(null);
-            this.template = manager.get(templateName).orElseThrow();
+            this.template = manager.get(templateName).orElseThrow(() -> new IllegalArgumentException("Cannot read template " + templateName));
         }
 
         public StructureInstance(StructureTemplateManager manager, CompoundTag tag) {

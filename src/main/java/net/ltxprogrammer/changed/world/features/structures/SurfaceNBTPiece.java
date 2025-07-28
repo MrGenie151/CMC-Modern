@@ -71,7 +71,7 @@ public class SurfaceNBTPiece extends StructurePiece {
     public SurfaceNBTPiece(StructureTemplateManager manager, CompoundTag tag) {
         super(ChangedStructurePieceTypes.NBT.get(), tag);
         this.templateName = TagUtil.getResourceLocation(tag, "nbt");
-        this.template = manager.get(templateName).orElseThrow();
+        this.template = manager.get(templateName).orElseThrow(() -> new IllegalArgumentException("Cannot read template " + templateName));
         this.lootTable = tag.contains("lootTable") ? TagUtil.getResourceLocation(tag, "lootTable") : null;
         if (tag.contains("genPos"))
             this.generationPosition = TagUtil.getBlockPos(tag, "genPos");

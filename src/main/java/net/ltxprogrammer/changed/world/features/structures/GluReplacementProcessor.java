@@ -3,6 +3,7 @@ package net.ltxprogrammer.changed.world.features.structures;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
+import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.block.entity.GluBlockEntity;
 import net.ltxprogrammer.changed.init.ChangedBlocks;
 import net.ltxprogrammer.changed.init.ChangedFeatures;
@@ -33,6 +34,9 @@ public class GluReplacementProcessor extends StructureProcessor {
     public StructureTemplate.StructureBlockInfo processBlock(LevelReader p_74127_, BlockPos p_74128_, BlockPos p_74129_, StructureTemplate.StructureBlockInfo p_74130_, StructureTemplate.StructureBlockInfo blockInfo, StructurePlaceSettings p_74132_) {
         BlockState blockstate = blockInfo.state();
         if (blockstate.is(ChangedBlocks.GLU_BLOCK.get())) {
+            if (Changed.dataFixer != null) // Fixes rare scenario where a facility was created pre-datafixer, then later placed in the world post-datafixer
+                Changed.dataFixer.updateBlockEntity(blockInfo.nbt());
+
             String s = blockInfo.nbt().getString(GluBlockEntity.FINAL_STATE);
 
             BlockState blockstate1;
