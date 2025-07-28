@@ -1,6 +1,7 @@
 package net.ltxprogrammer.changed.client.tfanimations;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.ltxprogrammer.changed.client.ClientLivingEntityExtender;
 import net.ltxprogrammer.changed.client.CubeExtender;
 import net.ltxprogrammer.changed.client.FormRenderHandler;
 import net.ltxprogrammer.changed.client.PoseStackExtender;
@@ -385,7 +386,7 @@ public abstract class TransfurAnimator {
         return Optional.ofNullable(afterModel.getTransfurHelperModel(limb));
     }
 
-    private static void renderMorphedLimb(LivingEntity entity, Limb limb, HumanoidModel<?> beforeModel, AdvancedHumanoidModel<?> afterModel,
+    private static void renderMorphedLimb(LivingEntity entity, Limb limb, HumanoidModel<?> beforeModel, AdvancedHumanoidModel<?> afterModel, float partialTicks,
                                           float morphProgress, Color3 color, float alpha, PoseStack stack, MultiBufferSource buffer, int light,
                                           @Nullable ResourceLocation texture, boolean listenToAfterVisible) {
         ModelPart before = limb.getModelPart(beforeModel);
@@ -425,13 +426,17 @@ public abstract class TransfurAnimator {
 
         transitionPart.loadPose(transitionPose.pose);
 
+        ((ClientLivingEntityExtender)entity).getOrderedAnimations().forEach(instance -> {
+            instance.animatePartAs(limb, transitionPart, partialTicks);
+        });
+
         transitionPart.render(stack, vertexConsumer, light, overlay, color.red(), color.green(), color.blue(), alpha);
         //transitionPart.loadPose(beforePose.pose);
 
         stack.popPose();
     }
 
-    public static void renderMorphedEntity(LivingEntity entity, HumanoidModel<?> beforeModel, AdvancedHumanoidModel<?> afterModel, float morphProgress, Color3 color, float alpha, PoseStack stack, MultiBufferSource buffer, int light, @Nullable ResourceLocation texture, boolean listenToAfterVisible) {
+    public static void renderMorphedEntity(LivingEntity entity, HumanoidModel<?> beforeModel, AdvancedHumanoidModel<?> afterModel, float partialTicks, float morphProgress, Color3 color, float alpha, PoseStack stack, MultiBufferSource buffer, int light, @Nullable ResourceLocation texture, boolean listenToAfterVisible) {
         Arrays.stream(Limb.values()).forEach(limb -> {
             if (ChangedCompatibility.isFirstPersonRendering() && limb == Limb.HEAD)
                 return;
@@ -439,7 +444,7 @@ public abstract class TransfurAnimator {
                 return;
 
             try {
-                renderMorphedLimb(entity, limb, beforeModel, afterModel, morphProgress, color, alpha, stack, buffer, light, texture, listenToAfterVisible);
+                renderMorphedLimb(entity, limb, beforeModel, afterModel, partialTicks, morphProgress, color, alpha, stack, buffer, light, texture, listenToAfterVisible);
             } catch (Exception e) {
                 CrashReport report = CrashReport.forThrowable(e, "Rendering transfurring entity's limb");
                 CrashReportCategory category = report.addCategory("Limb being renderered");
@@ -475,7 +480,7 @@ public abstract class TransfurAnimator {
         return part;
     }
 
-    private static void renderCoveringLimb(LivingEntity entity, TransfurVariantInstance<?> variant, float coverProgress, float coverAlpha, ModelPart part, Limb limb, PoseStack stack, MultiBufferSource buffer, int light, float partialTick) {
+    private static void renderCoveringLimb(LivingEntity entity, TransfurVariantInstance<?> variant, float partialTicks, float coverProgress, float coverAlpha, ModelPart part, Limb limb, PoseStack stack, MultiBufferSource buffer, int light, float partialTick) {
         final float progress = switch (limb) {
             case HEAD -> variant.transfurContext.cause.getHeadProgress(coverProgress);
             case TORSO -> variant.transfurContext.cause.getTorsoProgress(coverProgress);
@@ -516,6 +521,9 @@ public abstract class TransfurAnimator {
         final Color3 color = variant.getTransfurColor();
 
         copiedPart.loadPose(pose.pose);
+        ((ClientLivingEntityExtender)entity).getOrderedAnimations().forEach(instance -> {
+            instance.animatePartAs(limb, copiedPart, partialTicks);
+        });
         copiedPart.render(stack, vertexConsumer, light, LivingEntityRenderer.getOverlayCoords(entity, 0.0f), color.red(), color.green(), color.blue(), alpha);
 
         stack.popPose();
@@ -564,22 +572,22 @@ public abstract class TransfurAnimator {
 
         if (coverAlpha > 0f) {
             if (!ChangedCompatibility.isFirstPersonRendering()) {
-                renderCoveringLimb(player, variant, coverProgress, 1.0f, playerHumanoidModel.head, Limb.HEAD, stack, buffer, light, partialTick);
-                renderCoveringLimb(player, variant, coverProgress, coverAlpha, playerHumanoidModel.hat, Limb.HEAD, stack, buffer, light, partialTick);
+                renderCoveringLimb(player, variant, partialTick, coverProgress, 1.0f, playerHumanoidModel.head, Limb.HEAD, stack, buffer, light, partialTick);
+                renderCoveringLimb(player, variant, partialTick, coverProgress, coverAlpha, playerHumanoidModel.hat, Limb.HEAD, stack, buffer, light, partialTick);
             }
             if (!(ChangedCompatibility.isFirstPersonRendering() && player.isSwimming()))
-                renderCoveringLimb(player, variant, coverProgress, 1.0f, playerHumanoidModel.body, Limb.TORSO, stack, buffer, light, partialTick);
-            renderCoveringLimb(player, variant, coverProgress, 1.0f, playerHumanoidModel.leftArm, Limb.LEFT_ARM, stack, buffer, light, partialTick);
-            renderCoveringLimb(player, variant, coverProgress, 1.0f, playerHumanoidModel.rightArm, Limb.RIGHT_ARM, stack, buffer, light, partialTick);
-            renderCoveringLimb(player, variant, coverProgress, 1.0f, playerHumanoidModel.leftLeg, Limb.LEFT_LEG, stack, buffer, light, partialTick);
-            renderCoveringLimb(player, variant, coverProgress, 1.0f, playerHumanoidModel.rightLeg, Limb.RIGHT_LEG, stack, buffer, light, partialTick);
+                renderCoveringLimb(player, variant, partialTick, coverProgress, 1.0f, playerHumanoidModel.body, Limb.TORSO, stack, buffer, light, partialTick);
+            renderCoveringLimb(player, variant, partialTick, coverProgress, 1.0f, playerHumanoidModel.leftArm, Limb.LEFT_ARM, stack, buffer, light, partialTick);
+            renderCoveringLimb(player, variant, partialTick, coverProgress, 1.0f, playerHumanoidModel.rightArm, Limb.RIGHT_ARM, stack, buffer, light, partialTick);
+            renderCoveringLimb(player, variant, partialTick, coverProgress, 1.0f, playerHumanoidModel.leftLeg, Limb.LEFT_LEG, stack, buffer, light, partialTick);
+            renderCoveringLimb(player, variant, partialTick, coverProgress, 1.0f, playerHumanoidModel.rightLeg, Limb.RIGHT_LEG, stack, buffer, light, partialTick);
             if (playerHumanoidModel instanceof PlayerModel<?> playerModel) {
                 if (!(ChangedCompatibility.isFirstPersonRendering() && player.isSwimming()))
-                    renderCoveringLimb(player, variant, coverProgress, coverAlpha, playerModel.jacket, Limb.TORSO, stack, buffer, light, partialTick);
-                renderCoveringLimb(player, variant, coverProgress, coverAlpha, playerModel.leftSleeve, Limb.LEFT_ARM, stack, buffer, light, partialTick);
-                renderCoveringLimb(player, variant, coverProgress, coverAlpha, playerModel.rightSleeve, Limb.RIGHT_ARM, stack, buffer, light, partialTick);
-                renderCoveringLimb(player, variant, coverProgress, coverAlpha, playerModel.leftPants, Limb.LEFT_LEG, stack, buffer, light, partialTick);
-                renderCoveringLimb(player, variant, coverProgress, coverAlpha, playerModel.rightPants, Limb.RIGHT_LEG, stack, buffer, light, partialTick);
+                    renderCoveringLimb(player, variant, partialTick, coverProgress, coverAlpha, playerModel.jacket, Limb.TORSO, stack, buffer, light, partialTick);
+                renderCoveringLimb(player, variant, partialTick, coverProgress, coverAlpha, playerModel.leftSleeve, Limb.LEFT_ARM, stack, buffer, light, partialTick);
+                renderCoveringLimb(player, variant, partialTick, coverProgress, coverAlpha, playerModel.rightSleeve, Limb.RIGHT_ARM, stack, buffer, light, partialTick);
+                renderCoveringLimb(player, variant, partialTick, coverProgress, coverAlpha, playerModel.leftPants, Limb.LEFT_LEG, stack, buffer, light, partialTick);
+                renderCoveringLimb(player, variant, partialTick, coverProgress, coverAlpha, playerModel.rightPants, Limb.RIGHT_LEG, stack, buffer, light, partialTick);
             }
         }
 
@@ -587,7 +595,7 @@ public abstract class TransfurAnimator {
             final var colors = variant.getTransfurColor();
             try {
                 renderMorphedEntity(player, playerHumanoidModel, latexHumanoidRenderer.getModel(variant.getChangedEntity()),
-                        morphProgress, colors, morphAlpha, stack, buffer, light, null, false);
+                        partialTick, morphProgress, colors, morphAlpha, stack, buffer, light, null, false);
             } catch (Exception e) {
                 CrashReport report = CrashReport.forThrowable(e, "Rendering entity partially transfurred");
                 throw new ReportedException(report);
@@ -613,7 +621,7 @@ public abstract class TransfurAnimator {
                         renderMorphedEntity(player,
                                 model,
                                 afterModel,
-                                morphProgress, Color3.WHITE, 1f, stack, buffer, light,
+                                partialTick, morphProgress, Color3.WHITE, 1f, stack, buffer, light,
                                 texture, true);
                         afterModel.unprepareVisibility(armorSlot, item);
                     } catch (Exception e) {
@@ -649,7 +657,7 @@ public abstract class TransfurAnimator {
                                         renderMorphedEntity(player,
                                                 before.get(),
                                                 after,
-                                                morphProgress, Color3.WHITE, 1f, stack, buffer, light,
+                                                partialTick, morphProgress, Color3.WHITE, 1f, stack, buffer, light,
                                                 texture.get(), true);
                                     } catch (Exception e) {
                                         CrashReport report = CrashReport.forThrowable(e, "Rendering transfurring entity's accessories");
@@ -696,14 +704,14 @@ public abstract class TransfurAnimator {
 
         if (coverAlpha > 0f) {
             switch (arm) {
-                case RIGHT -> renderCoveringLimb(player, variant, coverProgress, 1.0f, playerHumanoidModel.rightArm, Limb.RIGHT_ARM, stack, buffer, light, partialTick);
-                case LEFT -> renderCoveringLimb(player, variant, coverProgress, 1.0f, playerHumanoidModel.leftArm, Limb.LEFT_ARM, stack, buffer, light, partialTick);
+                case RIGHT -> renderCoveringLimb(player, variant, partialTick, coverProgress, 1.0f, playerHumanoidModel.rightArm, Limb.RIGHT_ARM, stack, buffer, light, partialTick);
+                case LEFT -> renderCoveringLimb(player, variant, partialTick, coverProgress, 1.0f, playerHumanoidModel.leftArm, Limb.LEFT_ARM, stack, buffer, light, partialTick);
             }
 
             if (playerHumanoidModel instanceof PlayerModel<?> playerModel) {
                 switch (arm) {
-                    case RIGHT -> renderCoveringLimb(player, variant, coverProgress, 1.0f, playerModel.rightSleeve, Limb.RIGHT_ARM, stack, buffer, light, partialTick);
-                    case LEFT -> renderCoveringLimb(player, variant, coverProgress, 1.0f, playerModel.leftSleeve, Limb.LEFT_ARM, stack, buffer, light, partialTick);
+                    case RIGHT -> renderCoveringLimb(player, variant, partialTick, coverProgress, 1.0f, playerModel.rightSleeve, Limb.RIGHT_ARM, stack, buffer, light, partialTick);
+                    case LEFT -> renderCoveringLimb(player, variant, partialTick, coverProgress, 1.0f, playerModel.leftSleeve, Limb.LEFT_ARM, stack, buffer, light, partialTick);
                 }
             }
         }
@@ -714,7 +722,7 @@ public abstract class TransfurAnimator {
         final var color = variant.getTransfurColor();
         try {
             renderMorphedLimb(player, limb, playerHumanoidModel, latexHumanoidRenderer.getModel(variant.getChangedEntity()),
-                    morphProgress, color, morphAlpha, stack, buffer, light, texture, false);
+                    partialTick, morphProgress, color, morphAlpha, stack, buffer, light, texture, false);
         } catch (Exception e) {
             CrashReport report = CrashReport.forThrowable(e, "Rendering transfurring entity's arm");
             CrashReportCategory category = report.addCategory("Limb being rendered");

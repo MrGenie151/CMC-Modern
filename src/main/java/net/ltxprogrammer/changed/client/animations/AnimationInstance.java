@@ -200,6 +200,13 @@ public class AnimationInstance {
         animation.channels.keySet().forEach(limb -> animateLimb(limb, limb.getModelPart(model), baselineAH, time, transition));
     }
 
+    public void animatePartAs(Limb limb, ModelPart modelPart, float partialTicks) {
+        final float time = computeTime(partialTicks);
+        final float transition = computeTransition(partialTicks);
+
+        animateLimb(limb, modelPart, Map.of(limb, modelPart.storePose()), time, transition);
+    }
+
     private void playSounds(float timeO, float time) {
         animation.soundEffects.forEach(soundEffect -> {
             soundEffect.playIfInRange(this.hostEntity, timeO, time);
