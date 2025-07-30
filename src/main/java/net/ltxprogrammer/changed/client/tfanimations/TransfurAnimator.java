@@ -1,6 +1,8 @@
 package net.ltxprogrammer.changed.client.tfanimations;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.datafixers.util.Pair;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.ltxprogrammer.changed.client.ClientLivingEntityExtender;
 import net.ltxprogrammer.changed.client.CubeExtender;
 import net.ltxprogrammer.changed.client.FormRenderHandler;
@@ -19,6 +21,7 @@ import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
 import net.ltxprogrammer.changed.extension.ChangedCompatibility;
 import net.ltxprogrammer.changed.init.ChangedRegistry;
 import net.ltxprogrammer.changed.util.Color3;
+import net.ltxprogrammer.changed.util.ReversibleKeyedMap;
 import net.ltxprogrammer.changed.util.Transition;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -43,8 +46,11 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -53,7 +59,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public abstract class TransfurAnimator {
-    public static final Set<Direction> ALL_VISIBLE = EnumSet.allOf(Direction.class);
+    public static ReversibleKeyedMap<ModelPart, EntityGeometry> TRANSITIONS_CACHE = new ReversibleKeyedMap<>();
 
     public record ModelPose(PoseStack.Pose matrix, PartPose pose) {
         public ModelPose translate(float x, float y, float z) {
@@ -213,6 +219,114 @@ public abstract class TransfurAnimator {
         return matched;
     }
 
+    private static Pair<EntityGeometry, EntityGeometry> matchCubeCount(EntityGeometry begin, EntityGeometry end) {
+        return matchCubeCount(begin, end, SplittingSource.empty(), SplittingSource.empty());
+    }
+
+    private static Pair<EntityGeometry, EntityGeometry> matchCubeCount(EntityGeometry begin, EntityGeometry end,
+                                                                       SplittingSource beginSplittingSource, SplittingSource endSplittingSource) {
+        int targetCubeCount = Math.max(begin.cubes.size(), end.cubes.size());
+        int targetChildrenCount = Math.max(begin.children.size(), end.children.size());
+
+        if (Math.min(begin.cubes.size(), end.cubes.size()) == 0) { // Check for skeleton joints
+            if (begin.children.keySet().stream().anyMatch(EntityGeometry::isSkeletonName) ||
+                         end.children.keySet().stream().anyMatch(EntityGeometry::isSkeletonName))
+                targetCubeCount = 0;
+        }
+
+        List<EntityGeometry.Cube> beginResultCubes = new ArrayList<>(targetCubeCount);
+        List<EntityGeometry.Cube> endResultCubes = new ArrayList<>(targetCubeCount);
+        Map<String, EntityGeometry> beginResultChildren = new Object2ObjectArrayMap<>(targetChildrenCount);
+        Map<String, EntityGeometry> endResultChildren = new Object2ObjectArrayMap<>(targetChildrenCount);
+
+        SplittingSource subBeginSplittingSource = SplittingSource.forSources(
+                beginSplittingSource,
+                SplittingSource.forSourceCubes(begin.cubes)
+        );
+        SplittingSource subEndSplittingSource = SplittingSource.forSources(
+                endSplittingSource,
+                SplittingSource.forSourceCubes(end.cubes)
+        );
+
+        if (targetCubeCount >= 1) {
+            if (begin.cubes.size() == 1 && !end.cubes.isEmpty()) { // Simple segment case
+                beginResultCubes.addAll(EntityGeometry.Cube.segment(subBeginSplittingSource, end.cubes));
+                endResultCubes.addAll(end.cubes);
+            } else if (end.cubes.size() == 1 && !begin.cubes.isEmpty()) {
+                beginResultCubes.addAll(begin.cubes);
+                endResultCubes.addAll(EntityGeometry.Cube.segment(subEndSplittingSource, begin.cubes));
+            } else {
+                if (end.cubes.size() > begin.cubes.size()) {
+                    beginResultCubes.addAll(EntityGeometry.Cube.segment(subBeginSplittingSource, end.cubes));
+                    endResultCubes.addAll(end.cubes);
+                } else {
+                    beginResultCubes.addAll(begin.cubes);
+                    endResultCubes.addAll(EntityGeometry.Cube.segment(subEndSplittingSource, begin.cubes));
+                }
+            }
+
+            for (int i = 0; i < beginResultCubes.size(); i++) {
+                SplittingSource source = subBeginSplittingSource.findSourceFor(beginResultCubes.get(i));
+                final int myIndex = i;
+                if (source != null)
+                    source.setResizeConsumer((oldCube, newCube) -> beginResultCubes.set(myIndex, newCube));
+            }
+
+            for (int i = 0; i < endResultCubes.size(); i++) {
+                SplittingSource source = subEndSplittingSource.findSourceFor(endResultCubes.get(i));
+                final int myIndex = i;
+                if (source != null)
+                    source.setResizeConsumer((oldCube, newCube) -> endResultCubes.set(myIndex, newCube));
+            }
+        }
+
+        if (targetChildrenCount >= 1) {
+            for (var entry : begin.children.entrySet()) {
+                var childName = entry.getKey();
+                if (endResultChildren.containsKey(childName))
+                    continue;
+
+                if (end.children.containsKey(childName)) {
+                    var pair = matchCubeCount(entry.getValue(), end.children.get(childName));
+                    beginResultChildren.put(childName, pair.getFirst());
+                    endResultChildren.put(childName, pair.getSecond());
+                    continue;
+                }
+
+                // TODO fuzz for similar children
+
+                var pair = matchCubeCount(new EntityGeometry(/* Empty Part */), entry.getValue(), SplittingSource.empty(), subEndSplittingSource);
+                beginResultChildren.put(childName, pair.getFirst());
+                endResultChildren.put(childName, pair.getSecond());
+            }
+
+            for (var entry : end.children.entrySet()) {
+                var childName = entry.getKey();
+                if (beginResultChildren.containsKey(childName))
+                    continue;
+
+                if (begin.children.containsKey(childName)) {
+                    var pair = matchCubeCount(begin.children.get(childName), entry.getValue());
+                    beginResultChildren.put(childName, pair.getFirst());
+                    endResultChildren.put(childName, pair.getSecond());
+                    continue;
+                }
+
+                var pair = matchCubeCount(new EntityGeometry(/* Empty Part */), entry.getValue(), subBeginSplittingSource, SplittingSource.empty());
+                beginResultChildren.put(childName, pair.getFirst());
+                endResultChildren.put(childName, pair.getSecond());
+            }
+        }
+
+        if (beginResultCubes.size() != targetCubeCount || endResultCubes.size() != targetCubeCount)
+            throw new IllegalStateException("Begin and ending cubes aren't both equal to target count");
+
+        return new Pair<>(
+                new EntityGeometry(beginResultCubes, beginResultChildren),
+                new EntityGeometry(endResultCubes, endResultChildren)
+        );
+    }
+
     private static EntityGeometry matchCubeCount(EntityGeometry to, EntityGeometry from, boolean copyVisibility) {
         return matchCubeCount(to, from, findCube(to), copyVisibility);
     }
@@ -264,21 +378,17 @@ public abstract class TransfurAnimator {
         return ret;
     }
 
-    private static EntityGeometry.Cube lerpCube(EntityGeometry.Cube a, EntityGeometry.Cube b, float lerp, boolean remapUV) {
+    private static EntityGeometry.Cube lerpCube(@NotNull EntityGeometry.Cube a, @NotNull EntityGeometry.Cube b, float lerp, boolean remapUV) {
         EntityGeometry.Cube ret = new EntityGeometry.Cube(a);
 
-        final var polyA = a.polygons;
-        final var polyB = b.polygons;
-        final var polyR = ret.polygons;
-
-        for (int i = 0; i < polyR.length; ++i) {
-            polyR[i] = lerpPolygon(polyA[i], polyB[i], lerp, remapUV);
+        for (var normal : Direction.values()) {
+            ret.putFace(lerpPolygon(a.getFace(normal), b.getFace(normal), lerp, remapUV));
         }
 
         return ret;
     }
 
-    private static EntityGeometry lerpModelPart(EntityGeometry a, EntityGeometry b, float lerp, boolean remapUV) {
+    private static EntityGeometry lerpModelPart(@NotNull EntityGeometry a, @NotNull EntityGeometry b, float lerp, boolean remapUV) {
         List<EntityGeometry.Cube> copiedCubes = new ArrayList<>();
         for (int i = 0; i < a.cubes.size(); ++i)
             copiedCubes.add(lerpCube(a.cubes.get(i), b.cubes.get(i), lerp, remapUV));
@@ -308,11 +418,20 @@ public abstract class TransfurAnimator {
         return cubeReturn.getAcquire();
     }
 
-    private static EntityGeometry transitionModelPart(EntityGeometry before, EntityGeometry after, float lerp, boolean remapUV, boolean copyAfterVisibility) {
-        EntityGeometry beforeCopy = matchCubeCount(deepCopyPart(before, false), after, false);
-        EntityGeometry afterCopy = matchCubeCount(deepCopyPart(after, copyAfterVisibility), before, copyAfterVisibility);
+    private static EntityGeometry transitionModelPart(
+            ModelPart beforeCache, ModelPart afterCache,
+            EntityGeometry before, EntityGeometry after, float lerp, boolean remapUV, boolean copyAfterVisibility) {
+        var pair = TRANSITIONS_CACHE.computeIfAbsent(
+                beforeCache, afterCache,
+                (left, right) -> matchCubeCount(before, after));
 
-        return lerpModelPart(beforeCopy, afterCopy, lerp, remapUV);
+        var transitionBefore = pair.getFirst();
+        var transitionAfter = pair.getSecond();
+
+        transitionBefore.copyPoseTreeFrom(before);
+        transitionAfter.copyPoseTreeFrom(after);
+
+        return lerpModelPart(transitionBefore, transitionAfter, lerp, remapUV);
     }
 
     private static Matrix4f lerpMatrix(Matrix4f a, Matrix4f b, float lerp) {
@@ -392,7 +511,10 @@ public abstract class TransfurAnimator {
         }
 
         final EntityGeometry afterCopied = deepCopyPart(limb.getModelPart(afterModel), afterModel::shouldPartTransfur, listenToAfterVisible);
-        final EntityGeometry transitionPart = transitionModelPart(new EntityGeometry(before), afterCopied, morphProgress, texture == null, listenToAfterVisible);
+        final EntityGeometry transitionPart = transitionModelPart(
+                before, after,
+                new EntityGeometry(before).collapseSimple(), afterCopied.collapseSimple(),
+                morphProgress, texture == null, listenToAfterVisible);
         final ModelPose transitionPose = transitionModelPose(beforePose, afterPose, morphProgress);
 
         if (texture == null)

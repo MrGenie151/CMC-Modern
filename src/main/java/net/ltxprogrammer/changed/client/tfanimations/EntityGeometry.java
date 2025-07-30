@@ -2,23 +2,94 @@ package net.ltxprogrammer.changed.client.tfanimations;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.ltxprogrammer.changed.client.CubeExtender;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.NotNull;
 import org.joml.*;
 
 import javax.annotation.Nullable;
 import java.lang.Math;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+/**
+ * Class that represents a ModelPart without any bloat from mods, as well as many functions to aid in transforming
+ */
 public class EntityGeometry {
+    // Blockbench helper part that is used to rotate cubes
+    public static boolean isSkeletonName(String name) {
+        return name.matches(".*_r[0-9]+$");
+    }
+
+    public static boolean isSkeletonName(String hint, String name) {
+        return name.startsWith(hint + "_") && isSkeletonName(name);
+    }
+
+    /*public static class Box {
+        public float xMin, xMax;
+        public float yMin, yMax;
+        public float zMin, zMax;
+
+        public Box(float xMin, float yMin, float zMin, float xMax, float yMax, float zMax) {
+            this.xMin = Math.min(xMin, xMax);
+            this.yMin = Math.min(yMin, yMax);
+            this.zMin = Math.min(zMin, zMax);
+            this.xMax = Math.max(xMin, xMax);
+            this.yMax = Math.max(yMin, yMax);
+            this.zMax = Math.max(zMin, zMax);
+        }
+
+        public Box(Vector3fc min, Vector3fc max) {
+            this(min.x(), min.y(), min.z(), max.x(), max.y(), max.z());
+        }
+
+        public Box(Cube cube) {
+            this(cube.getMin(), cube.getMax());
+        }
+
+        public Vector3f getSize() {
+            return new Vector3f(xMax - xMin, yMax - yMin, zMax - zMin);
+        }
+
+        public Vector3f getCenter() {
+            return new Vector3f(xMax + xMin, yMax + yMin, zMax + zMin).mul(0.5f);
+        }
+
+        public Vector3f getCenter(Direction surface) {
+            var size = this.getSize().mul(surface.step()).mul(0.5f);
+            return this.getCenter().add(size);
+        }
+
+        public Box move(float x, float y, float z) {
+            return move(x, y, z, this);
+        }
+
+        public Box move(float x, float y, float z, Box dest) {
+            dest.xMin = this.xMin + x;
+            dest.xMax = this.xMax + x;
+            dest.yMin = this.yMin + y;
+            dest.yMax = this.yMax + y;
+            dest.zMin = this.zMin + z;
+            dest.zMax = this.zMax + z;
+            return dest;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("Box[%f,%f,%f] {%.2f,%.2f,%.2f -> %.2f,%.2f,%.2f}",
+                    xMax - xMin, yMax - yMin, zMax - zMin, xMin, yMin, zMin, xMax, yMax, zMax);
+        }
+    }*/
+
     public float x;
     public float y;
     public float z;
@@ -28,6 +99,8 @@ public class EntityGeometry {
     public boolean visible = true;
     public final ObjectArrayList<Cube> cubes = new ObjectArrayList<>();
     public final Object2ObjectArrayMap<String, EntityGeometry> children = new Object2ObjectArrayMap<>();
+
+    public EntityGeometry() {}
 
     public EntityGeometry(List<Cube> cubes, Map<String, EntityGeometry> children) {
         this.cubes.addAll(cubes);
@@ -52,6 +125,12 @@ public class EntityGeometry {
             if (includeChild == null || includeChild.test(modelPart))
                 this.children.put(name, new EntityGeometry(modelPart, includeChild));
         });
+    }
+
+    @Override
+    public String toString() {
+        return String.format("EntityGeometry[%d cubes] { %d children }",
+                cubes.size(), children.size());
     }
 
     public EntityGeometry(ModelPart copyFrom) {
@@ -98,6 +177,16 @@ public class EntityGeometry {
         this.x = part.x;
         this.y = part.y;
         this.z = part.z;
+    }
+
+    public void copyPoseTreeFrom(EntityGeometry part) {
+        this.copyPoseFrom(part);
+
+        for (var child : part.children.entrySet()) {
+            if (hasChild(child.getKey())) {
+                getChild(child.getKey()).copyPoseTreeFrom(child.getValue());
+            }
+        }
     }
 
     public void copyPoseFrom(ModelPart part) {
@@ -176,6 +265,88 @@ public class EntityGeometry {
         return this;
     }
 
+    public EntityGeometry move(float x, float y, float z) {
+        this.x += x;
+        this.y += y;
+        this.z += z;
+        return this;
+    }
+
+    public EntityGeometry collapseSimple() {
+        // Blockbench models sometimes create part "joints" that are just positional/rotational offsets, and don't (typically) animate
+        this.children.forEach((name, part) -> {
+            part.collapseSimple();
+        });
+
+        boolean collapsed;
+        do {
+            collapsed = false;
+            var preModSet = Set.copyOf(children.keySet());
+            for (var childName : preModSet) {
+                var childPart = children.get(childName);
+                if (isSkeletonName(childName)) {
+                    if (childPart.xRot == 0.0f && childPart.yRot == 0.0f && childPart.zRot == 0.0f) {
+                        childPart.cubes.forEach(cube -> {
+                            this.cubes.add(cube.move(childPart.x, childPart.y, childPart.z));
+                        });
+                        childPart.children.forEach((name, part) -> {
+                            this.children.put(childName + "/" + name, part.move(childPart.x, childPart.y, childPart.z));
+                        });
+
+                        children.remove(childName);
+                        collapsed = true;
+                    }
+                }
+            }
+        } while (collapsed);
+
+        return this;
+    }
+
+    /*private static EntityGeometry copyStructure(EntityGeometry toFit, EntityGeometry toMatch) {
+        Set<String> uniqueChildren = new HashSet<>();
+        for (var child : toFit.children.keySet())
+            uniqueChildren.add(fuzzName(child, uniqueChildren));
+        for (var child : toMatch.children.keySet())
+            uniqueChildren.add(fuzzName(child, uniqueChildren));
+
+        Map<String, EntityGeometry> resultChildren = new Object2ObjectArrayMap<>(uniqueChildren.size());
+
+        for (var child : uniqueChildren) {
+            var thisName = fuzzName(child, toFit.children.keySet());
+            var matchName = fuzzName(child, toMatch.children.keySet());
+
+            var thisChild = toFit.children.get(thisName);
+            var matchChild = toMatch.children.get(matchName);
+
+            var resultChild = copyStructure(
+                    Objects.requireNonNullElseGet(thisChild, EntityGeometry::new),
+                    Objects.requireNonNullElseGet(matchChild, EntityGeometry::new)
+            );
+
+            if (thisChild != null) {
+                resultChild.copyPoseFrom(thisChild);
+            }
+
+            resultChildren.put(child, resultChild);
+        }
+
+        return new EntityGeometry(new ArrayList<>(), resultChildren);
+    }
+
+    public static EntityGeometry createSkeleton(EntityGeometry toFit, EntityGeometry toMatch) {
+        return copyStructure(toFit, toMatch);
+    }*/
+
+    public static String fuzzName(String name, Set<String> toMatch) {
+        if (toMatch.contains(name))
+            return name;
+
+        // TODO better fuzzing
+
+        return name;
+    }
+
     public static class Vertex {
         public final Vector3f pos;
         public float u;
@@ -212,6 +383,59 @@ public class EntityGeometry {
         public Vertex[] vertices;
         public Vector3f normal;
 
+        public enum Edge {
+            UP, RIGHT, DOWN, LEFT;
+
+            public Edge getOpposite() {
+                return switch (this) {
+                    case UP -> DOWN;
+                    case DOWN -> UP;
+                    case LEFT -> RIGHT;
+                    case RIGHT -> LEFT;
+                };
+            }
+
+            public static @Nullable Edge fromFaceAndDirection(Direction face, Direction direction) {
+                if (face.getAxis() == direction.getAxis())
+                    return null;
+                if (face.getAxis().isHorizontal()) {
+                    direction = switch (face) {
+                        case NORTH -> Rotation.CLOCKWISE_180.rotate(direction);
+                        case EAST -> Rotation.CLOCKWISE_90.rotate(direction);
+                        case WEST -> Rotation.COUNTERCLOCKWISE_90.rotate(direction);
+                        default -> direction;
+                    };
+
+                    return switch (direction) {
+                        case UP -> Edge.UP;
+                        case DOWN -> Edge.DOWN;
+                        case EAST -> Edge.RIGHT;
+                        case WEST -> Edge.LEFT;
+                        default -> null;
+                    };
+                } else {
+                    if (face == Direction.UP) {
+                        return switch (direction) {
+                            case NORTH -> Edge.DOWN;
+                            case SOUTH -> Edge.UP;
+                            case EAST -> Edge.LEFT;
+                            case WEST -> Edge.RIGHT;
+                            default -> null;
+                        };
+                    } else if (face == Direction.DOWN) {
+                        return switch (direction) {
+                            case NORTH -> Edge.DOWN;
+                            case SOUTH -> Edge.UP;
+                            case EAST -> Edge.RIGHT;
+                            case WEST -> Edge.LEFT;
+                            default -> null;
+                        };
+                    }
+                }
+                return null;
+            }
+        }
+
         public Polygon(Polygon copyFrom) {
             this.vertices = new Vertex[copyFrom.vertices.length];
             int i = 0;
@@ -229,10 +453,120 @@ public class EntityGeometry {
             }
             this.normal = new Vector3f(copyFrom.normal);
         }
+
+        public Polygon growEdge(@NotNull Edge edge, float offset) {
+            var face = Direction.getNearest(normal.x, normal.y, normal.z);
+            Vector3f downDir = new Vector3f(0.0f, -1.0f, 0.0f), rightDir = new Vector3f(1.0f, 0.0f, 0.0f);
+
+            Vertex topLeft = this.vertices[0], topRight = this.vertices[0], bottomLeft = this.vertices[0], bottomRight = this.vertices[0];
+            switch (face.getAxis()) {
+                case X -> {
+                    for (var vert : this.vertices) {
+                        if (vert.pos.y >= topLeft.pos.y && vert.pos.z * face.getAxisDirection().getStep() >= topLeft.pos.z * face.getAxisDirection().getStep())
+                            topLeft = vert;
+                        if (vert.pos.y >= topRight.pos.y && vert.pos.z * face.getAxisDirection().getStep() <= topRight.pos.z * face.getAxisDirection().getStep())
+                            topRight = vert;
+                        if (vert.pos.y <= bottomLeft.pos.y && vert.pos.z * face.getAxisDirection().getStep() >= bottomLeft.pos.z * face.getAxisDirection().getStep())
+                            bottomLeft = vert;
+                        if (vert.pos.y <= bottomRight.pos.y && vert.pos.z * face.getAxisDirection().getStep() <= bottomRight.pos.z * face.getAxisDirection().getStep())
+                            bottomRight = vert;
+                    }
+
+                    rightDir.set(0.0f, 0.0f, face.getAxisDirection().getStep());
+                }
+                case Z -> {
+                    for (var vert : this.vertices) {
+                        if (vert.pos.y >= topLeft.pos.y && vert.pos.x * face.getAxisDirection().getStep() >= topLeft.pos.x * face.getAxisDirection().getStep())
+                            topLeft = vert;
+                        if (vert.pos.y >= topRight.pos.y && vert.pos.x * face.getAxisDirection().getStep() <= topRight.pos.x * face.getAxisDirection().getStep())
+                            topRight = vert;
+                        if (vert.pos.y <= bottomLeft.pos.y && vert.pos.x * face.getAxisDirection().getStep() >= bottomLeft.pos.x * face.getAxisDirection().getStep())
+                            bottomLeft = vert;
+                        if (vert.pos.y <= bottomRight.pos.y && vert.pos.x * face.getAxisDirection().getStep() <= bottomRight.pos.x * face.getAxisDirection().getStep())
+                            bottomRight = vert;
+                    }
+
+                    rightDir.set(face.getAxisDirection().getStep(), 0.0f, 0.0f);
+                }
+                case Y -> {
+                    for (var vert : this.vertices) {
+                        if (vert.pos.z >= topLeft.pos.z && vert.pos.x <= topLeft.pos.x)
+                            topLeft = vert;
+                        if (vert.pos.z >= topRight.pos.z && vert.pos.x >= topRight.pos.x)
+                            topRight = vert;
+                        if (vert.pos.z <= bottomLeft.pos.z && vert.pos.x <= bottomLeft.pos.x)
+                            bottomLeft = vert;
+                        if (vert.pos.z <= bottomRight.pos.z && vert.pos.x >= bottomRight.pos.x)
+                            bottomRight = vert;
+                    }
+
+                    downDir.set(0.0f, 0.0f, face.getAxisDirection().getStep());
+                }
+            }
+
+            switch (edge) { // TODO UV
+                case UP -> {
+                    downDir.mul(-offset, -offset, -offset);
+                    topLeft.pos.add(downDir);
+                    topRight.pos.add(downDir);
+                }
+                case DOWN -> {
+                    downDir.mul(offset, offset, offset);
+                    bottomLeft.pos.add(downDir);
+                    bottomRight.pos.add(downDir);
+                }
+                case LEFT -> {
+                    rightDir.mul(-offset, -offset, -offset);
+                    topLeft.pos.add(rightDir);
+                    bottomLeft.pos.add(rightDir);
+                }
+                case RIGHT -> {
+                    rightDir.mul(offset, offset, offset);
+                    topRight.pos.add(rightDir);
+                    bottomRight.pos.add(rightDir);
+                }
+            }
+
+            return this;
+        }
+
+        public Polygon shrinkEdge(@NotNull Edge edge, float offset) {
+            return growEdge(edge, -offset);
+        }
+
+        public Polygon move(Vector3fc vector3fc) {
+            return move(vector3fc.x(), vector3fc.y(), vector3fc.z(), this);
+        }
+
+        public Polygon move(Vector3fc vector3fc, Polygon dest) {
+            return move(vector3fc.x(), vector3fc.y(), vector3fc.z(), dest);
+        }
+
+        public Polygon move(float x, float y, float z) {
+            return move(x, y, z, this);
+        }
+
+        public Polygon move(float x, float y, float z, Polygon dest) {
+            for (int i = 0; i < this.vertices.length; ++i) {
+                dest.vertices[i].pos.x = this.vertices[i].pos.x + x;
+                dest.vertices[i].pos.y = this.vertices[i].pos.y + y;
+                dest.vertices[i].pos.z = this.vertices[i].pos.z + z;
+            }
+
+            return dest;
+        }
     }
 
     public static class Cube {
         public Polygon[] polygons;
+
+        public Cube(Polygon[] copyPolys) {
+            this.polygons = new Polygon[copyPolys.length];
+            int i = 0;
+            for (var poly : copyPolys) {
+                this.polygons[i++] = new Polygon(poly);
+            }
+        }
 
         public Cube(Cube copyFrom) {
             final var copyPolys = copyFrom.polygons;
@@ -252,6 +586,16 @@ public class EntityGeometry {
             }
         }
 
+        @Override
+        public String toString() {
+            var min = this.getMin();
+            var max = this.getMax();
+            var size = new Vector3f();
+            max.sub(min, size);
+            return String.format("Cube[%f,%f,%f] {%.2f,%.2f,%.2f -> %.2f,%.2f,%.2f}",
+                    size.x, size.y, size.z, min.x, min.y, min.z, max.x, max.y, max.z);
+        }
+
         @Nullable
         public Polygon getFace(Direction normal) {
             for (Polygon poly : polygons) {
@@ -261,20 +605,37 @@ public class EntityGeometry {
             return null;
         }
 
+        public void putFace(Polygon polygon) {
+            for (int i = 0; i < polygons.length; i++) {
+                if (polygons[i].normal.dot(polygon.normal) >= 0.95f) {
+                    polygons[i] = polygon;
+                    return;
+                }
+            }
+        }
+
         public Cube clampToFit(Cube clampBy) {
             return clampToFit(clampBy, this);
         }
 
         public Cube clampToFit(Cube clampBy, Cube dest) {
-            Vector3f sizeClamp = clampBy.getMax().sub(clampBy.getMin());
+            return clampToFit(clampBy.getMin(), clampBy.getMax(), this);
+        }
+
+        public Cube clampToFit(Vector3fc clampMin, Vector3fc clampMax) {
+            return clampToFit(clampMin, clampMax, this);
+        }
+
+        public Cube clampToFit(Vector3fc clampMin, Vector3fc clampMax, Cube dest) {
+            Vector3f sizeClamp = new Vector3f();
+            clampMax.sub(clampMin, sizeClamp);
             Vector3f thisMin = this.getMin();
             Vector3f thisMax = this.getMax();
             Vector3f thisSize = new Vector3f();
             Vector3f thisCenter = new Vector3f();
 
             thisMax.sub(thisMin, thisSize);
-            thisSize.add(thisMin, thisCenter);
-            thisCenter.mul(0.5f);
+            thisSize.mul(0.5f, thisCenter).add(thisMin);
 
             Vector3f deltaSize = new Vector3f();
             sizeClamp.sub(thisSize, deltaSize);
@@ -362,8 +723,7 @@ public class EntityGeometry {
             Vector3f thisCenter = new Vector3f();
 
             thisMax.sub(thisMin, thisSize);
-            thisSize.add(thisMin, thisCenter);
-            thisCenter.mul(0.5f);
+            thisSize.mul(0.5f, thisCenter).add(thisMin);
 
             for (Direction normal : Direction.values()) {
                 Polygon thisFace = this.getFace(normal);
@@ -381,17 +741,280 @@ public class EntityGeometry {
             return dest;
         }
 
+        public Cube move(float x, float y, float z) {
+            return move(x, y, z, this);
+        }
+
+        public Cube move(float x, float y, float z, Cube dest) {
+            for (Direction normal : Direction.values()) {
+                Polygon thisFace = this.getFace(normal);
+                Polygon destFace = dest.getFace(normal);
+                if (thisFace == null || destFace == null)
+                    continue;
+
+                thisFace.move(x, y, z, destFace);
+            }
+
+            return dest;
+        }
+
+        public static class SegmentCompute {
+            public static float EPSILON = 0.00001f;
+
+            public Cube source;
+            public Vector3fc min, max;
+            public boolean resolved = false;
+
+            public SegmentCompute(Cube source) {
+                this.source = source;
+                this.min = source.getMin();
+                this.max = source.getMax();
+            }
+
+            @Override
+            public String toString() {
+                var size = new Vector3f();
+                max.sub(min, size);
+                return String.format("Cube.SegmentCompute[%f,%f,%f] {%.2f,%.2f,%.2f -> %.2f,%.2f,%.2f}",
+                        size.x, size.y, size.z, min.x(), min.y(), min.z(), max.x(), max.y(), max.z());
+            }
+
+            public Vector3f getSize() {
+                var r = new Vector3f();
+                return max.sub(min, r);
+            }
+
+            public Vector3f getCenter() {
+                var r = new Vector3f();
+                return max.add(min, r).mul(0.5f);
+            }
+
+            public Vector3f getCenter(Direction surface) {
+                var r = new Vector3f();
+                var size = this.getSize().mul(surface.step()).mul(0.5f);
+                return max.add(min, r).mul(0.5f).add(size);
+            }
+
+            public @Nullable Direction.Axis getBestAxisForSplit(Cube other) {
+                return getBestAxisForSplit(new SegmentCompute(other));
+            }
+
+            public @Nullable Direction.Axis getBestAxisForSplit(SegmentCompute other) {
+                var thisCenter = this.getCenter();
+                var otherCenter = other.getCenter();
+
+                Direction.Axis centerAxis = null;
+                float dx = Mth.abs(thisCenter.x - otherCenter.x);
+                float dy = Mth.abs(thisCenter.y - otherCenter.y);
+                float dz = Mth.abs(thisCenter.z - otherCenter.z);
+                if (dz < dy && dx < dy)
+                    centerAxis = Direction.Axis.Y;
+                else if (dy < dz && dx < dz)
+                    centerAxis = Direction.Axis.Z;
+                else if (dy < dx && dz < dx)
+                    centerAxis = Direction.Axis.X;
+
+                /*if (centerAxis != null) {
+                    TODO maybe fail axis if part is too misaligned
+                }*/
+
+                return centerAxis;
+            }
+
+            public float rateSimilarity(Cube other) {
+                return rateSimilarity(new SegmentCompute(other));
+            }
+
+            public float rateSimilarity(SegmentCompute other) {
+                float lowest = Float.MAX_VALUE;
+                for (var normal : Direction.values()) {
+                    float distance = this.getCenter(normal).distanceSquared(other.getCenter(normal));
+                    if (distance < lowest)
+                        lowest = distance;
+                }
+
+                return lowest;
+            }
+        }
+
+        public Cube growFace(@NotNull Direction targetFace, float offset) {
+            for (var normal : Direction.values()) {
+                if (normal == targetFace.getOpposite()) continue;
+
+                var face = this.getFace(normal);
+                if (face == null) continue;
+
+                if (normal == targetFace) {
+                    face.move(targetFace.step().mul(offset));
+                } else {
+                    var edge = Polygon.Edge.fromFaceAndDirection(normal, targetFace);
+                    if (edge != null)
+                        face.growEdge(edge, offset);
+                }
+            }
+
+            return this;
+        }
+
+        public Cube shrinkFace(@NotNull Direction targetFace, float offset) {
+            return growFace(targetFace, -offset);
+        }
+
+        public Pair<Cube, Cube> splitOnAxis(@NotNull Direction.Axis onAxis) {
+            return splitOnAxis(onAxis, 0.5f);
+        }
+
+        public Pair<Cube, Cube> splitOnAxis(@NotNull Direction.Axis onAxis, float distribution) {
+            Vector3f thisMin = this.getMin();
+            Vector3f thisMax = this.getMax();
+            Vector3f thisSize = new Vector3f();
+
+            thisMax.sub(thisMin, thisSize);
+
+            Vector3f deltaPositionFirst = new Vector3f();
+            thisSize.mul(1.0f - distribution, deltaPositionFirst);
+
+            Vector3f deltaPositionSecond = new Vector3f();
+            thisSize.mul(distribution, deltaPositionSecond);
+
+            var copyFirst = new Cube(this);
+            var copySecond = new Cube(this);
+
+            Direction dirFirst = Direction.fromAxisAndDirection(onAxis, Direction.AxisDirection.POSITIVE);
+            Direction dirSecond = Direction.fromAxisAndDirection(onAxis, Direction.AxisDirection.NEGATIVE);
+
+            copyFirst.shrinkFace(dirFirst, (float)onAxis.choose(deltaPositionFirst.x, deltaPositionFirst.y, deltaPositionFirst.z));
+            copySecond.shrinkFace(dirSecond, (float)onAxis.choose(deltaPositionSecond.x, deltaPositionSecond.y, deltaPositionSecond.z));
+
+            return Pair.of(copyFirst, copySecond);
+        }
+
+        public List<Cube> segment(List<Cube> toMatch) {
+            return segment(toMatch, new ArrayList<>(toMatch.size()));
+        }
+
+        public List<Cube> segment(List<Cube> toMatch, List<Cube> output) {
+            if (toMatch.size() == 1)
+                output.add(new Cube(this));
+
+            SplittingSource splittingCubes = SplittingSource.forCube(this, (t, u) -> {});
+            return segment(splittingCubes, toMatch, new ArrayList<>(toMatch.size()));
+        }
+
+        public static List<Cube> segment(SplittingSource splittingCubes, List<Cube> toMatch) {
+            return segment(splittingCubes, toMatch, new ArrayList<>(toMatch.size()));
+        }
+
+        public static List<Cube> segment(SplittingSource splittingCubes, List<Cube> toMatch, List<Cube> output) {
+            for (int i = 0; i < toMatch.size(); i++) {
+                var match = toMatch.get(i);
+                final int myIndex = i;
+                output.add(splittingCubes.splitFor(match.getMin(), match.getMax(), (oldCube, newCube) -> {
+                    output.set(myIndex, newCube);
+                }));
+            }
+
+            /*List<SegmentCompute> endComputes = new ArrayList<>(toMatch.size());
+
+            for (var endCube : toMatch) {
+                endComputes.add(new SegmentCompute(endCube));
+            }
+
+            boolean changesMade;
+            do {
+                changesMade = false;
+                float bestMatchValue = Float.MAX_VALUE;
+                SegmentCompute bestMatch = null;
+                SegmentCompute bestMatchSource = null;
+
+                for (SegmentCompute compute : endComputes) {
+                    if (compute.resolved) continue;
+
+                    for (var entry : splittingCubes.entrySet()) {
+                        if (endComputes.size() == 1 && toMatch.contains(entry.getKey()))
+                            continue;
+
+                        var value = compute.rateSimilarity(entry.getValue());
+                        if (bestMatch == null || value < bestMatchValue) {
+                            bestMatchValue = value;
+                            bestMatch = compute;
+                            bestMatchSource = new SegmentCompute(entry.getValue());
+                        }
+                    }
+                }
+
+                if (bestMatch != null) {
+                    changesMade = true;
+                    bestMatch.resolved = true;
+                    endComputes.remove(bestMatch);
+
+                    if (endComputes.isEmpty()) {
+                        splittingCubes.put(bestMatch.source, new Cube(bestMatchSource.source));
+                    } else {
+
+                        var axis = bestMatch.getBestAxisForSplit(bestMatchSource);
+                        if (axis != null) {
+                            var matchSz = bestMatch.getSize();
+                            var matchC = bestMatch.getCenter();
+                            var matchSourceSz = bestMatchSource.getSize();
+                            var matchSourceC = bestMatchSource.getCenter();
+
+                            float ratio = (float)axis.choose(matchSz.x, matchSz.y, matchSz.z) / (float)axis.choose(matchSourceSz.x, matchSourceSz.y, matchSourceSz.z);
+                            ratio = Mth.clamp(ratio, 0.0f, 1.0f);
+                            if (axis.choose(matchC.x, matchC.y, matchC.z) < axis.choose(matchSourceC.x, matchSourceC.y, matchSourceC.z))
+                                ratio = 1.0f - ratio;
+
+                            var cubes = bestMatchSource.source.splitOnAxis(axis, ratio);
+                            var first = cubes.getFirst();
+                            var second = cubes.getSecond();
+                            var firstCompute = new SegmentCompute(first);
+                            var secondCompute = new SegmentCompute(second);
+
+                            if (bestMatch.rateSimilarity(firstCompute) < bestMatch.rateSimilarity(secondCompute)) {
+                                splittingCubes.put(bestMatch.source, first);
+                                splittingCubes.put(bestMatchSource.source, second);
+                            } else {
+                                splittingCubes.put(bestMatch.source, second);
+                                splittingCubes.put(bestMatchSource.source, first);
+                            }
+                        } else {
+                            // TODO handle
+
+                            splittingCubes.put(bestMatch.source, new Cube(bestMatchSource.source));
+                        }
+                    }
+                }
+            } while (changesMade);
+
+            for (var cube : toMatch) {
+                if (!splittingCubes.containsKey(cube))
+                    throw new IllegalStateException("Unresolved cube while segmenting");
+                output.add(splittingCubes.get(cube));
+            }*/
+            return output;
+        }
+
+        public static List<SegmentCompute> segmentDeferred(Set<Cube> availableSpace, List<Cube> toMatch) {
+            return segmentDeferred(availableSpace, toMatch, new ArrayList<>(toMatch.size()));
+        }
+
+        public static List<SegmentCompute> segmentDeferred(Set<Cube> availableSpace, List<Cube> toMatch, List<SegmentCompute> output) {
+
+
+            return output;
+        }
+
         public Vector3f getMin() {
             float minX = Float.MAX_VALUE;
             float minY = Float.MAX_VALUE;
             float minZ = Float.MAX_VALUE;
             for (var poly : polygons) {
                 for (var vert : poly.vertices) {
-                    if (vert.pos.x > minX)
+                    if (vert.pos.x < minX)
                         minX = vert.pos.x;
-                    if (vert.pos.y > minY)
+                    if (vert.pos.y < minY)
                         minY = vert.pos.y;
-                    if (vert.pos.z > minZ)
+                    if (vert.pos.z < minZ)
                         minZ = vert.pos.z;
                 }
             }
@@ -405,11 +1028,11 @@ public class EntityGeometry {
             float maxZ = -Float.MAX_VALUE;
             for (var poly : polygons) {
                 for (var vert : poly.vertices) {
-                    if (vert.pos.x < maxX)
+                    if (vert.pos.x > maxX)
                         maxX = vert.pos.x;
-                    if (vert.pos.y < maxY)
+                    if (vert.pos.y > maxY)
                         maxY = vert.pos.y;
-                    if (vert.pos.z < maxZ)
+                    if (vert.pos.z > maxZ)
                         maxZ = vert.pos.z;
                 }
             }
