@@ -24,15 +24,15 @@ import java.util.EnumMap;
 public class TransfurHelper {
     public static final ModelLayerLocation TRANSFUR_HELPER = new ModelLayerLocation(Changed.modResource("transfur_helper"), "main");
 
-    protected final HelperModel DigitigradeLeftLeg;
-    protected final HelperModel DigitigradeRightLeg;
-    protected final HelperModel BasicLeftArm;
-    protected final HelperModel BasicRightArm;
-    protected final HelperModel TailedTorso;
-    protected final HelperModel FeminineTorso;
-    protected final HelperModel FeminineTorsoAlt;
-    protected final HelperModel FeminineTorsoLegless;
-    protected final HelperModel SnoutedHead;
+    protected final @Deprecated HelperModel DigitigradeLeftLeg;
+    protected final @Deprecated HelperModel DigitigradeRightLeg;
+    protected final @Deprecated HelperModel BasicLeftArm;
+    protected final @Deprecated HelperModel BasicRightArm;
+    protected final @Deprecated HelperModel TailedTorso;
+    protected final @Deprecated HelperModel FeminineTorso;
+    protected final @Deprecated HelperModel FeminineTorsoAlt;
+    protected final @Deprecated HelperModel FeminineTorsoLegless;
+    protected final @Deprecated HelperModel SnoutedHead;
     protected final HelperModel Legless;
     protected final HelperModel TaurTorso;
     protected final HelperModel PupTorso;
@@ -74,7 +74,7 @@ public class TransfurHelper {
         this.Legless = HelperModel.withPrepareAndTransition(root.getChild("Legless"), (beforePose, part, model) -> {
             return beforePose.translate(0.0f, 12.0f, 0.0f)
                     .averageRotation(model.leftLeg, model.rightLeg);
-        }, (model, preMorph) -> {
+        }, (model, preMorph) -> { // TODO generalize helper to transform legs to legless and vice versa
             float avgX = (model.leftLeg.xRot + model.rightLeg.xRot) * 0.5f;
             float avgY = (model.leftLeg.yRot + model.rightLeg.yRot) * 0.5f;
             float avgZ = (model.leftLeg.zRot + model.rightLeg.zRot) * 0.5f;
@@ -299,7 +299,7 @@ public class TransfurHelper {
         }
 
         // TAUR
-        {
+        { // TODO Update to simpler model
             PartDefinition TaurTorso = partdefinition.addOrReplaceChild("TaurTorso", CubeListBuilder.create().texOffs(-2, -2).addBox(-4.0F, -2.0F, -2.0F, 8.0F, 2.0F, 4.0F, CubeDeformation.NONE), PartPose.offset(0.0F, 12.0F, 0.0F));
 
             PartDefinition LeftLeg = TaurTorso.addOrReplaceChild("LeftLeg", CubeListBuilder.create(), PartPose.offset(2.0F, 0.0F, 0.0F));
@@ -384,11 +384,11 @@ public class TransfurHelper {
     }
 
     private static final Cacheable<TransfurHelper> INSTANCE = Cacheable.of(() -> new TransfurHelper(getModelSet().bakeLayer(TRANSFUR_HELPER)));
-
+    @Deprecated
     public static HelperModel getDigitigradeLeftLeg() {
         return INSTANCE.get().DigitigradeLeftLeg;
     }
-
+    @Deprecated
     public static HelperModel getDigitigradeRightLeg() {
         return INSTANCE.get().DigitigradeRightLeg;
     }
@@ -413,30 +413,37 @@ public class TransfurHelper {
         return INSTANCE.get().ArmorMap.get(model).HeavyTorsoAlt;
     }
 
+    @Deprecated
     public static HelperModel getBasicLeftArm() {
-        return INSTANCE.get().BasicLeftArm;
+        return null;
     }
 
+    @Deprecated
     public static HelperModel getBasicRightArm() {
-        return INSTANCE.get().BasicRightArm;
+        return null;
     }
 
+    @Deprecated
     public static HelperModel getTailedTorso() {
         return INSTANCE.get().TailedTorso;
     }
 
+    @Deprecated
     public static HelperModel getFeminineTorso() {
         return INSTANCE.get().FeminineTorso;
     }
 
+    @Deprecated
     public static HelperModel getFeminineTorsoAlt() {
         return INSTANCE.get().FeminineTorsoAlt;
     }
 
+    @Deprecated
     public static HelperModel getFeminineTorsoLegless() {
         return INSTANCE.get().FeminineTorsoLegless;
     }
 
+    @Deprecated
     public static HelperModel getSnoutedHead() {
         return INSTANCE.get().SnoutedHead;
     }

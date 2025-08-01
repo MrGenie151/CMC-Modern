@@ -11,7 +11,6 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.joml.*;
 
@@ -22,7 +21,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
- * Class that represents a ModelPart without any bloat from mods, as well as many functions to aid in transforming
+ * Class that represents a ModelPart without any bloat from mods. Has many functions to aid in transforming
  */
 public class EntityGeometry {
     // Blockbench helper part that is used to rotate cubes
@@ -303,48 +302,34 @@ public class EntityGeometry {
         return this;
     }
 
-    /*private static EntityGeometry copyStructure(EntityGeometry toFit, EntityGeometry toMatch) {
-        Set<String> uniqueChildren = new HashSet<>();
-        for (var child : toFit.children.keySet())
-            uniqueChildren.add(fuzzName(child, uniqueChildren));
-        for (var child : toMatch.children.keySet())
-            uniqueChildren.add(fuzzName(child, uniqueChildren));
+    /**
+     * Discards child rotation, and applied positioning to cubes
+     * @return this
+     */
+    public EntityGeometry embedPositioning() {
+        this.xRot = 0.0f;
+        this.yRot = 0.0f;
+        this.zRot = 0.0f;
 
-        Map<String, EntityGeometry> resultChildren = new Object2ObjectArrayMap<>(uniqueChildren.size());
-
-        for (var child : uniqueChildren) {
-            var thisName = fuzzName(child, toFit.children.keySet());
-            var matchName = fuzzName(child, toMatch.children.keySet());
-
-            var thisChild = toFit.children.get(thisName);
-            var matchChild = toMatch.children.get(matchName);
-
-            var resultChild = copyStructure(
-                    Objects.requireNonNullElseGet(thisChild, EntityGeometry::new),
-                    Objects.requireNonNullElseGet(matchChild, EntityGeometry::new)
-            );
-
-            if (thisChild != null) {
-                resultChild.copyPoseFrom(thisChild);
-            }
-
-            resultChildren.put(child, resultChild);
+        for (var cube : this.cubes) {
+            cube.move(this.x, this.y, this.z);
         }
 
-        return new EntityGeometry(new ArrayList<>(), resultChildren);
-    }
+        for (var child : this.children.values()) {
+            child.x += this.x;
+            child.y += this.y;
+            child.z += this.z;
+        }
 
-    public static EntityGeometry createSkeleton(EntityGeometry toFit, EntityGeometry toMatch) {
-        return copyStructure(toFit, toMatch);
-    }*/
+        this.x = 0.0f;
+        this.y = 0.0f;
+        this.z = 0.0f;
 
-    public static String fuzzName(String name, Set<String> toMatch) {
-        if (toMatch.contains(name))
-            return name;
+        this.children.forEach((name, part) -> {
+            part.embedPositioning();
+        });
 
-        // TODO better fuzzing
-
-        return name;
+        return this;
     }
 
     public static class Vertex {
@@ -462,13 +447,13 @@ public class EntityGeometry {
             switch (face.getAxis()) {
                 case X -> {
                     for (var vert : this.vertices) {
-                        if (vert.pos.y >= topLeft.pos.y && vert.pos.z * face.getAxisDirection().getStep() >= topLeft.pos.z * face.getAxisDirection().getStep())
+                        if (vert.pos.y >= topLeft.pos.y && vert.pos.z * face.getAxisDirection().getStep() <= topLeft.pos.z * face.getAxisDirection().getStep())
                             topLeft = vert;
-                        if (vert.pos.y >= topRight.pos.y && vert.pos.z * face.getAxisDirection().getStep() <= topRight.pos.z * face.getAxisDirection().getStep())
+                        if (vert.pos.y >= topRight.pos.y && vert.pos.z * face.getAxisDirection().getStep() >= topRight.pos.z * face.getAxisDirection().getStep())
                             topRight = vert;
-                        if (vert.pos.y <= bottomLeft.pos.y && vert.pos.z * face.getAxisDirection().getStep() >= bottomLeft.pos.z * face.getAxisDirection().getStep())
+                        if (vert.pos.y <= bottomLeft.pos.y && vert.pos.z * face.getAxisDirection().getStep() <= bottomLeft.pos.z * face.getAxisDirection().getStep())
                             bottomLeft = vert;
-                        if (vert.pos.y <= bottomRight.pos.y && vert.pos.z * face.getAxisDirection().getStep() <= bottomRight.pos.z * face.getAxisDirection().getStep())
+                        if (vert.pos.y <= bottomRight.pos.y && vert.pos.z * face.getAxisDirection().getStep() >= bottomRight.pos.z * face.getAxisDirection().getStep())
                             bottomRight = vert;
                     }
 
@@ -490,13 +475,13 @@ public class EntityGeometry {
                 }
                 case Y -> {
                     for (var vert : this.vertices) {
-                        if (vert.pos.z >= topLeft.pos.z && vert.pos.x <= topLeft.pos.x)
+                        if (vert.pos.z <= topLeft.pos.z && vert.pos.x <= topLeft.pos.x)
                             topLeft = vert;
-                        if (vert.pos.z >= topRight.pos.z && vert.pos.x >= topRight.pos.x)
+                        if (vert.pos.z <= topRight.pos.z && vert.pos.x >= topRight.pos.x)
                             topRight = vert;
-                        if (vert.pos.z <= bottomLeft.pos.z && vert.pos.x <= bottomLeft.pos.x)
+                        if (vert.pos.z >= bottomLeft.pos.z && vert.pos.x <= bottomLeft.pos.x)
                             bottomLeft = vert;
-                        if (vert.pos.z <= bottomRight.pos.z && vert.pos.x >= bottomRight.pos.x)
+                        if (vert.pos.z >= bottomRight.pos.z && vert.pos.x >= bottomRight.pos.x)
                             bottomRight = vert;
                     }
 
@@ -627,8 +612,52 @@ public class EntityGeometry {
         }
 
         public Cube clampToFit(Vector3fc clampMin, Vector3fc clampMax, Cube dest) {
+            Vector3f thisMin = this.getMin();
+            Vector3f thisMax = this.getMax();
+            Vector3f thisSize = new Vector3f();
+            Vector3f thisCenter = new Vector3f();
+
+            thisMax.sub(thisMin, thisSize);
+            thisSize.mul(0.5f, thisCenter).add(thisMin);
+
             Vector3f sizeClamp = new Vector3f();
             clampMax.sub(clampMin, sizeClamp);
+            var result = clampToFitSize(sizeClamp, dest);
+            Vector3f resultSize = new Vector3f();
+            Vector3f resultCenter = new Vector3f();
+            result.getMax().sub(result.getMin(), resultSize);
+            resultSize.mul(0.5f, resultCenter).add(result.getMin());
+
+            Vector3f clampCenter = new Vector3f();
+            clampMax.add(clampMin, clampCenter).mul(0.5f);
+
+            Vector3f wantedMovement = new Vector3f(); // How much the cube wants to move
+            clampCenter.sub(resultCenter, wantedMovement);
+            Vector3f allowedMovement = new Vector3f(); // How much the cube can move in any direction
+            thisSize.sub(resultSize, allowedMovement).mul(0.5f);
+
+            Vector3f appliedMovement = new Vector3f(
+                    Mth.clamp(wantedMovement.x, -allowedMovement.x, allowedMovement.x),
+                    Mth.clamp(wantedMovement.y, -allowedMovement.y, allowedMovement.y),
+                    Mth.clamp(wantedMovement.z, -allowedMovement.z, allowedMovement.z)
+            );
+
+            // TODO remap UV for movement applied
+
+            return result.move(appliedMovement);
+        }
+
+        public Cube clampToFitSize(Vector3fc sizeClamp) {
+            return clampToFitSize(sizeClamp, this);
+        }
+
+        /**
+         * Shrinks this cube from the center to fit sizeClamp, and stores the result in dest
+         * @param sizeClamp
+         * @param dest
+         * @return
+         */
+        public Cube clampToFitSize(Vector3fc sizeClamp, Cube dest) {
             Vector3f thisMin = this.getMin();
             Vector3f thisMax = this.getMax();
             Vector3f thisSize = new Vector3f();
@@ -739,6 +768,14 @@ public class EntityGeometry {
             }
 
             return dest;
+        }
+
+        public Cube move(Vector3fc delta) {
+            return move(delta.x(), delta.y(), delta.z(), this);
+        }
+
+        public Cube move(Vector3fc delta, Cube dest) {
+            return move(delta.x(), delta.y(), delta.z(), dest);
         }
 
         public Cube move(float x, float y, float z) {
@@ -864,6 +901,12 @@ public class EntityGeometry {
             return splitOnAxis(onAxis, 0.5f);
         }
 
+        /**
+         * Creates a pair of cubes that take the same space as this cube, split along an axis and a distrobution
+         * @param onAxis the axis to split upon
+         * @param distribution point from 0 to 1 that draws the line where to split, resulting in a (distribution):(1 - distribution) split
+         * @return A pair of cubes. The first cube is position lower on the axis, and the second, higher.
+         */
         public Pair<Cube, Cube> splitOnAxis(@NotNull Direction.Axis onAxis, float distribution) {
             Vector3f thisMin = this.getMin();
             Vector3f thisMax = this.getMax();
@@ -914,83 +957,6 @@ public class EntityGeometry {
                 }));
             }
 
-            /*List<SegmentCompute> endComputes = new ArrayList<>(toMatch.size());
-
-            for (var endCube : toMatch) {
-                endComputes.add(new SegmentCompute(endCube));
-            }
-
-            boolean changesMade;
-            do {
-                changesMade = false;
-                float bestMatchValue = Float.MAX_VALUE;
-                SegmentCompute bestMatch = null;
-                SegmentCompute bestMatchSource = null;
-
-                for (SegmentCompute compute : endComputes) {
-                    if (compute.resolved) continue;
-
-                    for (var entry : splittingCubes.entrySet()) {
-                        if (endComputes.size() == 1 && toMatch.contains(entry.getKey()))
-                            continue;
-
-                        var value = compute.rateSimilarity(entry.getValue());
-                        if (bestMatch == null || value < bestMatchValue) {
-                            bestMatchValue = value;
-                            bestMatch = compute;
-                            bestMatchSource = new SegmentCompute(entry.getValue());
-                        }
-                    }
-                }
-
-                if (bestMatch != null) {
-                    changesMade = true;
-                    bestMatch.resolved = true;
-                    endComputes.remove(bestMatch);
-
-                    if (endComputes.isEmpty()) {
-                        splittingCubes.put(bestMatch.source, new Cube(bestMatchSource.source));
-                    } else {
-
-                        var axis = bestMatch.getBestAxisForSplit(bestMatchSource);
-                        if (axis != null) {
-                            var matchSz = bestMatch.getSize();
-                            var matchC = bestMatch.getCenter();
-                            var matchSourceSz = bestMatchSource.getSize();
-                            var matchSourceC = bestMatchSource.getCenter();
-
-                            float ratio = (float)axis.choose(matchSz.x, matchSz.y, matchSz.z) / (float)axis.choose(matchSourceSz.x, matchSourceSz.y, matchSourceSz.z);
-                            ratio = Mth.clamp(ratio, 0.0f, 1.0f);
-                            if (axis.choose(matchC.x, matchC.y, matchC.z) < axis.choose(matchSourceC.x, matchSourceC.y, matchSourceC.z))
-                                ratio = 1.0f - ratio;
-
-                            var cubes = bestMatchSource.source.splitOnAxis(axis, ratio);
-                            var first = cubes.getFirst();
-                            var second = cubes.getSecond();
-                            var firstCompute = new SegmentCompute(first);
-                            var secondCompute = new SegmentCompute(second);
-
-                            if (bestMatch.rateSimilarity(firstCompute) < bestMatch.rateSimilarity(secondCompute)) {
-                                splittingCubes.put(bestMatch.source, first);
-                                splittingCubes.put(bestMatchSource.source, second);
-                            } else {
-                                splittingCubes.put(bestMatch.source, second);
-                                splittingCubes.put(bestMatchSource.source, first);
-                            }
-                        } else {
-                            // TODO handle
-
-                            splittingCubes.put(bestMatch.source, new Cube(bestMatchSource.source));
-                        }
-                    }
-                }
-            } while (changesMade);
-
-            for (var cube : toMatch) {
-                if (!splittingCubes.containsKey(cube))
-                    throw new IllegalStateException("Unresolved cube while segmenting");
-                output.add(splittingCubes.get(cube));
-            }*/
             return output;
         }
 

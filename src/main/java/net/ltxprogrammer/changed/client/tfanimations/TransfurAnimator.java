@@ -99,19 +99,6 @@ public abstract class TransfurAnimator {
 
     private static final Map<ModelPart, ModelPose> CAPTURED_MODELS = new HashMap<>();
 
-    private static EntityGeometry.Cube copyCube(EntityGeometry.Cube cube) {
-        return new EntityGeometry.Cube(cube);
-    }
-
-    private static EntityGeometry deepCopyPart(@Nullable EntityGeometry part, boolean copyVisibility) {
-        if (part == null)
-            return null;
-        EntityGeometry copied = new EntityGeometry(part);
-        if (!copyVisibility)
-            copied.visit(visited -> visited.visible = true);
-        return copied;
-    }
-
     private static EntityGeometry deepCopyPart(@Nullable ModelPart part, Predicate<ModelPart> predicate, boolean copyVisibility) {
         if (part == null)
             return null;
@@ -121,107 +108,31 @@ public abstract class TransfurAnimator {
         return copied;
     }
 
-    private static EntityGeometry.Cube clampCube(EntityGeometry.Cube a, EntityGeometry.Cube clampBy) {
-        if (clampBy == null)
-            return a;
-
-        return a.clampToFit(clampBy);
-
-        /*float minX = Mth.clamp(a.minX, clampBy.minX, clampBy.maxX);
-        float minY = Mth.clamp(a.minY, clampBy.minY, clampBy.maxY);
-        float minZ = Mth.clamp(a.minZ, clampBy.minZ, clampBy.maxZ);
-
-        float maxX = Mth.clamp(a.maxX, clampBy.minX, clampBy.maxX);
-        float maxY = Mth.clamp(a.maxY, clampBy.minY, clampBy.maxY);
-        float maxZ = Mth.clamp(a.maxZ, clampBy.minZ, clampBy.maxZ);
-
-        ModelPart.Cube newCube = new ModelPart.Cube(0, 0, minX, minY, minZ,
-                maxX - minX, maxY - minY, maxZ - minZ,
-                0.0f, 0.0f, 0.0f, false, 1.0f, 1.0f, ALL_VISIBLE);
-        var polyCube = ((CubeExtender)newCube).getPolygons();
-        var polyClamp = ((CubeExtender)clampBy).getPolygons();
-        for (int i = 0; i < polyCube.length && i < polyClamp.length; ++i) {
-            for (int v = 0; v < polyCube[i].vertices.length && v < polyClamp[i].vertices.length; ++v) {
-                polyCube[i].vertices[v] = polyCube[i].vertices[v].remap(polyClamp[i].vertices[v].u, polyClamp[i].vertices[v].v);
-            }
-        }
-        return newCube;*/
-    }
-
-    private static EntityGeometry replaceCubesAndZeroParts(EntityGeometry part, EntityGeometry.Cube cube) {
-        EntityGeometry ret = new EntityGeometry(
-                part.cubes.stream().map(otherCube -> clampCube(otherCube, cube)).toList(),
-                part.children.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> replaceCubesAndZeroParts(entry.getValue(), cube))));
-        ret.loadPose(PartPose.ZERO);
-        return ret;
-    }
-
-    private static EntityGeometry shallowCopyPart(EntityGeometry part) {
-        return new EntityGeometry(part.cubes.stream().map(EntityGeometry.Cube::new).toList(), Map.of());
-    }
-
-    private static EntityGeometry matchCubeCount(EntityGeometry to, EntityGeometry from, EntityGeometry.Cube copyWith, boolean copyVisibility) {
-        List<EntityGeometry.Cube> cubes = new ArrayList<>();
-
-        final int targetCubeCount = Math.max(to.cubes.size(), from.cubes.size());
-        int cubeCount = 0;
-
-        for (var cube : to.cubes) {
-            if (cubeCount >= targetCubeCount) break;
-
-            cubes.add(copyCube(new EntityGeometry.Cube(cube)));
-            cubeCount++;
-        }
-
-        for (var cube : from.cubes) {
-            if (cubeCount >= targetCubeCount) break;
-
-            cubes.add(clampCube(new EntityGeometry.Cube(cube), copyWith));
-            cubeCount++;
-        }
-
-        cubes.sort((c1, c2) -> {
-            var c1max = c1.getMax();
-            var c2max = c2.getMax();
-            int yCompare = Float.compare(c1max.y, c2max.y);
-            int xCompare = Float.compare(c1max.x, c2max.x);
-            int zCompare = Float.compare(c1max.z, c2max.z);
-
-            if (yCompare == 0) {
-                if (xCompare == 0)
-                    return zCompare;
-                return xCompare;
-            }
-            return yCompare;
-        });
-
-        Map<String, EntityGeometry> children = new HashMap<>();
-
-        for (var k : to.children.keySet()) {
-            children.put(k, deepCopyPart(new EntityGeometry(to.children.get(k)), copyVisibility));
-        }
-
-        EntityGeometry.Cube copyOverride = !to.cubes.isEmpty() ? to.cubes.get(0) : copyWith;
-
-        for (var k : from.children.keySet()) {
-            if (to.children.containsKey(k)) {
-                var model = matchCubeCount(to.children.get(k), from.children.get(k), copyOverride, copyVisibility);
-                model.loadPose(to.children.get(k).storePose());
-                children.put(k, model);
-            } else {
-                children.put(k, replaceCubesAndZeroParts(from.children.get(k), copyOverride));
-            }
-        }
-
-        final EntityGeometry matched = new EntityGeometry(cubes, children);
-        if (copyVisibility)
-            matched.visible = to.visible;
-        return matched;
-    }
-
     private static Pair<EntityGeometry, EntityGeometry> matchCubeCount(EntityGeometry begin, EntityGeometry end) {
         return matchCubeCount(begin, end, SplittingSource.empty(), SplittingSource.empty());
     }
+
+    private static final Comparator<EntityGeometry.Cube> MASS_SORT = (left, right) -> {
+        var max = left.getMax();
+        var min = left.getMin();
+        max.sub(min);
+        float leftMass = max.x * max.y * max.z;
+
+        max = right.getMax();
+        min = right.getMin();
+        max.sub(min);
+        float rightMass = max.x * max.y * max.z;
+
+        return Float.compare(rightMass, leftMass);
+    };
+
+    private static final Comparator<String> PRIORITIZE_SKELETON = (left, right) -> {
+        if (EntityGeometry.isSkeletonName(left) && !EntityGeometry.isSkeletonName(right))
+            return -1;
+        else if (!EntityGeometry.isSkeletonName(left) && EntityGeometry.isSkeletonName(right))
+            return 1;
+        return left.compareTo(right);
+    };
 
     private static Pair<EntityGeometry, EntityGeometry> matchCubeCount(EntityGeometry begin, EntityGeometry end,
                                                                        SplittingSource beginSplittingSource, SplittingSource endSplittingSource) {
@@ -234,34 +145,41 @@ public abstract class TransfurAnimator {
                 targetCubeCount = 0;
         }
 
+        // Sort cubes to have consistent results across similar models
+        List<EntityGeometry.Cube> beginCubesSorted = begin.cubes.stream().sorted(MASS_SORT).toList();
+        List<EntityGeometry.Cube> endCubesSorted = end.cubes.stream().sorted(MASS_SORT).toList();
+
         List<EntityGeometry.Cube> beginResultCubes = new ArrayList<>(targetCubeCount);
         List<EntityGeometry.Cube> endResultCubes = new ArrayList<>(targetCubeCount);
         Map<String, EntityGeometry> beginResultChildren = new Object2ObjectArrayMap<>(targetChildrenCount);
         Map<String, EntityGeometry> endResultChildren = new Object2ObjectArrayMap<>(targetChildrenCount);
 
         SplittingSource subBeginSplittingSource = SplittingSource.forSources(
-                beginSplittingSource,
-                SplittingSource.forSourceCubes(begin.cubes)
+                SplittingSource.forSourceCubes(beginCubesSorted),
+                beginSplittingSource
         );
         SplittingSource subEndSplittingSource = SplittingSource.forSources(
-                endSplittingSource,
-                SplittingSource.forSourceCubes(end.cubes)
+                SplittingSource.forSourceCubes(endCubesSorted),
+                endSplittingSource
         );
 
         if (targetCubeCount >= 1) {
-            if (begin.cubes.size() == 1 && !end.cubes.isEmpty()) { // Simple segment case
-                beginResultCubes.addAll(EntityGeometry.Cube.segment(subBeginSplittingSource, end.cubes));
-                endResultCubes.addAll(end.cubes);
-            } else if (end.cubes.size() == 1 && !begin.cubes.isEmpty()) {
-                beginResultCubes.addAll(begin.cubes);
-                endResultCubes.addAll(EntityGeometry.Cube.segment(subEndSplittingSource, begin.cubes));
+            if (beginCubesSorted.size() == 1 && endCubesSorted.size() == 1) { // 1:1
+                beginResultCubes.addAll(beginCubesSorted);
+                endResultCubes.addAll(endCubesSorted);
+            } else if (beginCubesSorted.size() == 1 && !endCubesSorted.isEmpty()) {
+                beginResultCubes.addAll(EntityGeometry.Cube.segment(subBeginSplittingSource, endCubesSorted));
+                endResultCubes.addAll(endCubesSorted);
+            } else if (endCubesSorted.size() == 1 && !beginCubesSorted.isEmpty()) {
+                beginResultCubes.addAll(beginCubesSorted);
+                endResultCubes.addAll(EntityGeometry.Cube.segment(subEndSplittingSource, beginCubesSorted));
             } else {
-                if (end.cubes.size() > begin.cubes.size()) {
-                    beginResultCubes.addAll(EntityGeometry.Cube.segment(subBeginSplittingSource, end.cubes));
-                    endResultCubes.addAll(end.cubes);
+                if (endCubesSorted.size() > beginCubesSorted.size()) {
+                    beginResultCubes.addAll(EntityGeometry.Cube.segment(subBeginSplittingSource, endCubesSorted));
+                    endResultCubes.addAll(endCubesSorted);
                 } else {
-                    beginResultCubes.addAll(begin.cubes);
-                    endResultCubes.addAll(EntityGeometry.Cube.segment(subEndSplittingSource, begin.cubes));
+                    beginResultCubes.addAll(beginCubesSorted);
+                    endResultCubes.addAll(EntityGeometry.Cube.segment(subEndSplittingSource, beginCubesSorted));
                 }
             }
 
@@ -281,54 +199,74 @@ public abstract class TransfurAnimator {
         }
 
         if (targetChildrenCount >= 1) {
-            for (var entry : begin.children.entrySet()) {
-                var childName = entry.getKey();
+            for (var childName : begin.children.keySet().stream().sorted(PRIORITIZE_SKELETON).toList()) {
+                var child = begin.children.get(childName);
                 if (endResultChildren.containsKey(childName))
                     continue;
 
+                // TODO maybe fuzz for similar children
+
                 if (end.children.containsKey(childName)) {
-                    var pair = matchCubeCount(entry.getValue(), end.children.get(childName));
+                    var pair = matchCubeCount(child, end.children.get(childName));
                     beginResultChildren.put(childName, pair.getFirst());
                     endResultChildren.put(childName, pair.getSecond());
                     continue;
                 }
 
-                // TODO fuzz for similar children
+                // Similar not found, creating new child
 
-                var pair = matchCubeCount(new EntityGeometry(/* Empty Part */), entry.getValue(), SplittingSource.empty(), subEndSplittingSource);
-                beginResultChildren.put(childName, pair.getFirst());
+                var pair = matchCubeCount(
+                        new EntityGeometry(child).embedPositioning(/* Discard rotation, flatten position */),
+                        new EntityGeometry(/* Empty Part */),
+                        SplittingSource.empty(), subEndSplittingSource);
+                beginResultChildren.put(childName, child);
                 endResultChildren.put(childName, pair.getSecond());
             }
 
-            for (var entry : end.children.entrySet()) {
-                var childName = entry.getKey();
+            for (var childName : end.children.keySet().stream().sorted(PRIORITIZE_SKELETON).toList()) {
+                var child = end.children.get(childName);
                 if (beginResultChildren.containsKey(childName))
                     continue;
 
                 if (begin.children.containsKey(childName)) {
-                    var pair = matchCubeCount(begin.children.get(childName), entry.getValue());
+                    var pair = matchCubeCount(begin.children.get(childName), child);
                     beginResultChildren.put(childName, pair.getFirst());
                     endResultChildren.put(childName, pair.getSecond());
                     continue;
                 }
 
-                var pair = matchCubeCount(new EntityGeometry(/* Empty Part */), entry.getValue(), subBeginSplittingSource, SplittingSource.empty());
+                // Similar not found, creating new child
+
+                var pair = matchCubeCount(
+                        new EntityGeometry(/* Empty Part */),
+                        new EntityGeometry(child).embedPositioning(/* Discard rotation, flatten position */),
+                        subBeginSplittingSource, SplittingSource.empty());
                 beginResultChildren.put(childName, pair.getFirst());
-                endResultChildren.put(childName, pair.getSecond());
+                endResultChildren.put(childName, child);
             }
         }
 
         if (beginResultCubes.size() != targetCubeCount || endResultCubes.size() != targetCubeCount)
             throw new IllegalStateException("Begin and ending cubes aren't both equal to target count");
 
-        return new Pair<>(
-                new EntityGeometry(beginResultCubes, beginResultChildren),
-                new EntityGeometry(endResultCubes, endResultChildren)
-        );
-    }
+        var beginResult = new EntityGeometry(beginResultCubes, beginResultChildren);
+        var endResult = new EntityGeometry(endResultCubes, endResultChildren);
 
-    private static EntityGeometry matchCubeCount(EntityGeometry to, EntityGeometry from, boolean copyVisibility) {
-        return matchCubeCount(to, from, findCube(to), copyVisibility);
+        for (int i = 0; i < beginResult.cubes.size(); i++) { // Update resize consumers to new lists
+            SplittingSource source = subBeginSplittingSource.findSourceFor(beginResult.cubes.get(i));
+            final int myIndex = i;
+            if (source != null)
+                source.setResizeConsumer((oldCube, newCube) -> beginResult.cubes.set(myIndex, newCube));
+        }
+
+        for (int i = 0; i < endResult.cubes.size(); i++) {
+            SplittingSource source = subEndSplittingSource.findSourceFor(endResult.cubes.get(i));
+            final int myIndex = i;
+            if (source != null)
+                source.setResizeConsumer((oldCube, newCube) -> endResult.cubes.set(myIndex, newCube));
+        }
+
+        return Pair.of(beginResult, endResult);
     }
 
     private static EntityGeometry.Vertex lerpVertex(EntityGeometry.Vertex a, EntityGeometry.Vertex b, float lerp) {
@@ -407,15 +345,10 @@ public abstract class TransfurAnimator {
         return lerped;
     }
 
-    private static EntityGeometry.Cube findCube(EntityGeometry part) {
-        final AtomicReference<EntityGeometry.Cube> cubeReturn = new AtomicReference<>(null);
+    private static Pair<EntityGeometry, EntityGeometry> createTransitionModels(EntityGeometry before, EntityGeometry after) {
+        return matchCubeCount(before, after);
 
-        part.visit(visited -> {
-            for (var cube : visited.cubes)
-                cubeReturn.compareAndSet(null, cube);
-        });
-
-        return cubeReturn.getAcquire();
+        // TODO Undo EntityGeometry.embedPositioning()
     }
 
     private static EntityGeometry transitionModelPart(
@@ -423,7 +356,7 @@ public abstract class TransfurAnimator {
             EntityGeometry before, EntityGeometry after, float lerp, boolean remapUV, boolean copyAfterVisibility) {
         var pair = TRANSITIONS_CACHE.computeIfAbsent(
                 beforeCache, afterCache,
-                (left, right) -> matchCubeCount(before, after));
+                (left, right) -> createTransitionModels(before, after));
 
         var transitionBefore = pair.getFirst();
         var transitionAfter = pair.getSecond();
