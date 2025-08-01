@@ -3,6 +3,7 @@ package net.ltxprogrammer.changed.client.animations;
 import net.ltxprogrammer.changed.client.ClientLivingEntityExtender;
 import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
 import net.ltxprogrammer.changed.client.tfanimations.TransfurAnimator;
+import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.animation.AnimationCategory;
 import net.ltxprogrammer.changed.entity.animation.AnimationParameters;
 import net.ltxprogrammer.changed.entity.animation.NoParameters;
@@ -19,16 +20,14 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Stream;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AnimationInstance {
     private final AnimationDefinition animation;
-    private final Map<Limb, PartPose> baselineH = new HashMap<>();
-    private final Map<Limb, PartPose> baselineAH = new HashMap<>();
+    private final Map<ModelPartIdentifier, PartPose> baselineH = new HashMap<>();
+    private final Map<ModelPartIdentifier, PartPose> baselineAH = new HashMap<>();
     private final Map<LivingEntity, AnimationInstance> entities = new HashMap<>(0);
     private float time = 0.0f;
     private float timeO = 0.0f;
@@ -53,22 +52,22 @@ public class AnimationInstance {
         this.parentEntity = parentEntity;
     }
 
-    public void resetToBaseline(EntityModel<?> model) {
-        if (model instanceof AdvancedHumanoidModel<?> advancedHumanoid)
-            this.resetToBaseline(advancedHumanoid);
+    public void resetToBaseline(EntityModel<?> model, LivingEntity entity) {
+        if (model instanceof AdvancedHumanoidModel<?> advancedHumanoid && entity instanceof ChangedEntity changedEntity)
+            this.resetToBaseline(advancedHumanoid, changedEntity);
         else if (model instanceof HumanoidModel<?> humanoid)
-            this.resetToBaseline(humanoid);
+            this.resetToBaseline(humanoid, entity);
     }
 
     public void captureBaseline(HumanoidModel<?> model) {
         /* Capture model position baseline */
-        animation.channels.keySet().stream().filter(Limb::isVanillaPart).forEach(limb -> {
+        animation.channels.keySet().stream().filter(ModelPartIdentifier::isVanillaPart).forEach(limb -> {
             baselineH.put(limb, limb.getModelPartSafe(model).map(ModelPart::storePose).orElse(null));
         });
     }
 
-    public void resetToBaseline(HumanoidModel<?> model) {
-        animation.channels.keySet().stream().filter(Limb::isVanillaPart).filter(baselineH::containsKey).forEach(limb -> {
+    public void resetToBaseline(HumanoidModel<?> model, LivingEntity entity) {
+        animation.channels.keySet().stream().filter(ModelPartIdentifier::isVanillaPart).filter(baselineH::containsKey).forEach(limb -> {
             limb.getModelPartSafe(model).ifPresent(part -> {
                 final var baseline = baselineH.get(limb);
                 if (baseline != null)
@@ -78,16 +77,16 @@ public class AnimationInstance {
         baselineH.clear();
     }
 
-    public void captureBaseline(AdvancedHumanoidModel<?> model) {
+    public void captureBaseline(AdvancedHumanoidModel<?> model, ChangedEntity entity) {
         /* Capture model position baseline */
-        animation.channels.keySet().forEach(limb -> {
-            baselineAH.put(limb, limb.getModelPartSafe(model).map(ModelPart::storePose).orElse(null));
+        animation.channels.forEach((limb, either) -> {
+            baselineAH.put(limb, limb.getModelPartSafe(model, entity).map(ModelPart::storePose).orElse(null));
         });
     }
 
-    public void resetToBaseline(AdvancedHumanoidModel<?> model) {
+    public void resetToBaseline(AdvancedHumanoidModel<?> model, ChangedEntity entity) {
         animation.channels.keySet().stream().filter(baselineAH::containsKey).forEach(limb -> {
-            limb.getModelPartSafe(model).ifPresent(part -> {
+            limb.getModelPartSafe(model, entity).ifPresent(part -> {
                 final var baseline = baselineAH.get(limb);
                 if (baseline != null)
                     part.loadPose(baselineAH.get(limb));
@@ -121,16 +120,8 @@ public class AnimationInstance {
         // TODO: Item animation track, either lock to limb or be keyframed
     }
 
-    private void animateLimb(Limb limb, ModelPart part, Map<Limb, PartPose> baseline, float time, float transition) {
+    private void animateLimb(List<AnimationChannel> channelList, ModelPart part, PartPose base, float time, float transition) {
         if (part == null)
-            return;
-
-        final var base = baseline.get(limb);
-        if (base == null)
-            return; // Don't touch limb unless it has been saved
-
-        final var channelList = animation.channels.get(limb);
-        if (channelList == null)
             return;
 
         channelList.forEach(channel -> {
@@ -148,18 +139,7 @@ public class AnimationInstance {
         part.loadPose(TransfurAnimator.lerpPartPose(part.storePose(), base, transition));
     }
 
-    private PartPose animateLimb(Limb limb, PartPose part, Map<Limb, PartPose> baseline, float time, float transition) {
-        if (part == null)
-            return part;
-
-        final var base = baseline.get(limb);
-        if (base == null)
-            return part; // Don't touch limb unless it has been saved
-
-        final var channelList = animation.channels.get(limb);
-        if (channelList == null)
-            return part;
-
+    private PartPose animateLimb(List<AnimationChannel> channelList, PartPose part, PartPose base, float time, float transition) {
         AtomicReference<PartPose> partPoseRef = new AtomicReference<>(part);
 
         channelList.forEach(channel -> {
@@ -183,17 +163,6 @@ public class AnimationInstance {
         });
 
         return TransfurAnimator.lerpPartPose(partPoseRef.getAcquire(), base, transition);
-    }
-
-    public Vector3f getTargetValue(Limb limb, AnimationChannel.Target target, float partialTicks) {
-        final var channelList = animation.channels.get(limb);
-        if (channelList == null)
-            return new Vector3f(0.0f);
-
-        final float time = Mth.lerp(partialTicks, this.timeO, this.time);
-        return channelList.stream().filter(channel -> channel.getTarget() == target)
-                .map(channel -> channel.getValue(animation, time))
-                .findFirst().orElse(null);
     }
 
     public float computeTransition(float partialTicks) {
@@ -226,23 +195,42 @@ public class AnimationInstance {
         final float time = computeTime(partialTicks);
         final float transition = computeTransition(partialTicks);
 
-        animation.channels.keySet().stream().filter(Limb::isVanillaPart).forEach(limb -> animateLimb(limb, limb.getModelPart(model), baselineH, time, transition));
+        animation.channels.keySet().stream().filter(ModelPartIdentifier::isVanillaPart).forEach(limb -> {
+            animateLimb(animation.channels.get(limb), limb.getModelPart(model), baselineH.get(limb), time, transition);
+        });
     }
 
-    public void animate(AdvancedHumanoidModel<?> model, float partialTicks) {
-        captureBaseline(model);
+    public void animate(AdvancedHumanoidModel<?> model, ChangedEntity entity, float partialTicks) {
+        captureBaseline(model, entity);
 
         final float time = computeTime(partialTicks);
         final float transition = computeTransition(partialTicks);
 
-        animation.channels.keySet().forEach(limb -> animateLimb(limb, limb.getModelPart(model), baselineAH, time, transition));
+        animation.channels.forEach((limb, either) -> {
+            animateLimb(animation.channels.get(limb), limb.getModelPart(model, entity), baselineAH.get(limb), time, transition);
+        });
     }
 
     public PartPose animatePartAs(Limb limb, PartPose modelPart, float partialTicks) {
         final float time = computeTime(partialTicks);
         final float transition = computeTransition(partialTicks);
 
-        return animateLimb(limb, modelPart, Map.of(limb, modelPart), time, transition);
+        var channels = animation.channels.get(ModelPartIdentifier.forLimb(limb));
+        if (channels == null)
+            return modelPart;
+
+        return animateLimb(channels, modelPart, modelPart, time, transition);
+    }
+
+    public PartPose animatePartAs(ModelPartIdentifier limb, PartPose modelPart, float partialTicks) {
+        final float time = computeTime(partialTicks);
+        final float transition = computeTransition(partialTicks);
+
+        var channels = animation.channels.get(limb);
+        if (channels == null)
+            return modelPart;
+
+        return animateLimb(channels, modelPart, modelPart, time, transition);
     }
 
     private void playSounds(float timeO, float time) {

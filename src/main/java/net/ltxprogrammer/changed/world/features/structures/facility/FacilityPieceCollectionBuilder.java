@@ -1,12 +1,14 @@
 package net.ltxprogrammer.changed.world.features.structures.facility;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.random.WeightedEntry;
 
 public class FacilityPieceCollectionBuilder {
     private final ImmutableList.Builder<WeightedEntry.Wrapper<FacilityPiece>> builder = ImmutableList.builder();
 
     public static final int WEIGHT_COMMON = 20;
+    public static final int WEIGHT_LESSCOMMON = 14;
     public static final int WEIGHT_UNCOMMON = 10;
     public static final int WEIGHT_RARE = 5;
     public static final int WEIGHT_VERY_RARE = 1;

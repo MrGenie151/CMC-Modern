@@ -20,6 +20,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class HumanoidAnimator<T extends ChangedEntity, M extends AdvancedHumanoidModel<T>> {
     public final M entityModel;
@@ -239,6 +240,10 @@ public class HumanoidAnimator<T extends ChangedEntity, M extends AdvancedHumanoi
 
     public static <T extends ChangedEntity, M extends AdvancedHumanoidModel<T>> HumanoidAnimator<T, M> of(M entityModel) {
         return new HumanoidAnimator<>(entityModel);
+    }
+
+    public Stream<HumanoidAnimator.Animator<T, M>> getAnimators(AnimateStage stage) {
+        return animators.get(stage).stream();
     }
 
     private void setupAnimStage(AnimateStage stage, @NotNull T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {

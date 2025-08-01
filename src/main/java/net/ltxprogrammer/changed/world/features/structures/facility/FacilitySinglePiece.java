@@ -18,6 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.random.Weight;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
@@ -44,6 +45,12 @@ public abstract class FacilitySinglePiece extends FacilityPiece {
     }
 
     protected FacilitySinglePiece(PieceType type, ResourceLocation templateName, ResourceLocation lootTable) {
+        super(type);
+        this.templateName = templateName;
+        this.lootTable = Optional.of(lootTable);
+    }
+
+    protected FacilitySinglePiece(Weight weight, PieceType type, ResourceLocation templateName, ResourceLocation lootTable) {
         super(type);
         this.templateName = templateName;
         this.lootTable = Optional.of(lootTable);

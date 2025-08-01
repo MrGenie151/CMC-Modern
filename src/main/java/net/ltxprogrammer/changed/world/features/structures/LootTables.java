@@ -15,4 +15,6 @@ public class LootTables {
     public static final ResourceLocation LOW_TIER_LAB = Changed.modResource("chests/low_tier_lab");
     public static final ResourceLocation LAB_DARK_LATEX = Changed.modResource("chests/lab_dark_latex");
     public static final ResourceLocation LAB_WHITE_LATEX = Changed.modResource("chests/lab_white_latex");
+
+    public static final ResourceLocation ORANGE_TREE_CHEST = Changed.modResource("chests/orange_tree");
 }

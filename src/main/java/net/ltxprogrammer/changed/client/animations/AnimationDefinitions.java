@@ -64,6 +64,8 @@ public class AnimationDefinitions extends SimplePreparableReloadListener<Animati
     @Override
     @NotNull
     protected AnimationDefinitions.GatherAnimationsEvent prepare(@NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
+        LimbExtensions.gatherExtensions();
+
         final ImmutableSet.Builder<ResourceLocation> jsonDefined = new ImmutableSet.Builder<>();
         final HashMap<ResourceLocation, AnimationDefinition> builder = ResourceUtil.processJSONResources(new HashMap<>(),
                 resourceManager, "animation_definitions",

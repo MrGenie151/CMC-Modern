@@ -15,11 +15,21 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Function;
 
+/**
+ * Root level limb used to map ModelParts from the vanilla player model to a transfur model
+ */
 public enum Limb implements StringRepresentable {
     HEAD("head", HumanoidModel::getHead, AdvancedHumanoidModel::getHead),
     HEAD2("head2", HumanoidModel::getHead, model -> {
+        if (model instanceof TripleHeadedModel<?> tripleHeadedModel)
+            return tripleHeadedModel.getCenterHead();
         if (model instanceof DoubleHeadedModel<?> doubleHeadedModel)
             return doubleHeadedModel.getOtherHead();
+        return null;
+    }),
+    HEAD3("head3", HumanoidModel::getHead, model -> {
+        if (model instanceof TripleHeadedModel<?> tripleHeadedModel)
+            return tripleHeadedModel.getOtherHead();
         return null;
     }),
 

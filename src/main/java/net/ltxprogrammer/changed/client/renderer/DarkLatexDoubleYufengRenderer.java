@@ -6,15 +6,18 @@ import net.ltxprogrammer.changed.client.renderer.layers.LatexParticlesLayer;
 import net.ltxprogrammer.changed.client.renderer.layers.TransfurCapeLayer;
 import net.ltxprogrammer.changed.client.renderer.model.DarkLatexDoubleYufengModel;
 import net.ltxprogrammer.changed.client.renderer.model.armor.ArmorLatexMaleDoubleHeadedWingedDragonModel;
-import net.ltxprogrammer.changed.client.renderer.model.armor.ArmorLatexMaleWingedDragonModel;
+import net.ltxprogrammer.changed.client.renderer.model.armor.ArmorModelSet;
 import net.ltxprogrammer.changed.entity.beast.DarkLatexDoubleYufeng;
 import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
 public class DarkLatexDoubleYufengRenderer extends AdvancedHumanoidRenderer<DarkLatexDoubleYufeng, DarkLatexDoubleYufengModel, ArmorLatexMaleDoubleHeadedWingedDragonModel<DarkLatexDoubleYufeng>> {
+    public static final ArmorModelSet<DarkLatexDoubleYufeng, ArmorLatexMaleDoubleHeadedWingedDragonModel<DarkLatexDoubleYufeng>> ARMOR_MODEL_SET =
+            ArmorModelSet.castOf(ArmorLatexMaleDoubleHeadedWingedDragonModel.MODEL_SET, ArmorLatexMaleDoubleHeadedWingedDragonModel::new);
+
     public DarkLatexDoubleYufengRenderer(EntityRendererProvider.Context context) {
-        super(context, new DarkLatexDoubleYufengModel(context.bakeLayer(DarkLatexDoubleYufengModel.LAYER_LOCATION)), ArmorLatexMaleDoubleHeadedWingedDragonModel.MODEL_SET, 0.5f);
+        super(context, new DarkLatexDoubleYufengModel(context.bakeLayer(DarkLatexDoubleYufengModel.LAYER_LOCATION)), ARMOR_MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel(), model::isPartNotMask));
         this.addLayer(TransfurCapeLayer.normalCape(this, context.getModelSet()));
         this.addLayer(CustomEyesLayer.builder(this, context.getModelSet())

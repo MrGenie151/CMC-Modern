@@ -9,8 +9,8 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
 public class BeeWingInitAnimator<T extends ChangedEntity, M extends AdvancedHumanoidModel<T>> extends HumanoidAnimator.Animator<T, M> {
-    private final ModelPart leftWingRoot;
-    private final ModelPart rightWingRoot;
+    public final ModelPart leftWingRoot;
+    public final ModelPart rightWingRoot;
 
     public BeeWingInitAnimator(ModelPart leftWingRoot, ModelPart rightWingRoot) {
         this.leftWingRoot = leftWingRoot;

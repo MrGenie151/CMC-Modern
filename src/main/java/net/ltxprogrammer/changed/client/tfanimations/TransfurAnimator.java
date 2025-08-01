@@ -465,12 +465,12 @@ public abstract class TransfurAnimator {
 
         transitionPart.loadPose(transitionPose.pose);
 
+        // TODO apply LimbExtension stuff
         ((ClientLivingEntityExtender)entity).getOrderedAnimations().forEach(instance -> {
             transitionPart.loadPose(instance.animatePartAs(limb, transitionPart.storePose(), partialTicks));
         });
 
         transitionPart.render(stack, vertexConsumer, light, overlay, color.red(), color.green(), color.blue(), alpha);
-        //transitionPart.loadPose(beforePose.pose);
 
         stack.popPose();
     }
@@ -510,13 +510,6 @@ public abstract class TransfurAnimator {
             return Mth.clamp(Mth.map(transfurProgression, 0.35f, 0.45f, 0.0f, 1.0f), 0.0f, 1.0f);
         else
             return Mth.clamp(Mth.map(transfurProgression, 0.8f, 0.85f, 1.0f, 0.0f), 0.0f, 1.0f);
-    }
-
-    private static ModelPart extendModelPartCubes(ModelPart part, float x, float y, float z) {
-        part.cubes.forEach(cube -> ((CubeExtender)cube).extendCube(x, y, z));
-        part.children.values().forEach(child -> extendModelPartCubes(child, x, y, z));
-
-        return part;
     }
 
     private static void renderCoveringLimb(LivingEntity entity, TransfurVariantInstance<?> variant, float partialTicks, float coverProgress, float coverAlpha, ModelPart part, Limb limb, PoseStack stack, MultiBufferSource buffer, int light, float partialTick) {

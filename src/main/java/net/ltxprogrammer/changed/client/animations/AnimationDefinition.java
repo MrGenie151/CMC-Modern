@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.client.animations;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ltxprogrammer.changed.entity.animation.AnimationParameters;
@@ -16,7 +17,7 @@ import java.util.Map;
 public class AnimationDefinition {
     public final float length;
     public final float transitionDuration;
-    public final ImmutableMap<Limb, List<AnimationChannel>> channels;
+    public final ImmutableMap<ModelPartIdentifier, List<AnimationChannel>> channels;
     public final ImmutableList<ResourceLocation> entityProps;
     public final ImmutableList<AnimationChannel> itemProps;
     public final ImmutableList<TimedSoundEffect> soundEffects;
@@ -25,7 +26,7 @@ public class AnimationDefinition {
             Codec.FLOAT.fieldOf("length").forGetter(definition -> definition.length),
             Codec.FLOAT.fieldOf("transitionDuration").forGetter(definition -> definition.transitionDuration),
             Codec.unboundedMap(
-                    Limb.CODEC,
+                    ModelPartIdentifier.CODEC,
                     Codec.list(AnimationChannel.CODEC)
             ).fieldOf("channels").forGetter(definition -> definition.channels),
             Codec.list(ResourceLocation.CODEC).fieldOf("entities").orElse(List.of()).forGetter(definition -> definition.entityProps),
@@ -34,7 +35,7 @@ public class AnimationDefinition {
     ).apply(builder, AnimationDefinition::new));
 
     public AnimationDefinition(float length, float transitionDuration,
-                               Map<Limb, List<AnimationChannel>> channels,
+                               Map<ModelPartIdentifier, List<AnimationChannel>> channels,
                                List<ResourceLocation> entities,
                                List<AnimationChannel> items,
                                List<TimedSoundEffect> soundEffects) {
@@ -56,7 +57,7 @@ public class AnimationDefinition {
 
     public static class Builder {
         private final float length;
-        private final Map<Limb, List<AnimationChannel>> animations = new HashMap<>();
+        private final Map<ModelPartIdentifier, List<AnimationChannel>> animations = new HashMap<>();
         private final List<ResourceLocation> entities = new ArrayList<>();
         private final List<AnimationChannel> items = new ArrayList<>();
         private final List<TimedSoundEffect> soundEffects = new ArrayList<>();
@@ -77,6 +78,11 @@ public class AnimationDefinition {
         }
 
         public Builder addAnimation(Limb limb, AnimationChannel channel) {
+            animations.computeIfAbsent(ModelPartIdentifier.forLimb(limb), (l) -> new ArrayList<>()).add(channel);
+            return this;
+        }
+
+        public Builder addAnimation(ModelPartIdentifier limb, AnimationChannel channel) {
             animations.computeIfAbsent(limb, (l) -> new ArrayList<>()).add(channel);
             return this;
         }

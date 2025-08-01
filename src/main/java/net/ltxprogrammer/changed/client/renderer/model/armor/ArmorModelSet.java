@@ -38,6 +38,15 @@ public class ArmorModelSet<T extends ChangedEntity, A extends LatexHumanoidArmor
         this.modelWrapper = modelWrapper;
     }
 
+    public static <T extends ChangedEntity, A extends LatexHumanoidArmorModel<T, ?>> ArmorModelSet<T, A> ofUnspecified(ResourceLocation rootId, Function<ArmorModel, LayerDefinition> modelCreator) {
+        return new ArmorModelSet<>(rootId, modelCreator, ((rootPart, armorModel) -> null)) {
+            @Override
+            public A createModel(EntityModelSet bakery, ArmorModel model) {
+                throw new IllegalStateException("Attempted to create armor model wrapper for unspecified class");
+            }
+        };
+    }
+
     public static <T extends ChangedEntity, A extends LatexHumanoidArmorModel<T, ?>> ArmorModelSet<T, A> of(ResourceLocation rootId, Function<ArmorModel, LayerDefinition> modelCreator, BiFunction<ModelPart, ArmorModel, A> modelWrapper) {
         return new ArmorModelSet<>(rootId, modelCreator, modelWrapper);
     }

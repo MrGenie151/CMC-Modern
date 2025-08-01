@@ -94,7 +94,7 @@ public abstract class AdvancedHumanoidModel<T extends ChangedEntity> extends Pla
     public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         if (!TransfurAnimator.isCapturing()) {
             ((ClientLivingEntityExtender) entity.maybeGetUnderlying()).getOrderedAnimations().forEach(instance -> {
-                instance.animate(this, Mth.positiveModulo(ageInTicks, 1.0f));
+                instance.animate(this, entity, Mth.positiveModulo(ageInTicks, 1.0f));
             });
         }
 

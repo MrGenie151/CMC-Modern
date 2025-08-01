@@ -6,7 +6,10 @@ import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.client.renderer.animate.AnimatorPresets;
 import net.ltxprogrammer.changed.client.renderer.animate.HumanoidAnimator;
 import net.ltxprogrammer.changed.client.renderer.animate.multihead.DoubleHeadAnimator;
+import net.ltxprogrammer.changed.client.renderer.model.DoubleHeadedModel;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
+import net.ltxprogrammer.changed.entity.beast.DarkLatexDoubleYufeng;
+import net.ltxprogrammer.changed.entity.beast.DoubleHeadedEntity;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
@@ -20,9 +23,9 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
-public class ArmorLatexMaleDoubleHeadedWingedDragonModel<T extends ChangedEntity> extends LatexHumanoidArmorModel<T, ArmorLatexMaleDoubleHeadedWingedDragonModel<T>> {
-    public static final ArmorModelSet<ChangedEntity, ArmorLatexMaleDoubleHeadedWingedDragonModel<ChangedEntity>> MODEL_SET =
-            ArmorModelSet.of(Changed.modResource("armor_latex_double_headed_winged_dragon_male_unified"), ArmorLatexMaleDoubleHeadedWingedDragonModel::createArmorLayer, ArmorLatexMaleDoubleHeadedWingedDragonModel::new);
+public class ArmorLatexMaleDoubleHeadedWingedDragonModel<T extends ChangedEntity & DoubleHeadedEntity> extends LatexHumanoidArmorModel<T, ArmorLatexMaleDoubleHeadedWingedDragonModel<T>> implements DoubleHeadedModel<T> {
+    public static final ArmorModelSet<ChangedEntity, LatexHumanoidArmorModel<ChangedEntity, ?>> MODEL_SET =
+            ArmorModelSet.ofUnspecified(Changed.modResource("armor_latex_double_headed_winged_dragon_male_unified"), ArmorLatexMaleDoubleHeadedWingedDragonModel::createArmorLayer);
 
     private final ModelPart Head;
     private final ModelPart Head2;
@@ -66,8 +69,8 @@ public class ArmorLatexMaleDoubleHeadedWingedDragonModel<T extends ChangedEntity
                         LeftLeg, leftLowerLeg, leftFoot, leftFoot.getChild("LeftPad"), RightLeg, rightLowerLeg, rightFoot, rightFoot.getChild("RightPad"),
 
                         leftWingRoot, leftWingRoot.getChild("leftSecondaries"), leftWingRoot.getChild("leftSecondaries").getChild("leftTertiaries"),
-                        rightWingRoot, rightWingRoot.getChild("rightSecondaries"), rightWingRoot.getChild("rightSecondaries").getChild("rightTertiaries")));
-                /*.addAnimator(new DoubleHeadAnimator<>(Head, Head2));*/
+                        rightWingRoot, rightWingRoot.getChild("rightSecondaries"), rightWingRoot.getChild("rightSecondaries").getChild("rightTertiaries")))
+                .addAnimator(new DoubleHeadAnimator<>(Head, Head2));
     }
 
     public static LayerDefinition createArmorLayer(ArmorModel layer) {
@@ -110,7 +113,7 @@ public class ArmorLatexMaleDoubleHeadedWingedDragonModel<T extends ChangedEntity
 
         PartDefinition Head = partdefinition.addOrReplaceChild("Head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, layer.dualDeformation), PartPose.offset(-4.0F, -0.5F, 0.0F));
 
-        PartDefinition Head2 = partdefinition.addOrReplaceChild("Head2", CubeListBuilder.create().texOffs(0, 0).addBox(4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, layer.dualDeformation), PartPose.offset(4.0F, -0.5F, 0.0F));
+        PartDefinition Head2 = partdefinition.addOrReplaceChild("Head2", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, layer.dualDeformation), PartPose.offset(4.0F, -0.5F, 0.0F));
 
         PartDefinition RightArm = partdefinition.addOrReplaceChild("RightArm", CubeListBuilder.create().texOffs(40, 16).addBox(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, layer.dualDeformation), PartPose.offset(-5.0F, 1.5F, 0.0F));
 
@@ -141,7 +144,10 @@ public class ArmorLatexMaleDoubleHeadedWingedDragonModel<T extends ChangedEntity
         this.scaleForSlot(parent, slot, poseStack);
 
         switch (slot) {
-            case HEAD -> Head.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+            case HEAD -> {
+                Head.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+                Head2.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+            }
             case CHEST -> {
                 Torso.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
                 LeftArm.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
