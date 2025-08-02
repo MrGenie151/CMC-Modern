@@ -493,7 +493,7 @@ public abstract class TransfurAnimator {
     }
 
     public static float getPreMorphProgression(float transfurProgression) {
-        return Transition.easeInOutSine(Mth.clamp(Mth.map(transfurProgression, 0.2f, 0.45f, 0.0f, 1.0f), 0.0f, 1.0f));
+        return Transition.easeInOutSine(Mth.clamp(Mth.map(transfurProgression, 0.2f, 0.35f, 0.0f, 1.0f), 0.0f, 1.0f));
     }
 
     public static float getCoverProgression(float transfurProgression) {

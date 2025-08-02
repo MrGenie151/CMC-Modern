@@ -425,27 +425,27 @@ public class TransfurHelper {
 
     @Deprecated
     public static HelperModel getTailedTorso() {
-        return INSTANCE.get().TailedTorso;
+        return null;
     }
 
     @Deprecated
     public static HelperModel getFeminineTorso() {
-        return INSTANCE.get().FeminineTorso;
+        return null;
     }
 
     @Deprecated
     public static HelperModel getFeminineTorsoAlt() {
-        return INSTANCE.get().FeminineTorsoAlt;
+        return null;
     }
 
     @Deprecated
     public static HelperModel getFeminineTorsoLegless() {
-        return INSTANCE.get().FeminineTorsoLegless;
+        return null;
     }
 
     @Deprecated
     public static HelperModel getSnoutedHead() {
-        return INSTANCE.get().SnoutedHead;
+        return null;
     }
 
     public static HelperModel getLegless() {
