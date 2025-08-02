@@ -191,15 +191,13 @@ dependencies {
     annotationProcessor project(':ap')
 
     modIndex.forEach {modId, info ->
-        if (runWithClientOnlyMods || !info.clientOnly) {
-            if (runWithMods.contains(modId)) {
-                if (info.compile)
-                    implementation fg.deobf(info.artifact)
-                else
-                    runtimeOnly fg.deobf(info.artifact)
-            } else {
-                compileOnly fg.deobf(info.artifact)
-            }
+        if ((Boolean.parseBoolean(runWithClientOnlyMods) || !info.clientOnly) && runWithMods.contains(modId)) {
+            if (info.compile)
+                implementation fg.deobf(info.artifact)
+            else
+                runtimeOnly fg.deobf(info.artifact)
+        } else {
+            compileOnly fg.deobf(info.artifact)
         }
     }
 
