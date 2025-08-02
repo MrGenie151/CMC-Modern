@@ -45,6 +45,8 @@ public class ChangedDataFixer {
         map.put(Changed.modResource("light_latex_wolf_male"), ChangedEntities.WHITE_LATEX_WOLF_MALE.getId());
         map.put(Changed.modResource("light_latex_wolf_female"), ChangedEntities.WHITE_LATEX_WOLF_FEMALE.getId());
         map.put(Changed.modResource("white_latex_wolf"), ChangedEntities.PURE_WHITE_LATEX_WOLF.getId());
+
+        map.put(Changed.modResource("shark"), ChangedEntities.FERAL_LATEX_SHARK.getId());
     });
 
     private final HashMap<ResourceLocation, ResourceLocation> ITEM_ID_REMAP = Util.make(new HashMap<>(), map -> {

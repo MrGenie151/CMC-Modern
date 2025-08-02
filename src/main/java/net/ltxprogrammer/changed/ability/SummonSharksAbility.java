@@ -37,7 +37,7 @@ public class SummonSharksAbility extends SimpleAbility {
         while (attempts > 0) {
             var blockPos = list.get(level.random.nextInt(list.size()));
 
-            var shark = ChangedEntities.SHARK.get().create(level);
+            var shark = ChangedEntities.FERAL_LATEX_SHARK.get().create(level);
             level.addFreshEntity(shark);
             shark.setTarget(entity.getEntity().getLastHurtByMob());
             shark.moveTo(blockPos, 0.0f, 0.0f);

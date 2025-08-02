@@ -1,8 +1,7 @@
 package net.ltxprogrammer.changed.entity.beast;
 
-import net.ltxprogrammer.changed.entity.LatexTypeOld;
 import net.ltxprogrammer.changed.entity.TransfurMode;
-import net.ltxprogrammer.changed.entity.latex.LatexType;
+import net.ltxprogrammer.changed.entity.variant.EntityShape;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.init.ChangedTransfurVariants;
 import net.minecraft.core.particles.ParticleTypes;
@@ -18,9 +17,10 @@ import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
+import org.jetbrains.annotations.NotNull;
 
-public class Shark extends AbstractAquaticEntity {
-    public Shark(EntityType<? extends Shark> p_28316_, Level p_28317_) {
+public class FeralShark extends AbstractAquaticEntity {
+    public FeralShark(EntityType<? extends FeralShark> p_28316_, Level p_28317_) {
         super(p_28316_, p_28317_);
         this.lookControl = new SmoothSwimmingLookControl(this, 10);
     }
@@ -29,19 +29,14 @@ public class Shark extends AbstractAquaticEntity {
     protected void setAttributes(AttributeMap attributes) {
         super.setAttributes(attributes);
         attributes.getInstance(Attributes.MAX_HEALTH).setBaseValue(10.0D);
-        attributes.getInstance(Attributes.MOVEMENT_SPEED).setBaseValue(1.2D);
+        attributes.getInstance(Attributes.MOVEMENT_SPEED).setBaseValue(0.3D);
         attributes.getInstance(Attributes.ATTACK_DAMAGE).setBaseValue(3.0D);
-        attributes.getInstance(ForgeMod.SWIM_SPEED.get()).setBaseValue(2.4D);
+        attributes.getInstance(ForgeMod.SWIM_SPEED.get()).setBaseValue(5.0D);
     }
 
     @Override
     public TransfurMode getTransfurMode() {
         return TransfurMode.ABSORPTION;
-    }
-
-    @Override
-    public TransfurVariant<?> getSelfVariant() {
-        return null;
     }
 
     @Override
@@ -92,5 +87,10 @@ public class Shark extends AbstractAquaticEntity {
             }
 
         }
+    }
+
+    @Override
+    public @NotNull EntityShape getEntityShape() {
+        return EntityShape.FERAL;
     }
 }

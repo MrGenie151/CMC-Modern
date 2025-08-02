@@ -1051,14 +1051,14 @@
         ]
       }
     },
-    "changed:shark": {
+    "changed:latex_shark_feral": {
       "trigger": "minecraft:player_killed_entity",
       "conditions": {
         "entity": [
           {
             "condition": "minecraft:entity_properties",
             "predicate": {
-              "type": "changed:shark"
+              "type": "changed:latex_shark_feral"
             },
             "entity": "this"
           }
@@ -1406,7 +1406,7 @@
       "changed:milk_pudding"
     ],
     [
-      "changed:shark"
+      "changed:latex_shark_feral"
     ],
     [
       "changed:pooltoy_wolf"

@@ -153,7 +153,7 @@ public class ChangedEntityRenderers {
         registerHumanoid(event, ChangedEntities.CUSTOM_LATEX.get(), CustomLatexRenderer::new);
 
         event.registerEntityRenderer(ChangedEntities.MILK_PUDDING.get(), MilkPuddingRenderer::new);
-        event.registerEntityRenderer(ChangedEntities.SHARK.get(), SharkRenderer::new);
+        event.registerEntityRenderer(ChangedEntities.FERAL_LATEX_SHARK.get(), SharkRenderer::new);
 
         event.registerEntityRenderer(ChangedEntities.ROOMBA.get(), RoombaRenderer::new);
         event.registerEntityRenderer(ChangedEntities.EXOSKELETON.get(), ExoskeletonRenderer::new);

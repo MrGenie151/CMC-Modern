@@ -12,7 +12,6 @@ import net.ltxprogrammer.changed.entity.projectile.GasParticle;
 import net.ltxprogrammer.changed.entity.projectile.LatexInkball;
 import net.ltxprogrammer.changed.entity.robot.Exoskeleton;
 import net.ltxprogrammer.changed.entity.robot.Roomba;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -21,8 +20,6 @@ import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -324,9 +321,9 @@ public class ChangedEntities {
     public static final RegistryObject<EntityType<MilkPudding>> MILK_PUDDING = registerSpawning("milk_pudding", 0xFFFFFF, 0xF0F0F0,
             EntityType.Builder.of(MilkPudding::new, ChangedMobCategories.CHANGED).clientTrackingRange(10).sized(0.6F, 0.5F),
             ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, MilkPudding::checkEntitySpawnRules);
-    public static final RegistryObject<EntityType<Shark>> SHARK = registerSpawning("shark", 0x969696, 0xFFFFFF,
-            EntityType.Builder.of(Shark::new, ChangedMobCategories.AQUATIC).clientTrackingRange(10).sized(0.9F, 0.6F),
-            ChangedEntities::overworldOnly, SpawnPlacements.Type.IN_WATER, Shark::checkEntitySpawnRules);
+    public static final RegistryObject<EntityType<FeralShark>> FERAL_LATEX_SHARK = registerSpawning("latex_shark_feral", 0x969696, 0xFFFFFF,
+            EntityType.Builder.of(FeralShark::new, ChangedMobCategories.AQUATIC).clientTrackingRange(10).sized(0.9F, 0.6F),
+            ChangedEntities::overworldOnly, SpawnPlacements.Type.IN_WATER, FeralShark::checkEntitySpawnRules);
     public static final RegistryObject<EntityType<PureWhiteLatexWolf>> PURE_WHITE_LATEX_WOLF = registerSpawning("pure_white_latex_wolf", 0xFFFFFF, 0xFAFAFA,
             EntityType.Builder.of(PureWhiteLatexWolf::new, ChangedMobCategories.CHANGED).clientTrackingRange(10).sized(0.7F, 1.93F),
             ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, PureWhiteLatexWolf::checkEntitySpawnRules);

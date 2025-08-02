@@ -139,12 +139,6 @@ public abstract class TransfurAnimator {
         int targetCubeCount = Math.max(begin.cubes.size(), end.cubes.size());
         int targetChildrenCount = Math.max(begin.children.size(), end.children.size());
 
-        if (Math.min(begin.cubes.size(), end.cubes.size()) == 0) { // Check for skeleton joints
-            if (begin.children.keySet().stream().anyMatch(EntityGeometry::isSkeletonName) ||
-                         end.children.keySet().stream().anyMatch(EntityGeometry::isSkeletonName))
-                targetCubeCount = 0;
-        }
-
         // Sort cubes to have consistent results across similar models
         List<EntityGeometry.Cube> beginCubesSorted = begin.cubes.stream().sorted(MASS_SORT).toList();
         List<EntityGeometry.Cube> endCubesSorted = end.cubes.stream().sorted(MASS_SORT).toList();
@@ -162,6 +156,11 @@ public abstract class TransfurAnimator {
                 SplittingSource.forSourceCubes(endCubesSorted),
                 endSplittingSource
         );
+
+        if (Math.min(begin.cubes.size(), end.cubes.size()) == 0) {
+            if (subBeginSplittingSource.isEmpty() || subEndSplittingSource.isEmpty())
+                targetCubeCount = 0;
+        }
 
         if (targetCubeCount >= 1) {
             if (beginCubesSorted.size() == 1 && endCubesSorted.size() == 1) { // 1:1

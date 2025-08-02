@@ -21,6 +21,9 @@ import java.util.stream.Stream;
 public class ChangedTransfurVariants {
     public static final DeferredRegister<TransfurVariant<?>> REGISTRY = ChangedRegistry.TRANSFUR_VARIANT.createDeferred(Changed.MODID);
 
+    public static final RegistryObject<TransfurVariant<FeralShark>> FERAL_LATEX_SHARK = register("form_latex_shark_feral",
+            TransfurVariant.Builder.of(ChangedEntities.FERAL_LATEX_SHARK).holdItemsInMouth().stepSize(0.2f).breatheMode(TransfurVariant.BreatheMode.WATER));
+
     public static final RegistryObject<TransfurVariant<GasSkunk>> GAS_SKUNK = register("form_gas_skunk",
             TransfurVariant.Builder.of(ChangedEntities.GAS_SKUNK).stepSize(0.7f).sound(ChangedSounds.SOUND3.getId()));
     public static final RegistryObject<TransfurVariant<GasTiger>> GAS_TIGER = register("form_gas_tiger",

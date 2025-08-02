@@ -70,6 +70,11 @@ public class SplittingSource {
         }
 
         @Override
+        public boolean isEmpty() {
+            return true;
+        }
+
+        @Override
         public EntityGeometry.Cube splitFor(Vector3fc wantedMin, Vector3fc wantedMax, BiConsumer<EntityGeometry.Cube, EntityGeometry.Cube> resizeConsumer) {
             throw new IllegalStateException("Attempting to split an empty source");
         }
@@ -83,6 +88,10 @@ public class SplittingSource {
 
     public static SplittingSource empty() {
         return EMPTY;
+    }
+
+    public boolean isEmpty() {
+        return false;
     }
 
     public static SplittingSource shallowCopy(SplittingSource source) {
@@ -109,6 +118,13 @@ public class SplittingSource {
     public static SplittingSource forSourceCubes(List<EntityGeometry.Cube> cubes) {
         if (cubes.isEmpty())
             return empty();
+        if (cubes.size() == 1) {
+            var splittingSource = SplittingSource.forCube(cubes.get(0), DONT_CARE);
+            splittingSource.unclaimed = true;
+            splittingSource.parentCube = true;
+            return splittingSource;
+        }
+
         var splittingSource = new SplittingSource(null, new Vector3f(0.0f, 0.0f, 0.0f), new Vector3f(0.0f, 0.0f, 0.0f));
         splittingSource.sources = new ArrayList<>(cubes.size());
         for (var cube : cubes) {
@@ -136,7 +152,7 @@ public class SplittingSource {
     public static SplittingSource forSources(List<SplittingSource> sources) {
         List<SplittingSource> view = new ArrayList<>(sources);
         for (int i = 0; i < view.size(); i++)
-            if (view.get(i) == EMPTY)
+            if (view.get(i).isEmpty())
                 view.remove(i--);
         if (view.isEmpty())
             return empty();
