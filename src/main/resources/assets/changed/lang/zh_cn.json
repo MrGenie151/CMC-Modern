@@ -156,8 +156,8 @@
   "item.changed.netherite_quadrupedal_boots": "下界合金四足靴子",
     "item.changed.smithing_template.abdomen_conversion.applies_to": "护腿, 靴子",
       "item.changed.smithing_template.quadrupedal_conversion.ingredients": "装甲部分",
-  "item.changed.netherite_quadrupedal_boots": "下界合金四足靴子",
     "item.changed.smithing_template.quadrupedal_conversion.applies_to": "护腿, 靴子",
+       "item.changed.smithing_template.abdomen_conversion.ingredients": "装甲部分",
   
   "item.changed.owo_record": "胶液音乐唱片",
   "item.changed.owo_record.desc": "ÒwÓ - Artemka2009",
@@ -511,7 +511,6 @@
   "entity.changed.pure_white_latex_wolf_pup": "纯白胶液狼幼崽",
   "entity.changed.roomba": "扫地机器人",
   "entity.changed.exoskeleton": "外骨骼",
-  "entity.changed.shark": "鲨鱼",
   "entity.changed.sniper_dog": "胶液犬",
   "entity.changed.white_latex_centaur": "白胶半人兽",
   "entity.changed.white_latex_knight_fusion": "合体白胶骑士",
@@ -596,7 +595,6 @@
   "item.changed.pure_white_latex_wolf_spawn_egg": "白胶狼刷怪蛋",
   "item.changed.pure_white_latex_wolf_pup_spawn_egg": "白胶狼幼崽刷怪蛋",
     "item.changed.latex_shark_feral_spawn_egg": "野生胶液鲨鱼刷怪蛋",
-  "item.changed.shark_spawn_egg": "鲨鱼刷怪蛋",
   "item.changed.sniper_dog_spawn_egg": "胶液犬刷怪蛋",
   "item.changed.white_latex_centaur_spawn_egg": "白胶半人兽刷怪蛋",
   "item.changed.white_latex_knight_fusion_spawn_egg": "合体白胶骑士刷怪蛋",
@@ -823,7 +821,7 @@
   "changed.stasis.modify.arms.tooltip": "配置：手臂的形状和大小",
   "changed.stasis.modify.scale": "尺寸: %s",
   "changed.stasis.modify.scale.tooltip": "配置：整体尺寸",
-  "changed.stasis.modify.ears_wolf":"狼",
+
   
     "changed.exoskeleton.prompt": "[%s]> %s",
   "changed.exoskeleton.battery_low": "电池电量低",
