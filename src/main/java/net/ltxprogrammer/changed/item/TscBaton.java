@@ -1,7 +1,7 @@
 package net.ltxprogrammer.changed.item;
 
 import net.ltxprogrammer.changed.Changed;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.ltxprogrammer.changed.util.Cacheable;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -13,6 +13,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Tiers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
@@ -22,28 +24,19 @@ public class TscBaton extends TscWeapon implements SpecializedItemRendering {
         super(new Properties().durability(500));
     }
 
-    private static final ModelResourceLocation BATON_INVENTORY =
-            new ModelResourceLocation(Changed.modResource("tsc_baton"), "inventory");
-    private static final ModelResourceLocation BATON_IN_HAND =
-            new ModelResourceLocation(Changed.modResource("tsc_baton_in_hand"), "inventory");
-    private static final ModelResourceLocation BATON_IN_HAND_EMISSIVE =
-            new ModelResourceLocation(Changed.modResource("tsc_baton_in_hand_emissive"), "inventory");
-
-    @Nullable
-    @Override
-    public ModelResourceLocation getEmissiveModelLocation(ItemStack itemStack, ItemDisplayContext type) {
-        return SpecializedItemRendering.isGUI(type) ? null : BATON_IN_HAND_EMISSIVE;
-    }
+    private static final Cacheable<ResourceLocation> BATON_IN_HAND = Cacheable.of(() -> {
+        return DistExecutor.unsafeCallWhenOn(Dist.CLIENT,
+                () -> () ->  new ModelResourceLocation(Changed.modResource("tsc_baton_in_hand"), "inventory"));
+    });
 
     @Override
-    public ModelResourceLocation getModelLocation(ItemStack itemStack, ItemDisplayContext type) {
-        return SpecializedItemRendering.isGUI(type) ? BATON_INVENTORY : BATON_IN_HAND;
+    public ResourceLocation getModelLocation(ItemStack itemStack, ItemDisplayContext type) {
+        return SpecializedItemRendering.isGUI(type) ? null : BATON_IN_HAND.get();
     }
 
     @Override
     public void loadSpecialModels(Consumer<ResourceLocation> loader) {
-        loader.accept(BATON_IN_HAND);
-        loader.accept(BATON_IN_HAND_EMISSIVE);
+        loader.accept(BATON_IN_HAND.get());
     }
 
     public boolean hurtEnemy(ItemStack itemStack, LivingEntity enemy, LivingEntity source) {

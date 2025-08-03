@@ -10,11 +10,16 @@ import net.ltxprogrammer.changed.client.gui.ContentWarningScreen;
 import net.ltxprogrammer.changed.client.renderer.layers.DarkLatexMaskLayer;
 import net.ltxprogrammer.changed.client.renderer.layers.GasMaskLayer;
 import net.ltxprogrammer.changed.client.tfanimations.TransfurAnimator;
+import net.ltxprogrammer.changed.effect.particle.EmoteParticle;
+import net.ltxprogrammer.changed.effect.particle.GasParticle;
+import net.ltxprogrammer.changed.effect.particle.LatexDripParticle;
+import net.ltxprogrammer.changed.effect.particle.TscSweepParticle;
 import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.entity.latex.IClientLatexTypeExtensions;
 import net.ltxprogrammer.changed.fluid.AbstractLatexFluid;
 import net.ltxprogrammer.changed.init.ChangedAbilities;
 import net.ltxprogrammer.changed.init.ChangedGameRules;
+import net.ltxprogrammer.changed.init.ChangedParticles;
 import net.ltxprogrammer.changed.init.ChangedTags;
 import net.ltxprogrammer.changed.network.packet.QueryTransfurPacket;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
@@ -28,6 +33,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
@@ -35,6 +41,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.ForgeRenderTypes;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -112,6 +119,19 @@ public class EventHandlerClient {
         {
             FormRenderHandler.lastPartialTick = event.getPartialTick();
         }
+    }
+
+    @SubscribeEvent
+    public static void onRegisterParticles(RegisterParticleProvidersEvent event) {
+        event.registerSpriteSet(ChangedParticles.DRIPPING_LATEX.get(), LatexDripParticle.Provider::new);
+        event.registerSpriteSet(ChangedParticles.GAS.get(), GasParticle.Provider::new);
+        event.registerSpriteSet(ChangedParticles.EMOTE.get(), EmoteParticle.Provider::new);
+        event.registerSpriteSet(ChangedParticles.TSC_SWEEP_ATTACK.get(), TscSweepParticle.Provider::new);
+    }
+
+    @SubscribeEvent
+    public static void onRegisterModelRenderTypes(RegisterNamedRenderTypesEvent event) {
+        event.register("emissive", RenderType.cutout(), RenderType.eyes(TextureAtlas.LOCATION_BLOCKS));
     }
 
     @OnlyIn(Dist.CLIENT)

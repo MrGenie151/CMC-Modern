@@ -9,6 +9,7 @@ import net.ltxprogrammer.changed.init.ChangedBlockEntities;
 import net.ltxprogrammer.changed.init.ChangedSounds;
 import net.ltxprogrammer.changed.init.ChangedTransfurVariants;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
+import net.ltxprogrammer.changed.util.Cacheable;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -36,6 +37,8 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
@@ -172,9 +175,14 @@ public class LatexContainerBlock extends AbstractCustomShapeTallEntityBlock impl
         return (double)falling.getStartPos().getY() - falling.getY();
     }
 
+    private static final Cacheable<ResourceLocation> MODEL_NAME = Cacheable.of(() -> {
+        return DistExecutor.unsafeCallWhenOn(Dist.CLIENT,
+                () -> () ->  new ModelResourceLocation(Changed.modResource("latex_container"), "inventory"));
+    });
+
     @Override
     public ResourceLocation getModelName() {
-        return new ModelResourceLocation(Changed.modResource("latex_container"), "inventory");
+        return MODEL_NAME.get();
     }
 
     @Override

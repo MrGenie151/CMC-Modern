@@ -2,8 +2,8 @@ package net.ltxprogrammer.changed.item;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.ltxprogrammer.changed.Changed;
+import net.ltxprogrammer.changed.util.Cacheable;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -19,6 +19,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.DistExecutor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
@@ -28,28 +29,19 @@ public class TscStaff extends TscWeapon implements SpecializedItemRendering, Spe
         super(new Properties().durability(500));
     }
 
-    private static final ModelResourceLocation STAFF_INVENTORY =
-            new ModelResourceLocation(Changed.modResource("tsc_staff"), "inventory");
-    private static final ModelResourceLocation STAFF_IN_HAND =
-            new ModelResourceLocation(Changed.modResource("tsc_staff_in_hand"), "inventory");
-    private static final ModelResourceLocation STAFF_IN_HAND_EMISSIVE =
-            new ModelResourceLocation(Changed.modResource("tsc_staff_in_hand_emissive"), "inventory");
-
-    @Nullable
-    @Override
-    public ModelResourceLocation getEmissiveModelLocation(ItemStack itemStack, ItemDisplayContext type) {
-        return SpecializedItemRendering.isGUI(type) ? null : STAFF_IN_HAND_EMISSIVE;
-    }
+    private static final Cacheable<ResourceLocation> STAFF_IN_HAND = Cacheable.of(() -> {
+        return DistExecutor.unsafeCallWhenOn(Dist.CLIENT,
+                () -> () ->  new ModelResourceLocation(Changed.modResource("tsc_staff_in_hand"), "inventory"));
+    });
 
     @Override
-    public ModelResourceLocation getModelLocation(ItemStack itemStack, ItemDisplayContext type) {
-        return SpecializedItemRendering.isGUI(type) ? STAFF_INVENTORY : STAFF_IN_HAND;
+    public ResourceLocation getModelLocation(ItemStack itemStack, ItemDisplayContext type) {
+        return SpecializedItemRendering.isGUI(type) ? null : STAFF_IN_HAND.get();
     }
 
     @Override
     public void loadSpecialModels(Consumer<ResourceLocation> loader) {
-        loader.accept(STAFF_IN_HAND);
-        loader.accept(STAFF_IN_HAND_EMISSIVE);
+        loader.accept(STAFF_IN_HAND.get());
     }
 
     @Override

@@ -9,11 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -22,7 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ChangedParticles {
     public static final DeferredRegister<ParticleType<?>> REGISTRY = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, Changed.MODID);
 
@@ -59,13 +54,5 @@ public class ChangedParticles {
                 return fn.apply(this);
             }
         });
-    }
-
-    @SubscribeEvent
-    public static void registerParticles(RegisterParticleProvidersEvent event) {
-        event.registerSpriteSet(DRIPPING_LATEX.get(), LatexDripParticle.Provider::new);
-        event.registerSpriteSet(GAS.get(), GasParticle.Provider::new);
-        event.registerSpriteSet(EMOTE.get(), EmoteParticle.Provider::new);
-        event.registerSpriteSet(TSC_SWEEP_ATTACK.get(), TscSweepParticle.Provider::new);
     }
 }
