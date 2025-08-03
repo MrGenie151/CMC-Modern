@@ -155,7 +155,9 @@
   "item.changed.netherite_quadrupedal_leggings": "下界合金四足护腿",
   "item.changed.netherite_quadrupedal_boots": "下界合金四足靴子",
     "item.changed.smithing_template.abdomen_conversion.applies_to": "护腿, 靴子",
-      "item.changed.smithing_template.abdomen_conversion.ingredients": "装甲部分",
+      "item.changed.smithing_template.quadrupedal_conversion.ingredients": "装甲部分",
+    "item.changed.smithing_template.quadrupedal_conversion.applies_to": "护腿, 靴子",
+       "item.changed.smithing_template.abdomen_conversion.ingredients": "装甲部分",
   
   "item.changed.owo_record": "胶液音乐唱片",
   "item.changed.owo_record.desc": "ÒwÓ - Artemka2009",
@@ -425,6 +427,11 @@
   "biome.changed.dark_latex_plains": "黑胶平原",
   "biome.changed.white_latex_forest": "白胶森林",
 
+"fluid.changed.dark_latex": "液态黑胶方块",
+ "fluid.changed.white_latex": "液态白胶方块",
+  "fluid.changed.skunk_transfur_gas": "臭鼬兽化气体方块",
+  "fluid.changed.tiger_transfur_gas": "老虎兽化气体方块",
+  "fluid.changed.wolf_transfur_gas": "狼兽化气体方块",
 
   "entity.changed.gas_skunk": "毒气臭鼬",
   "entity.changed.special": "特殊胶液",
@@ -478,6 +485,7 @@
   "entity.changed.latex_red_dragon": "胶液红龙",
   "entity.changed.latex_red_panda": "胶液小熊猫",
   "entity.changed.latex_shark": "胶液鲨鱼",
+    "entity.changed.latex_shark_feral": "野生胶液鲨鱼",
   "entity.changed.latex_shark_female": "雌性胶液鲨鱼",
   "entity.changed.latex_shark_male": "雄性胶液鲨鱼",
   "entity.changed.latex_siamese_cat": "胶液暹罗猫",
@@ -503,7 +511,6 @@
   "entity.changed.pure_white_latex_wolf_pup": "纯白胶液狼幼崽",
   "entity.changed.roomba": "扫地机器人",
   "entity.changed.exoskeleton": "外骨骼",
-  "entity.changed.shark": "鲨鱼",
   "entity.changed.sniper_dog": "胶液犬",
   "entity.changed.white_latex_centaur": "白胶半人兽",
   "entity.changed.white_latex_knight_fusion": "合体白胶骑士",
@@ -587,7 +594,7 @@
   "item.changed.pooltoy_wolf_spawn_egg": "泳池玩具狼刷怪蛋",
   "item.changed.pure_white_latex_wolf_spawn_egg": "白胶狼刷怪蛋",
   "item.changed.pure_white_latex_wolf_pup_spawn_egg": "白胶狼幼崽刷怪蛋",
-  "item.changed.shark_spawn_egg": "鲨鱼刷怪蛋",
+    "item.changed.latex_shark_feral_spawn_egg": "野生胶液鲨鱼刷怪蛋",
   "item.changed.sniper_dog_spawn_egg": "胶液犬刷怪蛋",
   "item.changed.white_latex_centaur_spawn_egg": "白胶半人兽刷怪蛋",
   "item.changed.white_latex_knight_fusion_spawn_egg": "合体白胶骑士刷怪蛋",
@@ -814,9 +821,14 @@
   "changed.stasis.modify.arms.tooltip": "配置：手臂的形状和大小",
   "changed.stasis.modify.scale": "尺寸: %s",
   "changed.stasis.modify.scale.tooltip": "配置：整体尺寸",
+
   
     "changed.exoskeleton.prompt": "[%s]> %s",
   "changed.exoskeleton.battery_low": "电池电量低",
-  "changed.exoskeleton.battery_critical": "电池电量严重不足"
+  "changed.exoskeleton.battery_critical": "电池电量严重不足",
+  
+  "builtin_resources.changed:beyond_earth_extra": "Changed超过地球格外",
+  "builtin_resources.changed:instant_transfur": "Changed迅速兽化",
+  "builtin_resources.changed:changed_pbr": "Changed PBR"
 }
 
