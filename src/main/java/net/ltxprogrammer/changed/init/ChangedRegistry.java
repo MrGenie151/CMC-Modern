@@ -7,10 +7,13 @@ import net.ltxprogrammer.changed.client.latexparticles.LatexParticleType;
 import net.ltxprogrammer.changed.data.AccessorySlotType;
 import net.ltxprogrammer.changed.entity.HairStyle;
 import net.ltxprogrammer.changed.entity.PlayerMover;
+import net.ltxprogrammer.changed.entity.decoration.WallSignVariant;
 import net.ltxprogrammer.changed.entity.latex.LatexType;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.entity.animation.AnimationEvent;
 import net.ltxprogrammer.changed.world.LatexCoverState;
+import net.minecraft.core.Holder;
+import net.minecraft.core.IdMap;
 import net.minecraft.core.IdMapper;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
@@ -24,10 +27,10 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -49,6 +52,10 @@ public abstract class ChangedRegistry<T> implements Registry<T> {
             return get().getKey(value);
         }
 
+        public Optional<ResourceLocation> getKeySafe(T value) {
+            return Optional.ofNullable(get().getKey(value));
+        }
+
         public T getValue(ResourceLocation key) {
             return get().getValue(key);
         }
@@ -63,6 +70,18 @@ public abstract class ChangedRegistry<T> implements Registry<T> {
 
         public T getValue(int id) {
             return getRaw().getValue(id);
+        }
+
+        public Optional<Holder<T>> getHolder(T value) {
+            return get().getHolder(value);
+        }
+
+        public Optional<Holder<T>> getHolder(ResourceLocation name) {
+            return get().getHolder(name);
+        }
+
+        public Optional<Holder<T>> getHolder(ResourceKey<T> name) {
+            return get().getHolder(name);
         }
 
         public void writeRegistryObject(FriendlyByteBuf buffer, T value) {
@@ -89,6 +108,30 @@ public abstract class ChangedRegistry<T> implements Registry<T> {
         public DeferredRegister<T> createDeferred(String modId) {
             return DeferredRegister.create(key, modId);
         }
+
+        public IdMap<T> asIdMap() {
+            return new IdMap<T>() {
+                @Override
+                public int getId(T value) {
+                    return RegistryHolder.this.getID(value);
+                }
+
+                @Override
+                public @org.jetbrains.annotations.Nullable T byId(int id) {
+                    return RegistryHolder.this.getValue(id);
+                }
+
+                @Override
+                public int size() {
+                    return RegistryHolder.this.get().getValues().size();
+                }
+
+                @Override
+                public @NotNull Iterator<T> iterator() {
+                    return RegistryHolder.this.get().getValues().iterator();
+                }
+            };
+        }
     }
 
     // TODO rename registeries to be plural, and have modern names
@@ -100,6 +143,7 @@ public abstract class ChangedRegistry<T> implements Registry<T> {
     public static final RegistryHolder<AnimationEvent<?>> ANIMATION_EVENTS = new RegistryHolder<AnimationEvent<?>>(registryKey("animation_events"));
     public static final RegistryHolder<AccessorySlotType> ACCESSORY_SLOTS = new RegistryHolder<AccessorySlotType>(registryKey("accessory_slots"));
     public static final RegistryHolder<LatexType> LATEX_TYPE = new RegistryHolder<>(registryKey("latex_type"));
+    public static final RegistryHolder<WallSignVariant> WALL_SIGN_VARIANT = new RegistryHolder<>(registryKey("wall_sign_variant"));
 
     private static class ClearableObjectIntIdentityMap<I> extends IdMapper<I> {
         void clear()
@@ -164,6 +208,7 @@ public abstract class ChangedRegistry<T> implements Registry<T> {
                 DebugLevelSource.initValidStates();
             });
         }, null);
+        createRegistry(event, WALL_SIGN_VARIANT.key);
     }
 
     private static <T> void createRegistry(NewRegistryEvent event, ResourceKey<? extends Registry<T>> key) {

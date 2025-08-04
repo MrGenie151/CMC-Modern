@@ -6,6 +6,7 @@ import net.ltxprogrammer.changed.client.animations.AnimationAssociations;
 import net.ltxprogrammer.changed.client.animations.AnimationDefinitions;
 import net.ltxprogrammer.changed.client.latexparticles.LatexParticleEngine;
 import net.ltxprogrammer.changed.client.latexparticles.SetupContext;
+import net.ltxprogrammer.changed.client.renderer.ChangedEntityWithOutLevelRenderer;
 import net.ltxprogrammer.changed.client.renderer.blockentity.ChangedBlockEntityWithoutLevelRenderer;
 import net.ltxprogrammer.changed.client.renderer.layers.FirstPersonLayer;
 import net.ltxprogrammer.changed.client.renderer.layers.LatexParticlesLayer;
@@ -53,9 +54,12 @@ public class ChangedClient {
     public static final Cacheable<LatexParticleEngine> particleSystem = Cacheable.of(() -> new LatexParticleEngine(Minecraft.getInstance()));
     public static final Cacheable<ChangedBlockEntityWithoutLevelRenderer> itemRenderer =
             Cacheable.of(() -> new ChangedBlockEntityWithoutLevelRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels()));
+    public static final Cacheable<ChangedEntityWithOutLevelRenderer> itemEntityRenderer =
+            Cacheable.of(() -> new ChangedEntityWithOutLevelRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels(), Minecraft.getInstance().getEntityRenderDispatcher()));
     public static final Cacheable<AbilityColors> abilityColors = Cacheable.of(AbilityColors::createDefault);
     public static final Cacheable<AbilityRenderer> abilityRenderer = Cacheable.of(() -> new AbilityRenderer(Minecraft.getInstance().textureManager, Minecraft.getInstance().getModelManager(), abilityColors.getOrThrow()));
     public static final Cacheable<LatexCoveredBlocksRenderer> latexCoveredBlocksRenderer = Cacheable.of(() -> new LatexCoveredBlocksRenderer(Minecraft.getInstance()));
+    public static final Cacheable<WallSignTextureManager> wallSigns = Cacheable.of(() -> new WallSignTextureManager(Minecraft.getInstance().getTextureManager()));
 
     private static final ThreadLocal<Function<RenderType, RenderType>> CHUNK_RENDER_TYPE_SET_OVERRIDE = ThreadLocal.withInitial(() -> null);
 
@@ -89,6 +93,7 @@ public class ChangedClient {
         resourceManager.accept(particleSystem.getOrThrow());
         resourceManager.accept(abilityRenderer.getOrThrow());
         resourceManager.accept(latexCoveredBlocksRenderer.getOrThrow());
+        resourceManager.accept(wallSigns.getOrThrow());
         resourceManager.accept(AnimationDefinitions.INSTANCE);
         resourceManager.accept(AnimationAssociations.INSTANCE);
     }

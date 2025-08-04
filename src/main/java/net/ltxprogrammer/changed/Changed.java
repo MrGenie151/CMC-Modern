@@ -117,6 +117,7 @@ public class Changed {
         ChangedEntities.REGISTRY.register(modEventBus);
         ChangedAnimationEvents.REGISTRY.register(modEventBus);
         ChangedAccessorySlots.REGISTRY.register(modEventBus);
+        ChangedWallSigns.REGISTRY.register(modEventBus);
 
         // Our DFU references the above registries, so they need to be initialized before the DFU is created
         dataFixer = new ChangedDataFixer();

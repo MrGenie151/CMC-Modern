@@ -160,6 +160,13 @@
   "item.changed.smithing_template.quadrupedal_conversion.base_slot_description": "Add leggings or boots",
   "item.changed.smithing_template.quadrupedal_conversion.additions_slot_description": "Add armor ingredient",
 
+  "item.changed.wall_sign_cat": "\"Cat\" Wall Sign",
+  "item.changed.wall_sign_do_not_speak_with_dark_latexes": "\"Do Not Speak With Dark Latexes\" Wall Sign",
+  "item.changed.wall_sign_do_not_touch": "\"Do Not Touch\" Wall Sign",
+  "item.changed.wall_sign_do_not_touch_latexes": "\"Do Not Touch Latexes\" Wall Sign",
+  "item.changed.wall_sign_prototype": "\"Prototype\" Wall Sign",
+  "item.changed.wall_sign_squid": "\"Squid\" Wall Sign",
+
   "item.changed.owo_record": "Latex Music Disc",
   "item.changed.owo_record.desc": "Artemka2009 - ÒwÓ",
 

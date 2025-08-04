@@ -1,9 +1,9 @@
 package net.ltxprogrammer.changed.init;
 
 import net.ltxprogrammer.changed.Changed;
-import net.ltxprogrammer.changed.block.*;
+import net.ltxprogrammer.changed.entity.decoration.WallSignVariant;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
-import net.ltxprogrammer.changed.item.LatexRecordItem;
+import net.ltxprogrammer.changed.item.WallSignItem;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -11,9 +11,6 @@ import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -31,7 +28,8 @@ public class ChangedTabs {
 
     public static DeferredRegister<CreativeModeTab> REGISTRY = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Changed.MODID);
 
-    private static final Predicate<TransfurVariant<?>> CHANGED_ONLY = variant -> variant.getFormId().getNamespace().equals(Changed.MODID);
+    private static final Predicate<TransfurVariant<?>> CHANGED_ONLY_TRANSFURS = variant -> variant.getFormId().getNamespace().equals(Changed.MODID);
+    private static final Predicate<WallSignVariant> CHANGED_ONLY_WALL_SIGNS = variant -> ChangedRegistry.WALL_SIGN_VARIANT.getKey(variant).getNamespace().equals(Changed.MODID);
 
     private static RegistryObject<CreativeModeTab> register(String id, Function<CreativeModeTab.Builder, CreativeModeTab> finalizer) {
         return REGISTRY.register(id, () -> finalizer.apply(
@@ -180,6 +178,8 @@ public class ChangedTabs {
                         output.accept(ChangedBlocks.WHITE_LATEX_BLOCK.get());
                         output.accept(ChangedBlocks.WHITE_LATEX_PILLAR.get());
 
+                        WallSignItem.fillItemList(CHANGED_ONLY_WALL_SIGNS, params, output);
+
                         ChangedBlocks.PILLOWS.values().stream().map(RegistryObject::get).forEach(output::accept);
 
                         ForgeRegistries.PAINTING_VARIANTS.getKeys().stream()
@@ -221,10 +221,10 @@ public class ChangedTabs {
                         output.accept(ChangedItems.ROOMBA.get());
                         output.accept(ChangedItems.EXOSKELETON.get());
 
-                        ChangedItems.DARK_LATEX_MASK.get().fillItemList(CHANGED_ONLY, params, output);
-                        ChangedItems.LATEX_SYRINGE.get().fillItemList(CHANGED_ONLY, params, output);
-                        ChangedItems.LATEX_FLASK.get().fillItemList(CHANGED_ONLY, params, output);
-                        ChangedItems.LATEX_TIPPED_ARROW.get().fillItemList(CHANGED_ONLY, params, output);
+                        ChangedItems.DARK_LATEX_MASK.get().fillItemList(CHANGED_ONLY_TRANSFURS, params, output);
+                        ChangedItems.LATEX_SYRINGE.get().fillItemList(CHANGED_ONLY_TRANSFURS, params, output);
+                        ChangedItems.LATEX_FLASK.get().fillItemList(CHANGED_ONLY_TRANSFURS, params, output);
+                        ChangedItems.LATEX_TIPPED_ARROW.get().fillItemList(CHANGED_ONLY_TRANSFURS, params, output);
                     })
                     .build());
 

@@ -8,6 +8,7 @@ import net.ltxprogrammer.changed.entity.beast.*;
 import net.ltxprogrammer.changed.entity.beast.boss.BehemothHandLeft;
 import net.ltxprogrammer.changed.entity.beast.boss.BehemothHandRight;
 import net.ltxprogrammer.changed.entity.beast.boss.BehemothHead;
+import net.ltxprogrammer.changed.entity.decoration.WallSign;
 import net.ltxprogrammer.changed.entity.projectile.GasParticle;
 import net.ltxprogrammer.changed.entity.projectile.LatexInkball;
 import net.ltxprogrammer.changed.entity.robot.Exoskeleton;
@@ -359,6 +360,8 @@ public class ChangedEntities {
             () -> EntityType.Builder.<LatexInkball>of(LatexInkball::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10).build("latex_inkball"));
     public static final RegistryObject<EntityType<GasParticle>> GAS_PARTICLE = REGISTRY.register("gas_particle",
             () -> EntityType.Builder.of(GasParticle::new, MobCategory.MISC).sized(0.75F, 0.75F).clientTrackingRange(4).updateInterval(10).build("gas_particle"));
+    public static final RegistryObject<EntityType<WallSign>> WALL_SIGN = REGISTRY.register("wall_sign",
+            () -> EntityType.Builder.of(WallSign::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE).build("wall_sign"));
 
     // TODO make register function for non `ChangedEntity`
 
