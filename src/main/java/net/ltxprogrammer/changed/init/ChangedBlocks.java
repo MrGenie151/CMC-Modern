@@ -68,6 +68,7 @@ public class ChangedBlocks {
     public static final RegistryObject<RailingBlock> BLACK_RAILING = register("black_railing", () -> new RailingBlock(BlockBehaviour.Properties.of().sound(SoundType.METAL).requiresCorrectToolForDrops().strength(3.0F, 5.0F)));
     public static final RegistryObject<BookStack> BOOK_STACK = registerNoItem("book_stack", () -> new BookStack(BlockBehaviour.Properties.of().sound(SoundType.WOOD).strength(0.5F)));
     public static final RegistryObject<BoxPile> BOX_PILE = register("box_pile", BoxPile::new);
+    public static final RegistryObject<CDStack> CD_STACK = registerNoItem("cd_stack", () -> new CDStack(BlockBehaviour.Properties.of().sound(SoundType.CANDLE).strength(0.2F)));
     public static final RegistryObject<ClipboardBlock> CLIPBOARD = register("clipboard", ClipboardBlock::new);
     public static final RegistryObject<Note> NOTE = register("note", Note::new);
     public static final RegistryObject<Computer> COMPUTER = register("computer", () -> new Computer(BlockBehaviour.Properties.of().sound(SoundType.METAL).strength(3.0F, 3.0F).lightLevel((state) -> 4)));
