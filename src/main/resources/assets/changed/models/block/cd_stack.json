@@ -1,8 +1,0 @@
-{
-  "parent": "changed:custom/cd_stack",
-  "textures": {
-    "all": "changed:block/cd_stack",
-    "particle": "changed:block/cd_stack",
-    "0": "changed:block/cd_stack"
-  }
-}
