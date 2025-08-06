@@ -322,6 +322,7 @@
   "block.changed.floor_sign_electrical": "Gulvskilt for elektrisk fare",
   "block.changed.floor_sign_exit": "Utgangsgulvskilt",
   "block.changed.floor_sign_wet": "Våtgulvskilt",
+  "block.changed.generator": "Generator",
   "block.changed.glu": "Limblokk",
   "block.changed.infuser": "Tilfører",
   "block.changed.iron_crate": "Jernkasse",

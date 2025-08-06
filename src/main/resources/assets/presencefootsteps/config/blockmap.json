@@ -21,6 +21,7 @@
   "changed:duct": "hollowmetal",
   "changed:exoskeleton_charger": "hardmetal, composite",
   "changed:box_pile": "deckwood",
+  "changed:generator": "hollowmetal",
   "changed:iron_crate": "hollowmetal",
   "changed:dark_latex_fluid": "mud,slick",
   "changed:keypad": "hardmetal",
