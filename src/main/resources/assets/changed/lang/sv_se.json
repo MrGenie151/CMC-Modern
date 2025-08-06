@@ -322,6 +322,7 @@
   "block.changed.floor_sign_electrical": "Golvskylt för elektrisk fara",
   "block.changed.floor_sign_exit": "Utgångsgolvskylt",
   "block.changed.floor_sign_wet": "Blöttgolvskylt",
+  "block.changed.generator": "Generator",
   "block.changed.glu": "Limblock",
   "block.changed.infuser": "Infusionsanordning",
   "block.changed.iron_crate": "järnspjällåda",

@@ -67,6 +67,7 @@ public class ChangedTabs {
                         output.accept(ChangedBlocks.FLOOR_SIGN_WET.get());
                         output.accept(ChangedBlocks.FLOOR_SIGN_EXIT.get());
                         output.accept(ChangedBlocks.FLOOR_SIGN_ELECTRICAL.get());
+                        output.accept(ChangedBlocks.GENERATOR.get());
                         output.accept(ChangedBlocks.IRON_CRATE.get());
                         output.accept(ChangedBlocks.KEYPAD.get());
                         output.accept(ChangedBlocks.LAB_LIGHT.get());
