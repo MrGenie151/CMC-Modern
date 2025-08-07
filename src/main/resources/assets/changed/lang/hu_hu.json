@@ -322,6 +322,7 @@
   "block.changed.floor_sign_electrical": "Áramütés veszélye tábla",
   "block.changed.floor_sign_exit": "Kijárat tábla",
   "block.changed.floor_sign_wet": "Csúszásveszély tábla",
+  "block.changed.generator": "Generátor",
   "block.changed.glu": "Ragasztó blokk",
   "block.changed.infuser": "Infúzor",
   "block.changed.iron_crate": "Vasláda",
