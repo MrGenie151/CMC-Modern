@@ -98,6 +98,7 @@ public class ChangedTabs {
                         output.accept(ChangedBlocks.MICROSCOPE.get());
                         output.accept(ChangedBlocks.OFFICE_CHAIR.get());
                         output.accept(ChangedBlocks.ORANGE_TREE_LEAVES.get());
+                        output.accept(ChangedBlocks.ORANGE_TREE_SAPLING.get());
                         output.accept(ChangedBlocks.TAPE_RECORDER.get());
                         output.accept(ChangedBlocks.TILES_BLUE.get());
                         output.accept(ChangedBlocks.TILES_BLUE_SMALL.get());
