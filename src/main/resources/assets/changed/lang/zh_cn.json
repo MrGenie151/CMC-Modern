@@ -423,6 +423,7 @@
   "block.changed.floor_sign_wet": "潮湿地板标志",
   "block.changed.shipping_container_blue": "蓝色集装箱",
   "block.changed.shipping_container_orange": "橙色集装箱",
+  "block.changed.generator": "发电机",
 
   "biome.changed.dark_latex_plains": "黑胶平原",
   "biome.changed.white_latex_forest": "白胶森林",
@@ -827,8 +828,39 @@
   "changed.exoskeleton.battery_low": "电池电量低",
   "changed.exoskeleton.battery_critical": "电池电量严重不足",
   
-  "builtin_resources.changed:beyond_earth_extra": "Changed超过地球格外",
+  "builtin_resources.changed:beyond_earth_extra": "Changed超越地球格外",
   "builtin_resources.changed:instant_transfur": "Changed迅速兽化",
-  "builtin_resources.changed:changed_pbr": "Changed PBR"
+  "builtin_resources.changed:changed_pbr": "Changed PBR",
+  
+    "enum.changed.torso_type.generic": "通用",
+  "enum.changed.torso_type.chiseled": "健壮",
+  "enum.changed.torso_type.female": "雌性",
+  "enum.changed.torso_type.heavy": "厚重",
+  
+  "enum.changed.hair_type.bald": "无发",
+  "enum.changed.hair_type.short": "短发",
+  "enum.changed.hair_type.long": "长发",
+  
+  "enum.changed.ear_type.wolf": "狼",
+  "enum.changed.ear_type.cat": "猫",
+  "enum.changed.ear_type.dragon": "龙",
+  "enum.changed.ear_type.shark": "鲨",
+  
+  "enum.changed.tail_type.wolf": "狼",
+  "enum.changed.tail_type.cat": "猫",
+  "enum.changed.tail_type.dragon": "龙",
+  "enum.changed.tail_type.shark": "鲨",
+  
+  "enum.changed.leg_type.bipedal": "双足",
+  "enum.changed.leg_type.centaur": "半兽",
+  "enum.changed.leg_type.mermaid": "人鱼",
+  
+  "enum.changed.arm_type.generic": "通用",
+  "enum.changed.arm_type.wyvern": "飞龙",
+  "enum.changed.arm_type.shark": "鲨",
+  
+  "enum.changed.scale_type.normal": "普通",
+  "enum.changed.scale_type.buff": "健壮",
+  "enum.changed.scale_type.small": "娇小"
 }
 
