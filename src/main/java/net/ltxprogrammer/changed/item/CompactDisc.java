@@ -12,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemNameBlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
@@ -22,14 +23,14 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class CompactDisc extends Item {
+public class CompactDisc extends ItemNameBlockItem {
     public static final String TAG_TITLE = "title";
     public static final String TAG_AUTHOR = "author";
     public static final String TAG_DATA = "data";
     public static final String TAG_TRANSLATE = "translate";
 
     public CompactDisc() {
-        super(new Item.Properties().stacksTo(1));
+        super(ChangedBlocks.CD_STACK.get(), new Properties().stacksTo(1));
     }
 
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> hoverText, TooltipFlag tooltipFlag) {
@@ -49,7 +50,7 @@ public class CompactDisc extends Item {
         if (blockstate.is(ChangedBlocks.COMPUTER.get())) {
             return Computer.tryUseDisk(p_43466_.getPlayer(), level, blockpos, blockstate, p_43466_.getItemInHand()) ? InteractionResult.sidedSuccess(level.isClientSide) : InteractionResult.PASS;
         } else {
-            return InteractionResult.PASS;
+            return super.useOn(p_43466_);
         }
     }
 
