@@ -15,6 +15,7 @@ import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.init.ChangedAbilities;
 import net.ltxprogrammer.changed.init.ChangedRegistry;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -23,6 +24,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.util.LogicalSidedProvider;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -248,79 +250,6 @@ public class PatreonBenefits {
     public static int currentVersion;
 
     private static final Logger LOGGER = LogManager.getLogger(Changed.class);
-    private static final Map<Dist, AtomicBoolean> UPDATE_FLAG = new HashMap<>();
-    private static final AtomicBoolean UPDATE_PLAYER_JOIN_FLAG = new AtomicBoolean(false);
-    public static final Thread UPDATE_CHECKER = new Thread(() -> {
-        if (!Changed.config.common.downloadPatreonContent.get()) return;
-
-        LOGGER.info("Update checker started");
-
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder(URI.create(VERSION_DOCUMENT)).GET().build();
-
-        while (true) {
-            try {
-                Thread.sleep(60000 * 3);
-                synchronized (UPDATE_PLAYER_JOIN_FLAG) {
-                    UPDATE_PLAYER_JOIN_FLAG.wait();
-                }
-                UPDATE_PLAYER_JOIN_FLAG.set(false); // Consume
-                LOGGER.info("Checking for updates");
-                int version = Integer.parseInt(client.send(request, HttpResponse.BodyHandlers.ofString()).body().replace("\n", ""));
-
-                if (version != currentVersion) {
-                    LOGGER.info("Update found!");
-                    UPDATE_FLAG.computeIfAbsent(Dist.CLIENT, dist -> new AtomicBoolean(true)).set(true);
-                    UPDATE_FLAG.computeIfAbsent(Dist.DEDICATED_SERVER, dist -> new AtomicBoolean(true)).set(true);
-                    currentVersion = version;
-                }
-            }
-
-            catch (InterruptedException | IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-    });
-
-    @Mod.EventBusSubscriber
-    private static class EventSub {
-        @SubscribeEvent
-        public static void onPlayerJoin(EntityJoinLevelEvent playerJoin) {
-            if (playerJoin.getEntity() instanceof Player player) {
-                LOGGER.info("Player joined, setting enabling update checker flag");
-                synchronized (UPDATE_PLAYER_JOIN_FLAG) {
-                    UPDATE_PLAYER_JOIN_FLAG.notify();
-                }
-            }
-        }
-    }
-
-    public static boolean checkForUpdates() throws IOException, InterruptedException {
-        if (!Changed.config.common.downloadPatreonContent.get()) return false;
-
-        if (UPDATE_FLAG.computeIfAbsent(FMLEnvironment.dist, dist -> new AtomicBoolean(false)).get()) {
-            UPDATE_FLAG.get(FMLEnvironment.dist).set(false); // Consume update flag
-            updatePathStrings();
-            HttpClient client = HttpClient.newHttpClient();
-
-            {
-                HttpRequest request = HttpRequest.newBuilder(URI.create(LINKS_DOCUMENT)).GET().build();
-                JsonElement json = JsonParser.parseString(client.send(request, HttpResponse.BodyHandlers.ofString()).body());
-                JsonArray links = json.getAsJsonObject().get("players").getAsJsonArray();
-
-                CACHED_LEVELS.clear();
-                links.forEach((element) -> {
-                    JsonObject object = element.getAsJsonObject();
-                    CACHED_LEVELS.put(UUID.fromString(object.get("uuid").getAsString()), Tier.ofValue(object.get("tier").getAsInt()));
-                });
-            }
-
-            UniversalDist.displayClientMessage(Component.literal("Updated Patreon Data."), false);
-            return true;
-        }
-
-        return false;
-    }
 
     public static void loadBenefits() throws IOException, InterruptedException {
         if (!Changed.config.common.downloadPatreonContent.get()) return;

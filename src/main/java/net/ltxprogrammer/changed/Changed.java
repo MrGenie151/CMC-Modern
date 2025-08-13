@@ -132,7 +132,6 @@ public class Changed {
 
             try {
                 PatreonBenefits.loadBenefits();
-                PatreonBenefits.UPDATE_CHECKER.start();
             } catch (Exception ex) {
                 Changed.LOGGER.error("Failed to load Patreon Benefits. Patrons will not receive benefits visible to this client.", ex);
             }

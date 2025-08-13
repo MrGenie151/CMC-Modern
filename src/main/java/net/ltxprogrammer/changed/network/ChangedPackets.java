@@ -29,7 +29,6 @@ public class ChangedPackets {
     }
 
     public void registerPackets() {
-        addNetworkMessage(CheckForUpdatesPacket.class, CheckForUpdatesPacket::new);
         addNetworkMessage(GrabEntityPacket.class, GrabEntityPacket::new);
         addNetworkMessage(GrabEntityPacket.GrabKeyState.class, GrabEntityPacket.GrabKeyState::new);
         addNetworkMessage(GrabEntityPacket.EscapeKeyState.class, GrabEntityPacket.EscapeKeyState::new);

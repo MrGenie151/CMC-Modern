@@ -682,33 +682,6 @@ public class ProcessTransfur {
         }
     }
 
-    private static int worldTickCount = 0;
-    @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.side.isServer() && event.phase == TickEvent.Phase.END) {
-            worldTickCount++;
-
-            /*if (worldTickCount % 60 == 0) { // Discrete sync packet
-                ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers().forEach(serverPlayer -> {
-                    // Latex variant
-                    Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> serverPlayer), SyncTransfurPacket.Builder.of(serverPlayer));
-                    Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY.with(() -> serverPlayer), BasicPlayerInfoPacket.Builder.of(serverPlayer));
-                });
-            }*/
-
-            if (worldTickCount % 1200 == 0) {
-                try {
-                    if (PatreonBenefits.checkForUpdates())
-                        Changed.PACKET_HANDLER.send(PacketDistributor.ALL.noArg(), new CheckForUpdatesPacket(PatreonBenefits.currentVersion));
-                }
-
-                catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }
-    }
-
     @Deprecated
     public static void transfur(LivingEntity entity, Level level, TransfurVariant<?> variant, boolean keepConscious) {
         transfur(entity, level, variant, keepConscious, TransfurContext.hazard(TransfurCause.GRAB_REPLICATE));
