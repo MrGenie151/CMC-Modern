@@ -74,6 +74,10 @@ public class ExoskeletonItem<T extends AbstractRobot> extends PlaceableEntity<T>
 
     @Override
     public boolean allowedInSlot(ItemStack itemStack, LivingEntity wearer, AccessorySlotType slot) {
+        if (!canUse(itemStack)) {
+            return false;
+        }
+
         boolean isTransfurring = ProcessTransfur.getPlayerTransfurVariantSafe(EntityUtil.playerOrNull(wearer)).map(variant -> variant.transfurProgression)
                 .map(progress -> progress < 1f).orElse(false);
 
@@ -161,6 +165,12 @@ public class ExoskeletonItem<T extends AbstractRobot> extends PlaceableEntity<T>
             tellWearer(slotContext.wearer(), slotContext.stack(), EXOSKELETON_BATTERY_LOW);
         else if (after >= CHARGE_CRITICAL_WARNING && before < CHARGE_CRITICAL_WARNING)
             tellWearer(slotContext.wearer(), slotContext.stack(), EXOSKELETON_BATTERY_CRITICAL);
+
+        if (after >= CHARGE_IN_SECONDS) {
+            slotContext.stack().setDamageValue(CHARGE_IN_SECONDS - 1);
+            AccessorySlots.tryReplaceSlot(slotContext.wearer(), slotContext.slotType(), ItemStack.EMPTY);
+            return;
+        }
 
         slotContext.stack().setDamageValue(after);
     }

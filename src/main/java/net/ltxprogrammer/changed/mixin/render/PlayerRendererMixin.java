@@ -33,20 +33,20 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
         this.addLayer(new AccessoryLayer<>(this));
     }
 
-    @Inject(method = "renderHand", at = @At("HEAD"), cancellable = true)
-    private void renderHand(PoseStack stack, MultiBufferSource buffer, int light, AbstractClientPlayer player, ModelPart arm, ModelPart armwear, CallbackInfo ci) {
-        if (FormRenderHandler.maybeRenderHand(((PlayerRenderer)(Object)this), stack, buffer, light, player, arm, armwear)) {
+    @Inject(method = "renderHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/geom/ModelPart;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;II)V"), cancellable = true)
+    private void renderHand(PoseStack stack, MultiBufferSource buffer, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve, CallbackInfo ci) {
+        if (FormRenderHandler.maybeRenderHand(((PlayerRenderer)(Object)this), stack, buffer, light, player, arm, sleeve)) {
             ci.cancel(); //cancel the call
         }
     }
 
     @Inject(method = "renderHand", at = @At("TAIL"), cancellable = true)
-    private void renderHandLayers(PoseStack stack, MultiBufferSource buffer, int light, AbstractClientPlayer player, ModelPart arm, ModelPart armwear, CallbackInfo ci) {
+    private void renderHandLayers(PoseStack stack, MultiBufferSource buffer, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve, CallbackInfo ci) {
         for (var layer : layers) {
             if (layer instanceof FirstPersonLayer firstPersonLayer)
                 firstPersonLayer.renderFirstPersonOnArms(
                         stack, buffer, light, player, getModel().rightArm != arm ? HumanoidArm.LEFT : HumanoidArm.RIGHT,
-                        new PoseStack(), Minecraft.getInstance().getDeltaFrameTime());
+                        arm.storePose(), new PoseStack(), Minecraft.getInstance().getDeltaFrameTime());
         }
     }
 }

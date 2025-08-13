@@ -117,7 +117,7 @@ public class WaveVisionRenderer {
 
             if (renderType instanceof RenderType.CompositeRenderType composite) {
                 return composite.state().textureState.cutoutTexture().map(texture -> {
-                    if (texture.getPath().contains("dark_latex"))
+                    if (texture.getPath().contains("dark_latex") || texture.getPath().contains("phage_latex"))
                         return ChangedShaders.waveVisionEntityResonant(texture, WaveVisionRenderer.LATEX_RESONANCE_NEUTRAL);
                     else
                         return ChangedShaders.waveVisionEntity(texture);

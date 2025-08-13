@@ -317,6 +317,7 @@ public class HumanoidAnimator<T extends ChangedEntity, M extends AdvancedHumanoi
     }
 
     public void copyProperties(HumanoidAnimator<?, ?> other) {
+        hipOffset = other.hipOffset;
         torsoWidth = other.torsoWidth;
         forwardOffset = other.forwardOffset;
         torsoLength = other.torsoLength;

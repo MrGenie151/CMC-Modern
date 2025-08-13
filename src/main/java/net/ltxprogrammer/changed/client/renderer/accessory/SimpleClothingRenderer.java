@@ -16,6 +16,7 @@ import net.ltxprogrammer.changed.util.EntityUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -104,7 +105,7 @@ public class SimpleClothingRenderer implements AccessoryRenderer, TransitionalAc
     }
 
     @Override
-    public <T extends LivingEntity, M extends EntityModel<T>> void renderFirstPersonOnArms(AccessorySlotContext<T> slotContext, PoseStack matrixStack, RenderLayerParent<T, M> renderLayerParent, MultiBufferSource renderTypeBuffer, int light, HumanoidArm arm, PoseStack stackCorrector, float partialTicks) {
+    public <T extends LivingEntity, M extends EntityModel<T>> void renderFirstPersonOnArms(AccessorySlotContext<T> slotContext, PoseStack matrixStack, RenderLayerParent<T, M> renderLayerParent, MultiBufferSource renderTypeBuffer, int light, HumanoidArm arm, PartPose armPose, PoseStack stackCorrector, float partialTicks) {
         ItemStack stack = slotContext.stack();
         if (stack.getItem() instanceof Clothing clothing) {
             final T entity = slotContext.wearer();
@@ -120,9 +121,11 @@ public class SimpleClothingRenderer implements AccessoryRenderer, TransitionalAc
                             .get(component.armorModel);
 
                     model.prepareMobModel(changedEntity, 0f, 0f, partialTicks);
-                    model.setupAnim(changedEntity, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-                    model.setupHand(changedEntity);
+                    /*model.setupAnim(changedEntity, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                    model.setupHand(changedEntity);*/
                     model.prepareVisibility(component.renderAs, stack);
+                    var armPart = model.getArm(arm);
+                    armPart.loadPose(armPose);
                     FormRenderHandler.renderModelPartWithTexture(model.getArm(arm),
                             stackCorrector, matrixStack, ItemRenderer.getArmorFoilBuffer(renderTypeBuffer, RenderType.armorCutoutNoCull(texture), false, stack.hasFoil()),
                             light, 1F);
@@ -130,7 +133,9 @@ public class SimpleClothingRenderer implements AccessoryRenderer, TransitionalAc
                 }
             } else if (renderLayerParent.getModel() instanceof HumanoidModel<?> baseModel) {
                 baseModel.copyPropertiesTo(clothingModel);
-                FormRenderHandler.renderVanillaModelPartWithTexture(arm == HumanoidArm.RIGHT ? clothingModel.rightArm : clothingModel.leftArm,
+                var armPart = arm == HumanoidArm.RIGHT ? clothingModel.rightArm : clothingModel.leftArm;
+                armPart.loadPose(armPose);
+                FormRenderHandler.renderVanillaModelPartWithTexture(armPart,
                         stackCorrector, matrixStack, ItemRenderer.getArmorFoilBuffer(renderTypeBuffer, RenderType.armorCutoutNoCull(texture), false, stack.hasFoil()),
                         light, 1F);
             }

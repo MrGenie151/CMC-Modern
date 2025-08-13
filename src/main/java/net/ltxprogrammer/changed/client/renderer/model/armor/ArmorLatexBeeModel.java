@@ -55,7 +55,7 @@ public class ArmorLatexBeeModel<T extends ChangedEntity> extends LatexHumanoidAr
         var rightFoot = rightLowerLeg.getChild("RightFoot");
 
         animator = HumanoidAnimator.of(this).hipOffset(-1.5f)
-                .addPreset(AnimatorPresets.beeLikeArmor(Head, Torso, LeftArm, RightArm, LeftArm2, RightArm2,
+                .addPreset(AnimatorPresets.beeLikeArmor(Head, Torso, LeftArm2, RightArm2, LeftArm, RightArm,
                         Tail, List.of(tailPrimary),
                         LeftLeg, leftLowerLeg, leftFoot, leftFoot.getChild("LeftPad"), RightLeg, rightLowerLeg, rightFoot, rightFoot.getChild("RightPad")));
     }

@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 @OnlyIn(Dist.CLIENT)
-public class CustomLatexModel extends AdvancedHumanoidModel<CustomLatexEntity> implements AdvancedHumanoidModelInterface<CustomLatexEntity, CustomLatexModel>, LowerTorsoedModel {
+public class CustomLatexModel extends AdvancedHumanoidModel<CustomLatexEntity> implements AdvancedHumanoidModelInterface<CustomLatexEntity, CustomLatexModel>, LowerTorsoedModel, LeglessModel {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("custom_latex"), "main");
     private final ModelPart RightLeg;
@@ -899,12 +899,12 @@ public class CustomLatexModel extends AdvancedHumanoidModel<CustomLatexEntity> i
         super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
     }
 
-    public ModelPart getArm(HumanoidArm p_102852_) {
-        return p_102852_ == HumanoidArm.LEFT ? this.LeftArm : this.RightArm;
+    public ModelPart getArm(HumanoidArm arm) {
+        return arm == HumanoidArm.LEFT ? this.LeftArm : this.RightArm;
     }
 
-    public ModelPart getLeg(HumanoidArm p_102852_) {
-        return p_102852_ == HumanoidArm.LEFT ? this.LeftLeg : this.RightLeg;
+    public ModelPart getLeg(HumanoidArm leg) {
+        return leg == HumanoidArm.LEFT ? (this.LeftLeg.visible ? this.LeftLeg : null) : (this.RightLeg.visible ? this.RightLeg : null);
     }
 
     public ModelPart getHead() {
@@ -912,12 +912,22 @@ public class CustomLatexModel extends AdvancedHumanoidModel<CustomLatexEntity> i
     }
 
     public ModelPart getTorso() {
-        return Torso;
+        return Abdomen.visible ? TorsoShort : Torso;
     }
 
     @Override
     public ModelPart getLowerTorso() {
-        return this.LowerTorso;
+        return LowerTorso.visible ? LowerTorso : null;
+    }
+
+    @Override
+    public ModelPart getAbdomen() {
+        return Abdomen.visible ? Abdomen : null;
+    }
+
+    @Override
+    public boolean shouldPartTransfur(ModelPart part) {
+        return this.Saddle != part;
     }
 
     @Override

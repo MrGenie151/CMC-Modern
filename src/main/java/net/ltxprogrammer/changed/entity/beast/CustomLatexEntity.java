@@ -207,7 +207,8 @@ public class CustomLatexEntity extends ChangedEntity implements LatexTaur<Custom
         this.refreshDimensions();
 
         ProcessTransfur.ifPlayerTransfurred(this.getUnderlyingPlayer(), variant -> {
-            variant.jumpStrength = this.getTailType() == TailType.CAT ? 1.25f : 1.0f;
+            variant.stepSize = this.getLegType() == LegType.CENTAUR ? 1.1f : 0.6f;
+            variant.jumpStrength = (this.getLegType() == LegType.CENTAUR || this.getTailType() == TailType.CAT) ? 1.25f : 1.0f;
             variant.breatheMode = switch (this.getTailType()) {
                 case CAT -> TransfurVariant.BreatheMode.WEAK;
                 case SHARK -> TransfurVariant.BreatheMode.ANY;

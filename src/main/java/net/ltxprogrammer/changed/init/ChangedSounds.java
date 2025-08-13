@@ -76,8 +76,6 @@ public class ChangedSounds {
     public static final RegistryObject<SoundEvent> EXOSKELETON_CHIME = register("exoskeleton_chime");
     public static final RegistryObject<SoundEvent> EXOSKELETON_LOCK = register("exoskeleton_lock");
 
-    public static final RegistryObject<SoundEvent> OWO = register("music_disc.owo");
-
     public static final RegistryObject<SoundEvent> MUSIC_BLACK_GOO_ZONE = register("music.black_goo_zone");
     public static final RegistryObject<SoundEvent> MUSIC_CRYSTAL_ZONE = register("music.crystal_zone");
     public static final RegistryObject<SoundEvent> MUSIC_GAS_ROOM = register("music.gas_room");

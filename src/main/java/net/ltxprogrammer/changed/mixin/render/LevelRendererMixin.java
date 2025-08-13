@@ -464,6 +464,11 @@ public abstract class LevelRendererMixin {
             this.weatherTarget.clear(Minecraft.ON_OSX);
         }
 
+        if (this.shouldShowEntityOutlines()) {
+            this.entityTarget.clear(Minecraft.ON_OSX);
+            this.minecraft.getMainRenderTarget().bindWrite(false);
+        }
+
         MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
 
         // Force rendering entities to use the WaveVision shader

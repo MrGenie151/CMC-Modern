@@ -7,6 +7,7 @@ import net.ltxprogrammer.changed.data.AccessorySlots;
 import net.ltxprogrammer.changed.entity.AccessoryEntities;
 import net.ltxprogrammer.changed.util.Cacheable;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -56,7 +57,7 @@ public class AccessoryLayer<T extends LivingEntity, M extends EntityModel<T>> ex
     }
 
     @Override
-    public void renderFirstPersonOnArms(PoseStack poseStack, MultiBufferSource buffers, int packedLight, T entity, HumanoidArm arm, PoseStack stackCorrector, float partialTick) {
+    public void renderFirstPersonOnArms(PoseStack poseStack, MultiBufferSource buffers, int packedLight, T entity, HumanoidArm arm, PartPose armPose, PoseStack stackCorrector, float partialTick) {
         final var slotTypePredicate = AccessoryEntities.INSTANCE.canEntityTypeUseSlot(AccessoryEntities.getApparentEntityType(entity));
         AccessorySlots.getForEntity(entity).ifPresent(slots -> {
             slots.forEachSlot((slotType, stack) -> {
@@ -68,7 +69,7 @@ public class AccessoryLayer<T extends LivingEntity, M extends EntityModel<T>> ex
                     return; // Ensure lag doesn't crash with an invalid slot
 
                 var context = new AccessorySlotContext<>(entity, slotType, stack);
-                RENDERERS.get(stack.getItem()).get().renderFirstPersonOnArms(context, poseStack, this.parent, buffers, packedLight, arm, stackCorrector, partialTick);
+                RENDERERS.get(stack.getItem()).get().renderFirstPersonOnArms(context, poseStack, this.parent, buffers, packedLight, arm, armPose, stackCorrector, partialTick);
             });
         });
     }

@@ -3,12 +3,11 @@ package net.ltxprogrammer.changed.client.animations;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import net.ltxprogrammer.changed.client.renderer.model.*;
-import net.ltxprogrammer.changed.entity.VisionType;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.entity.HumanoidArm;
+import net.minecraftforge.common.IExtensibleEnum;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -18,74 +17,28 @@ import java.util.function.Function;
 /**
  * Root level limb used to map ModelParts from the vanilla player model to a transfur model
  */
-public enum Limb implements StringRepresentable {
-    HEAD("head", HumanoidModel::getHead, AdvancedHumanoidModel::getHead),
-    HEAD2("head2", HumanoidModel::getHead, model -> {
-        if (model instanceof TripleHeadedModel<?> tripleHeadedModel)
-            return tripleHeadedModel.getCenterHead();
-        if (model instanceof DoubleHeadedModel<?> doubleHeadedModel)
-            return doubleHeadedModel.getOtherHead();
-        return null;
-    }),
-    HEAD3("head3", HumanoidModel::getHead, model -> {
-        if (model instanceof TripleHeadedModel<?> tripleHeadedModel)
-            return tripleHeadedModel.getOtherHead();
-        return null;
-    }),
+public enum Limb implements StringRepresentable, IExtensibleEnum {
+    HEAD("head", HumanoidModel::getHead),
+    HEAD2("head2", HumanoidModel::getHead, false),
+    HEAD3("head3", HumanoidModel::getHead, false),
 
-    TORSO("torso", model -> model.body, AdvancedHumanoidModel::getTorso),
+    TORSO("torso", model -> model.body),
 
-    LEFT_ARM("left_arm", model -> model.leftArm, model -> model.getArm(HumanoidArm.LEFT)),
-    RIGHT_ARM("right_arm", model -> model.rightArm, model -> model.getArm(HumanoidArm.RIGHT)),
+    LEFT_ARM("left_arm", model -> model.leftArm),
+    RIGHT_ARM("right_arm", model -> model.rightArm),
 
-    LEFT_ARM2("left_arm2", model -> model.leftArm, model -> {
-        if (model instanceof TripleArmedModel<?> tripleArmedModel)
-            return tripleArmedModel.getMiddleArm(HumanoidArm.LEFT);
-        if (model instanceof DoubleArmedModel<?> doubleArmedModel)
-            return doubleArmedModel.getOtherArm(HumanoidArm.LEFT);
-        return null;
-    }, false),
-    RIGHT_ARM2("right_arm2", model -> model.rightArm, model -> {
-        if (model instanceof TripleArmedModel<?> tripleArmedModel)
-            return tripleArmedModel.getMiddleArm(HumanoidArm.RIGHT);
-        if (model instanceof DoubleArmedModel<?> doubleArmedModel)
-            return doubleArmedModel.getOtherArm(HumanoidArm.RIGHT);
-        return null;
-    }, false),
+    LEFT_ARM2("left_arm2", model -> model.leftArm, false),
+    RIGHT_ARM2("right_arm2", model -> model.rightArm, false),
 
-    LEFT_ARM3("left_arm3", model -> model.leftArm, model -> {
-        if (model instanceof TripleArmedModel<?> doubleArmedModel)
-            return doubleArmedModel.getOtherArm(HumanoidArm.LEFT);
-        return null;
-    }, false),
-    RIGHT_ARM3("right_arm3", model -> model.rightArm, model -> {
-        if (model instanceof TripleArmedModel<?> doubleArmedModel)
-            return doubleArmedModel.getOtherArm(HumanoidArm.RIGHT);
-        return null;
-    }, false),
+    LEFT_ARM3("left_arm3", model -> model.leftArm, false),
+    RIGHT_ARM3("right_arm3", model -> model.rightArm, false),
 
-    LEFT_LEG("left_leg", model -> model.leftLeg, model -> {
-        if (model instanceof LowerTorsoedModel)
-            return null;
-        return model.getLeg(HumanoidArm.LEFT);
-    }),
-    RIGHT_LEG("right_leg", model -> model.rightLeg, model -> {
-        if (model instanceof LowerTorsoedModel)
-            return null;
-        return model.getLeg(HumanoidArm.RIGHT);
-    }),
+    LEFT_LEG("left_leg", model -> model.leftLeg),
+    RIGHT_LEG("right_leg", model -> model.rightLeg),
 
-    ABDOMEN("abdomen", model -> model.body, model -> {
-        if (model instanceof LeglessModel leglessModel)
-            return leglessModel.getAbdomen();
-        return null;
-    }, false),
+    ABDOMEN("abdomen", model -> model.body, false),
 
-    LOWER_TORSO("lower_torso", model -> model.body, model -> {
-        if (model instanceof LowerTorsoedModel torsoedModel)
-            return torsoedModel.getLowerTorso();
-        return null;
-    });
+    LOWER_TORSO("lower_torso", model -> model.body, false);
 
     public static final Codec<Limb> CODEC = Codec.STRING.comapFlatMap(Limb::fromSerial, Limb::getSerializedName);
 
@@ -104,6 +57,28 @@ public enum Limb implements StringRepresentable {
     private final Function<AdvancedHumanoidModel<?>, ModelPart> getLatexModelPartFn;
     private final boolean isVanillaPart;
 
+    Limb(String serialName, Function<HumanoidModel<?>, ModelPart> getModelPartFn) {
+        this.serialName = serialName;
+        this.getModelPartFn = getModelPartFn;
+        this.getLatexModelPartFn = model -> model.getLimb(this);
+        this.isVanillaPart = true;
+    }
+
+    public static Limb create(String enumName, String serialName, Function<HumanoidModel<?>, ModelPart> getModelPartFn) {
+        throw new IllegalStateException("enum not extended");
+    }
+
+    Limb(String serialName, Function<HumanoidModel<?>, ModelPart> getModelPartFn, boolean isVanillaPart) {
+        this.serialName = serialName;
+        this.getModelPartFn = getModelPartFn;
+        this.getLatexModelPartFn = model -> model.getLimb(this);
+        this.isVanillaPart = isVanillaPart;
+    }
+
+    public static Limb create(String enumName, String serialName, Function<HumanoidModel<?>, ModelPart> getModelPartFn, boolean isVanillaPart) {
+        throw new IllegalStateException("enum not extended");
+    }
+
     Limb(String serialName, Function<HumanoidModel<?>, ModelPart> getModelPartFn, Function<AdvancedHumanoidModel<?>, ModelPart> getLatexModelPartFn) {
         this.serialName = serialName;
         this.getModelPartFn = getModelPartFn;
@@ -111,11 +86,19 @@ public enum Limb implements StringRepresentable {
         this.isVanillaPart = true;
     }
 
+    public static Limb create(String enumName, String serialName, Function<HumanoidModel<?>, ModelPart> getModelPartFn, Function<AdvancedHumanoidModel<?>, ModelPart> getLatexModelPartFn) {
+        throw new IllegalStateException("enum not extended");
+    }
+
     Limb(String serialName, Function<HumanoidModel<?>, ModelPart> getModelPartFn, Function<AdvancedHumanoidModel<?>, ModelPart> getLatexModelPartFn, boolean isVanillaPart) {
         this.serialName = serialName;
         this.getModelPartFn = getModelPartFn;
         this.getLatexModelPartFn = getLatexModelPartFn;
         this.isVanillaPart = isVanillaPart;
+    }
+
+    public static Limb create(String enumName, String serialName, Function<HumanoidModel<?>, ModelPart> getModelPartFn, Function<AdvancedHumanoidModel<?>, ModelPart> getLatexModelPartFn, boolean isVanillaPart) {
+        throw new IllegalStateException("enum not extended");
     }
 
     public ModelPart getModelPart(HumanoidModel<?> model) {

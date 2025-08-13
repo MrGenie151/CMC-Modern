@@ -5,7 +5,7 @@
   "itemGroup.tab_changed_combat": "Changed战斗",
   "itemGroup.tab_changed_music": "Changed音乐",
   "itemGroup.tab_changed_clothing": "Changed服饰",
-  
+
   "ability.changed.access_saddle": "访问鞍部页面",
   "ability.changed.switch_transfur_mode": "切换兽化模式",
   "ability.changed.switch_transfur_mode.desc": "改变您兽化实体方式",
@@ -29,7 +29,7 @@
   "ability.changed.slither": "爬行",
   "ability.changed.slither.desc": "你拥有灵敏的爬行，可以穿越狭窄的通道。",
   "ability.changed.puddle": "变成水坑",
-  "ability.changed.puddle.desc": "身体缩小到一个水坑，实体走上去会有减速效果。",    
+  "ability.changed.puddle.desc": "身体缩小到一个水坑，实体走上去会有减速效果。",
   "ability.changed.select_hairstyle": "选择发型",
   "ability.changed.select_special_state": "选择特殊形态",
   "ability.changed.summon_sharks": "召唤鲨鱼",
@@ -50,7 +50,7 @@
   
   "attribute.name.changed.transfur_damage": "兽化伤害",
   "attribute.name.changed.transfur_tolerance": "兽化抗性",
-  
+
     "subtitles.changed.exoskeleton_step": "外骨骼走步声",
   "subtitles.changed.exoskeleton_chime": "数据化报告",
   "subtitles.changed.exoskeleton_lock": "装备外骨骼",
@@ -82,10 +82,10 @@
   "subtitles.changed.vacuum": "吸尘器声",
   "subtitles.changed.puddle_alert": "水坑警报",
 
-  
+
   "conversion.changed.quadrupedal_conversion": "四足装甲改造",
   "conversion.changed.abdomen_conversion": "腹甲改造",
-  
+
   "item.changed.benign_shorts": "黑色短裤",
   "item.changed.black_tshirt": "黑色T恤",
   "item.changed.blood_syringe": "血液注射器",
@@ -124,7 +124,7 @@
   "item.changed.skunk_transfur_gas": "臭鼬兽化气体",
   "item.changed.tiger_transfur_gas": "老虎兽化气体",
   "item.changed.wolf_transfur_gas": "狼兽化气体",
-  
+
   "item.changed.tsc_staff": "惊雷科技电杖",
   "item.changed.tsc_baton": "惊雷科技电棍",
   "item.changed.tsc_shield": "惊雷科技防暴盾",
@@ -158,9 +158,6 @@
       "item.changed.smithing_template.quadrupedal_conversion.ingredients": "装甲部分",
     "item.changed.smithing_template.quadrupedal_conversion.applies_to": "护腿, 靴子",
        "item.changed.smithing_template.abdomen_conversion.ingredients": "装甲部分",
-  
-  "item.changed.owo_record": "胶液音乐唱片",
-  "item.changed.owo_record.desc": "ÒwÓ - Artemka2009",
 
   "item.changed.latex_music_disc": "胶液音乐唱片",
   "item.changed.black_goo_zone_record.desc": "Black Goo Zone - 噬子",
@@ -627,8 +624,8 @@
   "painting.changed.sharks_gaze.author": "Twix5803",
   "painting.changed.thunder_science_building.title": "雷霆科学馆",
   "painting.changed.thunder_science_building.author": "普罗",
- 
-  
+
+
   "changed.patreon.level0": "Discord服务器成员",
   "changed.patreon.level1": "等级 1",
   "changed.patreon.level2": "等级 2",
@@ -822,11 +819,11 @@
   "changed.stasis.modify.scale": "尺寸: %s",
   "changed.stasis.modify.scale.tooltip": "配置：整体尺寸",
 
-  
+
     "changed.exoskeleton.prompt": "[%s]> %s",
   "changed.exoskeleton.battery_low": "电池电量低",
   "changed.exoskeleton.battery_critical": "电池电量严重不足",
-  
+
   "builtin_resources.changed:beyond_earth_extra": "Changed超过地球格外",
   "builtin_resources.changed:instant_transfur": "Changed迅速兽化",
   "builtin_resources.changed:changed_pbr": "Changed PBR"

@@ -200,7 +200,7 @@ public class WhiteLatexCentaurModel extends AdvancedHumanoidModel<WhiteLatexCent
     }
 
     public ModelPart getLeg(HumanoidArm p_102852_) {
-        return p_102852_ == HumanoidArm.LEFT ? this.FrontLeftLeg : this.FrontRightLeg;
+        return null;
     }
 
     public ModelPart getHead() {

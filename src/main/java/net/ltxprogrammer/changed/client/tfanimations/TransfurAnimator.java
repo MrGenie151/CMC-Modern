@@ -704,7 +704,7 @@ public abstract class TransfurAnimator {
         }
     }
 
-    public static void renderTransfurringArm(Player player, HumanoidArm arm, TransfurVariantInstance<?> variant, PoseStack stack, MultiBufferSource buffer, int light, float partialTick, @Nullable ResourceLocation texture) {
+    public static void renderTransfurringArm(Player player, HumanoidArm arm, PartPose armPose, TransfurVariantInstance<?> variant, PoseStack stack, MultiBufferSource buffer, int light, float partialTick, @Nullable ResourceLocation texture) {
         final Minecraft minecraft = Minecraft.getInstance();
         final EntityRenderDispatcher dispatcher = minecraft.getEntityRenderDispatcher();
         final var playerRenderer = dispatcher.getRenderer(player);
@@ -724,11 +724,11 @@ public abstract class TransfurAnimator {
         if (morphAlpha < 1f) { // Render normal living entity, when they are still seen
             if (coverProgress < 1f) { // Render player, being covered
                 forceRenderPlayer = true;
-                FormRenderHandler.renderHand(player, arm, stack, buffer, light, partialTick);
+                FormRenderHandler.renderHand(player, arm, armPose, stack, buffer, light, partialTick);
                 ChangedCompatibility.forceIsFirstPersonRenderingToFrozen();
                 forceRenderPlayer = false;
             } else if (morphProgress > 0.5f) // Render latex at the end
-                FormRenderHandler.renderHand(variant.getChangedEntity(), arm, stack, buffer, light, partialTick);
+                FormRenderHandler.renderHand(variant.getChangedEntity(), arm, armPose, stack, buffer, light, partialTick);
         }
 
         Limb limb = arm == HumanoidArm.LEFT ? Limb.LEFT_ARM : Limb.RIGHT_ARM;

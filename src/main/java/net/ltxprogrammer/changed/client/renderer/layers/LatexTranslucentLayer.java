@@ -6,6 +6,7 @@ import net.ltxprogrammer.changed.client.FormRenderHandler;
 import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
@@ -48,7 +49,9 @@ public class LatexTranslucentLayer<T extends ChangedEntity, M extends AdvancedHu
     }
 
     @Override
-    public void renderFirstPersonOnArms(PoseStack stack, MultiBufferSource bufferSource, int packedLight, T entity, HumanoidArm arm, PoseStack stackCorrector, float partialTick) {
-        FormRenderHandler.renderModelPartWithTexture(model.getArm(arm), stackCorrector, stack, bufferSource.getBuffer(RenderType.entityTranslucent(texture)), packedLight, 1F);
+    public void renderFirstPersonOnArms(PoseStack stack, MultiBufferSource bufferSource, int packedLight, T entity, HumanoidArm arm, PartPose armPose, PoseStack stackCorrector, float partialTick) {
+        var armPart = model.getArm(arm);
+        armPart.loadPose(armPose);
+        FormRenderHandler.renderModelPartWithTexture(armPart, stackCorrector, stack, bufferSource.getBuffer(RenderType.entityTranslucent(texture)), packedLight, 1F);
     }
 }

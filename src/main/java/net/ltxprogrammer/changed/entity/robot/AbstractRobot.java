@@ -21,6 +21,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 
 import javax.annotation.Nullable;
 
@@ -35,6 +36,7 @@ public abstract class AbstractRobot extends PathfinderMob {
 
     protected AbstractRobot(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
+        this.setPathfindingMalus(BlockPathTypes.WATER, -1.0f);
     }
 
     public abstract boolean isAffectedByWater();

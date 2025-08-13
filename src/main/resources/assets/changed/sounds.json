@@ -372,15 +372,6 @@
     "subtitle": "subtitles.changed.exoskeleton_lock"
   },
 
-  "music_disc.owo": {
-    "sounds": [
-      {
-        "name": "changed:owo",
-        "stream": true
-      }
-    ]
-  },
-
   "music.black_goo_zone": {
     "sounds": [
       {

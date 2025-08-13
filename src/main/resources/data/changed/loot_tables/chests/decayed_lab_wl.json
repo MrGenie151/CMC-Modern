@@ -11,11 +11,6 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "weight": 5,
-          "name": "changed:owo_record"
-        },
-        {
-          "type": "minecraft:item",
           "weight": 8,
           "name": "changed:the_white_goo_jungle_record"
         },

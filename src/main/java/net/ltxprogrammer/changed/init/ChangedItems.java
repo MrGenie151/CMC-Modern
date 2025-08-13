@@ -45,7 +45,7 @@ public class ChangedItems {
     private static final ResourceLocation EMPTY_SLOT_BOOTS = ResourceLocation.parse("item/empty_armor_slot_boots");
     private static final ResourceLocation EMPTY_SLOT_INGOT = ResourceLocation.parse("item/empty_slot_ingot");
     private static final ResourceLocation EMPTY_SLOT_DIAMOND = ResourceLocation.parse("item/empty_slot_diamond");
-    
+
     private static List<ResourceLocation> createAbdomenConversionIconList() {
         return List.of(EMPTY_SLOT_LEGGINGS, EMPTY_SLOT_BOOTS);
     }
@@ -57,7 +57,7 @@ public class ChangedItems {
     private static List<ResourceLocation> createConversionMaterialList() {
         return List.of(EMPTY_SLOT_INGOT, EMPTY_SLOT_DIAMOND);
     }
-    
+
     public static final DeferredRegister<Item> REGISTRY = DeferredRegister.create(ForgeRegistries.ITEMS, Changed.MODID);
     public static final RegistryObject<BenignShorts> BENIGN_SHORTS = register("benign_shorts", BenignShorts::new);
     public static final RegistryObject<PinkShorts> PINK_SHORTS = register("pink_shorts", PinkShorts::new);
@@ -193,8 +193,6 @@ public class ChangedItems {
     public static final RegistryObject<ExoskeletonItem<Exoskeleton>> EXOSKELETON = register("exoskeleton",
             () -> new ExoskeletonItem<>(new Item.Properties().stacksTo(1), ChangedEntities.EXOSKELETON));
 
-    // Unsure whether to keep this record, it doesn't fit with the BGM from changed
-    public static final RegistryObject<RecordItem> OWO_RECORD = register("owo_record", () -> new RecordItem(8, ChangedSounds.OWO, (new Item.Properties()).stacksTo(1).rarity(Rarity.RARE), 0));
     public static final RegistryObject<LatexRecordItem> BLACK_GOO_ZONE_RECORD = registerLatexRecord("black_goo_zone_record", ChangedSounds.MUSIC_BLACK_GOO_ZONE, 0);
     public static final RegistryObject<LatexRecordItem> CRYSTAL_ZONE_RECORD = registerLatexRecord("crystal_zone_record", ChangedSounds.MUSIC_CRYSTAL_ZONE, 0);
     public static final RegistryObject<LatexRecordItem> GAS_ROOM_RECORD = registerLatexRecord("gas_room_record", ChangedSounds.MUSIC_GAS_ROOM, 0);

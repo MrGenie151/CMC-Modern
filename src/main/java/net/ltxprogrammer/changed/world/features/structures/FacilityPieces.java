@@ -154,17 +154,20 @@ public class FacilityPieces { // TODO extend facility pieces to be data-oriented
                 .register(new FacilitySplitSection(Changed.modResource("facility/corridor/split/blue/intersection2_blue")))
                 .register(new FacilitySplitSection(Changed.modResource("facility/corridor/split/blue/corridor_blue_t_v1")))
                 .register(new FacilitySplitSection(Changed.modResource("facility/corridor/split/blue/blue_office_split1")))
+                .register(FacilityPieceCollectionBuilder.WEIGHT_RARE, new FacilitySplitSection(Changed.modResource("facility/corridor/split/blue/intersection3_blue_tree")))
 
                 // Red
                 .register(new FacilitySplitSection(Changed.modResource("facility/corridor/split/red/intersection1_red")))
                 .register(new FacilitySplitSection(Changed.modResource("facility/corridor/split/red/intersection2_red")))
                 .register(new FacilitySplitSection(Changed.modResource("facility/corridor/split/red/corridor_red_t_v1")))
+                .register(FacilityPieceCollectionBuilder.WEIGHT_RARE, new FacilitySplitSection(Changed.modResource("facility/corridor/split/red/intersection3_red_tree")))
 
                 // Gray
                 .register(new FacilitySplitSection(Changed.modResource("facility/corridor/split/gray/intersection1_gray")))
                 .register(new FacilitySplitSection(Changed.modResource("facility/corridor/split/gray/intersection2_gray")))
                 .register(new FacilitySplitSection(Changed.modResource("facility/corridor/split/gray/corridor_gray_circle")))
-                .register(new FacilitySplitSection(Changed.modResource("facility/corridor/split/gray/gray_office_split1")));
+                .register(new FacilitySplitSection(Changed.modResource("facility/corridor/split/gray/gray_office_split1")))
+                .register(FacilityPieceCollectionBuilder.WEIGHT_RARE, new FacilitySplitSection(Changed.modResource("facility/corridor/split/red/intersection3_red_tree")));
     }
 
     private static void registerRooms(FacilityPieceCollectionBuilder builder) {

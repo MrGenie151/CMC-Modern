@@ -79,7 +79,7 @@
   "subtitles.changed.vacuum": "Porszívó pörög",
 
   "subtitles.changed.puddle_alert": "Pocsolya riaszt",
-  
+
   "subtitles.changed.exoskeleton_step": "Exoskeleton lép",
   "subtitles.changed.exoskeleton_chime": "Digitális csengőhang",
   "subtitles.changed.exoskeleton_lock": "Exoskeleton felvétele",
@@ -159,9 +159,6 @@
   "item.changed.smithing_template.quadrupedal_conversion.ingredients": "Páncél összetevője",
   "item.changed.smithing_template.quadrupedal_conversion.base_slot_description": "Helyezz ide lábszárvédőt vagy csizmát",
   "item.changed.smithing_template.quadrupedal_conversion.additions_slot_description": "Helyezz ide a páncél összetevőjét",
-
-  "item.changed.owo_record": "Latex hanglemez",
-  "item.changed.owo_record.desc": "Artemka2009 - ÒwÓ",
 
   "item.changed.latex_music_disc": "Latex hanglemez",
   "item.changed.black_goo_zone_record.desc": "Shizi - Black Goo Zone",
@@ -280,7 +277,7 @@
   "effect.changed.hypercoagulation": "Hiperkoaguláció",
   "effect.changed.shock": "Sokk",
   "effect.changed.caffeinated": "Koffeinezett",
-  
+
   "enchantment.changed.latex_protection": "Latexvédelem",
   "enchantment.changed.latex_protection.desc": "Védi a viselőjét a transzfurálástól.",
   "enchantment.changed.form_fitting": "Alakra simulás",
