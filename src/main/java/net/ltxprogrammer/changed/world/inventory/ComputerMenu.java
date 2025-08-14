@@ -77,7 +77,7 @@ public class ComputerMenu extends TextMenu {
     @Override
     public void update(CompoundTag payload, LogicalSide receiver, @Nullable ServerPlayer origin) {
         if (receiver.isServer() && serverDisk != null && data != null) {
-            if (payload.contains("op")) {
+            /*if (payload.contains("op")) {
                 Operation op = Operation.valueOf(payload.getString("op"));
 
                 switch (op) {
@@ -87,19 +87,19 @@ public class ComputerMenu extends TextMenu {
                         });
                     }
                 }
-            }
+            }*/
 
-            /*if (payload.contains("Text")) {
+            if (payload.contains("Text")) {
                 textCopy = payload.getString("Text");
                 textCopyLastReceived = textCopy;
                 serverDisk.getOrCreateTag().putString("Text", textCopy);
             }
 
-            this.setDirty(payload);*/
+            this.setDirty(payload);
         } else if (receiver.isClient()) {
-            /*textCopy = payload.getString("Text");
+            textCopy = payload.getString("Text");
             textCopyLastReceived = textCopy;
-            serverDisk.getOrCreateTag().putString("Text", textCopy);*/
+            serverDisk.getOrCreateTag().putString("Text", textCopy);
 
             // Handled by the server
         }

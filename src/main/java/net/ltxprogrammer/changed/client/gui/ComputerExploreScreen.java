@@ -94,7 +94,7 @@ public class ComputerExploreScreen extends Screen implements MenuAccess<Computer
 
         switch (file.type) {
             case PICTURE -> {} // TODO open window with picture
-            case TEXT -> this.minecraft.setScreen(new ComputerTextScreen(this, this.menu, this.inventory, ComputerTextScreen.TITLE));
+            case TEXT -> this.minecraft.setScreen(new ComputerTextScreen(/*this, */this.menu, this.inventory, ComputerTextScreen.TITLE));
             case RECIPE -> this.menu.setDirty(this.menu.requestRecipe(fullPath));
             default -> {} // No action
         }
