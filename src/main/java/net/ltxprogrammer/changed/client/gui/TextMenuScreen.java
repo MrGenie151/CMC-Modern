@@ -245,7 +245,7 @@ public abstract class TextMenuScreen<T extends TextMenu> extends Screen implemen
         TextMenuScreen.DisplayCache displayCache = this.getDisplayCache();
 
         for(TextMenuScreen.LineInfo lineInfo : displayCache.lines) {
-            graphics.drawString(this.font, lineInfo.asComponent, lineInfo.x, lineInfo.y, getTextColor());
+            graphics.drawString(this.font, lineInfo.asComponent, lineInfo.x, lineInfo.y, getTextColor(), false);
         }
 
         this.renderHighlight(graphics, displayCache.selection);
@@ -284,7 +284,7 @@ public abstract class TextMenuScreen<T extends TextMenu> extends Screen implemen
             if (!atEnd) {
                 graphics.fill(pos.x, pos.y - 1, pos.x + 1, pos.y + 9, getTextColor());
             } else {
-                graphics.drawString(this.font, "_", pos.x, pos.y, getTextColor());
+                graphics.drawString(this.font, "_", pos.x, pos.y, getTextColor(), false);
             }
         }
 
@@ -304,7 +304,7 @@ public abstract class TextMenuScreen<T extends TextMenu> extends Screen implemen
     protected void renderLabels(GuiGraphics graphics, int cursorX, int cursorY) {
         var noteTitle = this.getNoteTitle();
         if (noteTitle != null)
-            graphics.drawString(this.font, noteTitle, this.leftPos + this.titleLabelX, this.topPos + this.titleLabelY, 4210752);
+            graphics.drawString(this.font, noteTitle, this.leftPos + this.titleLabelX, this.topPos + this.titleLabelY, 4210752, false);
     }
 
     public boolean charTyped(char c, int i) {

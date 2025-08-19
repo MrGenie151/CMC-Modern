@@ -64,7 +64,7 @@ public abstract class InventoryScreenMixin extends EffectRenderingInventoryScree
             if (Mth.abs(secondary.brightness() - primary.brightness()) > 0.1f)
                 textColor = secondary.toInt();
 
-            graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, textColor);
+            graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, textColor, false);
             callback.cancel();
         });
     }

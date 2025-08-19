@@ -74,7 +74,7 @@ public class KeypadScreen extends AbstractContainerScreen<KeypadMenu> {
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int x, int y) {
-        graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752);
+        graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752, false);
     }
 
     @Override
