@@ -18,6 +18,8 @@ import net.ltxprogrammer.changed.data.AccessorySlots;
 import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.entity.latex.SpreadingLatexType;
 import net.ltxprogrammer.changed.entity.robot.Exoskeleton;
+import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
+import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
 import net.ltxprogrammer.changed.fluid.AbstractLatexFluid;
 import net.ltxprogrammer.changed.fluid.Gas;
 import net.ltxprogrammer.changed.fluid.TransfurGas;
@@ -189,14 +191,12 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDa
                 callback.setReturnValue(wearableBlock.getEquipmentSlot());
     }
 
-    @Inject(method = "isVisuallySwimming", at = @At("HEAD"), cancellable = true)
-    private void isVisuallySwimming(CallbackInfoReturnable<Boolean> callback) {
-        if ((LivingEntity)(Object)this instanceof Player player) {
-            ProcessTransfur.ifPlayerTransfurred(player, (variant) -> {
-                if (variant.getChangedEntity().isVisuallySwimming())
-                    callback.setReturnValue(true);
-            });
-        }
+    @WrapMethod(method = "isVisuallySwimming")
+    private boolean isVariantVisuallySwimming(Operation<Boolean> original) {
+        return ProcessTransfur.getPlayerTransfurVariantSafe(EntityUtil.playerOrNull(this))
+                .map(TransfurVariantInstance::getChangedEntity)
+                .map(ChangedEntity::isVisuallySwimming)
+                .orElseGet(original::call);
     }
 
     @Inject(method = "triggerItemUseEffects", at = @At("HEAD"), cancellable = true)

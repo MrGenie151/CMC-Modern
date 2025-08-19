@@ -107,10 +107,10 @@ public class ChangedEntities {
             EntityType.Builder.of(WhiteLatexKnight::new, ChangedMobCategories.CHANGED).clientTrackingRange(10).sized(0.7F, 1.93F),
             ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, WhiteLatexKnight::checkEntitySpawnRules);
     public static final RegistryObject<EntityType<WhiteLatexCentaur>> WHITE_LATEX_CENTAUR = registerSpawning("white_latex_centaur", 0xFFFFFF, 0x1E1E1E,
-            EntityType.Builder.of(WhiteLatexCentaur::new, ChangedMobCategories.CHANGED).clientTrackingRange(10).sized(1.1F, 2.0F),
+            EntityType.Builder.of(WhiteLatexCentaur::new, ChangedMobCategories.CHANGED).clientTrackingRange(10).sized(1.25F, 2.0F),
             ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, WhiteLatexCentaur::checkEntitySpawnRules);
     public static final RegistryObject<EntityType<LatexGnollTaur>> LATEX_GNOLL_TAUR = registerSpawning("latex_gnoll_taur", 0xffbf75, 0xc0604d,
-            EntityType.Builder.of(LatexGnollTaur::new, MobCategory.MONSTER).clientTrackingRange(10).sized(1.1F, 2.0F),
+            EntityType.Builder.of(LatexGnollTaur::new, MobCategory.MONSTER).clientTrackingRange(10).sized(1.25F, 2.0F),
             ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, LatexGnollTaur::checkEntitySpawnRules);
     public static final RegistryObject<EntityType<HeadlessKnight>> HEADLESS_KNIGHT = registerSpawning("headless_knight", 0xFFFFFF, 0x1E1E1E,
             EntityType.Builder.of(HeadlessKnight::new, ChangedMobCategories.CHANGED).clientTrackingRange(10).sized(1.1F, 1.1F),

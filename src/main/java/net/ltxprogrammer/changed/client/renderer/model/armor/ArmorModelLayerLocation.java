@@ -16,4 +16,7 @@ public record ArmorModelLayerLocation(DeferredModelLayerLocation inner, Deferred
     public static DeferredModelLayerLocation createOuterArmorLocation(ResourceLocation location) {
         return new DeferredModelLayerLocation(location, "outer_armor");
     }
+    public static DeferredModelLayerLocation createArmorLocation(ArmorModel layer, ResourceLocation location) {
+        return new DeferredModelLayerLocation(location, layer.identifier);
+    }
 }

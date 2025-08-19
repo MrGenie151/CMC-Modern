@@ -132,15 +132,19 @@ public class PureWhiteLatexWolfPupModel extends AdvancedHumanoidModel<PureWhiteL
         
         this.Body.xRot = 0.0F;
         this.Tail.xRot = -0.05235988F;
+        this.RightLegBack.loadPose(PartPose.offset(-2.0F, 18.0F, 7.0F));
         this.RightLegBack.xRot = Mth.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
         this.RightLegBack.yRot = 0f;
         this.RightLegBack.zRot = 0f;
+        this.LeftLegBack.loadPose(PartPose.offset(2.0F, 18.0F, 7.0F));
         this.LeftLegBack.xRot = Mth.cos(limbSwing * 0.6662F + (float)Math.PI) * 1.4F * limbSwingAmount;
         this.LeftLegBack.yRot = 0f;
         this.LeftLegBack.zRot = 0f;
+        this.RightFrontLeg.loadPose(PartPose.offset(-2.0F, 17.5F, -2.5F));
         this.RightFrontLeg.xRot = Mth.cos(limbSwing * 0.6662F + (float)Math.PI) * 1.4F * limbSwingAmount;
         this.RightFrontLeg.yRot = 0f;
         this.RightFrontLeg.zRot = 0f;
+        this.LeftFrontLeg.loadPose(PartPose.offset(2.0F, 17.5F, -2.5F));
         this.LeftFrontLeg.xRot = Mth.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
         this.LeftFrontLeg.yRot = 0f;
         this.LeftFrontLeg.zRot = 0f;

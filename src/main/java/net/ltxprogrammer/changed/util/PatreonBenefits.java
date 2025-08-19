@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.ability.AbstractAbility;
+import net.ltxprogrammer.changed.client.renderer.model.armor.ArmorModel;
 import net.ltxprogrammer.changed.client.renderer.model.armor.ArmorModelLayerLocation;
 import net.ltxprogrammer.changed.data.DeferredModelLayerLocation;
 import net.ltxprogrammer.changed.data.DelayLoadedModel;
@@ -46,6 +47,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class PatreonBenefits {
     private static final int COMPATIBLE_VERSION = 3;
@@ -151,7 +153,7 @@ public class PatreonBenefits {
     // Client only info
     public record ModelData(
             DeferredModelLayerLocation modelLayerLocation,
-            ArmorModelLayerLocation armorModelLayerLocation,
+            Map<ArmorModel, DeferredModelLayerLocation> armorModelLayerLocation,
 
             ResourceLocation texture,
             Optional<ResourceLocation> emissive,
@@ -174,10 +176,8 @@ public class PatreonBenefits {
             ResourceLocation textureLocation = Changed.modResource(fullId + "/texture.png");
             ResourceLocation modelLocation = Changed.modResource(fullId + "/model");
             DeferredModelLayerLocation layerLocation = new DeferredModelLayerLocation(modelLocation, "main");
-            ArmorModelLayerLocation armorLocations = new ArmorModelLayerLocation(
-                    ArmorModelLayerLocation.createInnerArmorLocation(modelLocation),
-                    ArmorModelLayerLocation.createOuterArmorLocation(modelLocation)
-            );
+            Map<ArmorModel, DeferredModelLayerLocation> armorLocations = Arrays.stream(ArmorModel.values())
+                    .collect(Collectors.toMap(Function.identity(), layer -> ArmorModelLayerLocation.createArmorLocation(layer, modelLocation)));
 
             return new ModelData(
                     layerLocation,
@@ -201,29 +201,16 @@ public class PatreonBenefits {
         }
 
         public void registerLayerDefinitions(BiConsumer<DeferredModelLayerLocation, Supplier<LayerDefinition>> registrar) {
-            if (oldModelRig) {
-                registrar.accept(modelLayerLocation, () -> model.get().createBodyLayer(
-                        DelayLoadedModel.HUMANOID_PART_FIXER,
-                        DelayLoadedModel.HUMANOID_GROUP_FIXER));
-                registrar.accept(armorModelLayerLocation.inner(), () -> armorModelInner.get().createBodyLayer(
-                        DelayLoadedModel.HUMANOID_PART_FIXER,
-                        DelayLoadedModel.HUMANOID_GROUP_FIXER));
-                registrar.accept(armorModelLayerLocation.outer(), () -> armorModelOuter.get().createBodyLayer(
-                        DelayLoadedModel.HUMANOID_PART_FIXER,
-                        DelayLoadedModel.HUMANOID_GROUP_FIXER));
-            }
+            var partFixer = oldModelRig ? DelayLoadedModel.HUMANOID_PART_FIXER : DelayLoadedModel.PART_NO_FIX;
+            var groupFixer = oldModelRig ? DelayLoadedModel.HUMANOID_GROUP_FIXER : DelayLoadedModel.GROUP_NO_FIX;
 
-            else {
-                registrar.accept(modelLayerLocation, () -> model.get().createBodyLayer(
-                        DelayLoadedModel.PART_NO_FIX,
-                        DelayLoadedModel.GROUP_NO_FIX));
-                registrar.accept(armorModelLayerLocation.inner(), () -> armorModelInner.get().createBodyLayer(
-                        DelayLoadedModel.PART_NO_FIX,
-                        DelayLoadedModel.GROUP_NO_FIX));
-                registrar.accept(armorModelLayerLocation.outer(), () -> armorModelOuter.get().createBodyLayer(
-                        DelayLoadedModel.PART_NO_FIX,
-                        DelayLoadedModel.GROUP_NO_FIX));
-            }
+            registrar.accept(modelLayerLocation, () -> model.get().createBodyLayer(partFixer, groupFixer));
+            registrar.accept(armorModelLayerLocation.get(ArmorModel.ARMOR_INNER), () -> armorModelInner.get().createBodyLayer(partFixer, groupFixer));
+            registrar.accept(armorModelLayerLocation.get(ArmorModel.ARMOR_OUTER), () -> armorModelOuter.get().createBodyLayer(partFixer, groupFixer));
+
+            registrar.accept(armorModelLayerLocation.get(ArmorModel.CLOTHING_INNER), () -> armorModelInner.get().createBodyLayer(partFixer, groupFixer, -0.25f));
+            registrar.accept(armorModelLayerLocation.get(ArmorModel.CLOTHING_MIDDLE), () -> armorModelInner.get().createBodyLayer(partFixer, groupFixer, -0.2f));
+            registrar.accept(armorModelLayerLocation.get(ArmorModel.CLOTHING_OUTER), () -> armorModelOuter.get().createBodyLayer(partFixer, groupFixer, -0.75f));
         }
 
         public void registerTextures(Consumer<ResourceLocation> registrar) {

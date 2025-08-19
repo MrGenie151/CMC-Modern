@@ -1,9 +1,6 @@
 package net.ltxprogrammer.changed;
 
-import net.ltxprogrammer.changed.client.ChangedClient;
-import net.ltxprogrammer.changed.client.ChangedOverlays;
-import net.ltxprogrammer.changed.client.EventHandlerClient;
-import net.ltxprogrammer.changed.client.RecipeCategories;
+import net.ltxprogrammer.changed.client.*;
 import net.ltxprogrammer.changed.client.latexparticles.LatexParticleType;
 import net.ltxprogrammer.changed.data.BuiltinRepositorySource;
 import net.ltxprogrammer.changed.entity.AccessoryEntities;
@@ -27,6 +24,7 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.IEventBusInvokeDispatcher;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.IModBusEvent;
@@ -78,7 +76,7 @@ public class Changed {
         registerLoadingEventListeners(context.getModEventBus());
 
         addEventListener(this::dataListeners);
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> this::registerClientEventListeners);
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> registerClientEventListeners(context.getModEventBus()));
 
         PACKETS.registerPackets();
 
@@ -144,12 +142,14 @@ public class Changed {
         event.enqueueWork(FacilityPieces::gatherFacilityPieces);
     }
 
-    private void registerClientEventListeners() {
+    private void registerClientEventListeners(IEventBus eventBus) {
         MinecraftForge.EVENT_BUS.register(eventHandlerClient = new EventHandlerClient());
-        Changed.addLoadingEventListener(RecipeCategories::registerCategories);
-        Changed.addLoadingEventListener(ChangedOverlays::registerOverlays);
-        Changed.addLoadingEventListener(ChangedClient::onBlockColorsInit);
-        Changed.addLoadingEventListener(ChangedClient::onItemColorsInit);
+        eventBus.addListener(RecipeCategories::registerCategories);
+        eventBus.addListener(ChangedOverlays::registerOverlays);
+        eventBus.addListener(ChangedClient::onBlockColorsInit);
+        eventBus.addListener(ChangedClient::onItemColorsInit);
+        eventBus.addListener(ChangedClient::onClientFinishSetup);
+        eventBus.addListener(AbilityRenderer::onRegisterModels);
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {
@@ -181,16 +181,8 @@ public class Changed {
         return MODID + ":" + path;
     }
 
-    public static <T extends Event & IModBusEvent> void addLoadingEventListener(Consumer<T> listener) {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(listener);
-    }
-
-    public static <T extends Event & IModBusEvent> boolean postModLoadingEvent(T event) {
-        return FMLJavaModLoadingContext.get().getModEventBus().post(event);
-    }
-
-    public static <T extends Event & IModBusEvent> boolean postModLoadingEvent(T event, IEventBusInvokeDispatcher dispatcher) {
-        return FMLJavaModLoadingContext.get().getModEventBus().post(event, dispatcher);
+    public static <T extends Event & IModBusEvent> void postModLoadingEvent(T event) {
+        ModLoader.get().postEvent(event);
     }
 
     public static <T extends Event> void addEventListener(Consumer<T> listener) {

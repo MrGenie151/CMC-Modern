@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.client.renderer.model.armor;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.client.renderer.animate.AnimatorPresets;
 import net.ltxprogrammer.changed.client.renderer.animate.HumanoidAnimator;
 import net.ltxprogrammer.changed.client.renderer.animate.arm.ArmBobAnimator;
@@ -11,7 +12,9 @@ import net.ltxprogrammer.changed.client.renderer.animate.upperbody.HeadInitAnima
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.item.Shorts;
 import net.ltxprogrammer.changed.util.PatreonBenefits;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
@@ -20,6 +23,18 @@ import net.minecraft.world.item.ItemStack;
 import java.util.List;
 
 public class ArmorSpecialLatexModel<T extends ChangedEntity> extends LatexHumanoidArmorModel<T, ArmorSpecialLatexModel<T>> {
+    public static ArmorModelSet<ChangedEntity, ArmorSpecialLatexModel<ChangedEntity>> makeModelSet(PatreonBenefits.ModelData form) {
+        return ArmorModelSet.of(form.modelLayerLocation().model, layer -> getLayerDefinitionForForm(layer, form),
+                (root, model) -> new ArmorSpecialLatexModel<>(root, model, form));
+    }
+
+    private static LayerDefinition getLayerDefinitionForForm(ArmorModel model, PatreonBenefits.ModelData form) {
+        var minecraft = Minecraft.getInstance();
+        var entityModels = minecraft.getEntityModels();
+
+        return entityModels.roots.get(form.armorModelLayerLocation().get(model).get());
+    }
+
     private final ModelPart RightLeg;
     private final ModelPart LeftLeg;
     private final ModelPart RightArm;

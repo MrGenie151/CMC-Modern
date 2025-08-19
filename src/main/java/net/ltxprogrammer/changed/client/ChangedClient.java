@@ -81,8 +81,6 @@ public class ChangedClient {
     public static void registerEventListeners() {
         Changed.addEventListener(ChangedClient::afterRenderStage);
         Changed.addEventListener(ChangedClient::onClientTick);
-        Changed.addLoadingEventListener(ChangedClient::onClientFinishSetup);
-        Changed.addLoadingEventListener(AbilityRenderer::onRegisterModels);
     }
 
     public static void onClientFinishSetup(FMLLoadCompleteEvent event) {

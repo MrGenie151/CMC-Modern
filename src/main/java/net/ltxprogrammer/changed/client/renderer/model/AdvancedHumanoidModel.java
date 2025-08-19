@@ -15,10 +15,7 @@ import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.robot.Exoskeleton;
 import net.ltxprogrammer.changed.extension.ChangedCompatibility;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.ArmedModel;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.HeadedModel;
-import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.*;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -95,6 +92,14 @@ public abstract class AdvancedHumanoidModel<T extends ChangedEntity> extends Pla
         if (!TransfurAnimator.isCapturing()) {
             ((ClientLivingEntityExtender) entity.maybeGetUnderlying()).getOrderedAnimations().forEach(instance -> {
                 instance.animate(this, entity, Mth.positiveModulo(ageInTicks, 1.0f));
+            });
+        }
+
+        if (limbSwing == 0.0f && limbSwingAmount == 0.0f && ageInTicks == 0.0f && netHeadYaw == 0.0f && headPitch == 0.0f) {
+            ((ClientLivingEntityExtender) entity).getOrderedAnimations().forEach(instance -> {
+                instance.resetToBaseline(this, entity, identifier -> {
+                    return identifier.limb() != Limb.LEFT_ARM && identifier.limb() != Limb.RIGHT_ARM;
+                });
             });
         }
 

@@ -1,5 +1,7 @@
 package net.ltxprogrammer.changed.util;
 
+import com.google.common.collect.HashMultimap;
+
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -36,6 +38,12 @@ public abstract class Cacheable<T> implements Supplier<T> {
         throw new NullPointerException();
     }
 
+    public Cacheable<T> preResolved(T value) {
+        var nval = Cacheable.of(this);
+        nval.forceValue(value);
+        return nval;
+    }
+
     protected static class Impl<T> extends Cacheable<T> {
         private final Supplier<T> init;
 
@@ -46,6 +54,13 @@ public abstract class Cacheable<T> implements Supplier<T> {
         @Override
         protected T initialGet() {
             return init.get();
+        }
+
+        @Override
+        public Cacheable<T> preResolved(T value) {
+            var nval = new Impl<>(init);
+            nval.forceValue(value);
+            return nval;
         }
     }
 

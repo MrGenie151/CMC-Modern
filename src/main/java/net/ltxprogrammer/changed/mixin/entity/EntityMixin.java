@@ -1,5 +1,6 @@
 package net.ltxprogrammer.changed.mixin.entity;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.ltxprogrammer.changed.ability.AbstractAbility;
@@ -11,6 +12,7 @@ import net.ltxprogrammer.changed.entity.LivingEntityDataExtension;
 import net.ltxprogrammer.changed.entity.SeatEntity;
 import net.ltxprogrammer.changed.entity.latex.SpreadingLatexType;
 import net.ltxprogrammer.changed.entity.variant.EntityShape;
+import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
 import net.ltxprogrammer.changed.init.ChangedAbilities;
 import net.ltxprogrammer.changed.init.ChangedTags;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
@@ -107,17 +109,24 @@ public abstract class EntityMixin extends net.minecraftforge.common.capabilities
         });
     }
 
+    @WrapMethod(method = "setPose")
+    public void setVariantPose(Pose pose, Operation<Void> original) {
+        original.call(pose);
+        // Forward calls to setPose directly to variant, instead of waiting for tick
+        ProcessTransfur.getPlayerTransfurVariantSafe(EntityUtil.playerOrNull((Entity)(Object)this))
+                .map(TransfurVariantInstance::getChangedEntity)
+                .ifPresent(entity -> entity.setPose(pose));
+    }
+
     @Unique
     private boolean isCallingIsInWall = false;
 
-    @Inject(method = "isInWall", at = @At("HEAD"))
-    public void startIsInWall(CallbackInfoReturnable<Boolean> cir) {
+    @WrapMethod(method = "isInWall")
+    public boolean wrapIsInWall(Operation<Boolean> original) {
         isCallingIsInWall = true;
-    }
-
-    @Inject(method = "isInWall", at = @At("TAIL"))
-    public void endIsInWall(CallbackInfoReturnable<Boolean> cir) {
+        var result = original.call();
         isCallingIsInWall = false;
+        return result;
     }
 
     @Inject(method = "getEyePosition()Lnet/minecraft/world/phys/Vec3;", at = @At("HEAD"), cancellable = true)

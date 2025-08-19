@@ -63,7 +63,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
     @Unique
     private void unprepareLayers(T entity) {
         ((ClientLivingEntityExtender)EntityUtil.maybeGetUnderlying(entity)).getOrderedAnimations().forEach(instance -> {
-            instance.resetToBaseline(this.model, entity);
+            instance.resetToBaseline(this.model, entity, identifier -> true);
         });
 
         if (!TransfurAnimator.isCapturing())

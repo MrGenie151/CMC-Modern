@@ -87,10 +87,19 @@ public abstract class HumanoidModelMixin<T extends LivingEntity> extends Ageable
     }
 
     @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/geom/ModelPart;copyFrom(Lnet/minecraft/client/model/geom/ModelPart;)V"))
-    public void setupAnimAndForceAnimation(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float p_102870_, float p_102871_, CallbackInfo ci) {
+    public void setupAnimAndForceAnimation(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo ci) {
         if (!TransfurAnimator.isCapturing()) {
             ((ClientLivingEntityExtender) entity).getOrderedAnimations().forEach(instance -> {
                 instance.animate((HumanoidModel<?>) (Object) this, Mth.positiveModulo(ageInTicks, 1.0f));
+            });
+        }
+
+        if (limbSwing == 0.0f && limbSwingAmount == 0.0f && ageInTicks == 0.0f && netHeadYaw == 0.0f && headPitch == 0.0f) {
+            // Exception case when rendering hand, ignore positioning other limbs
+            ((ClientLivingEntityExtender)entity).getOrderedAnimations().forEach(instance -> {
+                instance.resetToBaseline((HumanoidModel<?>)(Object) this, entity, identifier -> {
+                    return identifier.limb() != Limb.LEFT_ARM && identifier.limb() != Limb.RIGHT_ARM;
+                });
             });
         }
 

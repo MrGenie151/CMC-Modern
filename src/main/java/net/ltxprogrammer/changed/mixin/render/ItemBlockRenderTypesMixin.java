@@ -42,11 +42,11 @@ public abstract class ItemBlockRenderTypesMixin {
         }
 
         recurseFlag = true;
-        if (type == ChangedShaders.waveVisionResonantSolid(WaveVisionRenderer.LATEX_RESONANCE_NEUTRAL))
+        if (type == ChangedShaders.waveVisionResonantSolidFixed())
             callback.setReturnValue(ItemBlockRenderTypes.canRenderInLayer(state, RenderType.solid()));
-        else if (type == ChangedShaders.waveVisionResonantCutoutMipped(WaveVisionRenderer.LATEX_RESONANCE_NEUTRAL))
+        else if (type == ChangedShaders.waveVisionResonantCutoutMippedFixed())
             callback.setReturnValue(ItemBlockRenderTypes.canRenderInLayer(state, RenderType.cutoutMipped()));
-        else if (type == ChangedShaders.waveVisionResonantCutout(WaveVisionRenderer.LATEX_RESONANCE_NEUTRAL))
+        else if (type == ChangedShaders.waveVisionResonantCutoutFixed())
             callback.setReturnValue(
                     ItemBlockRenderTypes.canRenderInLayer(state, RenderType.cutout()) ||
                             ItemBlockRenderTypes.canRenderInLayer(state, RenderType.translucent()));

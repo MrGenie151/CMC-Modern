@@ -1,5 +1,8 @@
 package net.ltxprogrammer.changed.mixin.render;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.ltxprogrammer.changed.ability.GrabEntityAbility;
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.block.SeatableBlock;
@@ -180,7 +183,34 @@ public abstract class CameraMixin implements CameraExtender {
         return 0f;
     }
 
-    @Inject(method = "setPosition(Lnet/minecraft/world/phys/Vec3;)V", at = @At("HEAD"), cancellable = true)
+    @WrapOperation(method = "setup", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setPosition(DDD)V"))
+    public void setupAndAdjustForVariant(Camera self, double x, double y, double z, Operation<Void> original,
+                                         @Local(argsOnly = true) Entity cameraEntity,
+                                         @Local(argsOnly = true) float partialTick) {
+        if (cameraEntity instanceof Player player && player.isSpectator()) {
+            original.call(self, x, y, z);
+            return;
+        }
+
+        if (cameraEntity instanceof LivingEntity livingEntity) {
+            float zOffset = getEntityZOffset(livingEntity);
+            if (Mth.equal(zOffset, 0f)) {
+                original.call(self, x, y, z);
+                return;
+            }
+
+            /*if (Minecraft.getInstance().options.getCameraType().isFirstPerson())
+                zOffset *= 2f;*/
+            double yRot = Math.toRadians(Mth.rotLerp(partialTick, livingEntity.yBodyRotO, livingEntity.yBodyRot));
+            if (lastYRot == null)
+                lastYRot = yRot;
+            yRot = Mth.lerp(0.05f, lastYRot, yRot);
+            lastYRot = yRot;
+            original.call(self, x + (-Math.sin(yRot) * zOffset), y, z + (Math.cos(yRot) * zOffset));
+        }
+    }
+
+    /*@Inject(method = "setPosition(Lnet/minecraft/world/phys/Vec3;)V", at = @At("HEAD"), cancellable = true)
     protected void setPositionAndAdjustForVariant(Vec3 vec, CallbackInfo callbackInfo) {
         Camera self = (Camera)(Object)this;
         if (self.getEntity() instanceof Player player && player.isSpectator()) {
@@ -204,7 +234,7 @@ public abstract class CameraMixin implements CameraExtender {
             self.blockPosition.set(newVec.x, newVec.y, newVec.z);
             callbackInfo.cancel();
         }
-    }
+    }*/
 
     @Override
     public void setCameraPosition(Vec3 position) {

@@ -4,6 +4,7 @@ import net.ltxprogrammer.changed.world.features.structures.LootTables;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.util.random.WeightedRandomList;
+import org.jetbrains.annotations.Nullable;
 
 public class  FacilityCorridorSection extends FacilitySinglePiece {
     private static final WeightedRandomList<WeightedEntry.Wrapper<PieceType>> VALID_NEIGHBORS = WeightedRandomList.create(
@@ -34,7 +35,7 @@ public class  FacilityCorridorSection extends FacilitySinglePiece {
         super(PieceType.CORRIDOR, templateName, LootTables.LOW_TIER_LAB);
     }
 
-    public FacilityCorridorSection(ResourceLocation templateName, ResourceLocation lootTable) {
+    public FacilityCorridorSection(ResourceLocation templateName, @Nullable ResourceLocation lootTable) {
         super(PieceType.CORRIDOR, templateName, lootTable);
     }
 

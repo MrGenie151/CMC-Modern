@@ -29,6 +29,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 import net.minecraft.world.level.levelgen.structure.templatesystem.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -44,16 +45,16 @@ public abstract class FacilitySinglePiece extends FacilityPiece {
         this.lootTable = Optional.empty();
     }
 
-    protected FacilitySinglePiece(PieceType type, ResourceLocation templateName, ResourceLocation lootTable) {
+    protected FacilitySinglePiece(PieceType type, ResourceLocation templateName, @Nullable ResourceLocation lootTable) {
         super(type);
         this.templateName = templateName;
-        this.lootTable = Optional.of(lootTable);
+        this.lootTable = Optional.ofNullable(lootTable);
     }
 
-    protected FacilitySinglePiece(Weight weight, PieceType type, ResourceLocation templateName, ResourceLocation lootTable) {
+    protected FacilitySinglePiece(Weight weight, PieceType type, ResourceLocation templateName, @Nullable ResourceLocation lootTable) {
         super(type);
         this.templateName = templateName;
-        this.lootTable = Optional.of(lootTable);
+        this.lootTable = Optional.ofNullable(lootTable);
     }
 
     public static class StructureInstance extends FacilityPieceInstance {

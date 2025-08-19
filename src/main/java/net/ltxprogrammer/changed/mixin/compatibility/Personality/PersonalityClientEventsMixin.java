@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(value = PersonalityClientEvents.class, remap = false)
 @RequiredMods("personality")
 public class PersonalityClientEventsMixin<T extends ChangedEntity> {
-    @WrapOperation(method = "onEntitySize", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/player/Player;STANDING_DIMENSIONS:Lnet/minecraft/world/entity/EntityDimensions;"))
+    @WrapOperation(method = "onEntitySize", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/player/Player;STANDING_DIMENSIONS:Lnet/minecraft/world/entity/EntityDimensions;", remap = true))
     private static EntityDimensions applyPersonalitySizeEvent(Operation<EntityDimensions> original, @Local(argsOnly = true) EntityEvent.Size event) {
         return ProcessTransfur.getPlayerTransfurVariantSafe(EntityUtil.playerOrNull(event.getEntity()))
                 .map(variant -> variant.getTransfurDimensions(Pose.STANDING))
