@@ -898,7 +898,7 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
             host.setPose(Pose.SWIMMING);
 
         // Sink in water
-        if (host.getAttributeValue(ForgeMod.SWIM_SPEED.get()) > 1.0) {
+        if (host.getAttributeBaseValue(ForgeMod.SWIM_SPEED.get()) > 1.0) {
             host.setNoGravity(host.isEyeInFluid(FluidTags.WATER));
         }
 
