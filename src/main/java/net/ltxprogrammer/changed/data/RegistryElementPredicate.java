@@ -1,5 +1,7 @@
 package net.ltxprogrammer.changed.data;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -13,6 +15,8 @@ public abstract class RegistryElementPredicate<T> implements Predicate<T> {
     protected RegistryElementPredicate(IForgeRegistry<T> registry) {
         this.registry = registry;
     }
+
+    public abstract String toString();
 
     public abstract void throwIfMissing();
 
@@ -37,6 +41,11 @@ public abstract class RegistryElementPredicate<T> implements Predicate<T> {
 
         @Override
         public void throwIfMissing() {}
+
+        @Override
+        public String toString() {
+            return "@" + namespace;
+        }
     }
 
     protected static class FullNameSpec<T> extends RegistryElementPredicate<T> {
@@ -55,6 +64,11 @@ public abstract class RegistryElementPredicate<T> implements Predicate<T> {
         @Override
         public void throwIfMissing() {
             registry.getHolder(id).orElseThrow(() -> new IllegalArgumentException("Full registry object name not present in registry"));
+        }
+
+        @Override
+        public String toString() {
+            return id.toString();
         }
     }
 
@@ -75,6 +89,11 @@ public abstract class RegistryElementPredicate<T> implements Predicate<T> {
 
         @Override
         public void throwIfMissing() {}
+
+        @Override
+        public String toString() {
+            return "#" + tag.location().toString();
+        }
     }
 
     public static <T> RegistryElementPredicate<T> parseString(IForgeRegistry<T> registry, String string) {
@@ -125,5 +144,15 @@ public abstract class RegistryElementPredicate<T> implements Predicate<T> {
         if (obj instanceof String s)
             return isValidSyntax(s);
         return false;
+    }
+
+    public static <T> Codec<RegistryElementPredicate<T>> codec(IForgeRegistry<T> registry) {
+        return Codec.STRING.comapFlatMap(string -> {
+            try {
+                return DataResult.success(parseString(registry, string));
+            } catch (Exception e) {
+                return DataResult.error(e::getMessage);
+            }
+        }, RegistryElementPredicate::toString);
     }
 }

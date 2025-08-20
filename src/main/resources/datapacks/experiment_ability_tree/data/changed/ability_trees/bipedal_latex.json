@@ -1,0 +1,184 @@
+{
+  "variants": [
+    "#changed:bipedal_latex"
+  ],
+  "nodes": {
+    "changed:practice1": {
+      "parent": "changed:root",
+      "titleId": "changed.ability_tree.practice1",
+      "descriptionId": "changed.ability_tree.movement.practice1",
+      "price": 1,
+
+      "effects": [
+        {
+          "type": "changed:attribute_modifier",
+          "attribute": "minecraft:generic.movement_speed",
+          "acquiredBonus": 0.0,
+          "missingPenalty": -0.1
+        }
+      ]
+    },
+    "changed:practice2": {
+      "parent": "changed:practice1",
+      "titleId": "changed.ability_tree.practice2",
+      "descriptionId": "changed.ability_tree.movement.practice2",
+      "price": 1,
+
+      "effects": [
+        {
+          "type": "changed:attribute_modifier",
+          "attribute": "changed:sneak_speed",
+          "acquiredBonus": 0.0,
+          "missingPenalty": -0.1
+        }
+      ]
+    },
+    "changed:practice3": {
+      "parent": "changed:practice2",
+      "titleId": "changed.ability_tree.practice3",
+      "descriptionId": "changed.ability_tree.movement.practice3",
+      "price": 1,
+
+      "effects": [
+        {
+          "type": "changed:attribute_modifier",
+          "attribute": "forge:swim_speed",
+          "acquiredBonus": 0.0,
+          "missingPenalty": -0.1
+        }
+      ]
+    },
+    "changed:practice4": {
+      "parent": "changed:practice3",
+      "titleId": "changed.ability_tree.practice4",
+      "descriptionId": "changed.ability_tree.movement.practice4",
+      "price": 1,
+
+      "effects": [
+        {
+          "type": "changed:attribute_modifier",
+          "attribute": "changed:sprint_speed",
+          "acquiredBonus": 0.0,
+          "missingPenalty": -0.05
+        }
+      ]
+    },
+    "changed:practice5": {
+      "parent": "changed:practice4",
+      "titleId": "changed.ability_tree.practice5",
+      "descriptionId": "changed.ability_tree.movement.practice5",
+      "price": 1,
+
+      "effects": [
+        {
+          "type": "changed:step_size_modifier",
+          "acquiredBonus": 0.0,
+          "missingPenalty": -1.0
+        }
+      ]
+    },
+    "changed:practice6": {
+      "parent": "changed:practice5",
+      "titleId": "changed.ability_tree.practice6",
+      "descriptionId": "changed.ability_tree.movement.practice6",
+      "price": 1,
+
+      "effects": [
+        {
+          "type": "changed:attribute_modifier",
+          "attribute": "minecraft:generic.movement_speed",
+          "acquiredBonus": 0.0,
+          "missingPenalty": -0.1
+        }
+      ]
+    },
+    "changed:practice7": {
+      "parent": "changed:practice6",
+      "titleId": "changed.ability_tree.practice7",
+      "descriptionId": "changed.ability_tree.movement.practice7",
+      "price": 1,
+
+      "effects": [
+        {
+          "type": "changed:attribute_modifier",
+          "attribute": "changed:sneak_speed",
+          "acquiredBonus": 0.0,
+          "missingPenalty": -0.1
+        }
+      ]
+    },
+    "changed:practice8": {
+      "parent": "changed:practice7",
+      "titleId": "changed.ability_tree.practice8",
+      "descriptionId": "changed.ability_tree.movement.practice8",
+      "price": 1,
+
+      "effects": [
+        {
+          "type": "changed:attribute_modifier",
+          "attribute": "changed:sprint_speed",
+          "acquiredBonus": 0.0,
+          "missingPenalty": -0.10
+        }
+      ]
+    },
+    "changed:practice9": {
+      "parent": "changed:practice8",
+      "titleId": "changed.ability_tree.practice9",
+      "descriptionId": "changed.ability_tree.movement.practice9",
+      "price": 1,
+
+      "effects": [
+        {
+          "type": "changed:attribute_modifier",
+          "attribute": "forge:swim_speed",
+          "acquiredBonus": 0.0,
+          "missingPenalty": -0.15
+        }
+      ]
+    },
+    "changed:practice10": {
+      "parent": "changed:practice9",
+      "titleId": "changed.ability_tree.practice10",
+      "descriptionId": "changed.ability_tree.movement.practice10",
+      "price": 1,
+
+      "effects": [
+        {
+          "type": "changed:attribute_modifier",
+          "attribute": "minecraft:generic.movement_speed",
+          "acquiredBonus": 0.10,
+          "missingPenalty": 0.0
+        }
+      ]
+    },
+    "changed:practice11": {
+      "parent": "changed:practice10",
+      "titleId": "changed.ability_tree.practice11",
+      "descriptionId": "changed.ability_tree.movement.practice11",
+      "price": 1,
+
+      "effects": [
+        {
+          "type": "changed:attribute_modifier",
+          "attribute": "forge:swim_speed",
+          "acquiredBonus": 0.10,
+          "missingPenalty": 0.0
+        }
+      ]
+    },
+    "changed:practice12": {
+      "parent": "changed:practice11",
+      "titleId": "changed.ability_tree.practice12",
+      "descriptionId": "changed.ability_tree.movement.practice12",
+      "price": 1,
+
+      "effects": [
+        {
+          "type": "changed:unlock_active_ability",
+          "ability": "changed:high_jump"
+        }
+      ]
+    }
+  }
+}
