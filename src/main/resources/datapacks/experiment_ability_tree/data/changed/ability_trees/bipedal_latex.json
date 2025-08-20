@@ -3,11 +3,28 @@
     "#changed:bipedal_latex"
   ],
   "nodes": {
-    "changed:practice1": {
+    "changed:legs": {
       "parent": "changed:root",
+      "titleId": "changed.ability_tree.movement.legs",
+      "descriptionId": "changed.ability_tree.movement.legs",
+      "price": 1,
+      "groupDiscount": -1,
+
+      "effects": [
+        {
+          "type": "changed:attribute_modifier",
+          "attribute": "changed:sprint_speed",
+          "acquiredBonus": 0.0,
+          "missingPenalty": -1.0
+        }
+      ]
+    },
+    "changed:practice1": {
+      "parent": "changed:legs",
       "titleId": "changed.ability_tree.practice1",
       "descriptionId": "changed.ability_tree.movement.practice1",
       "price": 1,
+      "groupDiscount": -1,
 
       "effects": [
         {
@@ -23,6 +40,7 @@
       "titleId": "changed.ability_tree.practice2",
       "descriptionId": "changed.ability_tree.movement.practice2",
       "price": 1,
+      "groupDiscount": -1,
 
       "effects": [
         {
@@ -38,6 +56,7 @@
       "titleId": "changed.ability_tree.practice3",
       "descriptionId": "changed.ability_tree.movement.practice3",
       "price": 1,
+      "groupDiscount": -1,
 
       "effects": [
         {
@@ -53,6 +72,7 @@
       "titleId": "changed.ability_tree.practice4",
       "descriptionId": "changed.ability_tree.movement.practice4",
       "price": 1,
+      "groupDiscount": -1,
 
       "effects": [
         {
@@ -68,10 +88,12 @@
       "titleId": "changed.ability_tree.practice5",
       "descriptionId": "changed.ability_tree.movement.practice5",
       "price": 1,
+      "groupDiscount": -1,
 
       "effects": [
         {
-          "type": "changed:step_size_modifier",
+          "type": "changed:attribute_modifier",
+          "attribute": "changed:step_size",
           "acquiredBonus": 0.0,
           "missingPenalty": -1.0
         }
@@ -118,7 +140,7 @@
           "type": "changed:attribute_modifier",
           "attribute": "changed:sprint_speed",
           "acquiredBonus": 0.0,
-          "missingPenalty": -0.10
+          "missingPenalty": -0.1
         }
       ]
     },
@@ -141,7 +163,8 @@
       "parent": "changed:practice9",
       "titleId": "changed.ability_tree.practice10",
       "descriptionId": "changed.ability_tree.movement.practice10",
-      "price": 1,
+      "price": 2,
+      "groupDiscount": -1,
 
       "effects": [
         {
@@ -156,7 +179,8 @@
       "parent": "changed:practice10",
       "titleId": "changed.ability_tree.practice11",
       "descriptionId": "changed.ability_tree.movement.practice11",
-      "price": 1,
+      "price": 2,
+      "groupDiscount": -1,
 
       "effects": [
         {
@@ -171,7 +195,8 @@
       "parent": "changed:practice11",
       "titleId": "changed.ability_tree.practice12",
       "descriptionId": "changed.ability_tree.movement.practice12",
-      "price": 1,
+      "price": 2,
+      "groupDiscount": -1,
 
       "effects": [
         {

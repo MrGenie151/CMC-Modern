@@ -17,8 +17,6 @@ public class AbilityCounter {
     private final Map<Attribute, Double> baselineAttributes;
     private final Map<Attribute, Double> computedAttributes;
 
-    private float stepSize;
-
     private static Map<Attribute, Double> getBaseAttributeValues(AttributeMap attributeMap) {
         Map<Attribute, Double> map = new HashMap<>();
         ForgeRegistries.ATTRIBUTES.getValues().stream()
@@ -31,7 +29,6 @@ public class AbilityCounter {
         this.variantInstance = variantInstance;
         this.computedAttributes = getBaseAttributeValues(variantInstance.getHost().getAttributes());
         this.baselineAttributes = Map.copyOf(computedAttributes);
-        this.stepSize = variantInstance.stepSize;
     }
 
     /**
