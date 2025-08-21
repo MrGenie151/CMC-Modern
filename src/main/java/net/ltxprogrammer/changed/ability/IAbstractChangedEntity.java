@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.ability;
 
 import net.ltxprogrammer.changed.data.AccessorySlots;
 import net.ltxprogrammer.changed.entity.*;
+import net.ltxprogrammer.changed.entity.beast.AbstractDarkLatexEntity;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
 import net.ltxprogrammer.changed.init.ChangedEntities;
@@ -413,6 +414,11 @@ public interface IAbstractChangedEntity {
 
             @Override
             public boolean addItem(ItemStack item) {
+                if (cached.get() instanceof AbstractDarkLatexEntity darkLatexEntity) {
+                    var inv = darkLatexEntity.getInventory();
+                    if (inv != null)
+                        return darkLatexEntity.getInventory().add(item);
+                }
                 return false;
             }
 

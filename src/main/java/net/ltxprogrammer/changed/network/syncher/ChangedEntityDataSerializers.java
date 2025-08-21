@@ -40,5 +40,8 @@ public class ChangedEntityDataSerializers {
     static {
         EntityDataSerializers.registerSerializer(BASIC_PLAYER_INFO);
         EntityDataSerializers.registerSerializer(WALL_SIGN_VARIANT);
+        EntityDataSerializers.registerSerializer(DARK_LATEX_TARGET_TYPE);
+        EntityDataSerializers.registerSerializer(DARK_LATEX_ATTACK_TYPE);
+        EntityDataSerializers.registerSerializer(DARK_LATEX_ATTACK_CONDITION);
     }
 }

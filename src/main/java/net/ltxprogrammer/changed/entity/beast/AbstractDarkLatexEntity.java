@@ -3,6 +3,7 @@ package net.ltxprogrammer.changed.entity.beast;
 import net.ltxprogrammer.changed.entity.TamableLatexEntity;
 import net.ltxprogrammer.changed.entity.ai.*;
 import net.ltxprogrammer.changed.entity.latex.LatexType;
+import net.ltxprogrammer.changed.init.ChangedAttributes;
 import net.ltxprogrammer.changed.init.ChangedCriteriaTriggers;
 import net.ltxprogrammer.changed.init.ChangedItems;
 import net.ltxprogrammer.changed.init.ChangedLatexTypes;
@@ -10,6 +11,7 @@ import net.ltxprogrammer.changed.network.syncher.ChangedEntityDataSerializers;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -22,7 +24,9 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -42,11 +46,32 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
     protected static final EntityDataAccessor<DarkLatexTargetType> DATA_TARGET_TYPE_ID = SynchedEntityData.defineId(AbstractDarkLatexEntity.class, ChangedEntityDataSerializers.DARK_LATEX_TARGET_TYPE);
     protected static final EntityDataAccessor<DarkLatexAttackType> DATA_ATTACK_TYPE_ID = SynchedEntityData.defineId(AbstractDarkLatexEntity.class, ChangedEntityDataSerializers.DARK_LATEX_ATTACK_TYPE);
     protected static final EntityDataAccessor<DarkLatexAttackCondition> DATA_ATTACK_CONDITION_ID = SynchedEntityData.defineId(AbstractDarkLatexEntity.class, ChangedEntityDataSerializers.DARK_LATEX_ATTACK_CONDITION);
+    protected @Nullable DarkLatexInventory inventory; // Inventory doesn't exist until DL is tamed
 
     public static final int OWNER_HOSTILE_DURATION_TICKS = 600;
 
     public AbstractDarkLatexEntity(EntityType<? extends AbstractLatexWolf> p_19870_, Level p_19871_) {
         super(p_19870_, p_19871_);
+        this.inventory = null;
+    }
+
+    public DarkLatexInventory createInventory() {
+        return new DarkLatexInventory(this);
+    }
+
+    public @Nullable DarkLatexInventory getInventory() {
+        return inventory;
+    }
+
+    @Override
+    public ItemStack getItemInHand(InteractionHand hand) {
+        if (inventory == null)
+            return super.getItemInHand(hand);
+        if (hand == InteractionHand.OFF_HAND)
+            return inventory.getItem(DarkLatexInventory.SLOT_OFFHAND);
+        else {
+            return inventory.getSelected();
+        }
     }
 
     @Override
@@ -65,6 +90,15 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
         this.entityData.define(DATA_TARGET_TYPE_ID, DarkLatexTargetType.TRANSFURABLE_ENTITIES);
         this.entityData.define(DATA_ATTACK_TYPE_ID, DarkLatexAttackType.TRY_TRANSFUR);
         this.entityData.define(DATA_ATTACK_CONDITION_ID, DarkLatexAttackCondition.ALWAYS);
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+        super.onSyncedDataUpdated(accessor);
+        if (DATA_OWNERUUID_ID.equals(accessor)) {
+            if (this.inventory == null)
+                this.inventory = createInventory();
+        }
     }
 
     @Override
@@ -90,6 +124,13 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
                 this.setTame(false);
             }
         }
+
+        if (tag.contains("Inventory")) {
+            ListTag listtag = tag.getList("Inventory", 10);
+            this.inventory = this.createInventory();
+            this.inventory.load(listtag);
+            this.inventory.selected = tag.getInt("SelectedItemSlot");
+        }
     }
 
     @Override
@@ -101,6 +142,10 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
         }
 
         tag.putBoolean("FollowOwner", this.isFollowingOwner());
+        if (this.inventory != null) {
+            tag.put("Inventory", this.inventory.save(new ListTag()));
+            tag.putInt("SelectedItemSlot", this.inventory.selected);
+        }
     }
 
     public boolean isMaskless() {
@@ -307,6 +352,8 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
         }
 
         this.reassessTameGoals();
+        if (tame && this.inventory == null)
+            this.inventory = this.createInventory();
     }
 
     protected void reassessTameGoals() {
@@ -357,6 +404,12 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
             }
     }
 
+    protected void dropEquipment() {
+        super.dropEquipment();
+        if (this.inventory != null)
+            this.inventory.dropAll();
+    }
+
     protected boolean isTameItem(ItemStack stack) {
         return stack.is(ChangedItems.WHITE_LATEX_GOO.get()) || stack.is(ChangedItems.ORANGE.get());
     }
@@ -391,5 +444,85 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
         }
 
         return super.tryTransfurTarget(entity);
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (!this.level().isClientSide) {
+            updateHeldItemChoice();
+        }
+    }
+
+    protected int findSlotForTransfur() {
+        return this.inventory == null ? -1 : this.inventory.getFreeSlot();
+    }
+
+    protected int findSlotForCombat() {
+        // Maybe add bow AI?
+        if (this.inventory == null)
+            return -1;
+
+        double bestScore = 0;
+        int bestSlot = this.inventory.selected;
+
+        for (int i = 0; i < this.inventory.getContainerSize(); ++i) {
+            var itemStack = this.inventory.getItem(i);
+            if (itemStack.isEmpty())
+                continue;
+            double score = 0;
+            var modifiers = this.inventory.getItem(i).getAttributeModifiers(EquipmentSlot.MAINHAND);
+            if (modifiers.containsKey(Attributes.ATTACK_DAMAGE))
+                score += modifiers.get(Attributes.ATTACK_DAMAGE).stream().mapToDouble(AttributeModifier::getAmount).sum();
+            if (modifiers.containsKey(Attributes.ATTACK_SPEED))
+                score += modifiers.get(Attributes.ATTACK_SPEED).stream().mapToDouble(AttributeModifier::getAmount).sum();
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestSlot = i;
+            }
+        }
+
+        return bestSlot;
+    }
+
+    protected int findSlotForNonCombat() {
+        // TODO find a book, food, fishing rod, etc.
+        return this.inventory == null ? -1 : this.inventory.getFreeSlot();
+    }
+
+    public void updateHeldItemChoice() {
+        if (this.inventory == null)
+            return;
+
+        LivingEntity target = this.getTarget();
+        boolean inCombat = target != null;
+        boolean wantTransfur = inCombat && getAttackType().test(this, target); // Find empty slot, or else a strong weapon
+
+        if (inCombat) {
+            if (wantTransfur) {
+                this.inventory.selected = this.findSlotForTransfur();
+            }
+
+            if (!wantTransfur || this.inventory.selected == -1) { // No Free slot,
+                this.inventory.selected = this.findSlotForCombat();
+            }
+        } else {
+            if (getAttackCondition() == DarkLatexAttackCondition.ALWAYS) {
+                this.inventory.selected = this.findSlotForCombat();
+            }
+
+            if (getAttackCondition() != DarkLatexAttackCondition.ALWAYS || this.inventory.selected == -1) {
+                this.inventory.selected = this.findSlotForNonCombat();
+            }
+        }
+
+        if (this.inventory.selected == -1) {
+            this.inventory.selected = this.findSlotForNonCombat();
+        }
+
+        if (this.inventory.selected == -1) {
+            this.inventory.selected = 0; // Fail :(
+        }
     }
 }
