@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.mixin.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
+import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.ability.AbstractAbility;
 import net.ltxprogrammer.changed.client.ChangedClient;
 import net.ltxprogrammer.changed.client.ChangedShaders;
@@ -25,6 +26,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.GameType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.ModLoader;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -76,6 +78,11 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "reloadShaders", at = @At("RETURN"))
     public void reloadChangedShaders(ResourceProvider resourceManager, CallbackInfo callback) {
+        if (!ModLoader.isLoadingStateValid()) {
+            Changed.LOGGER.error("Refusing to load shaders due to invalid loading state");
+            return;
+        }
+
         List<Pair<ShaderInstance, Consumer<ShaderInstance>>> shaderInstances = new ArrayList<>();
         try {
             ChangedShaders.reloadShaders(resourceManager, shaderInstances::add);
