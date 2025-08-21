@@ -160,6 +160,13 @@
   "item.changed.smithing_template.quadrupedal_conversion.base_slot_description": "Helyezz ide lábszárvédőt vagy csizmát",
   "item.changed.smithing_template.quadrupedal_conversion.additions_slot_description": "Helyezz ide a páncél összetevőjét",
 
+  "item.changed.wall_sign_cat": "\"Macska\" fali tábla",
+  "item.changed.wall_sign_do_not_speak_with_dark_latexes": "\"Sötét latexekkel beszélgetni tilos\" fali tábla",
+  "item.changed.wall_sign_do_not_touch": "\"Érinteni tilos\" fali tábla",
+  "item.changed.wall_sign_do_not_touch_latexes": "\"Latexekre érinteni tilos\" fali tábla",
+  "item.changed.wall_sign_prototype": "\"Prototípus\" fali tábla",
+  "item.changed.wall_sign_squid": "\"Tintahal\" fali tábla",
+
   "item.changed.latex_music_disc": "Latex hanglemez",
   "item.changed.black_goo_zone_record.desc": "Shizi - Black Goo Zone",
   "item.changed.crystal_zone_record.desc": "Shizi - Crystal Zone",
@@ -817,6 +824,7 @@
   "changed.exoskeleton.battery_critical": "Akkumulátorszint kritikus",
 
   "builtin_resources.changed:beyond_earth_extra": "Changed Beyond Earth Extra",
+  "builtin_resources.changed:experiment_ability_tree": "Kísérleti: Changed Képességfák",
   "builtin_resources.changed:instant_transfur": "Changed Azonnali transzfur",
   "builtin_resources.changed:changed_pbr": "Changed PBR"
 }
