@@ -17,4 +17,11 @@ public enum DarkLatexAttackCondition implements StringRepresentable {
     public String getSerializedName() {
         return serializedName;
     }
+
+    public DarkLatexAttackCondition cycle() {
+        if (this.ordinal() + 1 == values().length)
+            return values()[0];
+        else
+            return values()[this.ordinal() + 1];
+    }
 }

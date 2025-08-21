@@ -36,4 +36,11 @@ public enum DarkLatexAttackType implements BiPredicate<AbstractDarkLatexEntity, 
     public String getSerializedName() {
         return serializedName;
     }
+
+    public DarkLatexAttackType cycle() {
+        if (this.ordinal() + 1 == values().length)
+            return values()[0];
+        else
+            return values()[this.ordinal() + 1];
+    }
 }

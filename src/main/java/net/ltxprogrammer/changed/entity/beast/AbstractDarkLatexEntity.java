@@ -8,6 +8,7 @@ import net.ltxprogrammer.changed.init.ChangedCriteriaTriggers;
 import net.ltxprogrammer.changed.init.ChangedItems;
 import net.ltxprogrammer.changed.init.ChangedLatexTypes;
 import net.ltxprogrammer.changed.network.syncher.ChangedEntityDataSerializers;
+import net.ltxprogrammer.changed.world.inventory.TamedDarkLatexMenu;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -21,6 +22,7 @@ import net.minecraft.server.players.OldUsersConverter;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
@@ -34,6 +36,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.scores.Team;
+import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -206,6 +209,18 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
         return this.entityData.get(DATA_ATTACK_CONDITION_ID);
     }
 
+    public void setTargetType(DarkLatexTargetType value) {
+        this.entityData.set(DATA_TARGET_TYPE_ID, value);
+    }
+
+    public void setAttackType(DarkLatexAttackType value) {
+        this.entityData.set(DATA_ATTACK_TYPE_ID, value);
+    }
+
+    public void setAttackCondition(DarkLatexAttackCondition value) {
+        this.entityData.set(DATA_ATTACK_CONDITION_ID, value);
+    }
+
     public boolean isPreventingPlayerRest(Player player) {
         if (isTame() && player.getUUID().equals(getOwnerUUID()))
             return false;
@@ -285,14 +300,21 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
                 } else {
                     InteractionResult interactionresult = super.mobInteract(player, hand);
                     if ((!interactionresult.consumesAction() || this.isBaby()) && this.isOwnedBy(player)) {
-                        boolean shouldFollow = !this.isFollowingOwner();
+                        /*boolean shouldFollow = !this.isFollowingOwner();
                         this.setFollowOwner(shouldFollow);
 
                         player.displayClientMessage(Component.translatable(shouldFollow ? "text.changed.tamed.follow" : "text.changed.tamed.wander", this.getDisplayName()), true);
                         this.jumping = false;
                         this.navigation.stop();
-                        this.setTarget((LivingEntity) null);
-                        return InteractionResult.SUCCESS;
+                        this.setTarget((LivingEntity) null);*/
+                        if (player instanceof ServerPlayer serverPlayer)
+                            NetworkHooks.openScreen(serverPlayer, new SimpleMenuProvider(
+                                    (id, inv, viewer) -> new TamedDarkLatexMenu(id, inv, this),
+                                    this.getDisplayName()
+                            ), extraData -> {
+                                extraData.writeInt(this.getId());
+                            });
+                        return InteractionResult.sidedSuccess(player.level().isClientSide);
                     }
 
                     return interactionresult;
