@@ -1,13 +1,12 @@
 package net.ltxprogrammer.changed.entity.beast;
 
 import net.ltxprogrammer.changed.entity.TamableLatexEntity;
-import net.ltxprogrammer.changed.entity.ai.LatexFollowOwnerGoal;
-import net.ltxprogrammer.changed.entity.ai.LatexOwnerHurtByTargetGoal;
-import net.ltxprogrammer.changed.entity.ai.LatexOwnerHurtTargetGoal;
+import net.ltxprogrammer.changed.entity.ai.*;
 import net.ltxprogrammer.changed.entity.latex.LatexType;
 import net.ltxprogrammer.changed.init.ChangedCriteriaTriggers;
 import net.ltxprogrammer.changed.init.ChangedItems;
 import net.ltxprogrammer.changed.init.ChangedLatexTypes;
+import net.ltxprogrammer.changed.network.syncher.ChangedEntityDataSerializers;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -35,10 +34,16 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implements DarkLatexEntity, TamableLatexEntity {
     protected static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(AbstractDarkLatexEntity.class, EntityDataSerializers.BYTE);
     protected static final EntityDataAccessor<Optional<UUID>> DATA_OWNERUUID_ID = SynchedEntityData.defineId(AbstractDarkLatexEntity.class, EntityDataSerializers.OPTIONAL_UUID);
+    protected static final EntityDataAccessor<DarkLatexTargetType> DATA_TARGET_TYPE_ID = SynchedEntityData.defineId(AbstractDarkLatexEntity.class, ChangedEntityDataSerializers.DARK_LATEX_TARGET_TYPE);
+    protected static final EntityDataAccessor<DarkLatexAttackType> DATA_ATTACK_TYPE_ID = SynchedEntityData.defineId(AbstractDarkLatexEntity.class, ChangedEntityDataSerializers.DARK_LATEX_ATTACK_TYPE);
+    protected static final EntityDataAccessor<DarkLatexAttackCondition> DATA_ATTACK_CONDITION_ID = SynchedEntityData.defineId(AbstractDarkLatexEntity.class, ChangedEntityDataSerializers.DARK_LATEX_ATTACK_CONDITION);
+
+    public static final int OWNER_HOSTILE_DURATION_TICKS = 600;
 
     public AbstractDarkLatexEntity(EntityType<? extends AbstractLatexWolf> p_19870_, Level p_19871_) {
         super(p_19870_, p_19871_);
@@ -57,6 +62,9 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
         super.defineSynchedData();
         this.entityData.define(DATA_FLAGS_ID, (byte)0);
         this.entityData.define(DATA_OWNERUUID_ID, Optional.empty());
+        this.entityData.define(DATA_TARGET_TYPE_ID, DarkLatexTargetType.TRANSFURABLE_ENTITIES);
+        this.entityData.define(DATA_ATTACK_TYPE_ID, DarkLatexAttackType.TRY_TRANSFUR);
+        this.entityData.define(DATA_ATTACK_CONDITION_ID, DarkLatexAttackCondition.ALWAYS);
     }
 
     @Override
@@ -109,14 +117,22 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
         final var owner = this.getOwner();
         if (livingEntity == owner)
             return false;
-        if (owner != null)
-            return livingEntity == owner.getLastHurtByMob();
+
+        Predicate<LivingEntity> superPredicate = super::targetSelectorTest;
+        if (owner != null) {
+            superPredicate = switch (getAttackCondition()) {
+                case NEVER -> target -> false;
+                case ALWAYS -> getTargetType().forEntity(this);
+                case OWNER_IS_HOSTILE -> getTargetType().forEntity(this)
+                        .and(target -> owner.tickCount - owner.getLastHurtMobTimestamp() < OWNER_HOSTILE_DURATION_TICKS);
+            };
+        }
         
         if (!this.isMaskless()) {// Check if masked DL can see entity
             if (livingEntity.distanceToSqr(this) <= 1.0)
-                return super.targetSelectorTest(livingEntity);
+                return superPredicate.test(livingEntity);
             if (getLevelBrightnessAt(livingEntity.blockPosition()) >= 5)
-                return super.targetSelectorTest(livingEntity);
+                return superPredicate.test(livingEntity);
 
             var delta = livingEntity.getDeltaMovement();
             var xyMovement = delta.subtract(0, delta.y, 0);
@@ -124,13 +140,25 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
                 return false;
         }
 
-        return super.targetSelectorTest(livingEntity);
+        return superPredicate.test(livingEntity);
     }
 
     @Nullable
     @Override
     public UUID getOwnerUUID() {
         return this.entityData.get(DATA_OWNERUUID_ID).orElse(null);
+    }
+
+    public DarkLatexTargetType getTargetType() {
+        return this.entityData.get(DATA_TARGET_TYPE_ID);
+    }
+
+    public DarkLatexAttackType getAttackType() {
+        return this.entityData.get(DATA_ATTACK_TYPE_ID);
+    }
+
+    public DarkLatexAttackCondition getAttackCondition() {
+        return this.entityData.get(DATA_ATTACK_CONDITION_ID);
     }
 
     public boolean isPreventingPlayerRest(Player player) {
@@ -252,6 +280,10 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
             return false;
         }
 
+        if (getAttackCondition() == DarkLatexAttackCondition.NEVER) {
+            return false;
+        }
+
         return TamableLatexEntity.super.wantsToAttack(target, owner);
     }
 
@@ -334,6 +366,8 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
         super.onDamagedBy(source);
         if (source instanceof Player player && player.isCreative())
             return;
+        if (getAttackCondition() == DarkLatexAttackCondition.NEVER)
+            return;
 
         double d0 = this.getAttributeValue(Attributes.FOLLOW_RANGE);
         AABB aabb = AABB.unitCubeFromLowerCorner(this.position()).inflate(d0, 10.0D, d0);
@@ -347,5 +381,15 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
     protected void setAttributes(AttributeMap attributes) {
         super.setAttributes(attributes);
         attributes.getInstance(Attributes.FOLLOW_RANGE).setBaseValue(25.0);
+    }
+
+    @Override
+    public boolean tryTransfurTarget(Entity entity) {
+        if (entity instanceof LivingEntity livingEntity && this.getUnderlyingPlayer() == null) {
+            if (!getAttackType().test(this, livingEntity))
+                return false; // Cancel attempt to transfur
+        }
+
+        return super.tryTransfurTarget(entity);
     }
 }
