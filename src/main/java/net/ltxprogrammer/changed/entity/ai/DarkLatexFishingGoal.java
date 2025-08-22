@@ -8,6 +8,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
@@ -39,15 +40,16 @@ public class DarkLatexFishingGoal extends MoveToBlockGoal {
     public final AbstractDarkLatexEntity entity;
     public final Level level;
     private BlockPos targetWaterSurface = BlockPos.ZERO;
-    private final int searchRange;
-    private final int verticalSearchRange;
 
     public DarkLatexFishingGoal(AbstractDarkLatexEntity entity, double speedModifier, int searchRange, int verticalSearchRange) {
         super(entity, speedModifier, searchRange, verticalSearchRange);
         this.entity = entity;
         this.level = entity.level();
-        this.searchRange = searchRange;
-        this.verticalSearchRange = verticalSearchRange;
+    }
+
+    @Override
+    protected int nextStartTick(PathfinderMob mob) {
+        return 40;
     }
 
     public double acceptedDistance() {
@@ -72,6 +74,8 @@ public class DarkLatexFishingGoal extends MoveToBlockGoal {
     @Override
     public boolean canContinueToUse() {
         if (entity.getTarget() != null)
+            return false;
+        if (entity.getCurrentFavor() != DarkLatexFavor.FISHING)
             return false;
         if (!entity.getMainHandItem().is(Tags.Items.TOOLS_FISHING_RODS))
             return false;
