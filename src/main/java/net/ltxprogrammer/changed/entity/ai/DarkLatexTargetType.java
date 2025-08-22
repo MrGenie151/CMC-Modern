@@ -4,6 +4,7 @@ import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.beast.AbstractDarkLatexEntity;
 import net.ltxprogrammer.changed.entity.latex.LatexType;
 import net.ltxprogrammer.changed.init.ChangedTags;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -59,6 +60,10 @@ public enum DarkLatexTargetType implements BiPredicate<AbstractDarkLatexEntity, 
     @Override
     public String getSerializedName() {
         return serializedName;
+    }
+
+    public Component getDisplayText() {
+        return Component.translatable("changed.tamed_dark_latex.targeting." + serializedName);
     }
 
     public DarkLatexTargetType cycle() {

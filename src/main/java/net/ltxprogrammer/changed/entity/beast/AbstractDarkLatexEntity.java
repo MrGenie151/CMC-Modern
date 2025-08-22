@@ -49,6 +49,7 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
     protected static final EntityDataAccessor<DarkLatexTargetType> DATA_TARGET_TYPE_ID = SynchedEntityData.defineId(AbstractDarkLatexEntity.class, ChangedEntityDataSerializers.DARK_LATEX_TARGET_TYPE);
     protected static final EntityDataAccessor<DarkLatexAttackType> DATA_ATTACK_TYPE_ID = SynchedEntityData.defineId(AbstractDarkLatexEntity.class, ChangedEntityDataSerializers.DARK_LATEX_ATTACK_TYPE);
     protected static final EntityDataAccessor<DarkLatexAttackCondition> DATA_ATTACK_CONDITION_ID = SynchedEntityData.defineId(AbstractDarkLatexEntity.class, ChangedEntityDataSerializers.DARK_LATEX_ATTACK_CONDITION);
+    protected static final EntityDataAccessor<DarkLatexFavor> DATA_FAVOR_ID = SynchedEntityData.defineId(AbstractDarkLatexEntity.class, ChangedEntityDataSerializers.DARK_LATEX_FAVOR);
     protected @Nullable DarkLatexInventory inventory; // Inventory doesn't exist until DL is tamed
 
     public static final int OWNER_HOSTILE_DURATION_TICKS = 600;
@@ -78,8 +79,22 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
     }
 
     @Override
+    public SlotAccess getSlot(int slotIndex) {
+        if (this.inventory == null)
+            return super.getSlot(slotIndex);
+        else {
+            if (slotIndex >= 0 && slotIndex < this.inventory.items.size()) {
+                return SlotAccess.forContainer(this.inventory, slotIndex);
+            } else {
+                return super.getSlot(slotIndex);
+            }
+        }
+    }
+
+    @Override
     protected void registerGoals() {
         super.registerGoals();
+        this.goalSelector.addGoal(2, new DarkLatexFishingGoal(this, 0.3, 8, 5));
         this.goalSelector.addGoal(6, new LatexFollowOwnerGoal<>(this, 0.35D, 10.0F, 2.0F, false));
         this.targetSelector.addGoal(1, new LatexOwnerHurtByTargetGoal<>(this));
         this.targetSelector.addGoal(2, new LatexOwnerHurtTargetGoal<>(this));
@@ -93,6 +108,7 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
         this.entityData.define(DATA_TARGET_TYPE_ID, DarkLatexTargetType.TRANSFURABLE_ENTITIES);
         this.entityData.define(DATA_ATTACK_TYPE_ID, DarkLatexAttackType.TRY_TRANSFUR);
         this.entityData.define(DATA_ATTACK_CONDITION_ID, DarkLatexAttackCondition.ALWAYS);
+        this.entityData.define(DATA_FAVOR_ID, DarkLatexFavor.NONE);
     }
 
     @Override
@@ -209,6 +225,10 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
         return this.entityData.get(DATA_ATTACK_CONDITION_ID);
     }
 
+    public DarkLatexFavor getCurrentFavor() {
+        return this.entityData.get(DATA_FAVOR_ID);
+    }
+
     public void setTargetType(DarkLatexTargetType value) {
         this.entityData.set(DATA_TARGET_TYPE_ID, value);
     }
@@ -219,6 +239,10 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
 
     public void setAttackCondition(DarkLatexAttackCondition value) {
         this.entityData.set(DATA_ATTACK_CONDITION_ID, value);
+    }
+
+    public void setFavor(DarkLatexFavor value) {
+        this.entityData.set(DATA_FAVOR_ID, value);
     }
 
     public boolean isPreventingPlayerRest(Player player) {

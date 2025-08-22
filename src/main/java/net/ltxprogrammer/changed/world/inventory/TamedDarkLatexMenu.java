@@ -1,5 +1,6 @@
 package net.ltxprogrammer.changed.world.inventory;
 
+import net.ltxprogrammer.changed.entity.ai.DarkLatexFavor;
 import net.ltxprogrammer.changed.entity.beast.AbstractDarkLatexEntity;
 import net.ltxprogrammer.changed.init.ChangedMenus;
 import net.minecraft.nbt.CompoundTag;
@@ -62,9 +63,38 @@ public class TamedDarkLatexMenu extends AbstractContainerMenu implements Updatea
     public void update(CompoundTag payload, LogicalSide receiver, @Nullable ServerPlayer origin) {
         if (receiver == LogicalSide.SERVER && origin == this.tamedDarkLatex.getOwner()) {
             switch (payload.getString("command")) {
-                case "cycle_target_type" -> this.tamedDarkLatex.setTargetType(this.tamedDarkLatex.getTargetType().cycle());
-                case "cycle_attack_type" -> this.tamedDarkLatex.setAttackType(this.tamedDarkLatex.getAttackType().cycle());
-                case "cycle_attack_condition" -> this.tamedDarkLatex.setAttackCondition(this.tamedDarkLatex.getAttackCondition().cycle());
+                case "view_inventory" -> {
+                    // TODO open menu for inventory
+                }
+                case "cycle_follow" -> {
+                    this.tamedDarkLatex.setFollowOwner(!this.tamedDarkLatex.isFollowingOwner());
+                    this.tamedDarkLatex.setJumping(false);
+                    this.tamedDarkLatex.getNavigation().stop();
+                }
+                case "cycle_target_type" -> {
+                    this.tamedDarkLatex.setTargetType(this.tamedDarkLatex.getTargetType().cycle());
+                    this.tamedDarkLatex.setTarget(null);
+                }
+                case "cycle_attack_type" -> {
+                    this.tamedDarkLatex.setAttackType(this.tamedDarkLatex.getAttackType().cycle());
+                    this.tamedDarkLatex.updateHeldItemChoice();
+                }
+                case "cycle_attack_condition" -> {
+                    this.tamedDarkLatex.setAttackCondition(this.tamedDarkLatex.getAttackCondition().cycle());
+                    this.tamedDarkLatex.setTarget(null);
+                }
+                case "favor_fishing" -> {
+                    this.tamedDarkLatex.setFavor(this.tamedDarkLatex.getCurrentFavor() != DarkLatexFavor.FISHING ?
+                            DarkLatexFavor.FISHING : DarkLatexFavor.NONE);
+                }
+                case "favor_caving" -> {
+                    this.tamedDarkLatex.setFavor(this.tamedDarkLatex.getCurrentFavor() != DarkLatexFavor.CAVING ?
+                            DarkLatexFavor.CAVING : DarkLatexFavor.NONE);
+                }
+                case "favor_suit_owner" -> {
+                    this.tamedDarkLatex.setFavor(this.tamedDarkLatex.getCurrentFavor() != DarkLatexFavor.SUIT_OWNER ?
+                            DarkLatexFavor.SUIT_OWNER : DarkLatexFavor.NONE);
+                }
             }
         }
     }

@@ -3,6 +3,7 @@ package net.ltxprogrammer.changed.entity.ai;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.beast.AbstractDarkLatexEntity;
 import net.ltxprogrammer.changed.init.ChangedTags;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -42,5 +43,9 @@ public enum DarkLatexAttackType implements BiPredicate<AbstractDarkLatexEntity, 
             return values()[0];
         else
             return values()[this.ordinal() + 1];
+    }
+
+    public Component getDisplayText() {
+        return Component.translatable("changed.tamed_dark_latex.attacking." + serializedName);
     }
 }

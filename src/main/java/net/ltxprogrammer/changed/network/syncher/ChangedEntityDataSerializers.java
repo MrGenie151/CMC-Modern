@@ -3,6 +3,7 @@ package net.ltxprogrammer.changed.network.syncher;
 import net.ltxprogrammer.changed.entity.BasicPlayerInfo;
 import net.ltxprogrammer.changed.entity.ai.DarkLatexAttackCondition;
 import net.ltxprogrammer.changed.entity.ai.DarkLatexAttackType;
+import net.ltxprogrammer.changed.entity.ai.DarkLatexFavor;
 import net.ltxprogrammer.changed.entity.ai.DarkLatexTargetType;
 import net.ltxprogrammer.changed.entity.decoration.WallSignVariant;
 import net.ltxprogrammer.changed.init.ChangedRegistry;
@@ -36,6 +37,7 @@ public class ChangedEntityDataSerializers {
     public static final EntityDataSerializer<DarkLatexTargetType> DARK_LATEX_TARGET_TYPE = EntityDataSerializer.simpleEnum(DarkLatexTargetType.class);
     public static final EntityDataSerializer<DarkLatexAttackType> DARK_LATEX_ATTACK_TYPE = EntityDataSerializer.simpleEnum(DarkLatexAttackType.class);
     public static final EntityDataSerializer<DarkLatexAttackCondition> DARK_LATEX_ATTACK_CONDITION = EntityDataSerializer.simpleEnum(DarkLatexAttackCondition.class);
+    public static final EntityDataSerializer<DarkLatexFavor> DARK_LATEX_FAVOR = EntityDataSerializer.simpleEnum(DarkLatexFavor.class);
 
     static {
         EntityDataSerializers.registerSerializer(BASIC_PLAYER_INFO);
@@ -43,5 +45,6 @@ public class ChangedEntityDataSerializers {
         EntityDataSerializers.registerSerializer(DARK_LATEX_TARGET_TYPE);
         EntityDataSerializers.registerSerializer(DARK_LATEX_ATTACK_TYPE);
         EntityDataSerializers.registerSerializer(DARK_LATEX_ATTACK_CONDITION);
+        EntityDataSerializers.registerSerializer(DARK_LATEX_FAVOR);
     }
 }

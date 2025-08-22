@@ -823,6 +823,9 @@
   "changed.exoskeleton.battery_low": "Battery level low",
   "changed.exoskeleton.battery_critical": "Battery level critical",
 
+  "changed.tamed_dark_latex.wander": "Wandering",
+  "changed.tamed_dark_latex.follow": "Following",
+
   "builtin_resources.changed:beyond_earth_extra": "Changed Beyond Earth Extra",
   "builtin_resources.changed:experiment_ability_tree": "Experimental: Changed Ability Trees",
   "builtin_resources.changed:instant_transfur": "Changed Instant Transfur",
