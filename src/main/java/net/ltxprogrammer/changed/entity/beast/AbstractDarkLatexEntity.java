@@ -1,9 +1,10 @@
 package net.ltxprogrammer.changed.entity.beast;
 
+import com.google.common.collect.Lists;
+import com.mojang.datafixers.util.Pair;
 import net.ltxprogrammer.changed.entity.TamableLatexEntity;
 import net.ltxprogrammer.changed.entity.ai.*;
 import net.ltxprogrammer.changed.entity.latex.LatexType;
-import net.ltxprogrammer.changed.init.ChangedAttributes;
 import net.ltxprogrammer.changed.init.ChangedCriteriaTriggers;
 import net.ltxprogrammer.changed.init.ChangedItems;
 import net.ltxprogrammer.changed.init.ChangedLatexTypes;
@@ -13,12 +14,14 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.OldUsersConverter;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -28,7 +31,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -36,9 +39,11 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.scores.Team;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -79,6 +84,50 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
     }
 
     @Override
+    public ItemStack getItemBySlot(EquipmentSlot slot) {
+        if (inventory == null)
+            return super.getItemBySlot(slot);
+        switch (slot.getType()) {
+            case HAND:
+                return switch (slot) {
+                    case MAINHAND -> inventory.getSelected();
+                    case OFFHAND -> inventory.getItem(DarkLatexInventory.SLOT_OFFHAND);
+                    default -> ItemStack.EMPTY;
+                };
+            default:
+                return super.getItemBySlot(slot);
+        }
+    }
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (inventory != null) {
+            if (!level().isClientSide) {
+                List<Pair<EquipmentSlot, ItemStack>> list = null;
+                var mainHandItem = this.getItemInHand(InteractionHand.MAIN_HAND);
+                var offHandItem = this.getItemInHand(InteractionHand.OFF_HAND);
+
+                if (mainHandItem != super.getItemBySlot(EquipmentSlot.MAINHAND)) {
+                    super.setItemSlot(EquipmentSlot.MAINHAND, mainHandItem);
+                    if (list == null)
+                        list = Lists.newArrayListWithCapacity(2);
+                    list.add(Pair.of(EquipmentSlot.MAINHAND, mainHandItem));
+                }
+                if (offHandItem != super.getItemBySlot(EquipmentSlot.OFFHAND)) {
+                    super.setItemSlot(EquipmentSlot.OFFHAND, offHandItem);
+                    if (list == null)
+                        list = Lists.newArrayListWithCapacity(2);
+                    list.add(Pair.of(EquipmentSlot.OFFHAND, offHandItem));
+                }
+
+                if (list != null && !list.isEmpty())
+                    ((ServerLevel)this.level()).getChunkSource().broadcast(this, new ClientboundSetEquipmentPacket(this.getId(), list));
+            }
+        }
+    }
+
+    @Override
     public SlotAccess getSlot(int slotIndex) {
         if (this.inventory == null)
             return super.getSlot(slotIndex);
@@ -94,7 +143,7 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(2, new DarkLatexFishingGoal(this, 0.3, 8, 5));
+        this.goalSelector.addGoal(2, new DarkLatexFishingGoal(this, 0.3, 24, 3));
         this.goalSelector.addGoal(6, new LatexFollowOwnerGoal<>(this, 0.35D, 10.0F, 2.0F, false));
         this.targetSelector.addGoal(1, new LatexOwnerHurtByTargetGoal<>(this));
         this.targetSelector.addGoal(2, new LatexOwnerHurtTargetGoal<>(this));
@@ -149,6 +198,11 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
             this.inventory = this.createInventory();
             this.inventory.load(listtag);
             this.inventory.selected = tag.getInt("SelectedItemSlot");
+
+            DarkLatexTargetType.fromSerial(tag.getString("TargetType")).result().ifPresent(this::setTargetType);
+            DarkLatexAttackType.fromSerial(tag.getString("AttackType")).result().ifPresent(this::setAttackType);
+            DarkLatexAttackCondition.fromSerial(tag.getString("AttackCondition")).result().ifPresent(this::setAttackCondition);
+            DarkLatexFavor.fromSerial(tag.getString("FavorToOwner")).result().ifPresent(this::setFavor);
         }
     }
 
@@ -164,6 +218,11 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
         if (this.inventory != null) {
             tag.put("Inventory", this.inventory.save(new ListTag()));
             tag.putInt("SelectedItemSlot", this.inventory.selected);
+
+            tag.putString("TargetType", getTargetType().getSerializedName());
+            tag.putString("AttackType", getAttackType().getSerializedName());
+            tag.putString("AttackCondition", getAttackCondition().getSerializedName());
+            tag.putString("FavorToOwner", getCurrentFavor().getSerializedName());
         }
     }
 
@@ -456,6 +515,65 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
             this.inventory.dropAll();
     }
 
+    @Override
+    public boolean canPickUpLoot() {
+        return inventory != null;
+    }
+
+    @Override
+    public void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack) {
+        if (inventory == null || equipmentSlot.isArmor())
+            super.setItemSlot(equipmentSlot, itemStack);
+        else {
+            if (equipmentSlot == EquipmentSlot.MAINHAND)
+                this.inventory.setItem(this.inventory.selected, itemStack);
+            else
+                this.inventory.setItem(DarkLatexInventory.SLOT_OFFHAND, itemStack);
+        }
+    }
+
+    @Override
+    protected void pickUpItem(ItemEntity itemEntity) {
+        if (inventory == null)
+            super.pickUpItem(itemEntity);
+        else {
+            ItemStack itemStack = itemEntity.getItem();
+            ItemStack copy = itemStack.copy();
+
+            EquipmentSlot equipmentSlot = itemStack.getEquipmentSlot();
+            if (equipmentSlot != null && equipmentSlot.isArmor()) {
+                ItemStack currentArmor = this.getItemBySlot(equipmentSlot);
+                if (this.canReplaceCurrentItem(itemStack, currentArmor)) {
+                    this.setItemSlot(equipmentSlot, itemStack.split(1));
+                    this.inventory.placeItemBackInInventory(currentArmor);
+
+                    int delta = copy.getCount() - itemStack.getCount();
+                    copy.setCount(delta);
+                    this.take(itemEntity, delta);
+                    if (itemStack.isEmpty()) {
+                        itemEntity.discard();
+                        itemStack.setCount(delta);
+                    }
+
+                    this.onItemPickup(itemEntity);
+                    return;
+                }
+            }
+
+            if (this.inventory.add(itemStack)) {
+                int tookAmount = copy.getCount() - itemStack.getCount();
+                copy.setCount(tookAmount);
+                this.take(itemEntity, tookAmount);
+                if (itemStack.isEmpty()) {
+                    itemEntity.discard();
+                    itemStack.setCount(tookAmount);
+                }
+
+                this.onItemPickup(itemEntity);
+            }
+        }
+    }
+
     protected boolean isTameItem(ItemStack stack) {
         return stack.is(ChangedItems.WHITE_LATEX_GOO.get()) || stack.is(ChangedItems.ORANGE.get());
     }
@@ -532,9 +650,50 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
         return bestSlot;
     }
 
+    protected int findSlotForFishingRod() {
+        if (inventory == null)
+            return -1;
+
+        for (int i = 0; i < inventory.getContainerSize(); ++i) {
+            var slot = inventory.getItem(i);
+            if (slot.isEmpty())
+                continue;
+
+            if (slot.is(Tags.Items.TOOLS_FISHING_RODS))
+                return i;
+        }
+
+        return inventory.selected;
+    }
+
+    protected int findSlotForPickaxe() {
+        if (inventory == null)
+            return -1;
+
+        // TODO rank pickaxes
+        return inventory.selected;
+    }
+
     protected int findSlotForNonCombat() {
         // TODO find a book, food, fishing rod, etc.
-        return this.inventory == null ? -1 : this.inventory.getFreeSlot();
+        if (inventory == null)
+            return -1;
+
+        if (getCurrentFavor() == DarkLatexFavor.FISHING)
+            return this.findSlotForFishingRod();
+
+        if (getCurrentFavor() == DarkLatexFavor.CAVING)
+            return this.findSlotForPickaxe();
+
+        for (int i = 0; i < inventory.getContainerSize(); ++i) {
+            var slot = inventory.getItem(i);
+            if (slot.isEmpty()) {
+                if (getCurrentFavor() == DarkLatexFavor.SUIT_OWNER)
+                    return i;
+            }
+        }
+
+        return inventory.selected;
     }
 
     public void updateHeldItemChoice() {
@@ -554,11 +713,11 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
                 this.inventory.selected = this.findSlotForCombat();
             }
         } else {
-            if (getAttackCondition() == DarkLatexAttackCondition.ALWAYS) {
+            if (getAttackCondition() == DarkLatexAttackCondition.ALWAYS && getCurrentFavor() == DarkLatexFavor.NONE) {
                 this.inventory.selected = this.findSlotForCombat();
             }
 
-            if (getAttackCondition() != DarkLatexAttackCondition.ALWAYS || this.inventory.selected == -1) {
+            if (getAttackCondition() != DarkLatexAttackCondition.ALWAYS || this.inventory.selected == -1 || getCurrentFavor() != DarkLatexFavor.NONE) {
                 this.inventory.selected = this.findSlotForNonCombat();
             }
         }

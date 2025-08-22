@@ -1,7 +1,10 @@
 package net.ltxprogrammer.changed.entity.ai;
 
+import com.mojang.serialization.DataResult;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
+
+import java.util.Arrays;
 
 public enum DarkLatexAttackCondition implements StringRepresentable {
     NEVER("never"),
@@ -17,6 +20,13 @@ public enum DarkLatexAttackCondition implements StringRepresentable {
     @Override
     public String getSerializedName() {
         return serializedName;
+    }
+
+    public static DataResult<DarkLatexAttackCondition> fromSerial(String serializedName) {
+        return Arrays.stream(values()).filter(value -> value.serializedName.equals(serializedName))
+                .findAny().map(DataResult::success).orElse(DataResult.error(
+                        () -> "Invalid attack condition " + serializedName
+                ));
     }
 
     public DarkLatexAttackCondition cycle() {

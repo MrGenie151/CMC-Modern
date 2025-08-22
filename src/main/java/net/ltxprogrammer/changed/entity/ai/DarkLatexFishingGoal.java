@@ -3,24 +3,39 @@ package net.ltxprogrammer.changed.entity.ai;
 import net.ltxprogrammer.changed.entity.beast.AbstractDarkLatexEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.FluidTags;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.FishingHook;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.Tags;
-import org.joml.Vector3f;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
 public class DarkLatexFishingGoal extends MoveToBlockGoal {
+    private static final int WATER_CHECK_SEARCH_HORIZONTAL = 8;
+    private static final int WATER_CHECK_SEARCH_VERTICAL = 4;
+
     public final AbstractDarkLatexEntity entity;
     public final Level level;
     private BlockPos targetWaterSurface = BlockPos.ZERO;
@@ -35,21 +50,8 @@ public class DarkLatexFishingGoal extends MoveToBlockGoal {
         this.verticalSearchRange = verticalSearchRange;
     }
 
-    public int findSlotForFishingRod() {
-        var inventory = entity.getInventory();
-        if (inventory == null)
-            return -1;
-
-        for (int i = 0; i < inventory.getContainerSize(); ++i) {
-            var slot = inventory.getItem(i);
-            if (slot.isEmpty())
-                continue;
-
-            if (slot.is(Tags.Items.TOOLS_FISHING_RODS))
-                return i;
-        }
-
-        return inventory.selected;
+    public double acceptedDistance() {
+        return 2.0D;
     }
 
     @Override
@@ -61,8 +63,6 @@ public class DarkLatexFishingGoal extends MoveToBlockGoal {
             return false;
         if (entity.getCurrentFavor() != DarkLatexFavor.FISHING)
             return false;
-
-        inventory.selected = this.findSlotForFishingRod();
         if (!entity.getMainHandItem().is(Tags.Items.TOOLS_FISHING_RODS))
             return false;
 
@@ -89,8 +89,8 @@ public class DarkLatexFishingGoal extends MoveToBlockGoal {
         BlockPos blockpos = this.blockPos;
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
-        for(int y = this.verticalSearchStart; y <= this.verticalSearchRange; y = y > 0 ? -y : 1 - y) {
-            for(int r = 0; r < this.searchRange; ++r) {
+        for(int y = 0; y <= WATER_CHECK_SEARCH_VERTICAL; y = y > 0 ? -y : 1 - y) {
+            for(int r = 0; r < WATER_CHECK_SEARCH_HORIZONTAL; ++r) {
                 for(int x = 0; x <= r; x = x > 0 ? -x : 1 - x) {
                     for(int z = x < r && x > -r ? r : 0; z <= r; z = z > 0 ? -z : 1 - z) {
                         blockpos$mutableblockpos.setWithOffset(blockpos, x, y - 1, z);
@@ -108,17 +108,17 @@ public class DarkLatexFishingGoal extends MoveToBlockGoal {
 
     public static Stream<BlockPos> getBlocksInLine(BlockPos start, BlockPos end, float traceThickness) {
         BlockPos delta = end.subtract(start);
-        Vec3 deltaCenter = delta.getCenter();
+        Vec3 deltaCenter = Vec3.atLowerCornerOf(delta);
         double checkIndex = 0;
         double deltaCheck = 1d / deltaCenter.length();
         Set<BlockPos> uniqueBlockPos = new HashSet<>();
         while (checkIndex <= 1d) {
-            Vec3 checkCenter = deltaCenter.multiply(checkIndex, checkIndex, checkIndex);
+            Vec3 checkCenter = deltaCenter.multiply(checkIndex, checkIndex, checkIndex).add(0.5, 0.5, 0.5);
 
             BlockPos.betweenClosedStream(new AABB(
                     checkCenter.subtract(traceThickness, traceThickness, traceThickness),
                     checkCenter.add(traceThickness, traceThickness, traceThickness)
-            )).forEach(uniqueBlockPos::add);
+            )).map(checkPos -> checkPos.offset(start)).forEach(uniqueBlockPos::add);
 
             checkIndex += deltaCheck;
         }
@@ -139,8 +139,8 @@ public class DarkLatexFishingGoal extends MoveToBlockGoal {
 
         // Trace from surface to where the entity will fish from
         return Stream.concat(
-                getBlocksInLine(this.blockPos.above(), blockPos.above(), 0.5f),
-                getBlocksInLine(this.blockPos.above().above(), blockPos.above().above(), 0.5f)
+                getBlocksInLine(this.blockPos.above(), blockPos.above(), 0.25f),
+                getBlocksInLine(this.blockPos.above().above(), blockPos.above().above(), 0.25f)
         ).allMatch(tracePos -> {
             if (tracePos.getX() == this.blockPos.getX() && tracePos.getZ() == this.blockPos.getZ())
                 return true; // Ignore perch block
@@ -164,6 +164,16 @@ public class DarkLatexFishingGoal extends MoveToBlockGoal {
         });
     }
 
+    protected int hookOutDuration = 0;
+    protected int idleDuration = 0;
+
+    @Override
+    public void start() {
+        super.start();
+        hookOutDuration = 0;
+        idleDuration = 0;
+    }
+
     @Override
     public void tick() {
         super.tick();
@@ -171,7 +181,57 @@ public class DarkLatexFishingGoal extends MoveToBlockGoal {
         if (this.isReachedTarget()) {
             this.tryTicks = 0; // Causes the DL to stay until other it has a combat target, or has a different favor
 
-            // TODO go fishing
+            if (this.idleDuration <= 0 && hookOutDuration <= 0)
+                this.startFishing();
+            if (this.hookOutDuration >= 8 * 20)
+                this.retrieveCast();
+
+            if (this.idleDuration > 0)
+                this.idleDuration--;
+            if (this.hookOutDuration > 0)
+                this.hookOutDuration++;
         }
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
+        if (this.hookOutDuration > 0)
+            this.cancelCast();
+    }
+
+    protected void startFishing() {
+        entity.swing(InteractionHand.MAIN_HAND);
+        level.playSound((Player)null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.NEUTRAL, 0.5F, 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F));
+        this.idleDuration = 0;
+        this.hookOutDuration = 1;
+    }
+
+    protected void retrieveCast() {
+        entity.swing(InteractionHand.MAIN_HAND);
+        ItemStack itemstack = entity.getItemInHand(InteractionHand.MAIN_HAND);
+        level.playSound((Player)null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.FISHING_BOBBER_RETRIEVE, SoundSource.NEUTRAL, 1.0F, 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F));
+        this.idleDuration = 3 * 20;
+        this.hookOutDuration = 0;
+
+        int luck = EnchantmentHelper.getFishingLuckBonus(itemstack);
+        LootParams lootparams = (new LootParams.Builder((ServerLevel)this.level))
+                .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(targetWaterSurface))
+                .withParameter(LootContextParams.TOOL, itemstack)
+                .withParameter(LootContextParams.KILLER_ENTITY, entity)
+                .withLuck(luck).create(LootContextParamSets.FISHING);
+        LootTable loottable = this.level.getServer().getLootData().getLootTable(BuiltInLootTables.FISHING);
+        loottable.getRandomItems(lootparams).forEach(caughtItem -> {
+            entity.getInventory().placeItemBackInInventory(caughtItem);
+        });
+    }
+
+    protected void cancelCast() {
+        entity.swing(InteractionHand.MAIN_HAND);
+        ItemStack itemstack = entity.getItemInHand(InteractionHand.MAIN_HAND);
+        level.playSound((Player)null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.FISHING_BOBBER_RETRIEVE, SoundSource.NEUTRAL, 1.0F, 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F));
+        itemstack.hurtAndBreak(1, entity, (p_41288_) -> {
+            p_41288_.broadcastBreakEvent(InteractionHand.MAIN_HAND);
+        });
     }
 }
