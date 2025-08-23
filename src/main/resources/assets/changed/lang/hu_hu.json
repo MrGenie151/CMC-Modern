@@ -823,6 +823,17 @@
   "changed.exoskeleton.battery_low": "Akkumulátorszint alacsony",
   "changed.exoskeleton.battery_critical": "Akkumulátorszint kritikus",
 
+  "changed.tamed_dark_latex.wander": "Vándorol",
+  "changed.tamed_dark_latex.follow": "Követ",
+  "changed.tamed_dark_latex.targeting.transfurable_entities": "Transzfurálható entitások",
+  "changed.tamed_dark_latex.targeting.monsters": "Szörnyek",
+  "changed.tamed_dark_latex.targeting.hostile_to_owner": "Tulajdonos ellenségei",
+  "changed.tamed_dark_latex.attacking.always_kill": "Mindig megöli az ellenséget",
+  "changed.tamed_dark_latex.attacking.try_transfur": "Próbálja elnyelni az ellenséget",
+  "changed.tamed_dark_latex.attack_condition.never": "Sose támad",
+  "changed.tamed_dark_latex.attack_condition.always": "Mindig támad",
+  "changed.tamed_dark_latex.attack_condition.owner_is_hostile": "Támad, amikor a tulajdonos is támad",
+
   "builtin_resources.changed:beyond_earth_extra": "Changed Beyond Earth Extra",
   "builtin_resources.changed:experiment_ability_tree": "Kísérleti: Changed Képességfák",
   "builtin_resources.changed:instant_transfur": "Changed Azonnali transzfur",
