@@ -2,12 +2,13 @@ package net.ltxprogrammer.changed.entity.beast;
 
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
+import net.ltxprogrammer.changed.Changed;
+import net.ltxprogrammer.changed.ability.*;
 import net.ltxprogrammer.changed.entity.TamableLatexEntity;
 import net.ltxprogrammer.changed.entity.ai.*;
 import net.ltxprogrammer.changed.entity.latex.LatexType;
-import net.ltxprogrammer.changed.init.ChangedCriteriaTriggers;
-import net.ltxprogrammer.changed.init.ChangedItems;
-import net.ltxprogrammer.changed.init.ChangedLatexTypes;
+import net.ltxprogrammer.changed.init.*;
+import net.ltxprogrammer.changed.network.packet.GrabEntityPacket;
 import net.ltxprogrammer.changed.network.syncher.ChangedEntityDataSerializers;
 import net.ltxprogrammer.changed.world.inventory.TamedDarkLatexMenu;
 import net.minecraft.core.particles.ParticleOptions;
@@ -21,7 +22,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.OldUsersConverter;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -37,10 +37,12 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Team;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.TierSortingRegistry;
 import net.minecraftforge.network.NetworkHooks;
+import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -56,12 +58,18 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
     protected static final EntityDataAccessor<DarkLatexAttackCondition> DATA_ATTACK_CONDITION_ID = SynchedEntityData.defineId(AbstractDarkLatexEntity.class, ChangedEntityDataSerializers.DARK_LATEX_ATTACK_CONDITION);
     protected static final EntityDataAccessor<DarkLatexFavor> DATA_FAVOR_ID = SynchedEntityData.defineId(AbstractDarkLatexEntity.class, ChangedEntityDataSerializers.DARK_LATEX_FAVOR);
     protected @Nullable DarkLatexInventory inventory; // Inventory doesn't exist until DL is tamed
+    protected @Nullable GrabEntityAbilityInstance grabEntityAbilityInstance; // Grab doesn't exist until DL is tamed
 
     public static final int OWNER_HOSTILE_DURATION_TICKS = 600;
 
     public AbstractDarkLatexEntity(EntityType<? extends AbstractLatexWolf> p_19870_, Level p_19871_) {
         super(p_19870_, p_19871_);
         this.inventory = null;
+        this.grabEntityAbilityInstance = null;
+    }
+
+    public GrabEntityAbilityInstance createGrabAbility() {
+        return new GrabEntityAbilityInstance(ChangedAbilities.GRAB_ENTITY_ABILITY.get(), IAbstractChangedEntity.forEntity(this));
     }
 
     public DarkLatexInventory createInventory() {
@@ -70,6 +78,17 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
 
     public @Nullable DarkLatexInventory getInventory() {
         return inventory;
+    }
+
+    public @Nullable GrabEntityAbilityInstance getGrabAbility() {
+        return grabEntityAbilityInstance;
+    }
+
+    @Override
+    public <A extends AbstractAbilityInstance> A getAbilityInstance(AbstractAbility<A> ability) {
+        if (grabEntityAbilityInstance != null && ability == grabEntityAbilityInstance.ability)
+            return (A) grabEntityAbilityInstance;
+        return super.getAbilityInstance(ability);
     }
 
     @Override
@@ -143,6 +162,7 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
     @Override
     protected void registerGoals() {
         super.registerGoals();
+        this.goalSelector.addGoal(1, new DarkLatexSuitOwnerGoal(this, 0.28, true));
         this.goalSelector.addGoal(2, new DarkLatexFishingGoal(this, 0.3, 24, 3));
         this.goalSelector.addGoal(2, new DarkLatexCaveHarvestGoal(this, 0.3, 24, 3));
         this.goalSelector.addGoal(3, new DarkLatexCaveTorchingGoal(this, 0.3, 16, 3));
@@ -168,6 +188,8 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
         if (DATA_OWNERUUID_ID.equals(accessor)) {
             if (this.inventory == null)
                 this.inventory = createInventory();
+            if (this.grabEntityAbilityInstance == null)
+                this.grabEntityAbilityInstance = createGrabAbility();
         }
     }
 
@@ -200,6 +222,7 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
             this.inventory = this.createInventory();
             this.inventory.load(listtag);
             this.inventory.selected = tag.getInt("SelectedItemSlot");
+            this.grabEntityAbilityInstance = createGrabAbility();
 
             DarkLatexTargetType.fromSerial(tag.getString("TargetType")).result().ifPresent(this::setTargetType);
             DarkLatexAttackType.fromSerial(tag.getString("AttackType")).result().ifPresent(this::setAttackType);
@@ -304,6 +327,18 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
 
     public void setFavor(DarkLatexFavor value) {
         this.entityData.set(DATA_FAVOR_ID, value);
+
+        var owner = this.getOwner();
+        if (value != DarkLatexFavor.SUIT_OWNER) {
+            if (owner != null && grabEntityAbilityInstance != null && grabEntityAbilityInstance.grabbedEntity == owner) {
+                grabEntityAbilityInstance.releaseEntity();
+                Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY.with(() -> this),
+                        new GrabEntityPacket(this, owner, GrabEntityPacket.GrabType.RELEASE));
+                ChangedSounds.broadcastSound(this, ChangedSounds.POISON, 1.0f, 1.0f);
+            }
+            if (this.getTarget() == owner)
+                this.setTarget(null);
+        }
     }
 
     public boolean isPreventingPlayerRest(Player player) {
@@ -461,6 +496,8 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
         this.reassessTameGoals();
         if (tame && this.inventory == null)
             this.inventory = this.createInventory();
+        if (tame && this.grabEntityAbilityInstance == null)
+            this.grabEntityAbilityInstance = createGrabAbility();
     }
 
     protected void reassessTameGoals() {
@@ -619,6 +656,14 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
             updateHeldItemChoice();
             updateOffhandItemChoice();
         }
+
+        if (grabEntityAbilityInstance != null) {
+            grabEntityAbilityInstance.tickIdle();
+            if (grabEntityAbilityInstance.grabbedEntity == this.getOwner() && grabEntityAbilityInstance.grabbedEntity != null) {
+                grabEntityAbilityInstance.grabbedHasControl = true;
+                grabEntityAbilityInstance.suited = true;
+            }
+        }
     }
 
     protected int findSlotForTransfur() {
@@ -719,7 +764,7 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
             return;
 
         LivingEntity target = this.getTarget();
-        boolean inCombat = target != null;
+        boolean inCombat = target != null && target != this.getOwner();
         boolean wantTransfur = inCombat && getAttackType().test(this, target); // Find empty slot, or else a strong weapon
 
         if (inCombat) {
