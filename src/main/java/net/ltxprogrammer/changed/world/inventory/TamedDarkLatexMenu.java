@@ -6,11 +6,13 @@ import net.ltxprogrammer.changed.init.ChangedMenus;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.LogicalSide;
+import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 public class TamedDarkLatexMenu extends AbstractContainerMenu implements UpdateableMenu {
@@ -64,7 +66,12 @@ public class TamedDarkLatexMenu extends AbstractContainerMenu implements Updatea
         if (receiver == LogicalSide.SERVER && origin == this.tamedDarkLatex.getOwner()) {
             switch (payload.getString("command")) {
                 case "view_inventory" -> {
-                    // TODO open menu for inventory
+                    NetworkHooks.openScreen((ServerPlayer) this.player, new SimpleMenuProvider(
+                            (id, inv, viewer) -> new TamedDarkLatexInventoryMenu(id, this.player, this.tamedDarkLatex),
+                            this.tamedDarkLatex.getDisplayName()
+                    ), extraData -> {
+                        extraData.writeInt(this.tamedDarkLatex.getId());
+                    });
                 }
                 case "cycle_follow" -> {
                     this.tamedDarkLatex.setFollowOwner(!this.tamedDarkLatex.isFollowingOwner());

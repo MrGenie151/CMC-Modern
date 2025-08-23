@@ -10,6 +10,7 @@ import net.ltxprogrammer.changed.entity.latex.LatexType;
 import net.ltxprogrammer.changed.init.*;
 import net.ltxprogrammer.changed.network.packet.GrabEntityPacket;
 import net.ltxprogrammer.changed.network.syncher.ChangedEntityDataSerializers;
+import net.ltxprogrammer.changed.world.inventory.TamedDarkLatexInventoryMenu;
 import net.ltxprogrammer.changed.world.inventory.TamedDarkLatexMenu;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -31,6 +32,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
@@ -116,6 +118,12 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
             default:
                 return super.getItemBySlot(slot);
         }
+    }
+
+    @Override
+    protected void updateControlFlags() {
+        super.updateControlFlags();
+        this.goalSelector.setControlFlag(Goal.Flag.MOVE, !this.isInteractingWith(this.getOwner()));
     }
 
     @Override
@@ -310,7 +318,10 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
     }
 
     public DarkLatexFavor getCurrentFavor() {
-        return this.entityData.get(DATA_FAVOR_ID);
+        DarkLatexFavor favor = this.entityData.get(DATA_FAVOR_ID);
+        if (!canDoFavor(favor))
+            favor = DarkLatexFavor.NONE;
+        return favor;
     }
 
     public void setTargetType(DarkLatexTargetType value) {
@@ -326,6 +337,8 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
     }
 
     public void setFavor(DarkLatexFavor value) {
+        if (!this.canDoFavor(value))
+            value = DarkLatexFavor.NONE;
         this.entityData.set(DATA_FAVOR_ID, value);
 
         var owner = this.getOwner();
@@ -393,6 +406,22 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
         this.entityData.set(DATA_OWNERUUID_ID, Optional.ofNullable(uuid));
     }
 
+    // Prevents the DL from switching items while the player is interacting with them
+    public boolean isInteractingWith(LivingEntity entity) {
+        if (entity instanceof Player player) {
+            if (player.containerMenu instanceof TamedDarkLatexMenu menu)
+                return menu.tamedDarkLatex == this;
+            if (player.containerMenu instanceof TamedDarkLatexInventoryMenu menu)
+                return menu.tamedDarkLatex == this;
+        }
+
+        return false;
+    }
+
+    public boolean canDoFavor(DarkLatexFavor favor) {
+        return true;
+    }
+
     public void tame(Player player) {
         this.setTame(true);
         this.setFollowOwner(true);
@@ -401,6 +430,17 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
             ChangedCriteriaTriggers.TAME_LATEX.trigger(serverPlayer, this);
         }
 
+    }
+
+    protected InteractionResult tamedInteract(Player player, InteractionHand hand) {
+        if (player instanceof ServerPlayer serverPlayer)
+            NetworkHooks.openScreen(serverPlayer, new SimpleMenuProvider(
+                    (id, inv, viewer) -> new TamedDarkLatexMenu(id, inv, this),
+                    this.getDisplayName()
+            ), extraData -> {
+                extraData.writeInt(this.getId());
+            });
+        return InteractionResult.sidedSuccess(player.level().isClientSide);
     }
 
     @Override
@@ -420,21 +460,7 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
                 } else {
                     InteractionResult interactionresult = super.mobInteract(player, hand);
                     if ((!interactionresult.consumesAction() || this.isBaby()) && this.isOwnedBy(player)) {
-                        /*boolean shouldFollow = !this.isFollowingOwner();
-                        this.setFollowOwner(shouldFollow);
-
-                        player.displayClientMessage(Component.translatable(shouldFollow ? "text.changed.tamed.follow" : "text.changed.tamed.wander", this.getDisplayName()), true);
-                        this.jumping = false;
-                        this.navigation.stop();
-                        this.setTarget((LivingEntity) null);*/
-                        if (player instanceof ServerPlayer serverPlayer)
-                            NetworkHooks.openScreen(serverPlayer, new SimpleMenuProvider(
-                                    (id, inv, viewer) -> new TamedDarkLatexMenu(id, inv, this),
-                                    this.getDisplayName()
-                            ), extraData -> {
-                                extraData.writeInt(this.getId());
-                            });
-                        return InteractionResult.sidedSuccess(player.level().isClientSide);
+                        return this.tamedInteract(player, hand);
                     }
 
                     return interactionresult;
@@ -760,7 +786,7 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
     }
 
     public void updateHeldItemChoice() {
-        if (this.inventory == null)
+        if (this.inventory == null || this.isInteractingWith(this.getOwner()))
             return;
 
         LivingEntity target = this.getTarget();
@@ -804,7 +830,7 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
     }
 
     public void updateOffhandItemChoice() {
-        if (this.inventory == null)
+        if (this.inventory == null || this.isInteractingWith(this.getOwner()))
             return;
 
         for (int slotIndex = 0; slotIndex < this.inventory.getContainerSize(); ++slotIndex) {
