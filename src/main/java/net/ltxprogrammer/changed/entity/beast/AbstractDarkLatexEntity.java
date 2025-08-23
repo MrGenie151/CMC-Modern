@@ -144,7 +144,8 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
     protected void registerGoals() {
         super.registerGoals();
         this.goalSelector.addGoal(2, new DarkLatexFishingGoal(this, 0.3, 24, 3));
-        this.goalSelector.addGoal(2, new DarkLatexCaveTorchingGoal(this, 0.3, 24, 5));
+        this.goalSelector.addGoal(2, new DarkLatexCaveHarvestGoal(this, 0.3, 24, 3));
+        this.goalSelector.addGoal(3, new DarkLatexCaveTorchingGoal(this, 0.3, 16, 3));
         this.goalSelector.addGoal(6, new LatexFollowOwnerGoal<>(this, 0.35D, 10.0F, 2.0F, false));
         this.targetSelector.addGoal(1, new LatexOwnerHurtByTargetGoal<>(this));
         this.targetSelector.addGoal(2, new LatexOwnerHurtTargetGoal<>(this));

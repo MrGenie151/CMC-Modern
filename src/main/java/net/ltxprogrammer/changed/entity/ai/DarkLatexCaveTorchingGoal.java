@@ -34,6 +34,8 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 public class DarkLatexCaveTorchingGoal extends MoveToBlockGoal {
+    private static final int TIME_LIMIT_TO_PATHFIND = 5 * 20;
+
     public final AbstractDarkLatexEntity entity;
     public final Level level;
 
@@ -76,7 +78,7 @@ public class DarkLatexCaveTorchingGoal extends MoveToBlockGoal {
         if (!entity.getOffhandItem().is(Items.TORCH))
             return false;
 
-        return super.canContinueToUse();
+        return this.tryTicks <= TIME_LIMIT_TO_PATHFIND && super.canContinueToUse();
     }
 
     @Override

@@ -30,7 +30,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class DarkLatexInventory implements Container, Nameable {
     public static final int POP_TIME_DURATION = 5;
     public static final int INVENTORY_SIZE = 36;
-    private static final int SELECTION_SIZE = 9;
+    private static final int SELECTION_SIZE = INVENTORY_SIZE;
     public static final int SLOT_OFFHAND = 40;
     public static final int NOT_FOUND_INDEX = -1;
     public static final int[] ALL_ARMOR_SLOTS = new int[]{0, 1, 2, 3};
@@ -106,8 +106,8 @@ public class DarkLatexInventory implements Container, Nameable {
         this.items.set(p_36039_, itemstack);
     }
 
-    public static boolean isHotbarSlot(int p_36046_) {
-        return p_36046_ >= 0 && p_36046_ < 9;
+    public static boolean isHotbarSlot(int slotIndex) {
+        return slotIndex >= 0 && slotIndex < SELECTION_SIZE;
     }
 
     public int findSlotMatchingItem(ItemStack p_36031_) {

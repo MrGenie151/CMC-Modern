@@ -36,6 +36,7 @@ import java.util.stream.Stream;
 public class DarkLatexFishingGoal extends MoveToBlockGoal {
     private static final int WATER_CHECK_SEARCH_HORIZONTAL = 8;
     private static final int WATER_CHECK_SEARCH_VERTICAL = 4;
+    private static final int TIME_LIMIT_TO_PATHFIND = 5 * 20;
 
     public final AbstractDarkLatexEntity entity;
     public final Level level;
@@ -82,7 +83,7 @@ public class DarkLatexFishingGoal extends MoveToBlockGoal {
         if (!this.isValidWaterSurface(level, targetWaterSurface))
             return false;
 
-        return super.canContinueToUse();
+        return this.tryTicks <= TIME_LIMIT_TO_PATHFIND && super.canContinueToUse();
     }
 
     @Override
@@ -228,14 +229,17 @@ public class DarkLatexFishingGoal extends MoveToBlockGoal {
         loottable.getRandomItems(lootparams).forEach(caughtItem -> {
             entity.getInventory().placeItemBackInInventory(caughtItem);
         });
+        itemstack.hurtAndBreak(1, entity, (handlerEntity) -> {
+            handlerEntity.broadcastBreakEvent(InteractionHand.MAIN_HAND);
+        });
     }
 
     protected void cancelCast() {
         entity.swing(InteractionHand.MAIN_HAND);
         ItemStack itemstack = entity.getItemInHand(InteractionHand.MAIN_HAND);
         level.playSound((Player)null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.FISHING_BOBBER_RETRIEVE, SoundSource.NEUTRAL, 1.0F, 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F));
-        itemstack.hurtAndBreak(1, entity, (p_41288_) -> {
-            p_41288_.broadcastBreakEvent(InteractionHand.MAIN_HAND);
+        itemstack.hurtAndBreak(1, entity, (handlerEntity) -> {
+            handlerEntity.broadcastBreakEvent(InteractionHand.MAIN_HAND);
         });
     }
 }
