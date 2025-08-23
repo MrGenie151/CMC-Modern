@@ -3,6 +3,7 @@ package net.ltxprogrammer.changed.network.packet;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.ability.AbstractAbility;
 import net.ltxprogrammer.changed.ability.AbstractAbilityInstance;
+import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.data.AccessorySlots;
 import net.ltxprogrammer.changed.entity.LivingEntityDataExtension;
 import net.ltxprogrammer.changed.init.ChangedAbilities;
@@ -74,24 +75,26 @@ public class GrabEntityPacket implements ChangedPacket {
                 if (!(source instanceof LivingEntity livingSource)) return;
                 if (!(target instanceof LivingEntity livingTarget)) return;
 
-                ProcessTransfur.ifPlayerTransfurred(EntityUtil.playerOrNull(livingSource), variant -> {
-                    variant.ifHasAbility(ChangedAbilities.GRAB_ENTITY_ABILITY.get(), ability -> {
-                        switch (type) {
-                            case RELEASE -> ability.releaseEntity();
-                            case SUIT -> {
-                                if (livingTarget instanceof Player && !Changed.config.server.isGrabEnabled.get())
-                                    return;
+                var latexSource = IAbstractChangedEntity.forEither(livingSource);
+                if (latexSource == null)
+                    return;
 
-                                ability.suitEntity(livingTarget);
-                            }
-                            case ARMS -> {
-                                if (livingTarget instanceof Player && !Changed.config.server.isGrabEnabled.get())
-                                    return;
+                latexSource.getAbilityInstanceSafe(ChangedAbilities.GRAB_ENTITY_ABILITY.get()).ifPresent(ability -> {
+                    switch (type) {
+                        case RELEASE -> ability.releaseEntity();
+                        case SUIT -> {
+                            if (livingTarget instanceof Player && !Changed.config.server.isGrabEnabled.get())
+                                return;
 
-                                ability.grabEntity(livingTarget);
-                            }
+                            ability.suitEntity(livingTarget);
                         }
-                    });
+                        case ARMS -> {
+                            if (livingTarget instanceof Player && !Changed.config.server.isGrabEnabled.get())
+                                return;
+
+                            ability.grabEntity(livingTarget);
+                        }
+                    }
                 });
             });
         }

@@ -1,6 +1,7 @@
 package net.ltxprogrammer.changed.client.gui;
 
 import net.ltxprogrammer.changed.Changed;
+import net.ltxprogrammer.changed.entity.ai.DarkLatexFavor;
 import net.ltxprogrammer.changed.util.Color3;
 import net.ltxprogrammer.changed.util.SingleRunnable;
 import net.ltxprogrammer.changed.world.inventory.TamedDarkLatexMenu;
@@ -20,6 +21,9 @@ public class TamedDarkLatexScreen extends AbstractRadialScreen<TamedDarkLatexMen
     private static final String PATH_GOO = "textures/gui/radial/goo/";
     private static final String PATH_GOO_SELECTED = "textures/gui/radial/goo_selected/";
 
+    private static final Component ACTIVE = Component.literal("Active");
+    private static final Component INACTIVE = Component.literal("Inactive");
+
     public TamedDarkLatexScreen(TamedDarkLatexMenu menu, Inventory inventory, Component text) {
         super(menu, inventory, text, Color3.DARK, Color3.WHITE, menu.tamedDarkLatex);
     }
@@ -30,19 +34,27 @@ public class TamedDarkLatexScreen extends AbstractRadialScreen<TamedDarkLatexMen
 
     @Override
     public int getCount() {
-        return 7;
+        return 8;
     }
 
     @Override
     public @Nullable List<Component> tooltipsFor(int section) {
         return switch (section) {
             case 0 -> List.of(Component.literal("View Inventory"));
-            case 1 -> List.of(Component.literal("Combat: Target Type"), Component.literal(menu.tamedDarkLatex.getTargetType().getSerializedName()));
-            case 2 -> List.of(Component.literal("Combat: Attack Type"), Component.literal(menu.tamedDarkLatex.getAttackType().getSerializedName()));
-            case 3 -> List.of(Component.literal("Combat: Attack Condition"), Component.literal(menu.tamedDarkLatex.getAttackCondition().getSerializedName()));
-            case 4 -> List.of(Component.literal("Favor: Fishing"));
-            case 5 -> List.of(Component.literal("Favor: Help Caving"));
-            case 6 -> List.of(Component.literal("Favor: Suit Owner"));
+            case 1 -> List.of(Component.literal("Follow Mode"),
+                    Component.translatable(menu.tamedDarkLatex.isFollowingOwner() ? "changed.tamed_dark_latex.follow" : "changed.tamed_dark_latex.wander"));
+            case 2 -> List.of(Component.literal("Combat: Target Type"),
+                    menu.tamedDarkLatex.getTargetType().getDisplayText());
+            case 3 -> List.of(Component.literal("Combat: Attack Type"),
+                    menu.tamedDarkLatex.getAttackType().getDisplayText());
+            case 4 -> List.of(Component.literal("Combat: Attack Condition"),
+                    menu.tamedDarkLatex.getAttackCondition().getDisplayText());
+            case 5 -> List.of(Component.literal("Favor: Fishing"),
+                    menu.tamedDarkLatex.getCurrentFavor() == DarkLatexFavor.FISHING ? ACTIVE : INACTIVE);
+            case 6 -> List.of(Component.literal("Favor: Help Caving"),
+                    menu.tamedDarkLatex.getCurrentFavor() == DarkLatexFavor.CAVING ? ACTIVE : INACTIVE);
+            case 7 -> List.of(Component.literal("Favor: Suit Owner"),
+                    menu.tamedDarkLatex.getCurrentFavor() == DarkLatexFavor.SUIT_OWNER ? ACTIVE : INACTIVE);
             default -> List.of();
         };
     }
@@ -73,30 +85,35 @@ public class TamedDarkLatexScreen extends AbstractRadialScreen<TamedDarkLatexMen
             }
             case 1 -> {
                 var tag = new CompoundTag();
-                tag.putString("command", "cycle_target_type");
+                tag.putString("command", "cycle_follow");
                 menu.setDirty(tag);
             }
             case 2 -> {
                 var tag = new CompoundTag();
-                tag.putString("command", "cycle_attack_type");
+                tag.putString("command", "cycle_target_type");
                 menu.setDirty(tag);
             }
             case 3 -> {
                 var tag = new CompoundTag();
-                tag.putString("command", "cycle_attack_condition");
+                tag.putString("command", "cycle_attack_type");
                 menu.setDirty(tag);
             }
             case 4 -> {
                 var tag = new CompoundTag();
-                tag.putString("command", "favor_fishing");
+                tag.putString("command", "cycle_attack_condition");
                 menu.setDirty(tag);
             }
             case 5 -> {
                 var tag = new CompoundTag();
-                tag.putString("command", "favor_help_caving");
+                tag.putString("command", "favor_fishing");
                 menu.setDirty(tag);
             }
             case 6 -> {
+                var tag = new CompoundTag();
+                tag.putString("command", "favor_caving");
+                menu.setDirty(tag);
+            }
+            case 7 -> {
                 var tag = new CompoundTag();
                 tag.putString("command", "favor_suit_owner");
                 menu.setDirty(tag);

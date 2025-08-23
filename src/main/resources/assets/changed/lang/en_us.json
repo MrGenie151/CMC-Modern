@@ -823,6 +823,17 @@
   "changed.exoskeleton.battery_low": "Battery level low",
   "changed.exoskeleton.battery_critical": "Battery level critical",
 
+  "changed.tamed_dark_latex.wander": "Wandering",
+  "changed.tamed_dark_latex.follow": "Following",
+  "changed.tamed_dark_latex.targeting.transfurable_entities": "Transfurable entities",
+  "changed.tamed_dark_latex.targeting.monsters": "Monsters",
+  "changed.tamed_dark_latex.targeting.hostile_to_owner": "Enemies to owner",
+  "changed.tamed_dark_latex.attacking.always_kill": "Always kill enemy",
+  "changed.tamed_dark_latex.attacking.try_transfur": "Try absorb enemy",
+  "changed.tamed_dark_latex.attack_condition.never": "Never attack",
+  "changed.tamed_dark_latex.attack_condition.always": "Always attack",
+  "changed.tamed_dark_latex.attack_condition.owner_is_hostile": "Attack when owner is hostile",
+
   "builtin_resources.changed:beyond_earth_extra": "Changed Beyond Earth Extra",
   "builtin_resources.changed:experiment_ability_tree": "Experimental: Changed Ability Trees",
   "builtin_resources.changed:instant_transfur": "Changed Instant Transfur",

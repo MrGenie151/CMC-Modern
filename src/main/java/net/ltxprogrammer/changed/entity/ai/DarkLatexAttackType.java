@@ -1,11 +1,14 @@
 package net.ltxprogrammer.changed.entity.ai;
 
+import com.mojang.serialization.DataResult;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.beast.AbstractDarkLatexEntity;
 import net.ltxprogrammer.changed.init.ChangedTags;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.LivingEntity;
 
+import java.util.Arrays;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
@@ -37,10 +40,22 @@ public enum DarkLatexAttackType implements BiPredicate<AbstractDarkLatexEntity, 
         return serializedName;
     }
 
+    public static DataResult<DarkLatexAttackType> fromSerial(String serializedName) {
+        return Arrays.stream(values()).filter(value -> value.serializedName.equals(serializedName))
+                .findAny().map(DataResult::success).orElse(DataResult.error(
+                        () -> "Invalid attack type " + serializedName
+                ));
+    }
+
+
     public DarkLatexAttackType cycle() {
         if (this.ordinal() + 1 == values().length)
             return values()[0];
         else
             return values()[this.ordinal() + 1];
+    }
+
+    public Component getDisplayText() {
+        return Component.translatable("changed.tamed_dark_latex.attacking." + serializedName);
     }
 }

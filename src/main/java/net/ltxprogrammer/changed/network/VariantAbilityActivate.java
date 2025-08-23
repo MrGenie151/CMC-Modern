@@ -2,12 +2,15 @@ package net.ltxprogrammer.changed.network;
 
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.ability.AbstractAbility;
+import net.ltxprogrammer.changed.ability.GrabEntityAbility;
+import net.ltxprogrammer.changed.init.ChangedAbilities;
 import net.ltxprogrammer.changed.init.ChangedRegistry;
 import net.ltxprogrammer.changed.network.packet.ChangedPacket;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.util.UniversalDist;
 import net.ltxprogrammer.changed.world.inventory.AbilityRadialMenu;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -81,6 +84,14 @@ public class VariantAbilityActivate implements ChangedPacket {
 
             ProcessTransfur.ifPlayerTransfurred(sender, (variant) -> {
                 context.setPacketHandled(true);
+
+                GrabEntityAbility.getGrabberSafe(sender).ifPresent(entity -> {
+                    if (entity.getAbilityInstanceSafe(ChangedAbilities.GRAB_ENTITY_ABILITY.get())
+                            .map(ability -> ability.grabbedHasControl).orElse(false)) {
+                        entity.getEntity().interact(sender, InteractionHand.MAIN_HAND);
+                    }
+                });
+
                 if (variant.isTemporaryFromSuit())
                     return;
 
