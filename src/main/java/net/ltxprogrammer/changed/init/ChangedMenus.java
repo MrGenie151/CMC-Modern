@@ -25,7 +25,7 @@ public class ChangedMenus {
     public static final RegistryObject<MenuType<StasisChamberMenu>> STASIS_CHAMBER = register("stasis_chamber", StasisChamberMenu::new);
     public static final RegistryObject<MenuType<AccessoryAccessMenu>> ACCESSORY_ACCESS = register("accessory_access", AccessoryAccessMenu::new);
     public static final RegistryObject<MenuType<TamedDarkLatexMenu>> TAMED_DARK_LATEX = register("tamed_dark_latex", TamedDarkLatexMenu::new);
-    public static final RegistryObject<MenuType<TamedDarkLatexMenu>> TAMED_DARK_LATEX_INVENTORY = register("tamed_dark_latex_inventory", TamedDarkLatexMenu::new);
+    public static final RegistryObject<MenuType<TamedDarkLatexInventoryMenu>> TAMED_DARK_LATEX_INVENTORY = register("tamed_dark_latex_inventory", TamedDarkLatexInventoryMenu::new);
 
     private static <T extends AbstractContainerMenu> RegistryObject<MenuType<T>> register(String name, IContainerFactory<T> containerFactory) {
         return REGISTRY.register(name, () -> new MenuType<>(containerFactory, FeatureFlagSet.of()));

@@ -23,7 +23,7 @@ public class ChangedScreens {
             MenuScreens.register(ChangedMenus.STASIS_CHAMBER.get(), StasisChamberScreen::new);
             MenuScreens.register(ChangedMenus.ACCESSORY_ACCESS.get(), AccessoryAccessScreen::new);
             MenuScreens.register(ChangedMenus.TAMED_DARK_LATEX.get(), TamedDarkLatexScreen::new);
-            MenuScreens.register(ChangedMenus.TAMED_DARK_LATEX_INVENTORY.get(), TamedDarkLatexScreen::new);
+            MenuScreens.register(ChangedMenus.TAMED_DARK_LATEX_INVENTORY.get(), TamedDarkLatexInventoryScreen::new);
         });
     }
 }

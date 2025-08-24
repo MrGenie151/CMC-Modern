@@ -29,9 +29,9 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class DarkLatexInventory implements Container, Nameable {
     public static final int POP_TIME_DURATION = 5;
-    public static final int INVENTORY_SIZE = 36;
+    public static final int INVENTORY_SIZE = 24;
     private static final int SELECTION_SIZE = INVENTORY_SIZE;
-    public static final int SLOT_OFFHAND = 40;
+    public static final int SLOT_OFFHAND = INVENTORY_SIZE + 4;
     public static final int NOT_FOUND_INDEX = -1;
     public static final int[] ALL_ARMOR_SLOTS = new int[]{0, 1, 2, 3};
     public static final int[] HELMET_SLOT_ONLY = new int[]{3};
@@ -74,7 +74,7 @@ public class DarkLatexInventory implements Container, Nameable {
             }
         }
 
-        return -1;
+        return NOT_FOUND_INDEX;
     }
 
     public void setPickedItem(ItemStack p_36013_) {
@@ -82,11 +82,11 @@ public class DarkLatexInventory implements Container, Nameable {
         if (isHotbarSlot(i)) {
             this.selected = i;
         } else {
-            if (i == -1) {
+            if (i == NOT_FOUND_INDEX) {
                 this.selected = this.getSuitableHotbarSlot();
                 if (!this.items.get(this.selected).isEmpty()) {
                     int j = this.getFreeSlot();
-                    if (j != -1) {
+                    if (j != NOT_FOUND_INDEX) {
                         this.items.set(j, this.items.get(this.selected));
                     }
                 }
@@ -117,7 +117,7 @@ public class DarkLatexInventory implements Container, Nameable {
             }
         }
 
-        return -1;
+        return NOT_FOUND_INDEX;
     }
 
     public int findSlotMatchingUnusedItem(ItemStack p_36044_) {
@@ -128,7 +128,7 @@ public class DarkLatexInventory implements Container, Nameable {
             }
         }
 
-        return -1;
+        return NOT_FOUND_INDEX;
     }
 
     public int getSuitableHotbarSlot() {
@@ -175,11 +175,11 @@ public class DarkLatexInventory implements Container, Nameable {
 
     private int addResource(ItemStack p_36067_) {
         int i = this.getSlotWithRemainingSpace(p_36067_);
-        if (i == -1) {
+        if (i == NOT_FOUND_INDEX) {
             i = this.getFreeSlot();
         }
 
-        return i == -1 ? p_36067_.getCount() : this.addResource(i, p_36067_);
+        return i == NOT_FOUND_INDEX ? p_36067_.getCount() : this.addResource(i, p_36067_);
     }
 
     private int addResource(int p_36048_, ItemStack p_36049_) {
@@ -227,12 +227,12 @@ public class DarkLatexInventory implements Container, Nameable {
                 }
             }
 
-            return -1;
+            return NOT_FOUND_INDEX;
         }
     }
 
     public boolean add(ItemStack itemStack) {
-        return this.add(-1, itemStack);
+        return this.add(NOT_FOUND_INDEX, itemStack);
     }
 
     public boolean add(int slotIndex, ItemStack itemStack) {
@@ -241,7 +241,7 @@ public class DarkLatexInventory implements Container, Nameable {
         } else {
             try {
                 if (itemStack.isDamaged()) {
-                    if (slotIndex == -1) {
+                    if (slotIndex == NOT_FOUND_INDEX) {
                         slotIndex = this.getFreeSlot();
                     }
 
@@ -256,7 +256,7 @@ public class DarkLatexInventory implements Container, Nameable {
                     int i;
                     do {
                         i = itemStack.getCount();
-                        if (slotIndex == -1) {
+                        if (slotIndex == NOT_FOUND_INDEX) {
                             itemStack.setCount(this.addResource(itemStack));
                         } else {
                             itemStack.setCount(this.addResource(slotIndex, itemStack));
@@ -288,11 +288,11 @@ public class DarkLatexInventory implements Container, Nameable {
         while(true) {
             if (!itemStack.isEmpty()) {
                 int slotIndex = this.getSlotWithRemainingSpace(itemStack);
-                if (slotIndex == -1) {
+                if (slotIndex == NOT_FOUND_INDEX) {
                     slotIndex = this.getFreeSlot();
                 }
 
-                if (slotIndex != -1) {
+                if (slotIndex != NOT_FOUND_INDEX) {
                     int splitSize = itemStack.getMaxStackSize() - this.getItem(slotIndex).getCount();
                     this.add(slotIndex, itemStack.split(splitSize));
                     continue;

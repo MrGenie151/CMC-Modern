@@ -1,6 +1,7 @@
 package net.ltxprogrammer.changed.entity.beast;
 
 import net.ltxprogrammer.changed.entity.*;
+import net.ltxprogrammer.changed.entity.ai.DarkLatexFavor;
 import net.ltxprogrammer.changed.entity.variant.EntityShape;
 import net.ltxprogrammer.changed.init.ChangedLatexTypes;
 import net.ltxprogrammer.changed.init.ChangedSounds;
@@ -8,6 +9,7 @@ import net.ltxprogrammer.changed.init.ChangedTransfurVariants;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -228,6 +230,23 @@ public class DarkLatexWolfPup extends AbstractDarkLatexEntity {
 
             return super.mobInteract(player, hand);
         }
+    }
+
+    /*@Override
+    protected InteractionResult tamedInteract(Player player, InteractionHand hand) {
+        boolean shouldFollow = !this.isFollowingOwner();
+        this.setFollowOwner(shouldFollow);
+
+        player.displayClientMessage(Component.translatable(shouldFollow ? "text.changed.tamed.follow" : "text.changed.tamed.wander", this.getDisplayName()), true);
+        this.jumping = false;
+        this.navigation.stop();
+        this.setTarget((LivingEntity) null);
+        return InteractionResult.SUCCESS;
+    }*/
+
+    @Override
+    public boolean canDoFavor(DarkLatexFavor favor) {
+        return favor == DarkLatexFavor.NONE;
     }
 
     @Override
