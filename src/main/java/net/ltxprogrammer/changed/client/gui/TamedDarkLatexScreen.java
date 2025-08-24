@@ -27,7 +27,11 @@ public class TamedDarkLatexScreen extends AbstractRadialScreen<TamedDarkLatexMen
     private static final Component ACTIVE = Component.literal("Active");
     private static final Component INACTIVE = Component.literal("Inactive");
 
-    public record Interaction(String command, Supplier<List<Component>> tooltips, Supplier<Boolean> shouldHighlight) {}
+    public record Interaction(String command, ResourceLocation texture, Supplier<List<Component>> tooltips, Supplier<Boolean> shouldHighlight) {
+        public Interaction(String command, Supplier<List<Component>> tooltips, Supplier<Boolean> shouldHighlight) {
+            this(command, Changed.modResource("textures/gui/tamed_dl_interactions/" + command + ".png"), tooltips, shouldHighlight);
+        }
+    }
 
     protected final ImmutableList<Interaction> availableInteractions;
 
@@ -105,7 +109,12 @@ public class TamedDarkLatexScreen extends AbstractRadialScreen<TamedDarkLatexMen
 
     @Override
     public void renderSectionForeground(GuiGraphics graphics, int section, double x, double y, float partialTicks, int mouseX, int mouseY, float red, float green, float blue, float alpha) {
-        // TODO icon or button
+        graphics.setColor(0, 0, 0, 0.5f);
+        graphics.blit(availableInteractions.get(section).texture,
+                (int)x - 24 + this.leftPos + 3, (int)y - 24 + this.topPos + 3, 0, 0, 48, 48, 48, 48);
+        graphics.setColor(red, green, blue, 1);
+        graphics.blit(availableInteractions.get(section).texture,
+                (int)x - 24 + this.leftPos, (int)y - 24 + this.topPos, 0, 0, 48, 48, 48, 48);
     }
 
     @Override
