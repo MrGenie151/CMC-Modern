@@ -280,6 +280,7 @@ public class DarkLatexCaveHarvestGoal extends MoveToBlockGoal {
         blockState.spawnAfterBreak((ServerLevel) level, targetOrePosition, pickaxe, false);
         level.setBlockAndUpdate(targetOrePosition, blockState.getFluidState().createLegacyBlock());
         level.levelEvent(2001, targetOrePosition, Block.getId(blockState));
+        level.destroyBlockProgress(entity.getId(), targetOrePosition, -1);
 
         if (!blockState.isAir())
             pickaxe.hurtAndBreak(1, entity, (handlerEntity) -> {
@@ -293,5 +294,6 @@ public class DarkLatexCaveHarvestGoal extends MoveToBlockGoal {
         isDestroying = false;
         this.destroyProgress = 0;
         this.destroyTicks = 0;
+        level.destroyBlockProgress(entity.getId(), targetOrePosition, -1);
     }
 }

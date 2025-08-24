@@ -129,7 +129,7 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
     @Override
     public void aiStep() {
         super.aiStep();
-        if (inventory != null) {
+        if (inventory != null && !this.isInteractingWith(this.getOwner())) {
             if (!level().isClientSide) {
                 List<Pair<EquipmentSlot, ItemStack>> list = null;
                 var mainHandItem = this.getItemInHand(InteractionHand.MAIN_HAND);

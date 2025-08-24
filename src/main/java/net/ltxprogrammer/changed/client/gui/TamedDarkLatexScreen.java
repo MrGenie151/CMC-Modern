@@ -24,10 +24,14 @@ public class TamedDarkLatexScreen extends AbstractRadialScreen<TamedDarkLatexMen
     private static final String PATH_GOO = "textures/gui/radial/goo/";
     private static final String PATH_GOO_SELECTED = "textures/gui/radial/goo_selected/";
 
-    private static final Component ACTIVE = Component.literal("Active");
-    private static final Component INACTIVE = Component.literal("Inactive");
+    private static final Component ACTIVE = Component.translatable("changed.tamed_dark_latex.active");
+    private static final Component INACTIVE = Component.translatable("changed.tamed_dark_latex.inactive");
 
-    public record Interaction(String command, Supplier<List<Component>> tooltips, Supplier<Boolean> shouldHighlight) {}
+    public record Interaction(String command, ResourceLocation texture, Supplier<List<Component>> tooltips, Supplier<Boolean> shouldHighlight) {
+        public Interaction(String command, Supplier<List<Component>> tooltips, Supplier<Boolean> shouldHighlight) {
+            this(command, Changed.modResource("textures/gui/tamed_dl_interactions/" + command + ".png"), tooltips, shouldHighlight);
+        }
+    }
 
     protected final ImmutableList<Interaction> availableInteractions;
 
@@ -35,44 +39,44 @@ public class TamedDarkLatexScreen extends AbstractRadialScreen<TamedDarkLatexMen
         super(menu, inventory, text, Color3.DARK, Color3.WHITE, menu.tamedDarkLatex);
         var interactionsBuilder = ImmutableList.<Interaction>builder();
         interactionsBuilder.add(new Interaction("view_inventory",
-                () -> List.of(Component.literal("View Inventory")),
+                () -> List.of(Component.translatable("changed.tamed_dark_latex.title.view_inventory")),
                 () -> false
         ));
         interactionsBuilder.add(new Interaction("cycle_follow",
-                () -> List.of(Component.literal("Follow Mode"),
+                () -> List.of(Component.translatable("changed.tamed_dark_latex.title.cycle_follow"),
                         Component.translatable(menu.tamedDarkLatex.isFollowingOwner() ? "changed.tamed_dark_latex.follow" : "changed.tamed_dark_latex.wander")),
                 () -> false
         ));
         interactionsBuilder.add(new Interaction("cycle_target_type",
-                () -> List.of(Component.literal("Combat: Target Type"),
+                () -> List.of(Component.translatable("changed.tamed_dark_latex.title.cycle_target_type"),
                         menu.tamedDarkLatex.getTargetType().getDisplayText()),
                 () -> false
         ));
         interactionsBuilder.add(new Interaction("cycle_attack_type",
-                () -> List.of(Component.literal("Combat: Attack Type"),
+                () -> List.of(Component.translatable("changed.tamed_dark_latex.title.cycle_attack_type"),
                         menu.tamedDarkLatex.getAttackType().getDisplayText()),
                 () -> false
         ));
         interactionsBuilder.add(new Interaction("cycle_attack_condition",
-                () -> List.of(Component.literal("Combat: Attack Condition"),
+                () -> List.of(Component.translatable("changed.tamed_dark_latex.title.cycle_attack_condition"),
                         menu.tamedDarkLatex.getAttackCondition().getDisplayText()),
                 () -> false
         ));
         if (menu.tamedDarkLatex.canDoFavor(DarkLatexFavor.FISHING))
             interactionsBuilder.add(new Interaction("favor_fishing",
-                    () -> List.of(Component.literal("Favor: Fishing"),
+                    () -> List.of(Component.translatable("changed.tamed_dark_latex.title.favor_fishing"),
                             menu.tamedDarkLatex.getCurrentFavor() == DarkLatexFavor.FISHING ? ACTIVE : INACTIVE),
                     () -> menu.tamedDarkLatex.getCurrentFavor() == DarkLatexFavor.FISHING
             ));
         if (menu.tamedDarkLatex.canDoFavor(DarkLatexFavor.CAVING))
             interactionsBuilder.add(new Interaction("favor_caving",
-                    () -> List.of(Component.literal("Favor: Help Caving"),
+                    () -> List.of(Component.translatable("changed.tamed_dark_latex.title.favor_caving"),
                             menu.tamedDarkLatex.getCurrentFavor() == DarkLatexFavor.CAVING ? ACTIVE : INACTIVE),
                     () -> menu.tamedDarkLatex.getCurrentFavor() == DarkLatexFavor.CAVING
             ));
         if (menu.tamedDarkLatex.canDoFavor(DarkLatexFavor.SUIT_OWNER))
             interactionsBuilder.add(new Interaction("favor_suit_owner",
-                    () -> List.of(Component.literal("Favor: Suit Owner"),
+                    () -> List.of(Component.translatable("changed.tamed_dark_latex.title.favor_suit_owner"),
                             menu.tamedDarkLatex.getCurrentFavor() == DarkLatexFavor.SUIT_OWNER ? ACTIVE : INACTIVE),
                     () -> menu.tamedDarkLatex.getCurrentFavor() == DarkLatexFavor.SUIT_OWNER
             ));
@@ -105,7 +109,12 @@ public class TamedDarkLatexScreen extends AbstractRadialScreen<TamedDarkLatexMen
 
     @Override
     public void renderSectionForeground(GuiGraphics graphics, int section, double x, double y, float partialTicks, int mouseX, int mouseY, float red, float green, float blue, float alpha) {
-        // TODO icon or button
+        graphics.setColor(0, 0, 0, 0.5f);
+        graphics.blit(availableInteractions.get(section).texture,
+                (int)x - 24 + this.leftPos + 3, (int)y - 24 + this.topPos + 3, 0, 0, 48, 48, 48, 48);
+        graphics.setColor(red, green, blue, 1);
+        graphics.blit(availableInteractions.get(section).texture,
+                (int)x - 24 + this.leftPos, (int)y - 24 + this.topPos, 0, 0, 48, 48, 48, 48);
     }
 
     @Override
