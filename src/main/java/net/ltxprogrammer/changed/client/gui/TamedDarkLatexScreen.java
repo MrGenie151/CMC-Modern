@@ -17,6 +17,7 @@ import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -97,13 +98,19 @@ public class TamedDarkLatexScreen extends AbstractRadialScreen<TamedDarkLatexMen
         return availableInteractions.get(section).tooltips.get();
     }
 
+    protected Optional<Interaction> getInteractionSafe(int interactionIndex) {
+        if (interactionIndex < availableInteractions.size())
+            return Optional.ofNullable(availableInteractions.get(interactionIndex));
+        return Optional.empty();
+    }
+
     @Override
     public void renderSectionBackground(GuiGraphics graphics, int section, double x, double y, float partialTicks, int mouseX, int mouseY, float red, float green, float blue) {
         var hovered = getSectionAt(mouseX, mouseY);
         boolean anyHovered = hovered.isPresent();
         boolean thisHovered = anyHovered && hovered.get() == section;
         graphics.setColor(red, green, blue, 1);
-        graphics.blit(getTextureForSection(section, thisHovered, anyHovered, availableInteractions.get(section).shouldHighlight.get()),
+        graphics.blit(getTextureForSection(section, thisHovered, anyHovered, getInteractionSafe(section).map(Interaction::shouldHighlight).map(Supplier::get).orElse(false)),
                 (int)x - 32 + this.leftPos, (int)y - 32 + this.topPos, 0, 0, 64, 64, 64, 64);
     }
 
@@ -121,9 +128,11 @@ public class TamedDarkLatexScreen extends AbstractRadialScreen<TamedDarkLatexMen
     public boolean handleClicked(int section, SingleRunnable close) {
         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 
-        var tag = new CompoundTag();
-        tag.putString("command", availableInteractions.get(section).command);
-        menu.setDirty(tag);
+        getInteractionSafe(section).ifPresent(interaction -> {
+            var tag = new CompoundTag();
+            tag.putString("command", interaction.command);
+            menu.setDirty(tag);
+        });
 
         return false;
     }
