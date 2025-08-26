@@ -273,6 +273,9 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
         final var owner = this.getOwner();
         if (livingEntity == owner)
             return false;
+        if (owner != null && livingEntity instanceof TamableLatexEntity tamableLatexEntity && tamableLatexEntity.getOwner() == owner)
+            return false;
+        // TODO: have npc DLs not target a player if that player has a tamed DL. Or a reputation system for the DLs.
 
         Predicate<LivingEntity> superPredicate = super::targetSelectorTest;
         if (owner != null) {
