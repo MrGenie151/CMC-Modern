@@ -58,7 +58,6 @@ public abstract class ServerPlayerMixin extends Player implements PlayerDataExte
                 if (newVariant == null)
                     return;
                 newVariant.load(oldVariant.save());
-                newVariant.getChangedEntity().readPlayerVariantData(oldVariant.getChangedEntity().savePlayerVariantData());
                 newVariant.handleRespawn();
             });
         }
@@ -100,9 +99,6 @@ public abstract class ServerPlayerMixin extends Player implements PlayerDataExte
             }
             final TransfurVariantInstance<?> variantInstance = ProcessTransfur.setPlayerTransfurVariant(this, variant, null, 1.0f, false,
                     entity -> {
-                        if (tag.contains("TransfurData"))
-                            entity.readPlayerVariantData(tag.getCompound("TransfurData"));
-
                         if (tag.contains("Leash", 10))
                             entity.setLeashInfoTag(tag.getCompound("Leash"));
                     });
@@ -160,9 +156,6 @@ public abstract class ServerPlayerMixin extends Player implements PlayerDataExte
             tag.put("TransfurVariantData", variant.save());
 
             var entity = variant.getChangedEntity();
-            var entityData = entity.savePlayerVariantData();
-            if (!entityData.isEmpty())
-                tag.put("TransfurData", entityData);
 
             if (entity.getLeashHolder() != null) {
                 CompoundTag compoundtag2 = new CompoundTag();

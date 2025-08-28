@@ -133,6 +133,11 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
         tag.putBoolean("isTemporaryFromSuit", isTemporaryFromSuit);
 
         tag.put("abilities", this.saveAbilities());
+
+        var entityData = entity.savePlayerVariantData();
+        if (!entityData.isEmpty())
+            tag.put("entityData", entityData);
+
         return tag;
     }
 
@@ -177,6 +182,9 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
         transfurContext = TransfurContext.fromTag(tag.getCompound("transfurContext"), host.level());
 
         this.loadAbilities(tag.getCompound("abilities"));
+
+        if (tag.contains("entityData"))
+            entity.readPlayerVariantData(tag.getCompound("entityData"));
     }
 
     public void handleRespawn() {

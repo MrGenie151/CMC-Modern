@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -81,7 +82,7 @@ public class AccessoryAccessScreen extends EffectRenderingInventoryScreen<Access
             if (slot == null)
                 return;
 
-            final var conflictingItems = menu.getBuiltSlots().stream()
+            final List<ItemStack> conflictingItems = menu.getBuiltSlots().stream()
                     .filter(otherSlotType -> otherSlotType != slotType)
                     .<ItemStack>map(otherSlotType -> {
                         final var context = AccessorySlotContext.of(menu.owner, otherSlotType);
@@ -126,8 +127,8 @@ public class AccessoryAccessScreen extends EffectRenderingInventoryScreen<Access
     }
 
     @Override
-    protected void slotClicked(Slot slot, int index, int button, @NotNull ClickType clickType) {
-        if (button == this.minecraft.options.keyUse.getKey().getValue()) {
+    protected void slotClicked(@Nullable Slot slot, int index, int button, @NotNull ClickType clickType) {
+        if (slot != null && button == this.minecraft.options.keyUse.getKey().getValue()) {
             if (slot.container instanceof AccessorySlots accessorySlots) {
                 AccessorySlotType slotType = accessorySlots.getSlotTypeByIndex(slot.getSlotIndex());
                 if (slotType != null) {
