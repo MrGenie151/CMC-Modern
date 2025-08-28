@@ -493,6 +493,10 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
                 serverPlayer.connection.send(
                         Changed.PACKET_HANDLER.toVanillaPacket(builderMover.build(), NetworkDirection.PLAY_TO_CLIENT)
                 );
+
+            serverPlayer.connection.send(
+                    Changed.PACKET_HANDLER.toVanillaPacket(AccessoryEntities.INSTANCE.syncPacket(serverPlayer), NetworkDirection.PLAY_TO_CLIENT)
+            );
         }
 
         /*else if (event.getEntity() instanceof Player localPlayer && UniversalDist.isLocalPlayer(localPlayer)) {
@@ -619,6 +623,8 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
 
     public boolean canWear(Player player, ItemStack itemStack, EquipmentSlot slot) {
         if (slot == EquipmentSlot.MAINHAND)
+            return true;
+        if (itemStack.isEmpty())
             return true;
         itemStack = FormFittingEnchantment.getFormFitted(player, itemStack, slot);
         if (itemStack.getItem() instanceof ExtendedItemProperties wearableItem) {
