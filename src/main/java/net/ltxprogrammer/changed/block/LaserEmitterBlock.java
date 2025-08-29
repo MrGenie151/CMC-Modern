@@ -1,8 +1,7 @@
 package net.ltxprogrammer.changed.block;
 
-import net.ltxprogrammer.changed.init.ChangedBlocks;
+import net.ltxprogrammer.changed.entity.decoration.EmittedLaser;
 import net.ltxprogrammer.changed.init.ChangedSounds;
-import net.ltxprogrammer.changed.init.ChangedTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -10,7 +9,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -78,52 +76,12 @@ public class LaserEmitterBlock extends DirectionalBlock {
         boolean shouldPower = this.getNeighborSignal(level, blockPos, direction);
         if (shouldPower && !blockState.getValue(POWERED)) {
             level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.TRUE), 3);
-            int distance = 0;
-            while (distance < MAX_DISTANCE) {
-                BlockPos nextPos = blockPos.relative(direction, ++distance);
-                BlockState nextState = level.getBlockState(nextPos);
-                if (!nextState.isAir() && !nextState.is(ChangedTags.Blocks.LASER_TRANSLUCENT))
-                    break;
-                if (!nextState.isAir() && nextState.is(ChangedTags.Blocks.LASER_TRANSLUCENT))
-                    continue;
-                level.setBlockAndUpdate(nextPos, ChangedBlocks.LASER_BEAM.get().defaultBlockState().setValue(FACING, direction)
-                        .setValue(LaserBeamBlock.DISTANCE, distance));
-            }
-
+            EmittedLaser.create(level, blockPos, direction).ifPresent(level::addFreshEntity);
             if (level instanceof ServerLevel serverLevel)
                 ChangedSounds.broadcastSound(serverLevel, ChangedSounds.SHOT1, blockPos, 1, 1);
         } else if (!shouldPower && blockState.getValue(POWERED)) {
             level.setBlockAndUpdate(blockPos, blockState.setValue(POWERED, Boolean.FALSE));
-            int distance = 0;
-            while (distance < MAX_DISTANCE) {
-                BlockPos nextPos = blockPos.relative(direction, ++distance);
-                BlockState nextState = level.getBlockState(nextPos);
-                if (!nextState.is(ChangedTags.Blocks.LASER_TRANSLUCENT))
-                    break;
-                if (!nextState.is(ChangedBlocks.LASER_BEAM.get()))
-                    continue;
-                level.setBlockAndUpdate(nextPos, Blocks.AIR.defaultBlockState());
-            }
         }
-    }
-
-    @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState otherState, LevelAccessor level, BlockPos pos, BlockPos otherPos) {
-        Direction facing = state.getValue(FACING);
-        BlockState laserState = ChangedBlocks.LASER_BEAM.get().defaultBlockState().setValue(FACING, facing);
-        if (facing == direction && state.getValue(POWERED)) {
-            int distance = 0;
-            while (distance < LaserEmitterBlock.MAX_DISTANCE) {
-                BlockPos nextPos = pos.relative(direction, ++distance);
-                BlockState nextState = level.getBlockState(nextPos);
-                if (!nextState.isAir() && !nextState.is(ChangedTags.Blocks.LASER_TRANSLUCENT))
-                    break;
-                if (!nextState.isAir() && nextState.is(ChangedTags.Blocks.LASER_TRANSLUCENT))
-                    continue;
-                level.setBlock(nextPos, laserState.setValue(LaserBeamBlock.DISTANCE, distance), 3);
-            }
-        }
-        return super.updateShape(state, direction, otherState, level, pos, otherPos);
     }
 
     public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPosOther, boolean p_60203_) {
