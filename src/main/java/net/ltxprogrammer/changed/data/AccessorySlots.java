@@ -2,6 +2,8 @@ package net.ltxprogrammer.changed.data;
 
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.LivingEntityDataExtension;
@@ -49,9 +51,9 @@ public class AccessorySlots implements Container {
     private static final Logger LOGGER = LogManager.getLogger(AccessorySlots.class);
 
     public final @Nullable LivingEntity owner;
-    private final Map<AccessorySlotType, ItemStack> items = new HashMap<>();
-    private final Map<AccessorySlotType, ItemStack> lastItems = new HashMap<>();
-    private final List<ItemStack> invalidItems = new ArrayList<>();
+    private final Map<AccessorySlotType, ItemStack> items = new Object2ObjectArrayMap<>();
+    private final Map<AccessorySlotType, ItemStack> lastItems = new Object2ObjectArrayMap<>();
+    private final List<ItemStack> invalidItems = new ObjectArrayList<>();
     private final Cacheable<List<AccessorySlotType>> orderedSlots = Cacheable.of(() -> {
         final var registry = ChangedRegistry.ACCESSORY_SLOTS;
         final var sorted = new ArrayList<>(registry.get().getValues().stream()
@@ -220,7 +222,7 @@ public class AccessorySlots implements Container {
         invalidItems.forEach(removed);
         invalidItems.clear();
 
-        for (var slotType : items.keySet().stream().filter(allowedSlots.negate()).collect(Collectors.toSet())) {
+        for (var slotType : items.keySet().stream().filter(allowedSlots.negate().or(Objects::isNull)).collect(Collectors.toSet())) {
             removed.accept(items.get(slotType));
             items.remove(slotType);
             stateChanged.set(true);
@@ -248,7 +250,7 @@ public class AccessorySlots implements Container {
 
     public void tick() {
         for (var entry : items.entrySet()) {
-            if (entry.getValue().getItem() instanceof AccessoryItem accessoryItem) {
+            if (entry.getKey() != null && entry.getValue().getItem() instanceof AccessoryItem accessoryItem) {
                 accessoryItem.accessoryTick(AccessorySlotContext.of(this.owner, entry.getKey()));
             }
         }
@@ -256,7 +258,7 @@ public class AccessorySlots implements Container {
 
     public void onEntitySwing(InteractionHand hand) {
         for (var entry : items.entrySet()) {
-            if (entry.getValue().getItem() instanceof AccessoryItem accessoryItem) {
+            if (entry.getKey() != null &&entry.getValue().getItem() instanceof AccessoryItem accessoryItem) {
                 accessoryItem.accessorySwing(AccessorySlotContext.of(this.owner, entry.getKey()), hand);
             }
         }
@@ -264,7 +266,7 @@ public class AccessorySlots implements Container {
 
     public void onEntityAttack(InteractionHand hand, Entity target) {
         for (var entry : items.entrySet()) {
-            if (entry.getValue().getItem() instanceof AccessoryItem accessoryItem) {
+            if (entry.getKey() != null && entry.getValue().getItem() instanceof AccessoryItem accessoryItem) {
                 accessoryItem.accessoryAttack(AccessorySlotContext.of(this.owner, entry.getKey()), hand, target);
             }
         }
@@ -272,13 +274,15 @@ public class AccessorySlots implements Container {
 
     public void onEntityDamage(DamageSource source, float amount) {
         for (var entry : items.entrySet()) {
-            if (entry.getValue().getItem() instanceof AccessoryItem accessoryItem) {
+            if (entry.getKey() != null && entry.getValue().getItem() instanceof AccessoryItem accessoryItem) {
                 accessoryItem.accessoryDamaged(AccessorySlotContext.of(this.owner, entry.getKey()), source, amount);
             }
         }
     }
 
-    public boolean moveToSlot(AccessorySlotType slot, ItemStack stack) {
+    public boolean moveToSlot(@Nullable AccessorySlotType slot, ItemStack stack) {
+        if (slot == null)
+            return false;
         if (!items.containsKey(slot))
             return false;
         if (!isItemAllowedWithOthers(slot, stack))
@@ -316,8 +320,10 @@ public class AccessorySlots implements Container {
     }
 
     public void forEachSlot(BiConsumer<AccessorySlotType, ItemStack> consumer) {
-        for (var entry : items.entrySet())
-            consumer.accept(entry.getKey(), entry.getValue());
+        for (var entry : items.entrySet()) {
+            if (entry.getKey() != null)
+                consumer.accept(entry.getKey(), entry.getValue());
+        }
     }
 
     public void forEachItem(Consumer<ItemStack> consumer) {
@@ -428,7 +434,7 @@ public class AccessorySlots implements Container {
 
     @Override
     public int getContainerSize() {
-        return items.size();
+        return (int) items.keySet().stream().filter(Objects::nonNull).count();
     }
 
     @Override
@@ -459,8 +465,8 @@ public class AccessorySlots implements Container {
         return taken;
     }
 
-    public void setItem(AccessorySlotType slotType, ItemStack stack) {
-        if (items.keySet().contains(slotType))
+    public void setItem(@Nullable AccessorySlotType slotType, ItemStack stack) {
+        if (slotType != null && items.containsKey(slotType))
             items.put(slotType, stack);
     }
 

@@ -22,10 +22,12 @@ import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -36,6 +38,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLLoader;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -68,12 +71,20 @@ public class CommandTransfur {
                                 .executes(context -> transfurPlayers(context.getSource(),
                                         EntityArgument.getPlayers(context, "players"),
                                         ResourceLocationArgument.getId(context, "form"),
-                                        TransfurCause.GRAB_REPLICATE.getSerializedName()))
+                                        TransfurCause.GRAB_REPLICATE.getSerializedName(),
+                                        null))
                                 .then(Commands.argument("cause", StringArgumentType.string()).suggests(SUGGEST_TRANSFUR_CAUSE)
                                         .executes(context -> transfurPlayers(context.getSource(),
                                                 EntityArgument.getPlayers(context, "players"),
                                                 ResourceLocationArgument.getId(context, "form"),
-                                                StringArgumentType.getString(context, "cause"))))
+                                                StringArgumentType.getString(context, "cause"),
+                                                null))
+                                        .then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
+                                                .executes(context -> transfurPlayers(context.getSource(),
+                                                        EntityArgument.getPlayers(context, "players"),
+                                                        ResourceLocationArgument.getId(context, "form"),
+                                                        StringArgumentType.getString(context, "cause"),
+                                                        CompoundTagArgument.getCompoundTag(context, "nbt")))))
                         )));
         event.getDispatcher().register(Commands.literal("tf").requires(p -> p.hasPermission(2)).redirect(transfurNode));
         var progressTransfurNode = event.getDispatcher().register(Commands.literal("progresstransfur").requires(p -> p.hasPermission(2))
@@ -136,7 +147,7 @@ public class CommandTransfur {
                 ));
     }
 
-    private static int transfurPlayer(CommandSourceStack source, ServerPlayer player, ResourceLocation form, TransfurCause cause) throws CommandSyntaxException {
+    private static int transfurPlayer(CommandSourceStack source, ServerPlayer player, ResourceLocation form, TransfurCause cause, @Nullable CompoundTag tag) throws CommandSyntaxException {
         if (ChangedCompatibility.isPlayerUsedByOtherMod(player))
             throw USED_BY_OTHER_MOD.create();
 
@@ -144,8 +155,15 @@ public class CommandTransfur {
             form = Util.getRandom(TransfurVariant.getPublicTransfurVariants().collect(Collectors.toList()), player.getRandom()).getFormId();
 
         if (TransfurVariant.getPublicTransfurVariants().map(ChangedRegistry.TRANSFUR_VARIANT::getKey).anyMatch(form::equals)) {
-            ProcessTransfur.transfur(player, source.getLevel(), ChangedRegistry.TRANSFUR_VARIANT.get().getValue(form), true,
+            TransfurVariant<?> transfurVariant = ChangedRegistry.TRANSFUR_VARIANT.get().getValue(form);
+            ProcessTransfur.transfur(player, source.getLevel(), transfurVariant, true,
                     TransfurContext.hazard(cause));
+            if (tag != null) {
+                ProcessTransfur.getPlayerTransfurVariantSafe(player).filter(instance -> instance.getParent() == transfurVariant)
+                        .ifPresent(instance -> {
+                            instance.getChangedEntity().readPlayerVariantData(tag);
+                        });
+            }
         }
         else if (form.equals(TransfurVariant.SPECIAL_LATEX)) {
             ResourceLocation key = Changed.modResource("special/form_" + player.getUUID());
@@ -160,21 +178,21 @@ public class CommandTransfur {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int transfurPlayers(CommandSourceStack source, Collection<ServerPlayer> players, ResourceLocation form, String cause) throws CommandSyntaxException {
+    private static int transfurPlayers(CommandSourceStack source, Collection<ServerPlayer> players, ResourceLocation form, String cause, @Nullable CompoundTag tag) throws CommandSyntaxException {
         final TransfurCause transfurCause = TransfurCause.fromSerial(cause).result().orElse(null);
         if (transfurCause == null)
             throw NOT_CAUSE.create();
 
         if (players.size() == 1) {
             final ServerPlayer player = players.stream().findFirst().get();
-            int success = transfurPlayer(source, player, form, transfurCause);
+            int success = transfurPlayer(source, player, form, transfurCause, tag);
             if (success > 0)
                 source.sendSuccess(() -> Component.translatable("command.changed.success.transfurred.one", player.getScoreboardName(), form), false);
             return success;
         } else if (players.size() > 1) {
             int success = players.stream().map(player -> {
                 try {
-                    return transfurPlayer(source, player, form, transfurCause);
+                    return transfurPlayer(source, player, form, transfurCause, tag);
                 } catch (CommandSyntaxException e) {
                     return 0;
                 }

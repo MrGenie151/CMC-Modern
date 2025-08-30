@@ -67,6 +67,7 @@ public class ChangedTags {
 
     public static class Fluids {
         public static final TagKey<Fluid> LATEX = create("latex");
+        public static final TagKey<Fluid> LASER_TRANSLUCENT = create("laser_translucent");
 
         private static TagKey<Fluid> create(String name) {
             return TagKey.create(Registries.FLUID, Changed.modResource(name));

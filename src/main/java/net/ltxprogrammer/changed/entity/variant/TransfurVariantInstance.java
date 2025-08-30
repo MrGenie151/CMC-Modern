@@ -133,6 +133,11 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
         tag.putBoolean("isTemporaryFromSuit", isTemporaryFromSuit);
 
         tag.put("abilities", this.saveAbilities());
+
+        var entityData = entity.savePlayerVariantData();
+        if (!entityData.isEmpty())
+            tag.put("entityData", entityData);
+
         return tag;
     }
 
@@ -177,6 +182,9 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
         transfurContext = TransfurContext.fromTag(tag.getCompound("transfurContext"), host.level());
 
         this.loadAbilities(tag.getCompound("abilities"));
+
+        if (tag.contains("entityData"))
+            entity.readPlayerVariantData(tag.getCompound("entityData"));
     }
 
     public void handleRespawn() {
@@ -485,6 +493,10 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
                 serverPlayer.connection.send(
                         Changed.PACKET_HANDLER.toVanillaPacket(builderMover.build(), NetworkDirection.PLAY_TO_CLIENT)
                 );
+
+            serverPlayer.connection.send(
+                    Changed.PACKET_HANDLER.toVanillaPacket(AccessoryEntities.INSTANCE.syncPacket(serverPlayer), NetworkDirection.PLAY_TO_CLIENT)
+            );
         }
 
         /*else if (event.getEntity() instanceof Player localPlayer && UniversalDist.isLocalPlayer(localPlayer)) {
@@ -611,6 +623,8 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
 
     public boolean canWear(Player player, ItemStack itemStack, EquipmentSlot slot) {
         if (slot == EquipmentSlot.MAINHAND)
+            return true;
+        if (itemStack.isEmpty())
             return true;
         itemStack = FormFittingEnchantment.getFormFitted(player, itemStack, slot);
         if (itemStack.getItem() instanceof ExtendedItemProperties wearableItem) {

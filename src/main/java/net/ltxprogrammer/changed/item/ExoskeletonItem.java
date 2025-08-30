@@ -6,7 +6,6 @@ import net.ltxprogrammer.changed.block.IRobotCharger;
 import net.ltxprogrammer.changed.data.AccessorySlotContext;
 import net.ltxprogrammer.changed.data.AccessorySlotType;
 import net.ltxprogrammer.changed.data.AccessorySlots;
-import net.ltxprogrammer.changed.entity.LivingEntityDataExtension;
 import net.ltxprogrammer.changed.entity.robot.AbstractRobot;
 import net.ltxprogrammer.changed.entity.robot.ChargerType;
 import net.ltxprogrammer.changed.init.ChangedAccessorySlots;
@@ -17,10 +16,11 @@ import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.util.Cacheable;
 import net.ltxprogrammer.changed.util.EntityUtil;
 import net.minecraft.ChatFormatting;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -37,10 +37,15 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.enchantment.DigDurabilityEnchantment;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nullable;
+import java.util.Random;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -70,6 +75,11 @@ public class ExoskeletonItem<T extends AbstractRobot> extends PlaceableEntity<T>
     public ExoskeletonItem(Properties builder, Supplier<EntityType<T>> entityType) {
         super(builder.durability(CHARGE_IN_SECONDS), entityType);
         DispenserBlock.registerBehavior(this, AccessoryItem.DISPENSE_ITEM_BEHAVIOR);
+    }
+
+    @Override
+    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
+        return enchantment != Enchantments.MENDING && super.canApplyAtEnchantingTable(stack, enchantment);
     }
 
     @Override
@@ -157,9 +167,50 @@ public class ExoskeletonItem<T extends AbstractRobot> extends PlaceableEntity<T>
         }
     }
 
+    private static final float UNBREAKABLE_NERF = 1.0f - 0.6F; // 60% chance to ignore unbreakable enchantment
+
+    // Copied from ItemStack.hurt(), with custom unbreakable nerf
+    protected boolean hurtItem(ItemStack stack, int damage, RandomSource random, @Nullable ServerPlayer wearer) {
+        if (!stack.isDamageableItem()) {
+            return false;
+        } else {
+            if (damage > 0) {
+                int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.UNBREAKING, stack);
+                int j = 0;
+
+                for(int k = 0; i > 0 && k < damage; ++k) {
+                    if (random.nextFloat() < UNBREAKABLE_NERF && DigDurabilityEnchantment.shouldIgnoreDurabilityDrop(stack, i, random)) {
+                        ++j;
+                    }
+                }
+
+                damage -= j;
+                if (damage <= 0) {
+                    return false;
+                }
+            }
+
+            if (wearer != null && damage != 0) {
+                CriteriaTriggers.ITEM_DURABILITY_CHANGED.trigger(wearer, stack, stack.getDamageValue() + damage);
+            }
+
+            int l = stack.getDamageValue() + damage;
+            stack.setDamageValue(l);
+            return l >= stack.getMaxDamage();
+        }
+    }
+
     protected void degradeCharge(AccessorySlotContext<?> slotContext, int amount) {
+        if (slotContext.wearer().level().isClientSide)
+            return;
+
+        ServerPlayer player = null;
+        if (slotContext.wearer() instanceof ServerPlayer serverPlayer)
+            player = serverPlayer;
+
         int before = slotContext.stack().getDamageValue();
-        int after = before + amount;
+        this.hurtItem(slotContext.stack(), amount, slotContext.wearer().getRandom(), player);
+        int after = slotContext.stack().getDamageValue();
 
         if (after >= CHARGE_LOW_WARNING && before < CHARGE_LOW_WARNING)
             tellWearer(slotContext.wearer(), slotContext.stack(), EXOSKELETON_BATTERY_LOW);
@@ -169,10 +220,7 @@ public class ExoskeletonItem<T extends AbstractRobot> extends PlaceableEntity<T>
         if (after >= CHARGE_IN_SECONDS) {
             slotContext.stack().setDamageValue(CHARGE_IN_SECONDS - 1);
             AccessorySlots.tryReplaceSlot(slotContext.wearer(), slotContext.slotType(), ItemStack.EMPTY);
-            return;
         }
-
-        slotContext.stack().setDamageValue(after);
     }
 
     @Override

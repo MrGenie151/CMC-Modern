@@ -14,6 +14,8 @@ import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.util.EntityUtil;
 import net.ltxprogrammer.changed.util.ItemUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -43,6 +45,8 @@ public class Exoskeleton extends AbstractRobot {
     private LivingEntity clientSideCachedAttackTarget;
     private int clientSideAttackTime;
 
+    private ListTag savedEnchantments = new ListTag();
+
     public static Optional<Pair<ItemStack, ExoskeletonItem<?>>> getEntityExoskeleton(LivingEntity entity) {
         return AccessorySlots.getForEntity(entity)
                 .flatMap(slots -> slots.getItem(ChangedAccessorySlots.FULL_BODY.get()))
@@ -62,6 +66,7 @@ public class Exoskeleton extends AbstractRobot {
         stack.setDamageValue((int) ((1.0f - this.getCharge()) * stack.getMaxDamage()));
         if (this.hasCustomName())
             stack.setHoverName(this.getCustomName());
+        stack.getOrCreateTag().put("Enchantments", savedEnchantments);
         return stack;
     }
 
@@ -69,6 +74,19 @@ public class Exoskeleton extends AbstractRobot {
         this.setCharge(1.0f - ((float) (stack.getDamageValue()) / (float) (stack.getMaxDamage())));
         if (stack.hasCustomHoverName())
             this.setCustomName(stack.getHoverName());
+        savedEnchantments = stack.getEnchantmentTags();
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.put("Enchantments", savedEnchantments);
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        savedEnchantments = tag.getList("Enchantments", 10);
     }
 
     @Override

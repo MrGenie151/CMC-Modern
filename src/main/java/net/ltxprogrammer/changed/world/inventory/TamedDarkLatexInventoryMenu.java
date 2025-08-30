@@ -63,6 +63,38 @@ public class TamedDarkLatexInventoryMenu extends AbstractContainerMenu {
         this(id, inventory.player, (AbstractDarkLatexEntity) inventory.player.level().getEntity(extra.readInt()));
     }
 
+    public boolean canWear(ItemStack itemStack, EquipmentSlot slot) {
+        if (slot == EquipmentSlot.MAINHAND)
+            return true;
+        if (itemStack.isEmpty())
+            return true;
+        itemStack = FormFittingEnchantment.getFormFitted(tamedDarkLatex, itemStack, slot);
+        if (itemStack.getItem() instanceof ExtendedItemProperties wearableItem) {
+            if (!wearableItem.allowedInSlot(itemStack, tamedDarkLatex, slot))
+                return false;
+        }
+
+        else { // Default expected entity shapes
+            var entityShape = tamedDarkLatex.getEntityShape();
+
+            boolean shapeFits = switch (slot) {
+                case HEAD -> entityShape.getHeadShape() == ClothingShape.Head.ANTHRO;
+                case CHEST -> entityShape.getTorsoShape() == ClothingShape.Torso.ANTHRO;
+                case LEGS -> entityShape.getLegsShape() == ClothingShape.Legs.BIPEDAL;
+                case FEET -> entityShape.getFeetShape() == ClothingShape.Feet.BIPEDAL;
+                default -> true;
+            };
+
+            if (!shapeFits)
+                return false;
+        }
+
+        if (!tamedDarkLatex.isItemAllowedInSlot(itemStack, slot))
+            return false;
+
+        return true;
+    }
+
     // 0-3 -> DL armor, 4-30 -> hotbar, 31->39 -> inventory, 40 -> DL offhand, 41+ -> DL inventory
     protected void createSlots(Inventory inv, DarkLatexInventory dlInventory) {
         for (int si = 0; si < 4; ++si) {
@@ -73,7 +105,7 @@ public class TamedDarkLatexInventoryMenu extends AbstractContainerMenu {
                 }
 
                 public boolean mayPlace(ItemStack stack) {
-                    return stack.canEquip(equipmentSlot, tamedDarkLatex);
+                    return stack.canEquip(equipmentSlot, tamedDarkLatex) && canWear(stack, equipmentSlot);
                 }
 
                 public boolean mayPickup(Player player) {
