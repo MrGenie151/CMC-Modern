@@ -1,6 +1,7 @@
 package net.ltxprogrammer.changed.entity.ai;
 
 import net.ltxprogrammer.changed.entity.beast.AbstractDarkLatexEntity;
+import net.ltxprogrammer.changed.util.LevelUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -111,26 +112,6 @@ public class DarkLatexFishingGoal extends MoveToBlockGoal {
         return false;
     }
 
-    public static Stream<BlockPos> getBlocksInLine(BlockPos start, BlockPos end, float traceThickness) {
-        BlockPos delta = end.subtract(start);
-        Vec3 deltaCenter = Vec3.atLowerCornerOf(delta);
-        double checkIndex = 0;
-        double deltaCheck = 1d / deltaCenter.length();
-        Set<BlockPos> uniqueBlockPos = new HashSet<>();
-        while (checkIndex <= 1d) {
-            Vec3 checkCenter = deltaCenter.multiply(checkIndex, checkIndex, checkIndex).add(0.5, 0.5, 0.5);
-
-            BlockPos.betweenClosedStream(new AABB(
-                    checkCenter.subtract(traceThickness, traceThickness, traceThickness),
-                    checkCenter.add(traceThickness, traceThickness, traceThickness)
-            )).map(checkPos -> checkPos.offset(start)).forEach(uniqueBlockPos::add);
-
-            checkIndex += deltaCheck;
-        }
-
-        return uniqueBlockPos.stream();
-    }
-
     protected boolean isValidWaterSurface(LevelReader level, BlockPos blockPos) {
         if (blockPos.getX() == this.blockPos.getX() && blockPos.getZ() == this.blockPos.getZ())
             return false; // Water cannot be directly below
@@ -144,8 +125,8 @@ public class DarkLatexFishingGoal extends MoveToBlockGoal {
 
         // Trace from surface to where the entity will fish from
         return Stream.concat(
-                getBlocksInLine(this.blockPos.above(), blockPos.above(), 0.25f),
-                getBlocksInLine(this.blockPos.above().above(), blockPos.above().above(), 0.25f)
+                LevelUtil.getBlocksInLine(this.blockPos.above(), blockPos.above(), 0.25f),
+                LevelUtil.getBlocksInLine(this.blockPos.above().above(), blockPos.above().above(), 0.25f)
         ).allMatch(tracePos -> {
             if (tracePos.getX() == this.blockPos.getX() && tracePos.getZ() == this.blockPos.getZ())
                 return true; // Ignore perch block
