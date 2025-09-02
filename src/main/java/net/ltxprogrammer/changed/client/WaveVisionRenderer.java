@@ -52,6 +52,7 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Objects;
 
 public class WaveVisionRenderer {
     public static final Logger LOGGER = LogUtils.getLogger();
@@ -75,20 +76,20 @@ public class WaveVisionRenderer {
 
         public RenderType convertRenderType(@NotNull BlockState state, @NotNull RandomSource rand, @NotNull ModelData data, RenderType renderType) {
             if (renderType == RenderType.solid())
-                return ChangedShaders.waveVisionResonantSolid(WaveVisionRenderer.LATEX_RESONANCE_NEUTRAL);
+                return ChangedShaders.waveVisionResonantSolidFixed();
             if (renderType == RenderType.cutout())
-                return ChangedShaders.waveVisionResonantCutout(WaveVisionRenderer.LATEX_RESONANCE_NEUTRAL);
+                return ChangedShaders.waveVisionResonantCutoutFixed();
             if (renderType == RenderType.cutoutMipped())
-                return ChangedShaders.waveVisionResonantCutoutMipped(WaveVisionRenderer.LATEX_RESONANCE_NEUTRAL);
+                return ChangedShaders.waveVisionResonantCutoutMippedFixed();
             return renderType;
         }
 
         public RenderType backConvertRenderType(@NotNull BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data, RenderType renderType) {
-            if (renderType == ChangedShaders.waveVisionResonantSolid(WaveVisionRenderer.LATEX_RESONANCE_NEUTRAL))
+            if (renderType == ChangedShaders.waveVisionResonantSolidFixed())
                 return RenderType.solid();
-            if (renderType == ChangedShaders.waveVisionResonantCutout(WaveVisionRenderer.LATEX_RESONANCE_NEUTRAL))
+            if (renderType == ChangedShaders.waveVisionResonantCutoutFixed())
                 return RenderType.cutout();
-            if (renderType == ChangedShaders.waveVisionResonantCutoutMipped(WaveVisionRenderer.LATEX_RESONANCE_NEUTRAL))
+            if (renderType == ChangedShaders.waveVisionResonantCutoutMippedFixed())
                 return RenderType.cutoutMipped();
             return renderType;
         }
@@ -164,7 +165,6 @@ public class WaveVisionRenderer {
         ObjectListIterator<LevelRenderer.RenderChunkInfo> chunkInfoIterator = this.renderChunksInFrustum.listIterator();
         VertexFormat vertexformat = actualRenderType.format();
         ShaderInstance shader = RenderSystem.getShader();
-        BufferUploader.reset();
 
         for(int k = 0; k < 12; ++k) {
             int i = RenderSystem.getShaderTexture(k);
@@ -209,37 +209,32 @@ public class WaveVisionRenderer {
 
         RenderSystem.setupShaderLights(shader);
         shader.apply();
-        Uniform uniform = shader.CHUNK_OFFSET;
-        boolean flag1 = false;
+        Uniform chunkOffset = shader.CHUNK_OFFSET;
 
-        while (chunkInfoIterator.hasNext()) {
-            LevelRenderer.RenderChunkInfo chunkInfo = chunkInfoIterator.next();
-            ChunkRenderDispatcher.RenderChunk renderChunk = chunkInfo.chunk;
+        for (LevelRenderer.RenderChunkInfo renderChunkInfo : this.renderChunksInFrustum) {
+            ChunkRenderDispatcher.RenderChunk renderChunk = renderChunkInfo.chunk;
             if (!renderChunk.getCompiledChunk().isEmpty(renderType)) {
                 VertexBuffer vertexbuffer = renderChunk.getBuffer(renderType);
+                Objects.requireNonNull(vertexbuffer, () -> "Compiled chunk is missing layer buffer, but is non-empty, for render type " + renderType);
                 BlockPos blockpos = renderChunk.getOrigin();
-                if (uniform != null) {
-                    uniform.set((float) ((double) blockpos.getX() - camX), (float) ((double) blockpos.getY() - camY), (float) ((double) blockpos.getZ() - camZ));
-                    uniform.upload();
+                if (chunkOffset != null) {
+                    chunkOffset.set((float) ((double) blockpos.getX() - camX), (float) ((double) blockpos.getY() - camY), (float) ((double) blockpos.getZ() - camZ));
+                    chunkOffset.upload();
                 }
 
                 vertexbuffer.bind();
                 vertexbuffer.draw();
-                flag1 = true;
             }
         }
 
-        if (uniform != null) {
-            uniform.set(new Vector3f(0f, 0f, 0f));
+        if (chunkOffset != null) {
+            chunkOffset.set(0.0F, 0.0F, 0.0F);
         }
 
         shader.clear();
-        if (flag1) {
-            vertexformat.clearBufferState();
-        }
-
         VertexBuffer.unbind();
         this.minecraft.getProfiler().pop();
+        //net.minecraftforge.client.ForgeHooksClient.dispatchRenderStage(renderType, this, p_172995_, p_254039_, this.ticks, this.minecraft.gameRenderer.getMainCamera(), this.getFrustum());
         actualRenderType.clearRenderState();
     }
 
@@ -247,19 +242,19 @@ public class WaveVisionRenderer {
         ChangedClient.resetWaveResonance();
         this.renderChunkLayer(RenderType.solid(), ChangedShaders.waveVisionSolid(), poseStack, camX, camY, camZ, projectionMatrix);
         ChangedClient.setWaveResonance(LATEX_RESONANCE_NEUTRAL);
-        this.renderChunkLayer(ChangedShaders.waveVisionResonantSolid(LATEX_RESONANCE_NEUTRAL), poseStack, camX, camY, camZ, projectionMatrix);
+        this.renderChunkLayer(ChangedShaders.waveVisionResonantSolidFixed(), poseStack, camX, camY, camZ, projectionMatrix);
 
         ChangedClient.resetWaveResonance();
         this.minecraft.getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS).setBlurMipmap(false, this.minecraft.options.mipmapLevels().get() > 0);
         this.renderChunkLayer(RenderType.cutoutMipped(), ChangedShaders.waveVisionCutoutMipped(), poseStack, camX, camY, camZ, projectionMatrix);
         ChangedClient.setWaveResonance(LATEX_RESONANCE_NEUTRAL);
-        this.renderChunkLayer(ChangedShaders.waveVisionResonantCutoutMipped(LATEX_RESONANCE_NEUTRAL), poseStack, camX, camY, camZ, projectionMatrix);
+        this.renderChunkLayer(ChangedShaders.waveVisionResonantCutoutMippedFixed(), poseStack, camX, camY, camZ, projectionMatrix);
 
         ChangedClient.resetWaveResonance();
         this.minecraft.getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS).restoreLastBlurMipmap();
         this.renderChunkLayer(RenderType.cutout(), ChangedShaders.waveVisionCutout(), poseStack, camX, camY, camZ, projectionMatrix);
         ChangedClient.setWaveResonance(LATEX_RESONANCE_NEUTRAL);
-        this.renderChunkLayer(ChangedShaders.waveVisionResonantCutout(LATEX_RESONANCE_NEUTRAL), poseStack, camX, camY, camZ, projectionMatrix);
+        this.renderChunkLayer(ChangedShaders.waveVisionResonantCutoutFixed(), poseStack, camX, camY, camZ, projectionMatrix);
 
         ChangedClient.resetWaveResonance();
     }

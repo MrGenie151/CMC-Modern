@@ -25,9 +25,9 @@ public abstract class ChunkBufferBuilderPackMixin {
             return null;
 
         final var extraLayers = Set.of(
-            ChangedShaders.waveVisionResonantSolid(WaveVisionRenderer.LATEX_RESONANCE_NEUTRAL),
-            ChangedShaders.waveVisionResonantCutoutMipped(WaveVisionRenderer.LATEX_RESONANCE_NEUTRAL),
-            ChangedShaders.waveVisionResonantCutout(WaveVisionRenderer.LATEX_RESONANCE_NEUTRAL)
+            ChangedShaders.waveVisionResonantSolidFixed(),
+            ChangedShaders.waveVisionResonantCutoutMippedFixed(),
+            ChangedShaders.waveVisionResonantCutoutFixed()
         );
 
         return extraLayers.stream().collect(Collectors.toMap(Function.identity(), (renderType) -> {

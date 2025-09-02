@@ -510,7 +510,7 @@ public class AccessorySlots implements Container {
             return event.shouldDrop();
         }).forEach(entry -> {
             consumer.accept(entry.getValue());
-            entry.setValue(ItemStack.EMPTY);
+            entry.getValue().setCount(0);
         });
     }
 
