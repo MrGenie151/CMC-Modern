@@ -1,6 +1,7 @@
 package net.ltxprogrammer.changed.entity.ai;
 
 import net.ltxprogrammer.changed.entity.beast.AbstractDarkLatexEntity;
+import net.ltxprogrammer.changed.util.LevelUtil;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
@@ -137,7 +138,7 @@ public class DarkLatexCaveHarvestGoal extends MoveToBlockGoal {
         return Arrays.stream(Direction.values()).filter(surface -> {
             return level.isEmptyBlock(orePos.relative(surface));
         }).anyMatch(surface -> {
-            return DarkLatexFishingGoal.getBlocksInLine(this.blockPos.above().above(), orePos.relative(surface), 0.125f).allMatch(tracePos -> {
+            return LevelUtil.getBlocksInLine(this.blockPos.above().above(), orePos.relative(surface), 0.125f).allMatch(tracePos -> {
                 if (tracePos.equals(orePos))
                     return true;
                 return level.isEmptyBlock(tracePos);

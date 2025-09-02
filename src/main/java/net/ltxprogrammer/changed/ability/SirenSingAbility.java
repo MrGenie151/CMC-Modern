@@ -17,7 +17,7 @@ public class SirenSingAbility extends AbstractAbility<SirenSingAbilityInstance> 
 
     @Override
     public int getCoolDown(IAbstractChangedEntity entity) {
-        return 90 * 20; // 90 Seconds
+        return 30 * 20; // 30 Seconds
     }
 
     private static final Collection<Component> DESCRIPTION = Collections.singleton(Component.translatable("ability.changed.siren_sing.desc"));
