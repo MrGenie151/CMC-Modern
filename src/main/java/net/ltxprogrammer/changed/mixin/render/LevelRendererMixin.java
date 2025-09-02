@@ -434,6 +434,8 @@ public abstract class LevelRendererMixin {
 
         waveVisionRenderer.renderAndSetupFog(profiler);
 
+        profiler.popPush("clear");
+        RenderSystem.clear(16640, Minecraft.ON_OSX);
         profiler.popPush("terrain_setup");
         this.waveVisionSetupRender(camera, frustum, frustumExists, this.minecraft.player.isSpectator());
         profiler.popPush("compilechunks");
@@ -533,6 +535,7 @@ public abstract class LevelRendererMixin {
         bufferSource.endBatch(Sheets.bedSheet());
         bufferSource.endBatch(Sheets.shulkerBoxSheet());
         bufferSource.endBatch(Sheets.signSheet());
+        bufferSource.endBatch(Sheets.hangingSignSheet());
         bufferSource.endBatch(Sheets.chestSheet());
         this.renderBuffers.outlineBufferSource().endOutlineBatch();
 
@@ -572,12 +575,9 @@ public abstract class LevelRendererMixin {
             net.minecraftforge.client.ForgeHooksClient.onDrawHighlight((LevelRenderer)(Object)this, camera, hitresult, partialTicks, poseStack, bufferSource);
         }
 
-        PoseStack posestack = RenderSystem.getModelViewStack();
-        posestack.pushPose();
-        posestack.mulPoseMatrix(poseStack.last().pose());
-        RenderSystem.applyModelViewMatrix();
         this.minecraft.debugRenderer.render(poseStack, bufferSource, camX, camY, camZ);
-        posestack.popPose();
+        bufferSource.endLastBatch();
+        PoseStack posestack = RenderSystem.getModelViewStack();
         RenderSystem.applyModelViewMatrix();
         bufferSource.endBatch(Sheets.translucentCullBlockSheet());
         bufferSource.endBatch(Sheets.bannerSheet());
