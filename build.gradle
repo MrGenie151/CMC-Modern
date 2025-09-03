@@ -175,7 +175,9 @@ def modIndex = [
     "parcool": [ artifact: "curse.maven:parcool-482378:6652972", compile: true, clientOnly: false ], // Forge 1.20.1 v3.4.0.7
     "personality": [ artifact: "curse.maven:personality-415974:6248892", compile: true, clientOnly: false ], // Forge 1.20.1 v4.1.0
     "create": [ artifact: "curse.maven:create-328085:6641603", compile: true, clientOnly: false ], // Forge 1.20.1 v6.0.6
-    "curios": [ artifact: "curse.maven:curios-309927:6418456", compile: false, clientOnly: false ] // Forge 1.20.1 v5.14.1
+    "curios": [ artifact: "curse.maven:curios-309927:6418456", compile: false, clientOnly: false ], // Forge 1.20.1 v5.14.1
+    "quark": [ artifact: "curse.maven:quark-243121:6427817", compile: false, clientOnly: false ], // Forge 1.20.1 v4.0-462
+    "zeta": [ artifact: "curse.maven:zeta-968868:6432578", compile: false, clientOnly: false ] // Forge 1.20.1 v1.0-30
 ]
 
 dependencies {
