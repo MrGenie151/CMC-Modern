@@ -626,6 +626,13 @@ public class ProcessTransfur {
     }
 
     public static float difficultyAdjustTransfurAmount(Difficulty difficulty, float amount) {
+        return difficultyAdjustTransfurAmount(difficulty, amount, null);
+    }
+
+    public static float difficultyAdjustTransfurAmount(Difficulty difficulty, float amount, @Nullable IAbstractChangedEntity source) {
+        if (source != null && source.isPlayer())
+            return 1.0f;
+
         if (difficulty == Difficulty.EASY) {
             amount = Math.min(amount / 2.0F + 1.0F, amount);
         }

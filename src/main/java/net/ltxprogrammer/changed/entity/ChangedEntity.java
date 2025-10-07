@@ -772,7 +772,7 @@ public abstract class ChangedEntity extends Monster {
             return false;
 
         float damage = (float)maybeGetUnderlying().getAttributeValue(ChangedAttributes.TRANSFUR_DAMAGE.get());
-        damage = ProcessTransfur.difficultyAdjustTransfurAmount(entity.level().getDifficulty(), damage);
+        damage = ProcessTransfur.difficultyAdjustTransfurAmount(entity.level().getDifficulty(), damage, abstractChangedEntity);
         TransfurVariant<?> variant = this.getTransfurVariant();
 
         if (entity instanceof LivingEntity livingEntity) {

@@ -393,7 +393,9 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
             }
 
             if (attackDown && useDown && suited) {
-                if (this.entity.getChangedEntity().tryAbsorbTarget(this.grabbedEntity, this.entity, 4.0f, null)
+                float damage = (float)entity.getEntity().getAttributeValue(ChangedAttributes.TRANSFUR_DAMAGE.get());
+                damage = ProcessTransfur.difficultyAdjustTransfurAmount(entity.getLevel().getDifficulty(), damage, this.entity) * 1.5f;
+                if (this.entity.getChangedEntity().tryAbsorbTarget(this.grabbedEntity, this.entity, damage, null)
                         && !this.entity.getLevel().isClientSide) {
                     this.releaseEntity();
                     return;
@@ -402,7 +404,7 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
 
             if (attackDown && !suited) {
                 float damage = (float)entity.getEntity().getAttributeValue(ChangedAttributes.TRANSFUR_DAMAGE.get());
-                damage = ProcessTransfur.difficultyAdjustTransfurAmount(entity.getLevel().getDifficulty(), damage);
+                damage = ProcessTransfur.difficultyAdjustTransfurAmount(entity.getLevel().getDifficulty(), damage, this.entity);
                 if (ProcessTransfur.progressTransfur(this.grabbedEntity, damage, entity.getChangedEntity().getTransfurVariant(), TransfurContext.latexHazard(this.entity, TransfurCause.GRAB_REPLICATE))
                         && !this.entity.getLevel().isClientSide)
                     this.releaseEntity();
