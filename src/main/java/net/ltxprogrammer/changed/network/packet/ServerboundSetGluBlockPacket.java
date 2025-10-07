@@ -4,6 +4,7 @@ import net.ltxprogrammer.changed.block.entity.GluBlockEntity;
 import net.ltxprogrammer.changed.world.features.structures.facility.Zone;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.network.NetworkEvent;
@@ -51,21 +52,28 @@ public class ServerboundSetGluBlockPacket implements ChangedPacket {
     @Override
     public CompletableFuture<Void> handle(NetworkEvent.Context context, CompletableFuture<Level> levelFuture, Executor sidedExecutor) {
         if (context.getDirection().getReceptionSide() == LogicalSide.SERVER) {
-            var level = context.getSender().level();
-            var blockState = level.getBlockState(pos);
-            var blockEntity = level.getBlockEntity(pos);
-            if (blockEntity instanceof GluBlockEntity gluBlockEntity) {
-                gluBlockEntity.setSize(size);
-                gluBlockEntity.setHasDoor(hasDoor);
-                gluBlockEntity.setZone(zone);
-                gluBlockEntity.setJointType(jointType);
-                gluBlockEntity.setFinalState(finalState);
-                gluBlockEntity.setChanged();
-                level.sendBlockUpdated(pos, blockState, blockState, 3);
+            if (!context.getSender().canUseGameMasterBlocks()) {
+                context.getSender().sendSystemMessage(Component.translatable("advMode.notAllowed"));
+                return CompletableFuture.failedFuture(new IllegalArgumentException("Sender cannot use game master blocks"));
             }
 
-            context.setPacketHandled(true);
-            return CompletableFuture.completedFuture(null);
+            return levelFuture.thenAcceptAsync(level -> {
+                var blockState = level.getBlockState(pos);
+                var blockEntity = level.getBlockEntity(pos);
+                if (blockEntity instanceof GluBlockEntity gluBlockEntity) {
+                    gluBlockEntity.setSize(size);
+                    gluBlockEntity.setHasDoor(hasDoor);
+                    gluBlockEntity.setZone(zone);
+                    gluBlockEntity.setJointType(jointType);
+                    gluBlockEntity.setFinalState(finalState);
+                    gluBlockEntity.setChanged();
+                    level.sendBlockUpdated(pos, blockState, blockState, 3);
+                }
+
+                else {
+                    throw new IllegalArgumentException("Specified block is not a Glu block");
+                }
+            }, sidedExecutor);
         }
 
         return CompletableFuture.failedFuture(makeIllegalSideException(context.getDirection().getReceptionSide(), LogicalSide.SERVER));
