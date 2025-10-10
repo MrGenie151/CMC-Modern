@@ -1,11 +1,18 @@
 package net.ltxprogrammer.changed.world.features.structures.facility;
 
-import net.minecraft.util.random.WeightedEntry;
+import net.ltxprogrammer.changed.block.entity.GluBlockEntity;
+import net.ltxprogrammer.changed.init.ChangedRegistry;
+import net.ltxprogrammer.changed.util.TagUtil;
 import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 /**
  * The position of a glu block
  */
-public record GenStep(StructureTemplate.StructureBlockInfo blockInfo, WeightedRandomList<WeightedEntry.Wrapper<PieceType>> validTypes) {
+public record GenStep(StructureTemplate.StructureBlockInfo blockInfo, WeightedRandomList<WeightedPieceNeighborSupplier> validTypes) {
+    public Zone getZone() {
+        if (blockInfo.nbt() != null && blockInfo.nbt().contains(GluBlockEntity.ZONE))
+            return ChangedRegistry.FACILITY_ZONES.getValue(TagUtil.getResourceLocation(blockInfo.nbt(), GluBlockEntity.ZONE));
+        return null;
+    }
 }

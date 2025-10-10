@@ -1,13 +1,14 @@
 package net.ltxprogrammer.changed.world.features.structures.facility;
 
+import net.ltxprogrammer.changed.world.features.structures.facility.types.PieceType;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.fml.event.IModBusEvent;
 
 public class GatherFacilityPiecesEvent extends Event implements IModBusEvent {
-    private final PieceType pieceType;
+    private final PieceType<?> pieceType;
     private final FacilityPieceCollectionBuilder builder;
 
-    public GatherFacilityPiecesEvent(PieceType pieceType, FacilityPieceCollectionBuilder builder) {
+    public GatherFacilityPiecesEvent(PieceType<?> pieceType, FacilityPieceCollectionBuilder builder) {
         this.pieceType = pieceType;
         this.builder = builder;
     }
@@ -22,7 +23,7 @@ public class GatherFacilityPiecesEvent extends Event implements IModBusEvent {
         return this;
     }
 
-    public PieceType getPieceType() {
+    public PieceType<?> getPieceType() {
         return pieceType;
     }
 

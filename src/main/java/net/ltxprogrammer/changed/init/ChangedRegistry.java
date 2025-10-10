@@ -1,6 +1,5 @@
 package net.ltxprogrammer.changed.init;
 
-import com.mojang.serialization.Lifecycle;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.ability.AbstractAbility;
 import net.ltxprogrammer.changed.client.latexparticles.LatexParticleType;
@@ -12,6 +11,8 @@ import net.ltxprogrammer.changed.entity.latex.LatexType;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.entity.animation.AnimationEvent;
 import net.ltxprogrammer.changed.world.LatexCoverState;
+import net.ltxprogrammer.changed.world.features.structures.facility.types.PieceType;
+import net.ltxprogrammer.changed.world.features.structures.facility.Zone;
 import net.minecraft.core.Holder;
 import net.minecraft.core.IdMap;
 import net.minecraft.core.IdMapper;
@@ -19,8 +20,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -56,7 +55,7 @@ public abstract class ChangedRegistry<T> implements Registry<T> {
             return Optional.ofNullable(get().getKey(value));
         }
 
-        public T getValue(ResourceLocation key) {
+        public @Nullable T getValue(ResourceLocation key) {
             return get().getValue(key);
         }
 
@@ -145,6 +144,9 @@ public abstract class ChangedRegistry<T> implements Registry<T> {
     public static final RegistryHolder<LatexType> LATEX_TYPE = new RegistryHolder<>(registryKey("latex_type"));
     public static final RegistryHolder<WallSignVariant> WALL_SIGN_VARIANT = new RegistryHolder<>(registryKey("wall_sign_variant"));
 
+    public static final RegistryHolder<PieceType<?>> FACILITY_PIECE_TYPES = new RegistryHolder<>(registryKey("facility/piece_types"));
+    public static final RegistryHolder<Zone> FACILITY_ZONES = new RegistryHolder<>(registryKey("facility/zones"));
+
     private static class ClearableObjectIntIdentityMap<I> extends IdMapper<I> {
         void clear()
         {
@@ -209,6 +211,8 @@ public abstract class ChangedRegistry<T> implements Registry<T> {
             });
         }, null);
         createRegistry(event, WALL_SIGN_VARIANT.key);
+        createRegistry(event, FACILITY_PIECE_TYPES.key);
+        createRegistry(event, FACILITY_ZONES.key);
     }
 
     private static <T> void createRegistry(NewRegistryEvent event, ResourceKey<? extends Registry<T>> key) {

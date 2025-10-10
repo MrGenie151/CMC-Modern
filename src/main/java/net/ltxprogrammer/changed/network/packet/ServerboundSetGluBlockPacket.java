@@ -1,6 +1,7 @@
 package net.ltxprogrammer.changed.network.packet;
 
 import net.ltxprogrammer.changed.block.entity.GluBlockEntity;
+import net.ltxprogrammer.changed.init.ChangedRegistry;
 import net.ltxprogrammer.changed.world.features.structures.facility.Zone;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -25,7 +26,7 @@ public class ServerboundSetGluBlockPacket implements ChangedPacket {
         this.pos = buffer.readBlockPos();
         this.size = buffer.readInt();
         this.hasDoor = buffer.readBoolean();
-        this.zone = Zone.byName(buffer.readUtf()).orElse(Zone.BLUE_ZONE);
+        this.zone = ChangedRegistry.FACILITY_ZONES.readRegistryObject(buffer);
         this.jointType = GluBlockEntity.JointType.byName(buffer.readUtf()).orElse(GluBlockEntity.JointType.ENTRANCE);
         this.finalState = buffer.readUtf();
     }
@@ -44,7 +45,7 @@ public class ServerboundSetGluBlockPacket implements ChangedPacket {
         buffer.writeBlockPos(pos);
         buffer.writeInt(size);
         buffer.writeBoolean(hasDoor);
-        buffer.writeUtf(zone.getSerializedName());
+        ChangedRegistry.FACILITY_ZONES.writeRegistryObject(buffer, zone);
         buffer.writeUtf(jointType.getSerializedName());
         buffer.writeUtf(finalState);
     }

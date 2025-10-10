@@ -116,6 +116,8 @@ public class Changed {
         ChangedAnimationEvents.REGISTRY.register(modEventBus);
         ChangedAccessorySlots.REGISTRY.register(modEventBus);
         ChangedWallSigns.REGISTRY.register(modEventBus);
+        ChangedFacilityPieceTypes.REGISTRY.register(modEventBus);
+        ChangedFacilityZones.REGISTRY.register(modEventBus);
 
         // Our DFU references the above registries, so they need to be initialized before the DFU is created
         dataFixer = new ChangedDataFixer();
@@ -139,7 +141,6 @@ public class Changed {
             ComposterBlock.COMPOSTABLES.put(ChangedBlocks.ORANGE_TREE_SAPLING.get().asItem(), 0.3F);
             ComposterBlock.COMPOSTABLES.put(ChangedItems.ORANGE.get(), 0.65F);
         });
-        event.enqueueWork(FacilityPieces::gatherFacilityPieces);
     }
 
     private void registerClientEventListeners(IEventBus eventBus) {
@@ -159,6 +160,7 @@ public class Changed {
     private void dataListeners(final AddReloadListenerEvent event) {
         event.addListener(ChangedFusions.INSTANCE);
         event.addListener(AccessoryEntities.INSTANCE);
+        event.addListener(FacilityPieces.INSTANCE);
         ChangedCompatibility.addDataListeners(event);
     }
 

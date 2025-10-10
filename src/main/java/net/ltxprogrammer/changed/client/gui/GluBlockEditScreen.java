@@ -79,7 +79,7 @@ public class GluBlockEditScreen extends Screen {
         this.addWidget(this.jointTypeButton);
 
         this.zoneButton = Button.builder(zone.getTranslatedName(), press -> {
-            this.zone = this.zone.next();
+            this.zone = Zone.findNext(this.zone);
             this.zoneButton.setMessage(zone.getTranslatedName());
         }).bounds((this.width / 2 - 152) + 152, 55, 148, 20).build();
         this.addWidget(this.zoneButton);

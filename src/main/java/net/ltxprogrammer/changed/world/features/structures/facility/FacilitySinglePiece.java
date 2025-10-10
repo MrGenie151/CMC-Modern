@@ -10,6 +10,7 @@ import net.ltxprogrammer.changed.world.features.structures.ChestLootTableProcess
 import net.ltxprogrammer.changed.world.features.structures.FacilityPieces;
 import net.ltxprogrammer.changed.world.features.structures.GluReplacementProcessor;
 import net.ltxprogrammer.changed.world.features.structures.HangingBlockFixerProcessor;
+import net.ltxprogrammer.changed.world.features.structures.facility.types.PieceType;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -39,19 +40,13 @@ public abstract class FacilitySinglePiece extends FacilityPiece {
     public final Optional<ResourceLocation> lootTable;
     private StructureTemplate template = null;
 
-    protected FacilitySinglePiece(PieceType type, ResourceLocation templateName) {
+    protected FacilitySinglePiece(PieceType<?> type, ResourceLocation templateName) {
         super(type);
         this.templateName = templateName;
         this.lootTable = Optional.empty();
     }
 
-    protected FacilitySinglePiece(PieceType type, ResourceLocation templateName, @Nullable ResourceLocation lootTable) {
-        super(type);
-        this.templateName = templateName;
-        this.lootTable = Optional.ofNullable(lootTable);
-    }
-
-    protected FacilitySinglePiece(Weight weight, PieceType type, ResourceLocation templateName, @Nullable ResourceLocation lootTable) {
+    protected FacilitySinglePiece(PieceType<?> type, ResourceLocation templateName, @Nullable ResourceLocation lootTable) {
         super(type);
         this.templateName = templateName;
         this.lootTable = Optional.ofNullable(lootTable);

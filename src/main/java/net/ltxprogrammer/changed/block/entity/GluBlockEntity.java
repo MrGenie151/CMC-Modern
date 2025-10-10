@@ -1,6 +1,10 @@
 package net.ltxprogrammer.changed.block.entity;
 
 import net.ltxprogrammer.changed.init.ChangedBlockEntities;
+import net.ltxprogrammer.changed.init.ChangedFacilityPieceTypes;
+import net.ltxprogrammer.changed.init.ChangedFacilityZones;
+import net.ltxprogrammer.changed.init.ChangedRegistry;
+import net.ltxprogrammer.changed.util.TagUtil;
 import net.ltxprogrammer.changed.world.features.structures.facility.Zone;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -23,7 +27,7 @@ public class GluBlockEntity extends BlockEntity {
     private int size = 3;
     private boolean hasDoor = false;
     private JointType jointType = JointType.ENTRANCE;
-    private Zone zone = Zone.BLUE_ZONE;
+    private Zone zone = ChangedFacilityZones.ENTRANCE_ZONE.get();
     private String finalState = "minecraft:air";
 
     public GluBlockEntity(BlockPos pos, BlockState state) {
@@ -75,7 +79,7 @@ public class GluBlockEntity extends BlockEntity {
         tag.putInt(SIZE, this.size);
         tag.putBoolean(HAS_DOOR, this.hasDoor);
         tag.putString(JOINT, this.jointType.getSerializedName());
-        tag.putString(ZONE, this.zone.getSerializedName());
+        TagUtil.putResourceLocation(tag, ZONE, ChangedRegistry.FACILITY_ZONES.getKey(this.zone));
         tag.putString(FINAL_STATE, this.finalState);
     }
 
@@ -84,7 +88,7 @@ public class GluBlockEntity extends BlockEntity {
         this.size = tag.getInt(SIZE);
         this.hasDoor = tag.getBoolean(HAS_DOOR);
         this.jointType = JointType.byName(tag.getString(JOINT)).orElse(JointType.ENTRANCE);
-        this.zone = Zone.byName(tag.getString(ZONE)).orElse(Zone.BLUE_ZONE);
+        this.zone = ChangedRegistry.FACILITY_ZONES.getValue(TagUtil.getResourceLocation(tag, GluBlockEntity.ZONE));
         this.finalState = tag.getString(FINAL_STATE);
     }
 
