@@ -44,7 +44,11 @@ public class ClothingItem extends Item implements Clothing, ExtendedItemProperti
     public ClothingState defaultClothingState;
 
     public ClothingItem() {
-        super(new Properties().durability(5));
+        this(new Properties().durability(5));
+    }
+
+    public ClothingItem(Properties properties) {
+        super(properties);
         StateDefinition.Builder<ClothingItem, ClothingState> builder = new StateDefinition.Builder<>(this);
         this.createClothingStateDefinition(builder);
         this.stateDefinition = builder.create(ClothingItem::defaultClothingState, ClothingState::new);
