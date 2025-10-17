@@ -719,13 +719,16 @@
 
   "changed.instruction.clothing_state": "Click %s while equipped to change state",
 
-  "facility.zone.red_zone": "Red Zone",
-  "facility.zone.gray_zone": "Gray Zone",
-  "facility.zone.maintenance_zone": "Maintenance Zone",
-  "facility.zone.library_zone": "Library Zone",
-  "facility.zone.vent_zone": "Vent Zone",
-  "facility.zone.greenhouse_zone": "Greenhouse Zone",
-  "facility.zone.blue_zone": "Blue Zone",
+  "facility.zone.changed:general": "General Zone",
+  "facility.zone.changed:server": "Server Zone",
+  "facility.zone.changed:office": "Office Zone",
+  "facility.zone.changed:dark_latex": "Dark Latex Zone",
+  "facility.zone.changed:library": "Library Zone",
+  "facility.zone.changed:vent": "Vent Zone",
+  "facility.zone.changed:greenhouse": "Greenhouse Zone",
+  "facility.zone.changed:maintenance": "Maintenance Zone",
+  "facility.zone.changed:white_latex": "White Latex Zone",
+  "facility.zone.changed:entrance": "Entrance Zone",
 
   "glu_block.size": "Size %1$sx%1$s",
   "glu_block.has_door": "Has Door",

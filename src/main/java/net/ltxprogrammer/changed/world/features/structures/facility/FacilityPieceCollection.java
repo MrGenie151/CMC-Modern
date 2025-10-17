@@ -27,6 +27,10 @@ public class FacilityPieceCollection {
         return pieces.stream().map(ConfiguredFacilityPiece::facilityPiece).anyMatch(facilityPiece::equals);
     }
 
+    boolean contains(ConfiguredFacilityPiece facilityPiece) {
+        return pieces.stream().anyMatch(facilityPiece::equals);
+    }
+
     public Stream<ConfiguredFacilityPiece> stream() {
         return pieces.stream();
     }

@@ -15,4 +15,9 @@ public class EntranceType extends PieceType<FacilityEntrance> {
     public Codec<FacilityEntrance> getCodec() {
         return CODEC;
     }
+
+    @Override
+    public boolean connectionsMeetExpectations(int connections) {
+        return connections >= 1;
+    }
 }

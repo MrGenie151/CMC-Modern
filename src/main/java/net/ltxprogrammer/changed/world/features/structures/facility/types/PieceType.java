@@ -9,4 +9,12 @@ public abstract class PieceType<T extends FacilityPiece> {
     public boolean shouldConsumeSpan() {
         return true;
     }
+
+    public boolean connectionsMeetExpectations(int connections) {
+        return connections > 1;
+    }
+
+    public boolean canBeReplacedBy(PieceType<?> other) {
+        return false;
+    }
 }
