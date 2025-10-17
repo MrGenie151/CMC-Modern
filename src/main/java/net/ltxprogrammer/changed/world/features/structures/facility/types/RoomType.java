@@ -15,4 +15,9 @@ public class RoomType extends PieceType<FacilityRoomPiece> {
     public Codec<FacilityRoomPiece> getCodec() {
         return CODEC;
     }
+
+    @Override
+    public boolean connectionsMeetExpectations(int connections) {
+        return connections >= 1;
+    }
 }

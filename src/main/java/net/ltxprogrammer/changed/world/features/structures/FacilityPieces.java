@@ -1,5 +1,6 @@
 package net.ltxprogrammer.changed.world.features.structures;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import net.ltxprogrammer.changed.Changed;
@@ -16,6 +17,9 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.random.SimpleWeightedRandomList;
+import net.minecraft.util.random.WeightedEntry;
+import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -27,6 +31,9 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FacilityPieces extends SimplePreparableReloadListener<Set<ConfiguredFacilityPiece>> {
     public static FacilityPieces INSTANCE = new FacilityPieces();
@@ -77,11 +84,61 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
         };
     }
 
-    private static void treeGenerate(StructurePiecesBuilder builder, Structure.GenerationContext context,
-                                     Stack<FacilityPiece> stack, StructurePiece parentStructure,
+    private static Predicate<ConfiguredFacilityPiece> pieceConnectsToZones(Zone zone, Zone wantedZone) {
+        if (zone == wantedZone)
+            return pieceConnectsToZone(zone);
+
+        return configuredFacilityPiece -> {
+            return configuredFacilityPiece.connectsTo().isEmpty() || (
+                    configuredFacilityPiece.connectsTo().contains(zone) && configuredFacilityPiece.connectsTo().contains(wantedZone));
+        };
+    }
+
+    public static class FacilityGenerationContext {
+        public final StructurePiecesBuilder builder;
+        public final Structure.GenerationContext structureContext;
+        public final Map<ConfiguredFacilityPiece, Integer> configuredPieceCounts = new HashMap<>();
+
+        public FacilityGenerationContext(StructurePiecesBuilder builder, Structure.GenerationContext structureContext) {
+            this.builder = builder;
+            this.structureContext = structureContext;
+        }
+
+        public void addPieceToCount(ConfiguredFacilityPiece configuredFacilityPiece) {
+            configuredPieceCounts.compute(configuredFacilityPiece, (configuredPiece, count) -> {
+                if (count == null)
+                    return 1;
+                return count + 1;
+            });
+        }
+    }
+
+    private static int sequentialMatch(Stack<ConfiguredFacilityPiece> stack, Predicate<ConfiguredFacilityPiece> predicate, boolean includingNonSpan) {
+        int nonSpan = 0;
+        for (int i = stack.size() - 1; i >= 0; --i) {
+            var element = stack.elementAt(i);
+            if (!includingNonSpan && !element.facilityPiece().getType().shouldConsumeSpan()) {
+                nonSpan++;
+                continue;
+            }
+            if (!predicate.test(element))
+                return stack.size() - (i + 1) - nonSpan;
+        }
+
+        return stack.size() - nonSpan;
+    }
+
+    private static void treeGenerate(FacilityGenerationContext facilityContext,
+                                     Stack<ConfiguredFacilityPiece> stack, StructurePiece parentStructure,
                                      GenStep start, int genDepth, int span, BoundingBox allowedRegion) {
-        var parent = stack.peek();
+        var configuredParent = stack.peek();
+        var parent = configuredParent.facilityPiece();
         var zone = start.getZone();
+        var wantedZone = zone;
+
+        int zoneLength = sequentialMatch(stack, configuredPiece -> {
+            return configuredPiece.connectsTo().isEmpty() || configuredPiece.connectsTo().contains(zone);
+        }, false);
 
         int reroll = 10;
         while (reroll > 0) {
@@ -94,83 +151,92 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
                 pieceType = ChangedFacilityPieceTypes.ROOM.get();
                 allowedRegionForPiece = allowedRegion;
             } else {
-                var type = start.validTypes().getRandom(context.random());
+                var type = start.validTypes().getRandom(facilityContext.structureContext.random());
                 if (type.isEmpty())
                     break;
-                pieceType = type.get().getPieceType();
-                allowedRegionForPiece = allowedRegion;
-            }
+                if (reroll > 5 && zone != null && zoneLength > zone.getMinimumLength()) { // Coerce the next piece to be a transition to another zone
+                    WeightedRandomList<WeightedEntry.Wrapper<Zone>> possibleZones = WeightedRandomList.create(
+                            ChangedRegistry.FACILITY_ZONES.get().getValues().stream()
+                                    .map(facilityZone -> WeightedEntry.wrap(facilityZone, (int)(facilityZone.getGenerationWeight(36 - span) * 100)))
+                                    .collect(Collectors.toList())
+                    );
 
-            boolean placed = INSTANCE.facilityPieceCollections.get(pieceType).shuffledStream(context.random())
-                    .filter(pieceConnectsToZone(zone)).map(ConfiguredFacilityPiece::facilityPiece).anyMatch(nextPiece -> {
-                var nextStructure = nextPiece.createStructurePiece(context.structureTemplateManager(), genDepth);
-                if (!nextStructure.setupBoundingBox(builder, start.blockInfo(), context.random(), allowedRegionForPiece))
-                    return false;
-
-                var startPos = gluNeighbor(start.blockInfo().pos(), start.blockInfo().state());
-                builder.addPiece(nextStructure);
-
-                if (span <= 0)
-                    return false;
-
-                int nextSpan = pieceType.shouldConsumeSpan() ? span - 1 : span;
-                stack.push(nextPiece);
-
-                var genStack = new FacilityGenerationStack(stack, nextStructure.getBoundingBox(), context, nextSpan);
-                List<GenStep> starts = new ArrayList<>();
-                nextStructure.addSteps(genStack, starts);
-
-                int piecesBefore = ((StructurePiecesBuilderExtender)builder).pieceCount();
-                starts.stream().filter(next -> !next.blockInfo().pos().equals(startPos)).forEach(next -> {
-                    treeGenerate(builder, context, stack, nextStructure, next, genDepth, nextSpan, allowedRegion);
-                });
-                int piecesAfter = ((StructurePiecesBuilderExtender)builder).pieceCount();
-
-                stack.pop();
-
-                if (piecesAfter > piecesBefore) // Successfully generated pieces that attach to this one
-                    return true;
-
-                // No piece was generated to attach to this one
-                if (pieceType == ChangedFacilityPieceTypes.ROOM.get() || pieceType == ChangedFacilityPieceTypes.SEAL.get())
-                    return true; // This behaviour is expected for a room
-
-                // Attempt to regenerate this piece as a room, to prevent a dead end
-                ((StructurePiecesBuilderExtender)builder).removePiece(nextStructure);
-
-                StructurePiece pieceToPut = INSTANCE.facilityPieceCollections.get(ChangedFacilityPieceTypes.ROOM.get()).shuffledStream(context.random())
-                        .filter(pieceConnectsToZone(zone)).map(ConfiguredFacilityPiece::facilityPiece).map(nextRoom -> {
-                    var nextRoomStructure = nextRoom.createStructurePiece(context.structureTemplateManager(), genDepth);
-                    if (!nextRoomStructure.setupBoundingBox(builder, start.blockInfo(), context.random(), allowedRegion))
-                        return null;
-
-                    // Success
-                    return nextRoomStructure;
-                }).filter(Objects::nonNull).findFirst().orElse(nextStructure);
-
-                if (pieceToPut == nextStructure) {
-                    pieceToPut = INSTANCE.facilityPieceCollections.get(ChangedFacilityPieceTypes.SEAL.get()).shuffledStream(context.random())
-                            .filter(pieceConnectsToZone(zone)).map(ConfiguredFacilityPiece::facilityPiece).map(nextSeal -> {
-                        var nextRoomStructure = nextSeal.createStructurePiece(context.structureTemplateManager(), genDepth);
-                        if (!nextRoomStructure.setupBoundingBox(builder, start.blockInfo(), context.random(), allowedRegion))
-                            return null;
-
-                        // Success
-                        return nextRoomStructure;
-                    }).filter(Objects::nonNull).findFirst().orElse(nextStructure);
+                    wantedZone = possibleZones.getRandom(facilityContext.structureContext.random()).map(WeightedEntry.Wrapper::getData).orElse(zone);
                 }
 
-                if (pieceToPut == nextStructure)
-                    Changed.LOGGER.debug("Failed to seal dead end in facility, startPos {}", startPos);
-                else
-                    Changed.LOGGER.debug("Sealed dead end in facility, startPos {}", startPos);
-                builder.addPiece(pieceToPut);
+                pieceType = type.get().getPieceType();
+                allowedRegionForPiece = allowedRegion;
 
-                return true;
-            });
+                if (wantedZone != zone && pieceType.canBeReplacedBy(ChangedFacilityPieceTypes.TRANSITION.get())) {
+                    pieceType = ChangedFacilityPieceTypes.TRANSITION.get();
+                }
+            }
 
-            if (placed)
+            final PieceType<?> resolvedPieceType = pieceType;
+
+            boolean placed = INSTANCE.facilityPieceCollections.get(pieceType).shuffledStream(facilityContext.structureContext.random())
+                    .filter(nextConfiguredPiece -> facilityContext.configuredPieceCounts.getOrDefault(nextConfiguredPiece, 0) < nextConfiguredPiece.maximum())
+                    .filter(pieceConnectsToZones(zone, wantedZone)).anyMatch(nextConfiguredPiece -> {
+                        var nextPiece = nextConfiguredPiece.facilityPiece();
+                        var nextStructure = nextPiece.createStructurePiece(facilityContext.structureContext.structureTemplateManager(), genDepth);
+                        if (!nextStructure.setupBoundingBox(facilityContext.builder, start.blockInfo(), facilityContext.structureContext.random(), allowedRegionForPiece))
+                            return false;
+
+                        var startPos = gluNeighbor(start.blockInfo().pos(), start.blockInfo().state());
+                                facilityContext.builder.addPiece(nextStructure);
+
+                        if (span <= 0)
+                            return false;
+
+                        int nextSpan = resolvedPieceType.shouldConsumeSpan() ? span - 1 : span;
+                        stack.push(nextConfiguredPiece);
+
+                        var genStack = new FacilityGenerationStack(stack, nextStructure.getBoundingBox(), facilityContext.structureContext, nextSpan);
+                        List<GenStep> starts = new ArrayList<>();
+                        nextStructure.addSteps(genStack, starts);
+
+                        int piecesBefore = ((StructurePiecesBuilderExtender)facilityContext.builder).pieceCount();
+                        starts.stream().filter(next -> !next.blockInfo().pos().equals(startPos)).forEach(next -> {
+                            treeGenerate(facilityContext, stack, nextStructure, next, genDepth, nextSpan, allowedRegion);
+                        });
+                        int piecesAfter = ((StructurePiecesBuilderExtender)facilityContext.builder).pieceCount();
+
+                        stack.pop();
+
+                        if (resolvedPieceType.connectionsMeetExpectations((piecesAfter - piecesBefore) + 1)) {
+                            if (resolvedPieceType != ChangedFacilityPieceTypes.SEAL.get())
+                                facilityContext.addPieceToCount(nextConfiguredPiece);
+                            return true;
+                        }
+
+                        // Attempt to regenerate this piece as a room, to prevent a dead end
+                        ((StructurePiecesBuilderExtender)facilityContext.builder).removePiece(nextStructure);
+
+                        StructurePiece pieceToPut = Stream.concat(
+                                INSTANCE.facilityPieceCollections.get(ChangedFacilityPieceTypes.ROOM.get()).shuffledStream(facilityContext.structureContext.random()),
+                                INSTANCE.facilityPieceCollections.get(ChangedFacilityPieceTypes.SEAL.get()).shuffledStream(facilityContext.structureContext.random())
+                        ).filter(pieceConnectsToZone(zone)).map(ConfiguredFacilityPiece::facilityPiece).map(nextRoom -> {
+                            var nextRoomStructure = nextRoom.createStructurePiece(facilityContext.structureContext.structureTemplateManager(), genDepth);
+                            if (!nextRoomStructure.setupBoundingBox(facilityContext.builder, start.blockInfo(), facilityContext.structureContext.random(), allowedRegion))
+                                return null;
+
+                            // Success
+                            return nextRoomStructure;
+                        }).filter(Objects::nonNull).findFirst().orElse(nextStructure);
+
+                        if (pieceToPut == nextStructure)
+                            Changed.LOGGER.debug("Failed to seal dead end in facility, startPos {}", startPos);
+                        else
+                            Changed.LOGGER.debug("Sealed dead end in facility, startPos {}", startPos);
+                        facilityContext.builder.addPiece(pieceToPut);
+
+                        return true;
+                    });
+
+
+            if (placed) {
                 break;
+            }
 
             reroll--;
         }
@@ -185,11 +251,11 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
         blockPos = blockPos.atY(context.chunkGenerator().getBaseHeight(blockPos.getX(), blockPos.getZ(),
                 Heightmap.Types.WORLD_SURFACE_WG, context.heightAccessor(), context.randomState()));
 
-        Stack<FacilityPiece> stack = new Stack<>();
+        Stack<ConfiguredFacilityPiece> stack = new Stack<>();
         List<GenStep> starts = new ArrayList<>();
-        FacilityPiece entranceNew = INSTANCE.facilityPieceCollections.get(ChangedFacilityPieceTypes.ENTRANCE.get()).findNextPiece(context.random())
-                .map(ConfiguredFacilityPiece::facilityPiece).orElseThrow();
-        FacilityPieceInstance entrancePiece = entranceNew.createStructurePiece(context.structureTemplateManager(), genDepth);
+        ConfiguredFacilityPiece entranceNew = INSTANCE.facilityPieceCollections.get(ChangedFacilityPieceTypes.ENTRANCE.get()).findNextPiece(context.random())
+                .orElseThrow();
+        FacilityPieceInstance entrancePiece = entranceNew.facilityPiece().createStructurePiece(context.structureTemplateManager(), genDepth);
 
         var directions = new ArrayList<>(Direction.Plane.HORIZONTAL.stream().toList());
         CollectionUtil.shuffle(directions, context.random());
@@ -225,7 +291,7 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
 
         if (span > 0) {
             starts.forEach(start -> {
-                treeGenerate(builder, context, stack, entrancePiece, start, genDepth, span - 1, allowedRegion);
+                treeGenerate(new FacilityGenerationContext(builder, context), stack, entrancePiece, start, genDepth, span - 1, allowedRegion);
             });
         }
 

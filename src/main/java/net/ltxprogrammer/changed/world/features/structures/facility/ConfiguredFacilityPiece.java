@@ -19,11 +19,15 @@ import java.util.Set;
  */
 public record ConfiguredFacilityPiece(FacilityPiece facilityPiece,
                                    int spawnWeight,
+                                   int minimum,
+                                   int maximum,
                                    Set<Zone> connectsTo) implements WeightedEntry {
     public static Codec<ConfiguredFacilityPiece> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ((MapCodec<FacilityPiece>) ChangedRegistry.FACILITY_PIECE_TYPES.get().getCodec().dispatch("type", FacilityPiece::getType, PieceType::getCodec)
                     .fieldOf("piece")).forGetter(ConfiguredFacilityPiece::facilityPiece),
             Codec.INT.fieldOf("spawn_weight").forGetter(ConfiguredFacilityPiece::spawnWeight),
+            Codec.INT.fieldOf("minimum").orElse(0).forGetter(ConfiguredFacilityPiece::minimum),
+            Codec.INT.fieldOf("maximum").orElse(10).forGetter(ConfiguredFacilityPiece::maximum),
             ChangedRegistry.FACILITY_ZONES.get().getCodec().listOf().xmap(Set::copyOf, List::copyOf)
                     .fieldOf("neighboring_zones").forGetter(ConfiguredFacilityPiece::connectsTo)
     ).apply(instance, ConfiguredFacilityPiece::new));

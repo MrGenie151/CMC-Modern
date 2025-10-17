@@ -47,7 +47,7 @@ public class Facility extends Structure {
 
         BoundingBox generationRegion = BoundingBox.fromCorners(minPos, maxPos);
 
-        FacilityPieces.generateFacility(builder, context, 5, 25, generationRegion);
+        FacilityPieces.generateFacility(builder, context, 5, 36, generationRegion);
         Changed.LOGGER.info("Generated facility with {} pieces, at ChunkPos {}", ((StructurePiecesBuilderExtender)builder).pieceCount(), center);
     }
 

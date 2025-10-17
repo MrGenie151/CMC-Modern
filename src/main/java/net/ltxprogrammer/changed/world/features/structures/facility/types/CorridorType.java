@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.world.features.structures.facility.types;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.ltxprogrammer.changed.init.ChangedFacilityPieceTypes;
 import net.ltxprogrammer.changed.world.features.structures.facility.FacilityCorridorSection;
 import net.minecraft.resources.ResourceLocation;
 
@@ -14,5 +15,10 @@ public class CorridorType extends PieceType<FacilityCorridorSection> {
     @Override
     public Codec<FacilityCorridorSection> getCodec() {
         return CODEC;
+    }
+
+    @Override
+    public boolean canBeReplacedBy(PieceType<?> other) {
+        return other == ChangedFacilityPieceTypes.TRANSITION.get() || other == ChangedFacilityPieceTypes.SPLIT.get();
     }
 }

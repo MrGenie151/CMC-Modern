@@ -160,7 +160,7 @@ public abstract class FacilitySinglePiece extends FacilityPiece {
             if (gluBlocks.isEmpty())
                 Changed.LOGGER.error("Facility structure is missing placement blocks {}", templateName);
             gluBlocks.forEach(blockInfo -> {
-                steps.add(new GenStep(blockInfo, stack.getParent().getValidNeighbors(stack)));
+                steps.add(new GenStep(blockInfo, stack.getParent().facilityPiece().getValidNeighbors(stack)));
             });
         }
 

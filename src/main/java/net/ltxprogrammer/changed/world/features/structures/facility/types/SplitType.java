@@ -15,4 +15,9 @@ public class SplitType extends PieceType<FacilitySplitSection> {
     public Codec<FacilitySplitSection> getCodec() {
         return CODEC;
     }
+
+    @Override
+    public boolean connectionsMeetExpectations(int connections) {
+        return connections >= 2;
+    }
 }

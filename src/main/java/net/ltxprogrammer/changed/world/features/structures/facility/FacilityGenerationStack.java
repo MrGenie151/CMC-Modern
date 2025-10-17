@@ -11,23 +11,23 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class FacilityGenerationStack {
-    private final Stack<FacilityPiece> stack;
+    private final Stack<ConfiguredFacilityPiece> stack;
     private final BoundingBox parentPieceBoundingBox;
     private final Structure.GenerationContext context;
     private final int depthRemaining;
 
-    public FacilityGenerationStack(Stack<FacilityPiece> stack, BoundingBox parentPieceBoundingBox, Structure.GenerationContext context, int depthRemaining) {
+    public FacilityGenerationStack(Stack<ConfiguredFacilityPiece> stack, BoundingBox parentPieceBoundingBox, Structure.GenerationContext context, int depthRemaining) {
         this.stack = stack;
         this.parentPieceBoundingBox = parentPieceBoundingBox;
         this.context = context;
         this.depthRemaining = depthRemaining;
     }
 
-    public Stream<FacilityPiece> stream() {
+    public Stream<ConfiguredFacilityPiece> stream() {
         return stack.stream();
     }
 
-    public FacilityPiece getParent() {
+    public ConfiguredFacilityPiece getParent() {
         return stack.peek();
     }
 
@@ -43,7 +43,7 @@ public class FacilityGenerationStack {
         return context;
     }
 
-    public int sequentialMatch(Predicate<FacilityPiece> predicate) {
+    public int sequentialMatch(Predicate<ConfiguredFacilityPiece> predicate) {
         for (int i = stack.size() - 1; i >= 0; --i) {
             if (!predicate.test(stack.elementAt(i)))
                 return stack.size() - (i + 1);

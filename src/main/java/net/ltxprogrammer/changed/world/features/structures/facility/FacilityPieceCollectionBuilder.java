@@ -24,7 +24,7 @@ public class FacilityPieceCollectionBuilder {
     }
 
     public FacilityPieceCollectionBuilder register(int weight, FacilityPiece piece) {
-        builder.add(new ConfiguredFacilityPiece(piece, weight, Set.of()));
+        builder.add(new ConfiguredFacilityPiece(piece, weight, 0, 10, Set.of()));
         return this;
     }
 
