@@ -34,7 +34,7 @@ public class MugBlock extends Block implements SimpleWaterloggedBlock {
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
     public MugBlock() {
-        super(Properties.of().offsetType(OffsetType.XZ).strength(0.5F).dynamicShape());
+        super(Properties.of().offsetType(OffsetType.XZ).sound(SoundType.DECORATED_POT).strength(0.5F).dynamicShape());
         this.registerDefaultState(this.stateDefinition.any().setValue(MUGS, 1).setValue(WATERLOGGED, false));
     }
 

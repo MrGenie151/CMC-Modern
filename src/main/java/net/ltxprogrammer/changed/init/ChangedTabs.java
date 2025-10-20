@@ -59,6 +59,7 @@ public class ChangedTabs {
                         output.accept(ChangedBlocks.CARDBOARD_BOX_SMALL.get());
                         output.accept(ChangedBlocks.CARDBOARD_BOX_TALL.get());
                         output.accept(ChangedBlocks.BOX_PILE.get());
+                        output.accept(ChangedBlocks.PEN_BOX.get());
                         output.accept(ChangedBlocks.DUCT.get());
                         output.accept(ChangedBlocks.ERLENMEYER_FLASK.get());
                         output.accept(ChangedBlocks.EXOSKELETON_CHARGER.get());
