@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.init;
 
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.world.features.structures.SurfaceNBTPiece;
+import net.ltxprogrammer.changed.world.features.structures.facility.FacilityKeystone;
 import net.ltxprogrammer.changed.world.features.structures.facility.FacilitySinglePiece;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -16,6 +17,7 @@ public class ChangedStructurePieceTypes {
 
     public static final RegistryObject<StructurePieceType> NBT = setTemplatePieceId(SurfaceNBTPiece::new, "nbt");
     public static final RegistryObject<StructurePieceType> FACILITY_SINGLE = setTemplatePieceId(FacilitySinglePiece.StructureInstance::new, "facility_single");
+    public static final RegistryObject<StructurePieceType> FACILITY_KEYSTONE = setTemplatePieceId(FacilityKeystone::new, "facility_keystone");
 
     private static RegistryObject<StructurePieceType> setFullContextPieceId(StructurePieceType type, String name) {
         return REGISTRY.register(name.toLowerCase(Locale.ROOT), () -> type);

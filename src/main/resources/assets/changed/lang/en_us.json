@@ -718,6 +718,8 @@
 
   "changed.instruction.clothing_state": "Click %s while equipped to change state",
 
+  "facility.site": "Site %s",
+
   "facility.zone.changed:general": "General Zone",
   "facility.zone.changed:server": "Server Zone",
   "facility.zone.changed:office": "Office Zone",

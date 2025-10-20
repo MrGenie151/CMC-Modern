@@ -5,6 +5,8 @@ import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.network.packet.TransfurEntityEventPacket;
 import net.ltxprogrammer.changed.world.LatexCoverState;
+import net.ltxprogrammer.changed.world.data.ChangedGameData;
+import net.ltxprogrammer.changed.world.data.ChangedGameDataAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -25,10 +27,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 @Mixin(ServerLevel.class)
-public abstract class ServerLevelMixin extends Level {
+public abstract class ServerLevelMixin extends Level implements ChangedGameDataAccessor {
+    private final ChangedGameData changedGameData = new ChangedGameData((ServerLevel)(Object)this);
+
+    @Override
+    public ChangedGameData getChangedGameData() {
+        return changedGameData;
+    }
+
     protected ServerLevelMixin(WritableLevelData p_270739_, ResourceKey<Level> p_270683_, RegistryAccess p_270200_, Holder<DimensionType> p_270240_, Supplier<ProfilerFiller> p_270692_, boolean p_270904_, boolean p_270470_, long p_270248_, int p_270466_) {
         super(p_270739_, p_270683_, p_270200_, p_270240_, p_270692_, p_270904_, p_270470_, p_270248_, p_270466_);
     }
@@ -43,8 +53,8 @@ public abstract class ServerLevelMixin extends Level {
     }
 
     @Inject(method = "tickChunk", at = @At("TAIL"))
-    public void doChangedTicks(LevelChunk chunk, int tickCount, CallbackInfo ci,
-                               @Local ProfilerFiller profilerFiller) {
+    public void doChangedChunkTicks(LevelChunk chunk, int tickCount, CallbackInfo ci,
+                                    @Local ProfilerFiller profilerFiller) {
         profilerFiller.push("changed:latexCoverTick");
 
         ChunkPos chunkpos = chunk.getPos();
@@ -73,6 +83,16 @@ public abstract class ServerLevelMixin extends Level {
                 }
             }
         }
+
+        profilerFiller.pop();
+    }
+
+    @Inject(method = "tick", at = @At("TAIL"))
+    public void doChangedTicks(BooleanSupplier hasTimeSupplier, CallbackInfo ci,
+                               @Local ProfilerFiller profilerFiller) {
+        profilerFiller.push("changed:gamedata");
+
+        changedGameData.tick(hasTimeSupplier);
 
         profilerFiller.pop();
     }

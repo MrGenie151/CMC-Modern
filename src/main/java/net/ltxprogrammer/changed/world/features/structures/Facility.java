@@ -1,24 +1,17 @@
 package net.ltxprogrammer.changed.world.features.structures;
 
-import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.init.ChangedStructureTypes;
+import net.ltxprogrammer.changed.world.features.structures.facility.FacilityKeystone;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureType;
-import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
-import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
-import java.util.List;
 import java.util.Optional;
 
 public class Facility extends Structure {
@@ -47,8 +40,11 @@ public class Facility extends Structure {
 
         BoundingBox generationRegion = BoundingBox.fromCorners(minPos, maxPos);
 
-        FacilityPieces.generateFacility(builder, context, 5, 36, generationRegion);
-        Changed.LOGGER.info("Generated facility with {} pieces, at ChunkPos {}", ((StructurePiecesBuilderExtender)builder).pieceCount(), center);
+        FacilityKeystone keystone = FacilityPieces.generateFacility(builder, context, 5, 36, generationRegion);
+        builder.addPiece(keystone);
+
+        Changed.LOGGER.info("Generated facility \"{}\" with {} pieces, at ChunkPos {}", keystone,
+                ((StructurePiecesBuilderExtender)builder).pieceCount(), center);
     }
 
     @Override

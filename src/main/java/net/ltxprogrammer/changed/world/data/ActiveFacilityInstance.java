@@ -1,0 +1,339 @@
+package net.ltxprogrammer.changed.world.data;
+
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.ltxprogrammer.changed.init.ChangedRegistry;
+import net.ltxprogrammer.changed.init.ChangedTags;
+import net.ltxprogrammer.changed.world.features.structures.facility.FacilityZoneEntities;
+import net.ltxprogrammer.changed.world.features.structures.facility.Zone;
+import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.random.Weight;
+import net.minecraft.util.random.WeightedEntry;
+import net.minecraft.util.random.WeightedRandomList;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkSource;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.phys.AABB;
+
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+public class ActiveFacilityInstance {
+    /**
+     * Allows for the game data to check if the instance should be loaded without reading the saved contents
+     */
+    public static class Header {
+        public String name;
+        public ChunkPos minimum;
+        public ChunkPos maximum;
+
+        public static final Codec<ChunkPos> CHUNK_POS_CODEC = Codec.INT_STREAM.comapFlatMap((stream) -> {
+            return Util.fixedSize(stream, 2).map((values) -> {
+                return new ChunkPos(values[0], values[1]);
+            });
+        }, (chunkPos) -> {
+            return IntStream.of(chunkPos.x, chunkPos.z);
+        }).stable();
+
+        public static final Codec<Header> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.STRING.fieldOf("name").forGetter(header -> header.name),
+                CHUNK_POS_CODEC.fieldOf("minimum").forGetter(header -> header.minimum),
+                CHUNK_POS_CODEC.fieldOf("maximum").forGetter(header -> header.maximum)
+        ).apply(instance, Header::new));
+
+        public Header() {}
+
+        public Header(String name, ChunkPos minimum, ChunkPos maximum) {
+            this.name = name;
+            this.minimum = minimum;
+            this.maximum = maximum;
+        }
+
+        public String getResourceName() {
+            return String.format("%s_%s.%s_%s.%s", name,
+                    minimum.x, minimum.z, maximum.x, maximum.z);
+        }
+
+        public Component getDisplayName() {
+            return Component.translatable("facility.site", this.name);
+        }
+
+        public boolean readInfoFromName(String fileName) {
+            try {
+                var splits = fileName.split("_");
+                this.name = splits[0];
+
+                var minSplits = splits[1].split("\\.");
+                minimum = new ChunkPos(Integer.parseInt(minSplits[0]), Integer.parseInt(minSplits[1]));
+
+                var maxSplits = splits[2].split("\\.");
+                maximum = new ChunkPos(Integer.parseInt(maxSplits[0]), Integer.parseInt(maxSplits[1]));
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+
+        public boolean shouldBeLoaded(ChunkSource chunkSource) {
+            for (int z = minimum.z; z <= maximum.z; ++z) {
+                for (int x = minimum.x; x <= maximum.x; ++x) {
+                    if (chunkSource.hasChunk(x, z))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static final List<String> NAME_FRAGMENTS = Util.make(new ArrayList<>(24), Header::initializeNameFragments);
+
+        private static void initializeNameFragments(List<String> list) { // This is a function to allow mixins to hook
+            list.add("Alpha");
+            list.add("Beta");
+            list.add("Gamma");
+            list.add("Delta");
+            list.add("Epsilon");
+            list.add("Zeta");
+            list.add("Eta");
+            list.add("Theta");
+            list.add("Iota");
+            list.add("Kappa");
+            list.add("Lambda");
+            list.add("Mu");
+            list.add("Nu");
+            list.add("Xi");
+            list.add("Omicron");
+            list.add("Pi");
+            list.add("Rho");
+            list.add("Sigma");
+            list.add("Tau");
+            list.add("Ipsilon");
+            list.add("Phi");
+            list.add("Chi");
+            list.add("Psi");
+            list.add("Omega");
+        }
+
+        public static String generateRandomName(RandomSource random) {
+            int nameLength = random.nextInt(2, 4);
+            List<String> fragments = new ArrayList<>(NAME_FRAGMENTS);
+            StringBuilder stringBuilder = new StringBuilder();
+
+            for (int i = 0; i < nameLength; ++i) {
+                int index = random.nextInt(fragments.size());
+                if (i > 0)
+                    stringBuilder.append(" ");
+                stringBuilder.append(fragments.get(index));
+                fragments.remove(index);
+            }
+
+            return stringBuilder.toString();
+        }
+
+        public void initialize(BoundingBox facilitySpan, RandomSource random) {
+            this.minimum = new ChunkPos(
+                    SectionPos.blockToSectionCoord(facilitySpan.minX()),
+                    SectionPos.blockToSectionCoord(facilitySpan.minZ())
+            );
+            this.maximum = new ChunkPos(
+                    SectionPos.blockToSectionCoord(facilitySpan.maxX()),
+                    SectionPos.blockToSectionCoord(facilitySpan.maxZ())
+            );
+            this.name = generateRandomName(random);
+        }
+    }
+
+    public static class SpawnInfo implements WeightedEntry {
+        public static class EntityInfo implements WeightedEntry {
+            public final FacilityZoneEntities.EntitySpawnDefinition definition;
+            public int spawnedCount;
+
+            public static final Codec<EntityInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                    FacilityZoneEntities.EntitySpawnDefinition.CODEC.fieldOf("definition").forGetter(info -> info.definition),
+                    Codec.INT.fieldOf("spawnedCount").forGetter(info -> info.spawnedCount)
+            ).apply(instance, EntityInfo::new));
+
+            public EntityInfo(FacilityZoneEntities.EntitySpawnDefinition definition, int spawnedCount) {
+                this.definition = definition;
+                this.spawnedCount = spawnedCount;
+            }
+
+            @Override
+            public Weight getWeight() {
+                return Weight.of(definition.weight());
+            }
+
+            public boolean isNotExhausted() {
+                return spawnedCount < definition.maximum();
+            }
+        }
+
+        public final List<EntityInfo> spawns;
+        public int available;
+
+        public List<EntityInfo> getSpawns() {
+            return spawns;
+        }
+
+        public static final Codec<SpawnInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.list(EntityInfo.CODEC).fieldOf("spawns").forGetter(SpawnInfo::getSpawns),
+                Codec.INT.fieldOf("available").forGetter(info -> info.available)
+        ).apply(instance, SpawnInfo::new));
+
+        public SpawnInfo(FacilityZoneEntities.ZoneEntitiesDefinition definition) {
+            this.spawns = definition.spawns().stream().map(spawnDefinition -> new EntityInfo(spawnDefinition, 0)).toList();
+            this.available = definition.available();
+        }
+
+        public SpawnInfo(List<EntityInfo> spawns, int available) {
+            this.spawns = spawns;
+            this.available = available;
+        }
+
+        @Override
+        public Weight getWeight() {
+            return Weight.of(spawns.stream()
+                    .filter(EntityInfo::isNotExhausted)
+                    .map(EntityInfo::getWeight).reduce(0, (sum, info) -> sum + info.asInt(), Integer::sum));
+        }
+
+        public boolean isNotExhausted() {
+            if (spawns.stream().noneMatch(EntityInfo::isNotExhausted))
+                return false;
+
+            return spawns.stream().filter(EntityInfo::isNotExhausted).anyMatch(info -> info.definition.cost() <= available);
+        }
+    }
+
+    public record ZoneInfo(List<SpawnInfo> spawnLists, List<BoundingBox> pieceRegions) {
+        public static final Codec<ZoneInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.list(SpawnInfo.CODEC).fieldOf("spawnLists").forGetter(ZoneInfo::spawnLists),
+                Codec.list(BoundingBox.CODEC).fieldOf("pieceRegions").forGetter(ZoneInfo::pieceRegions)
+        ).apply(instance, ZoneInfo::new));
+
+        public Optional<Pair<SpawnInfo, SpawnInfo.EntityInfo>> getNextSpawn(RandomSource random) {
+            return WeightedRandomList.create(spawnLists.stream().filter(SpawnInfo::isNotExhausted).toList()).getRandom(random)
+                    .map(info -> Pair.of(info, WeightedRandomList.create(info.getSpawns())))
+                    .map(pair -> pair.mapSecond(list -> list.getRandom(random)))
+                    .filter(pair -> pair.getSecond().isPresent())
+                    .map(pair -> pair.mapSecond(Optional::get));
+        }
+
+        public Entity spawnRandomAt(ServerLevel level, BoundingBox region) {
+            return getNextSpawn(level.getRandom()).map(pair -> {
+                var entityType = pair.getSecond().definition.entityType();
+                var spawnType = SpawnPlacements.getPlacementType(pair.getSecond().definition.entityType());
+
+                var possibleSpawns = BlockPos.betweenClosedStream(region).filter(blockPos -> { // Filter out blocks that spawn our entity outside a facility zone
+                    BlockPos blockPos1 = blockPos.below();
+                    BlockPos blockPos2 = blockPos.above();
+
+                    return (region.isInside(blockPos) || this.pieceRegions.stream().anyMatch(boundingBox -> boundingBox.isInside(blockPos))) &&
+                            (region.isInside(blockPos1) || this.pieceRegions.stream().anyMatch(boundingBox -> boundingBox.isInside(blockPos1))) &&
+                            (region.isInside(blockPos2) || this.pieceRegions.stream().anyMatch(boundingBox -> boundingBox.isInside(blockPos2)));
+                }).filter(blockPos -> { // Prevent unloaded chunks from loading
+                    BlockPos blockPos1 = blockPos.below();
+                    BlockPos blockPos2 = blockPos.above();
+
+                    return level.isLoaded(blockPos) && level.isLoaded(blockPos1) && level.isLoaded(blockPos2);
+                }).filter(blockPos -> { // Allow the entity to predicate its spawn with a spawn type
+                    return spawnType.canSpawnAt(level, blockPos, entityType);
+                }).map(BlockPos::new).toList();
+
+                if (possibleSpawns.isEmpty())
+                    return null;
+
+                var entity = entityType.spawn(level, Util.getRandom(possibleSpawns, level.getRandom()), MobSpawnType.STRUCTURE);
+
+                if (entity == null)
+                    return null;
+
+                if (entity instanceof Mob mob)
+                    mob.setPersistenceRequired();
+
+                pair.getFirst().available -= pair.getSecond().definition.cost();
+                pair.getSecond().spawnedCount++;
+
+                return entity;
+            }).orElse(null);
+        }
+
+        public Entity spawnRandom(ServerLevel level) {
+            return spawnRandomAt(level, Util.getRandom(pieceRegions, level.random));
+        }
+    }
+
+    private Header header;
+
+    public void setHeader(Header header) {
+        this.header = header;
+    }
+
+    public Header getHeader() {
+        return header;
+    }
+
+    private final Map<Zone, ZoneInfo> zoneInfos;
+
+    private boolean dirty = false;
+
+    public static final Codec<ActiveFacilityInstance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.unboundedMap(ChangedRegistry.FACILITY_ZONES.get().getCodec(), ZoneInfo.CODEC).fieldOf("zoneInfos").forGetter(facility -> facility.zoneInfos)
+    ).apply(instance, ActiveFacilityInstance::new));
+
+    public ActiveFacilityInstance(Map<Zone, ZoneInfo> zoneInfos) {
+        this.zoneInfos = zoneInfos;
+    }
+
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    public void setDirty(boolean value) {
+        dirty = value;
+    }
+
+    public void saveToFile(DimensionDataStorage dataStorage, BiConsumer<File, Tag> tagWriter) {
+        File file = dataStorage.getDataFile("facilities/" + getHeader().getResourceName());
+        CODEC.encodeStart(NbtOps.INSTANCE, this).result().ifPresent(tag -> {
+            tagWriter.accept(file, tag);
+            this.setDirty(false);
+        });
+    }
+
+    public static Stream<File> discoverInstances(DimensionDataStorage dataStorage) {
+        var files = dataStorage.getDataFile("facilities/hook").getParentFile().listFiles((dir, name) -> {
+            return name.endsWith(".dat");
+        });
+
+        if (files == null)
+            return Stream.empty();
+        return Arrays.stream(files);
+    }
+
+    public void tick(ServerLevel level) {
+        zoneInfos.forEach((zone, info) -> {
+            var entity = info.spawnRandom(level);
+            if (entity != null)
+                this.setDirty(true);
+        });
+    }
+}

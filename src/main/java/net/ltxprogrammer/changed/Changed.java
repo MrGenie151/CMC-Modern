@@ -13,6 +13,7 @@ import net.ltxprogrammer.changed.network.packet.ChangedPacket;
 import net.ltxprogrammer.changed.util.PatreonBenefits;
 import net.ltxprogrammer.changed.world.ChangedDataFixer;
 import net.ltxprogrammer.changed.world.features.structures.FacilityPieces;
+import net.ltxprogrammer.changed.world.features.structures.facility.FacilityZoneEntities;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.ComposterBlock;
@@ -161,6 +162,7 @@ public class Changed {
         event.addListener(ChangedFusions.INSTANCE);
         event.addListener(AccessoryEntities.INSTANCE);
         event.addListener(FacilityPieces.INSTANCE);
+        event.addListener(FacilityZoneEntities.INSTANCE);
         ChangedCompatibility.addDataListeners(event);
     }
 
