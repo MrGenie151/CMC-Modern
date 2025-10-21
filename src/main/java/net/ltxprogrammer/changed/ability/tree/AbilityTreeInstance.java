@@ -101,10 +101,22 @@ public class AbilityTreeInstance {
         }
 
         public void applyEffects(AbilityCounter counter) {
+            Set<ResourceLocation> occludedNodes = new HashSet<>();
+            getNodeStates(counter.variantInstance.getParent()).filter(NodeState::unlocked)
+                    .forEach(nodeState -> occludedNodes.addAll(nodeState.node.occludes));
+
             getNodeStates(counter.variantInstance.getParent()).forEach(nodeState -> {
-                nodeState.node.effects.forEach(nodeEffect -> {
-                    nodeEffect.applyEffect(counter, nodeState.unlocked);
-                });
+                if (nodeState.unlocked) {
+                    if (!occludedNodes.contains(nodeState.nodeName)) {
+                        nodeState.node.acquiredEffects.forEach(nodeEffect -> {
+                            nodeEffect.applyEffect(counter);
+                        });
+                    }
+                } else {
+                    nodeState.node.missingEffects.forEach(nodeEffect -> {
+                        nodeEffect.applyEffect(counter);
+                    });
+                }
             });
         }
 

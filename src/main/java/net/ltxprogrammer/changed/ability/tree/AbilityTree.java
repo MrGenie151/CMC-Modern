@@ -61,28 +61,35 @@ public class AbilityTree {
     public static class Node {
         public static final Codec<Node> CODEC = RecordCodecBuilder.create(builder -> builder.group(
                 ResourceLocation.CODEC.fieldOf("parent").forGetter(node -> node.parentNode),
+                Codec.list(ResourceLocation.CODEC).fieldOf("occludes").forGetter(node -> node.occludes),
                 Codec.STRING.fieldOf("titleId").forGetter(node -> node.titleId),
                 Codec.STRING.fieldOf("descriptionId").forGetter(node -> node.descriptionId),
                 Codec.INT.fieldOf("price").forGetter(node -> node.price),
                 Codec.INT.fieldOf("groupDiscount").orElse(0).forGetter(node -> node.groupDiscount),
-                Codec.list(NodeEffect.CODEC).fieldOf("effects").forGetter(node -> node.effects)
+                Codec.list(NodeEffect.CODEC).fieldOf("acquiredEffects").orElse(List.of()).forGetter(node -> node.acquiredEffects),
+                Codec.list(NodeEffect.CODEC).fieldOf("missingEffects").orElse(List.of()).forGetter(node -> node.missingEffects)
         ).apply(builder, Node::new));
 
         public final ResourceLocation parentNode;
+        public final List<ResourceLocation> occludes;
         public final String titleId;
         public final String descriptionId;
         public final int price;
         public final int groupDiscount;
-        public final List<NodeEffect> effects;
+        public final List<NodeEffect> acquiredEffects;
+        public final List<NodeEffect> missingEffects;
 
-        public Node(ResourceLocation parentNode, String titleId, String descriptionId, int price, int groupDiscount,
-                    List<NodeEffect> effects) {
+        public Node(ResourceLocation parentNode, List<ResourceLocation> occludes, String titleId, String descriptionId,
+                    int price, int groupDiscount,
+                    List<NodeEffect> acquiredEffects, List<NodeEffect> missingEffects) {
             this.parentNode = parentNode;
+            this.occludes = occludes;
             this.titleId = titleId;
             this.descriptionId = descriptionId;
             this.price = price;
             this.groupDiscount = groupDiscount;
-            this.effects = effects;
+            this.acquiredEffects = acquiredEffects;
+            this.missingEffects = missingEffects;
         }
 
         public Component getTitle() {
@@ -98,7 +105,7 @@ public class AbilityTree {
         // TODO move codec to a registry
         public static final Codec<NodeEffect> CODEC = Codec.unit(NodeEffect::new);
 
-        public void applyEffect(AbilityCounter counter, boolean unlocked) {
+        public void applyEffect(AbilityCounter counter) {
 
         }
     }

@@ -10,12 +10,11 @@
       "price": 1,
       "groupDiscount": -1,
 
-      "effects": [
+      "missingEffects": [
         {
           "type": "changed:attribute_modifier",
           "attribute": "changed:sprint_speed",
-          "acquiredBonus": 0.0,
-          "missingPenalty": -1.0
+          "factor": -1.0
         }
       ]
     },
@@ -26,12 +25,11 @@
       "price": 1,
       "groupDiscount": -1,
 
-      "effects": [
+      "missingEffects": [
         {
           "type": "changed:attribute_modifier",
           "attribute": "minecraft:generic.movement_speed",
-          "acquiredBonus": 0.0,
-          "missingPenalty": -0.1
+          "factor": -0.1
         }
       ]
     },
@@ -42,12 +40,11 @@
       "price": 1,
       "groupDiscount": -1,
 
-      "effects": [
+      "missingEffects": [
         {
           "type": "changed:attribute_modifier",
           "attribute": "changed:sneak_speed",
-          "acquiredBonus": 0.0,
-          "missingPenalty": -0.1
+          "factor": -0.1
         }
       ]
     },
@@ -58,12 +55,11 @@
       "price": 1,
       "groupDiscount": -1,
 
-      "effects": [
+      "missingEffects": [
         {
           "type": "changed:attribute_modifier",
           "attribute": "forge:swim_speed",
-          "acquiredBonus": 0.0,
-          "missingPenalty": -0.1
+          "factor": -0.1
         }
       ]
     },
@@ -74,12 +70,11 @@
       "price": 1,
       "groupDiscount": -1,
 
-      "effects": [
+      "missingEffects": [
         {
           "type": "changed:attribute_modifier",
           "attribute": "changed:sprint_speed",
-          "acquiredBonus": 0.0,
-          "missingPenalty": -0.05
+          "factor": -0.05
         }
       ]
     },
@@ -90,12 +85,11 @@
       "price": 1,
       "groupDiscount": -1,
 
-      "effects": [
+      "missingEffects": [
         {
           "type": "changed:attribute_modifier",
           "attribute": "changed:step_size",
-          "acquiredBonus": 0.0,
-          "missingPenalty": -1.0
+          "factor": -1.0
         }
       ]
     },
@@ -105,12 +99,11 @@
       "descriptionId": "changed.ability_tree.movement.practice6",
       "price": 1,
 
-      "effects": [
+      "missingEffects": [
         {
           "type": "changed:attribute_modifier",
           "attribute": "minecraft:generic.movement_speed",
-          "acquiredBonus": 0.0,
-          "missingPenalty": -0.1
+          "factor": -0.1
         }
       ]
     },
@@ -120,12 +113,11 @@
       "descriptionId": "changed.ability_tree.movement.practice7",
       "price": 1,
 
-      "effects": [
+      "missingEffects": [
         {
           "type": "changed:attribute_modifier",
           "attribute": "changed:sneak_speed",
-          "acquiredBonus": 0.0,
-          "missingPenalty": -0.1
+          "factor": -0.1
         }
       ]
     },
@@ -135,12 +127,11 @@
       "descriptionId": "changed.ability_tree.movement.practice8",
       "price": 1,
 
-      "effects": [
+      "missingEffects": [
         {
           "type": "changed:attribute_modifier",
           "attribute": "changed:sprint_speed",
-          "acquiredBonus": 0.0,
-          "missingPenalty": -0.1
+          "factor": -0.1
         }
       ]
     },
@@ -150,12 +141,11 @@
       "descriptionId": "changed.ability_tree.movement.practice9",
       "price": 1,
 
-      "effects": [
+      "missingEffects": [
         {
           "type": "changed:attribute_modifier",
           "attribute": "forge:swim_speed",
-          "acquiredBonus": 0.0,
-          "missingPenalty": -0.15
+          "factor": -0.15
         }
       ]
     },
@@ -166,12 +156,11 @@
       "price": 2,
       "groupDiscount": -1,
 
-      "effects": [
+      "acquiredEffects": [
         {
           "type": "changed:attribute_modifier",
           "attribute": "minecraft:generic.movement_speed",
-          "acquiredBonus": 0.10,
-          "missingPenalty": 0.0
+          "factor": 0.10
         }
       ]
     },
@@ -182,12 +171,11 @@
       "price": 2,
       "groupDiscount": -1,
 
-      "effects": [
+      "acquiredEffects": [
         {
           "type": "changed:attribute_modifier",
           "attribute": "forge:swim_speed",
-          "acquiredBonus": 0.10,
-          "missingPenalty": 0.0
+          "factor": 0.10
         }
       ]
     },
@@ -198,7 +186,7 @@
       "price": 2,
       "groupDiscount": -1,
 
-      "effects": [
+      "acquiredEffects": [
         {
           "type": "changed:unlock_active_ability",
           "ability": "changed:high_jump"
