@@ -318,7 +318,7 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
 
     @SubscribeEvent
     public static void onEntityAttack(LivingAttackEvent event) {
-        if (GrabEntityAbility.isEntityNoControl(event.getEntity())) {
+        if (GrabEntityAbility.isEntityNoControl(event.getSource().getEntity())) {
             event.setCanceled(true);
         }
     }
