@@ -718,6 +718,8 @@
   "changed.tutorial.use_ability.description": "Nyomd meg vagy megnyomva tartani a(z) %s gombot",
 
   "changed.instruction.clothing_state": "Kattintson a(z) %s gombot a tárgyra, ha fel van szerelve az állapot megváltoztatásához",
+
+  "facility.site": "Hely: %s",
   
   "facility.zone.changed:dark_latex": "Sötét latex zóna",
   "facility.zone.changed:entrance": "Bejárati zóna",
