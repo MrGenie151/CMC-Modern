@@ -23,6 +23,7 @@ import net.ltxprogrammer.changed.world.LatexCoverHitResult;
 import net.ltxprogrammer.changed.world.LatexCoverState;
 import net.ltxprogrammer.changed.world.enchantments.FormFittingEnchantment;
 import net.minecraft.Util;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -36,13 +37,14 @@ import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
+import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -771,59 +773,84 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
             ticksFlying = 0;
     }
 
-    protected void tickBreathing() {
-        if (host.isAlive() && breatheMode.canBreatheWater() && shouldApplyAbilities()) {
-            if (air == -100) {
-                air = host.getAirSupply();
-            }
+    @SubscribeEvent
+    public static void onLivingBreathe(LivingBreatheEvent event) {
+        ProcessTransfur.ifPlayerTransfurred(EntityUtil.playerOrNull(event.getEntity()), variant -> {
+            if (!variant.shouldApplyAbilities())
+                return;
 
-            //if the player is in water, add air
-            if (host.isEyeInFluid(FluidTags.WATER)) {
-                //Taken from determineNextAir in LivingEntity
-                air = Math.min(air + 4, host.getMaxAirSupply());
-                host.setAirSupply(air);
+            // Let TransfurVariantInstance.tickBreathing() handle breathing
+            event.setCanBreathe(true);
+            event.setCanRefillAir(false);
+        });
+    }
+
+    protected void tickBreathing() {
+        if (!shouldApplyAbilities())
+            return;
+
+        var airSupplyMax = (int)host.getAttributeValue(ChangedAttributes.AIR_CAPACITY.get());
+        var airSupplyScale = host.getAttributeValue(ChangedAttributes.AIR_CAPACITY.get()) / host.getMaxAirSupply();
+
+        int airDelta;
+        if (breatheMode == TransfurVariant.BreatheMode.NONE) {
+            airDelta = 0;
+            this.ticksBreathingUnderwater = 0;
+        } else if (host.isEyeInFluidType(Fluids.WATER.getFluidType())) {
+            if (breatheMode.canBreatheWater()) {
+                airDelta = 4;
                 this.ticksBreathingUnderwater++;
             }
 
-            //if the player is on land and the entity suffocates
-            else if (!breatheMode.canBreatheAir()) {
-                //taken from decreaseAirSupply in Living Entity
+            else {
                 int i = EnchantmentHelper.getRespiration(host);
-                air = i > 0 && host.getRandom().nextInt(i + 1) > 0 ? air : air - 1;
+                airDelta = i > 0 && host.getRandom().nextInt(i + 1) > 0 ? 0 : -1;
+                this.ticksBreathingUnderwater = 0;
+            }
+        } else {
+            if (breatheMode.canBreatheAir()) {
+                airDelta = 4;
+            }
 
-                if(air == -20)
-                {
-                    air = 0;
+            else {
+                int i = EnchantmentHelper.getRespiration(host);
+                airDelta = i > 0 && host.getRandom().nextInt(i + 1) > 0 ? 0 : -1;
+            }
 
-                    host.hurt(host.level().damageSources().drown(), 2F);
+            this.ticksBreathingUnderwater = 0;
+        }
+
+        if (air == -100) {
+            air = (int)(host.getAirSupply() * airSupplyScale);
+        }
+
+        air += airDelta;
+        air = Mth.clamp(air, -20, airSupplyMax);
+
+        if (air <= 0) {
+            LivingDrownEvent drownEvent = new LivingDrownEvent(host, air <= -20, 2.0F, 8);
+            if (!MinecraftForge.EVENT_BUS.post(drownEvent) && drownEvent.isDrowning()) {
+                air = 0;
+                Vec3 vec3 = entity.getDeltaMovement();
+
+                if (host.isEyeInFluidType(Fluids.WATER.getFluidType())) {
+                    for (int i = 0; i < drownEvent.getBubbleCount(); ++i) {
+                        double d2 = host.getRandom().nextDouble() - host.getRandom().nextDouble();
+                        double d3 = host.getRandom().nextDouble() - host.getRandom().nextDouble();
+                        double d4 = host.getRandom().nextDouble() - host.getRandom().nextDouble();
+                        host.level().addParticle(ParticleTypes.BUBBLE, host.getX() + d2, host.getY() + d3, host.getZ() + d4, vec3.x, vec3.y, vec3.z);
+                    }
                 }
 
-                host.setAirSupply(air);
-                this.ticksBreathingUnderwater = 0;
-            }
-            else {
-                this.ticksBreathingUnderwater = 0;
+                if (drownEvent.getDamageAmount() > 0) host.hurt(entity.damageSources().drown(), drownEvent.getDamageAmount());
             }
         }
 
-        else if (host.isAlive() && !breatheMode.canBreatheWater() && breatheMode == TransfurVariant.BreatheMode.WEAK && shouldApplyAbilities()) {
-            //if the player is in water, remove more air
-            if (host.isEyeInFluid(FluidTags.WATER)) {
-                int air = host.getAirSupply();
-                if (air > -10)
-                    host.setAirSupply(air-1);
-                this.ticksBreathingUnderwater = 0;
-            }
-        }
-
-        // Air is fixed, doesn't increase or decrease
-        else if (host.isAlive() && breatheMode == TransfurVariant.BreatheMode.NONE && shouldApplyAbilities()) {
-            if (air == -100) {
-                air = host.getAirSupply();
-            }
-
-            host.setAirSupply(Mth.clamp(air, 0, host.getMaxAirSupply()));
-        }
+        if (!host.level().isClientSide)
+            host.setAirSupply(Mth.clamp(
+                (int)Math.round((float)air / airSupplyScale),
+                0,
+                host.getMaxAirSupply()));
     }
 
     protected void tickAbilities() {
@@ -917,10 +944,11 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
         }
 
         // Step size
-        if (host.isCrouching() && stepSize > 0.6f)
+        var stepSizeOffset = host.getAttributeValue(ChangedAttributes.STEP_SIZE.get()) - 0.6;
+        if (host.isCrouching() && (stepSize + stepSizeOffset) > 0.6f)
             host.setMaxUpStep(0.6f);
         else
-            host.setMaxUpStep(stepSize);
+            host.setMaxUpStep((float) (stepSize + stepSizeOffset));
 
         // Effects
         if (visionType == VisionType.BLIND) {

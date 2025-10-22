@@ -1,7 +1,9 @@
 package net.ltxprogrammer.changed.server;
 
 import net.ltxprogrammer.changed.ability.GrabEntityAbility;
+import net.ltxprogrammer.changed.ability.tree.AbilityCounter;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
+import net.ltxprogrammer.changed.entity.PlayerDataExtension;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
 import net.ltxprogrammer.changed.init.ChangedAbilities;
@@ -11,13 +13,21 @@ import net.ltxprogrammer.changed.init.ChangedTags;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class ServerTransfurVariantInstance<T extends ChangedEntity> extends TransfurVariantInstance<T> {
     private final ServerPlayer host;
@@ -86,8 +96,33 @@ public class ServerTransfurVariantInstance<T extends ChangedEntity> extends Tran
         }
     }
 
+    public final Map<Attribute, UUID> attributesByUUID = new HashMap<>();
+
     @Override
     public void tick() {
+        AbilityCounter counter = new AbilityCounter(this);
+        var abilityTree = ((PlayerDataExtension)host).getAbilityTree();
+        abilityTree.updateTrees();
+        abilityTree.applyEffects(counter);
+
+        var attributes = host.getAttributes();
+        counter.getAttributeAdders().forEach((attribute, value) -> {
+            var uuid = attributesByUUID.computeIfAbsent(attribute, ignored -> Mth.createInsecureUUID(RandomSource.createNewThreadLocalInstance()));
+            var instance = attributes.getInstance(attribute);
+            if (instance == null)
+                return;
+            var existing = instance.getModifier(uuid);
+            if (existing != null && existing.getAmount() == value)
+                return;
+
+            if (existing == null && value == 0.0)
+                return;
+
+            instance.removeModifier(uuid);
+            if (value != 0.0)
+                instance.addTransientModifier(new AttributeModifier(uuid, "AbilityTree-Modifier", value, AttributeModifier.Operation.ADDITION));
+        });
+
         super.tick();
 
         if (parent.getEntityType().is(ChangedTags.EntityTypes.LATEX))
@@ -127,5 +162,17 @@ public class ServerTransfurVariantInstance<T extends ChangedEntity> extends Tran
                     v.setTarget(null);
             }
         }
+    }
+
+    @Override
+    public void unhookAll(Player player) {
+        super.unhookAll(player);
+        attributesByUUID.forEach((attribute, uuid) -> {
+            var instance = player.getAttributes().getInstance(attribute);
+            if (instance == null)
+                return;
+
+            instance.removeModifier(uuid);
+        });
     }
 }

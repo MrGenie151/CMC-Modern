@@ -1,5 +1,6 @@
 package net.ltxprogrammer.changed;
 
+import net.ltxprogrammer.changed.ability.tree.AbilityTrees;
 import net.ltxprogrammer.changed.client.*;
 import net.ltxprogrammer.changed.client.latexparticles.LatexParticleType;
 import net.ltxprogrammer.changed.data.BuiltinRepositorySource;
@@ -119,6 +120,8 @@ public class Changed {
         ChangedWallSigns.REGISTRY.register(modEventBus);
         ChangedFacilityPieceTypes.REGISTRY.register(modEventBus);
         ChangedFacilityZones.REGISTRY.register(modEventBus);
+        ChangedAbilityTreeCodecs.NODE_EFFECT_REGISTRY.register(modEventBus);
+        ChangedAbilityTreeCodecs.EFFECT_CONDITION_REGISTRY.register(modEventBus);
 
         // Our DFU references the above registries, so they need to be initialized before the DFU is created
         dataFixer = new ChangedDataFixer();
@@ -163,6 +166,7 @@ public class Changed {
         event.addListener(AccessoryEntities.INSTANCE);
         event.addListener(FacilityPieces.INSTANCE);
         event.addListener(FacilityZoneEntities.INSTANCE);
+        event.addListener(AbilityTrees.INSTANCE);
         ChangedCompatibility.addDataListeners(event);
     }
 

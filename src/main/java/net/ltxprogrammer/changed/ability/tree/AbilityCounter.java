@@ -1,5 +1,8 @@
 package net.ltxprogrammer.changed.ability.tree;
 
+import net.ltxprogrammer.changed.ability.AbstractAbility;
+import net.ltxprogrammer.changed.ability.AbstractAbilityInstance;
+import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -10,12 +13,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 public class AbilityCounter {
     public final TransfurVariantInstance<?> variantInstance;
+    public final IAbstractChangedEntity entity;
     private final Set<ResourceLocation> enabledFeatures = new HashSet<>();
     private final Map<Attribute, Double> baselineAttributes;
-    private final Map<Attribute, Double> computedAttributes;
+    private final Map<Attribute, Double> attributeAdders;
+    private final Map<AbstractAbility<?>, AbstractAbilityInstance> activeAbilities;
+    private final Map<AbilityTree.NodeEffect, AbilityTree.NodeEffectInstance> nodeEffectInstances;
 
     private static Map<Attribute, Double> getBaseAttributeValues(AttributeMap attributeMap) {
         Map<Attribute, Double> map = new HashMap<>();
@@ -27,8 +34,17 @@ public class AbilityCounter {
 
     public AbilityCounter(TransfurVariantInstance<?> variantInstance) {
         this.variantInstance = variantInstance;
-        this.computedAttributes = getBaseAttributeValues(variantInstance.getHost().getAttributes());
-        this.baselineAttributes = Map.copyOf(computedAttributes);
+        this.entity = IAbstractChangedEntity.forPlayer(variantInstance.getHost());
+        this.attributeAdders = getBaseAttributeValues(variantInstance.getHost().getAttributes());
+        this.baselineAttributes = Map.copyOf(attributeAdders);
+        this.activeAbilities = new HashMap<>(variantInstance.abilityInstances);
+        this.nodeEffectInstances = new HashMap<>();
+
+        this.attributeAdders.replaceAll((a, v) -> 0.0);
+    }
+
+    public Map<Attribute, Double> getAttributeAdders() {
+        return attributeAdders;
     }
 
     /**
@@ -43,7 +59,7 @@ public class AbilityCounter {
         if (!baselineAttributes.containsKey(attribute))
             return;
 
-        computedAttributes.computeIfPresent(attribute, (attr, current) -> {
+        attributeAdders.computeIfPresent(attribute, (attr, current) -> {
             return current + baselineAttributes.get(attr) * basePercent;
         });
     }
@@ -52,8 +68,12 @@ public class AbilityCounter {
         if (!baselineAttributes.containsKey(attribute))
             return;
 
-        computedAttributes.computeIfPresent(attribute, (attr, current) -> {
+        attributeAdders.computeIfPresent(attribute, (attr, current) -> {
             return current + value;
         });
+    }
+
+    public AbilityTree.NodeEffectInstance addEffectInstance(AbilityTree.NodeEffect key, Function<IAbstractChangedEntity, AbilityTree.NodeEffectInstance> ctor) {
+        return nodeEffectInstances.computeIfAbsent(key, ignored -> ctor.apply(this.entity));
     }
 }

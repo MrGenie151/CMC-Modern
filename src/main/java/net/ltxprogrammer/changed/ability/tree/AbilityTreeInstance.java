@@ -1,5 +1,6 @@
 package net.ltxprogrammer.changed.ability.tree;
 
+import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.minecraft.resources.ResourceLocation;
@@ -39,6 +40,53 @@ public class AbilityTreeInstance {
 
         public AccountedTree(AbilityTree tree) {
             this.tree = tree;
+        }
+
+        public AccountedTree(AbilityTree tree, Set<AccountedPurchase> purchasedNodes, Map<TransfurVariant<?>, Integer> pointStores) {
+            this.tree = tree;
+            this.purchasedNodes.addAll(purchasedNodes);
+            this.pointStores.putAll(pointStores);
+        }
+
+        public boolean makePurchase(ResourceLocation nodeName, TransfurVariant<?> variant, int price) {
+            if (tree.getNode(nodeName) == null)
+                return false;
+
+            if (purchasedNodes.stream().anyMatch(purchase -> {
+                return purchase.nodeName.equals(nodeName) && purchase.variant == variant;
+            })) return false;
+
+            purchasedNodes.add(new AccountedPurchase(nodeName, variant, price));
+            return true;
+        }
+
+        public int refundNodePurchases(ResourceLocation nodeName) {
+            if (tree.getNode(nodeName) == null)
+                return 0;
+
+            if (purchasedNodes.stream().noneMatch(purchase -> {
+                return purchase.nodeName.equals(nodeName);
+            })) return 0;
+
+            var toRemove = purchasedNodes.stream().filter(purchase -> {
+                return purchase.nodeName.equals(nodeName);
+            }).toList();
+
+            toRemove.forEach(purchase -> {
+                purchasedNodes.remove(purchase);
+                pointStores.compute(purchase.variant, (variant, points) -> {
+                    if (points == null)
+                        return purchase.price;
+                    else
+                        return points + purchase.price;
+                });
+            });
+
+            return toRemove.size();
+        }
+
+        public AbilityTree getTree() {
+            return tree;
         }
 
         public Stream<AccountedPurchase> getPurchasesFor(ResourceLocation nodeName) {
@@ -127,8 +175,45 @@ public class AbilityTreeInstance {
 
     private final Set<AccountedTree> trees = new HashSet<>();
 
+    public Set<AccountedTree> getTrees() {
+        return ImmutableSet.copyOf(trees);
+    }
+
     public Set<AccountedTree> getTrees(TransfurVariant<?> forVariant) {
         return trees.stream().filter(tree -> tree.appliesTo(forVariant)).collect(Collectors.toSet());
+    }
+
+    public void updateTrees() {
+        var treeDefinitions = AbilityTrees.INSTANCE.getTrees();
+        if (trees.size() == treeDefinitions.size() && trees.stream().allMatch(accountedTree ->
+            treeDefinitions.stream().anyMatch(accountedTree.tree::matchLocation)
+        )) {
+            return;
+        }
+
+        Set<AccountedTree> newAccountedTrees = new HashSet<>();
+        trees.forEach(accountedTree -> {
+            var newTree = treeDefinitions.stream().filter(accountedTree.tree::matchLocation).findFirst();
+            if (newTree.isEmpty())
+                return;
+            var newAccountedTree = new AccountedTree(
+                    newTree.get(),
+                    accountedTree.purchasedNodes,
+                    accountedTree.pointStores
+            );
+            newAccountedTree.refundInvalidNodes();
+            newAccountedTrees.add(newAccountedTree);
+        });
+
+        treeDefinitions.forEach(abilityTree -> {
+            if (newAccountedTrees.stream().anyMatch(accountedTree -> accountedTree.tree == abilityTree))
+                return;
+
+            newAccountedTrees.add(new AccountedTree(abilityTree));
+        });
+
+        trees.clear();
+        trees.addAll(newAccountedTrees);
     }
 
     public void applyEffects(AbilityCounter counter) {

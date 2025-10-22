@@ -1,5 +1,6 @@
 package net.ltxprogrammer.changed.entity;
 
+import net.ltxprogrammer.changed.ability.tree.AbilityTreeInstance;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
 import net.ltxprogrammer.changed.util.CameraUtil;
 import org.jetbrains.annotations.NotNull;
@@ -47,4 +48,6 @@ public interface PlayerDataExtension extends LivingEntityDataExtension {
 
     BasicPlayerInfo getBasicPlayerInfo();
     void setBasicPlayerInfo(BasicPlayerInfo basicPlayerInfo);
+
+    AbilityTreeInstance getAbilityTree();
 }

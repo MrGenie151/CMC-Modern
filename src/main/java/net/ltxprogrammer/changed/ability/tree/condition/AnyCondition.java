@@ -1,11 +1,17 @@
 package net.ltxprogrammer.changed.ability.tree.condition;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 
 import java.util.List;
 
 public class AnyCondition extends AbstractCondition {
     public final List<AbstractCondition> components;
+
+    public static final Codec<AnyCondition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.list(AbstractCondition.CONDITION_CODEC).fieldOf("components").forGetter(condition -> condition.components)
+    ).apply(instance, AnyCondition::new));
 
     public AnyCondition(List<AbstractCondition> components) {
         this.components = components;
@@ -14,5 +20,10 @@ public class AnyCondition extends AbstractCondition {
     @Override
     public boolean test(IAbstractChangedEntity entity) {
         return components.stream().anyMatch(condition -> condition.test(entity));
+    }
+
+    @Override
+    public Codec<? extends AbstractCondition> getCodec() {
+        return CODEC;
     }
 }

@@ -15,7 +15,10 @@
           "type": "changed:mob_effect",
           "mobEffect": {
             "effect": "minecraft:saturation",
-            "duration": 1
+            "duration": 1,
+            "hideParticles": true,
+            "visible": false,
+            "showIcon": false
           },
           "condition": {
             "type": "changed:all",
@@ -35,7 +38,7 @@
               },
               {
                 "type": "changed:nth_tick",
-                "tickRate": 30
+                "tickRate": 60
               }
             ]
           }
@@ -70,7 +73,10 @@
           "type": "changed:mob_effect",
           "mobEffect": {
             "effect": "minecraft:saturation",
-            "duration": 1
+            "duration": 1,
+            "hideParticles": true,
+            "visible": false,
+            "showIcon": false
           },
           "condition": {
             "type": "changed:all",
@@ -90,7 +96,7 @@
               },
               {
                 "type": "changed:nth_tick",
-                "tickRate": 20
+                "tickRate": 40
               }
             ]
           }
@@ -125,12 +131,24 @@
           "type": "changed:mob_effect",
           "mobEffect": {
             "effect": "minecraft:hunger",
-            "duration": 40
+            "duration": 40,
+            "hideParticles": true,
+            "visible": false,
+            "showIcon": false
           },
           "condition": {
-            "type": "changed:light_exposure",
-            "threshold": 6,
-            "operation": "less_than_equal_to"
+            "type": "changed:all",
+            "components": [
+              {
+                "type": "changed:light_exposure",
+                "threshold": 6,
+                "operation": "less_than_equal_to"
+              },
+              {
+                "type": "changed:nth_tick",
+                "tickRate": 20
+              }
+            ]
           }
         }
       ]

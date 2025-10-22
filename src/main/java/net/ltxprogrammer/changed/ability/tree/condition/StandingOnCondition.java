@@ -25,4 +25,9 @@ public class StandingOnCondition extends AbstractCondition {
         Block standingOn = entity.getEntity().getBlockStateOn().getBlock();
         return blocks.stream().anyMatch(predicate -> predicate.test(standingOn));
     }
+
+    @Override
+    public Codec<? extends AbstractCondition> getCodec() {
+        return CODEC;
+    }
 }

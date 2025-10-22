@@ -2,33 +2,31 @@ package net.ltxprogrammer.changed.ability.tree;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.ability.tree.condition.AbstractCondition;
 import net.ltxprogrammer.changed.ability.tree.condition.TrueCondition;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public class AttributeModifierNodeEffect extends AbilityTree.NodeEffect {
-    public static final Codec<AttributeModifierNodeEffect> CODEC = RecordCodecBuilder.create(builder -> builder.group(
+import java.util.List;
+
+public class GroupNodeEffect extends AbilityTree.NodeEffect {
+    public static final Codec<GroupNodeEffect> CODEC = RecordCodecBuilder.create(builder -> builder.group(
             AbstractCondition.CONDITION_CODEC.fieldOf("condition").orElse(TrueCondition.INSTANCE).forGetter(node -> node.condition),
-            ForgeRegistries.ATTRIBUTES.getCodec().fieldOf("attribute").forGetter(node -> node.attribute),
-            Codec.DOUBLE.fieldOf("factor").forGetter(node -> node.factor)
-    ).apply(builder, AttributeModifierNodeEffect::new));
+            Codec.list(AbilityTree.NodeEffect.EFFECT_CODEC).fieldOf("effects").forGetter(node -> node.effects)
+    ).apply(builder, GroupNodeEffect::new));
 
     public final AbstractCondition condition;
-    public final Attribute attribute;
-    public final double factor;
+    public final List<AbilityTree.NodeEffect> effects;
 
-    public AttributeModifierNodeEffect(AbstractCondition condition, Attribute attribute, double factor) {
+    public GroupNodeEffect(AbstractCondition condition, List<AbilityTree.NodeEffect> effects) {
         this.condition = condition;
-        this.attribute = attribute;
-        this.factor = factor;
+        this.effects = effects;
     }
 
     @Override
     public void applyEffect(AbilityCounter counter) {
         if (condition.test(counter.entity))
-            counter.addAttributeMultiplier(attribute, factor);
+            effects.forEach(effect -> effect.applyEffect(counter));
     }
 
     @Override

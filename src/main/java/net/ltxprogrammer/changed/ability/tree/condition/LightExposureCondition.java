@@ -41,19 +41,24 @@ public class LightExposureCondition extends AbstractCondition {
         if (skyBrightness > 0) {
             float f1 = sunAngle < (float)Math.PI ? 0.0F : ((float)Math.PI * 2F);
             sunAngle += (f1 - sunAngle) * 0.2F;
-            skyBrightness = Math.round((float)skyBrightness * Mth.cos(sunAngle) * sunScale);
+            skyBrightness = Math.max(Math.round((float)skyBrightness * Mth.clamp(Mth.cos(sunAngle) * 1.7f, 0f, 1f) * sunScale), 0);
         }
 
         int blockBrightness = Math.round((float)level.getBrightness(LightLayer.BLOCK, checkPos) * blockScale);
 
-        float moonBrightness = level.getMoonBrightness() * 4f;
+        float moonBrightness = level.getMoonBrightness() * 4f * (level.getBrightness(LightLayer.SKY, checkPos) / 15f);
         float moonAngle = 1.0f - level.getSunAngle(1.0F);
         if (moonBrightness > 0) {
             float f1 = moonAngle < (float)Math.PI ? 0.0F : ((float)Math.PI * 2F);
             moonAngle += (f1 - moonAngle) * 0.2F;
-            moonBrightness = Math.round((float)moonBrightness * Mth.cos(moonAngle) * moonScale);
+            moonBrightness = Math.max(Math.round((float)moonBrightness * Mth.clamp(Mth.cos(moonAngle) * 1.7f, 0f, 1f) * moonScale), 0);
         }
 
         return operation.test((int)(skyBrightness + blockBrightness + moonBrightness), this.threshold);
+    }
+
+    @Override
+    public Codec<? extends AbstractCondition> getCodec() {
+        return CODEC;
     }
 }

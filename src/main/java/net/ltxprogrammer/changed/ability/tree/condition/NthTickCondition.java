@@ -24,4 +24,9 @@ public class NthTickCondition extends AbstractCondition {
     public boolean test(IAbstractChangedEntity entity) {
         return entity.getEntity().tickCount % tickRate == 0;
     }
+
+    @Override
+    public Codec<? extends AbstractCondition> getCodec() {
+        return CODEC;
+    }
 }

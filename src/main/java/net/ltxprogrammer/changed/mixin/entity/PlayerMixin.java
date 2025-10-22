@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.mixin.entity;
 
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.ability.AbstractAbility;
+import net.ltxprogrammer.changed.ability.tree.AbilityTreeInstance;
 import net.ltxprogrammer.changed.block.WhiteLatexTransportInterface;
 import net.ltxprogrammer.changed.data.AccessorySlots;
 import net.ltxprogrammer.changed.entity.*;
@@ -108,7 +109,11 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerDataExte
 
     @Inject(method = "createAttributes", at = @At("RETURN"))
     private static void addChangedAttributes(CallbackInfoReturnable<AttributeSupplier.Builder> cir) {
-        cir.getReturnValue().add(ChangedAttributes.TRANSFUR_DAMAGE.get(), 3.0D);
+        cir.getReturnValue().add(ChangedAttributes.TRANSFUR_DAMAGE.get(), 3.0D)
+                .add(ChangedAttributes.STEP_SIZE.get(), 0.6)
+                .add(ChangedAttributes.SPRINT_SPEED.get(), 1.0D)
+                .add(ChangedAttributes.SNEAK_SPEED.get(), 1.0D)
+                .add(ChangedAttributes.AIR_CAPACITY.get(), 300.0);
     }
 
     @Inject(method = "attack", at = @At("HEAD"), cancellable = true)
@@ -160,6 +165,8 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerDataExte
     public int paleExposure;
     @Unique
     public BasicPlayerInfo basicPlayerInfo = new BasicPlayerInfo();
+    @Unique
+    public AbilityTreeInstance abilityTree = new AbilityTreeInstance();
 
     @Override
     public TransfurVariantInstance<?> getTransfurVariant() {
@@ -291,5 +298,10 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerDataExte
     @Override
     public void setBasicPlayerInfo(BasicPlayerInfo basicPlayerInfo) {
         this.basicPlayerInfo = basicPlayerInfo;
+    }
+
+    @Override
+    public AbilityTreeInstance getAbilityTree() {
+        return abilityTree;
     }
 }

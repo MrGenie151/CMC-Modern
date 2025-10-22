@@ -2,6 +2,8 @@ package net.ltxprogrammer.changed.ability.tree;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.ltxprogrammer.changed.ability.tree.condition.AbstractCondition;
+import net.ltxprogrammer.changed.ability.tree.condition.TrueCondition;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -16,17 +18,26 @@ public class MobEffectNodeEffect extends AbilityTree.NodeEffect {
     ).apply(instance, MobEffectInstance::new));
 
     public static final Codec<MobEffectNodeEffect> CODEC = RecordCodecBuilder.create(builder -> builder.group(
+            AbstractCondition.CONDITION_CODEC.fieldOf("condition").orElse(TrueCondition.INSTANCE).forGetter(node -> node.condition),
             MOB_EFFECT_CODEC.fieldOf("mobEffect").forGetter(node -> node.mobEffect)
     ).apply(builder, MobEffectNodeEffect::new));
 
+    public final AbstractCondition condition;
     public final MobEffectInstance mobEffect;
 
-    public MobEffectNodeEffect(MobEffectInstance mobEffect) {
+    public MobEffectNodeEffect(AbstractCondition condition, MobEffectInstance mobEffect) {
+        this.condition = condition;
         this.mobEffect = mobEffect;
     }
 
     @Override
     public void applyEffect(AbilityCounter counter) {
-        counter.variantInstance.getHost().addEffect(new MobEffectInstance(mobEffect));
+        if (condition.test(counter.entity))
+            counter.variantInstance.getHost().addEffect(new MobEffectInstance(mobEffect));
+    }
+
+    @Override
+    public Codec<? extends AbilityTree.NodeEffect> getCodec() {
+        return CODEC;
     }
 }

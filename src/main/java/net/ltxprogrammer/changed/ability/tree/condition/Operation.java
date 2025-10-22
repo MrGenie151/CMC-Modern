@@ -5,15 +5,16 @@ import com.mojang.serialization.DataResult;
 import net.minecraft.util.StringRepresentable;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.BiPredicate;
 
 public enum Operation implements StringRepresentable, BiPredicate<Integer, Integer> {
     GREATER_THAN("greater_than", (left, right) -> left > right),
-    GREATER_THAN_EQUAL_TO("greater_than_equal_to", (left, right) -> left > right),
-    LESS_THAN("less_than", (left, right) -> left > right),
-    LESS_THAN_EQUAL_TO("less_than_equal_to", (left, right) -> left > right),
-    EQUAL_TO("equal_to", (left, right) -> left > right),
-    NOT_EQUAL_TO("not_equal_to", (left, right) -> left > right);
+    GREATER_THAN_EQUAL_TO("greater_than_equal_to", (left, right) -> left >= right),
+    LESS_THAN("less_than", (left, right) -> left < right),
+    LESS_THAN_EQUAL_TO("less_than_equal_to", (left, right) -> left <= right),
+    EQUAL_TO("equal_to", Objects::equals),
+    NOT_EQUAL_TO("not_equal_to", (left, right) -> !Objects.equals(left, right));
 
     public static Codec<Operation> CODEC = Codec.STRING.comapFlatMap(Operation::fromSerial, Operation::getSerializedName);
     

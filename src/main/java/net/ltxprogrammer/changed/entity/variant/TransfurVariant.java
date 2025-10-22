@@ -124,7 +124,9 @@ public class TransfurVariant<T extends ChangedEntity> {
 
     public enum BreatheMode {
         NORMAL,
+        @Deprecated
         WEAK,
+        @Deprecated
         STRONG,
         WATER,
         ANY,
