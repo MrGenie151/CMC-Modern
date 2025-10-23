@@ -1,9 +1,17 @@
 package net.ltxprogrammer.changed.client;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Streams;
+import com.google.gson.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
+import com.mojang.math.Transformation;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.entity.latex.IClientLatexTypeExtensions;
 import net.ltxprogrammer.changed.entity.latex.LatexType;
@@ -21,36 +29,45 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.block.model.*;
+import net.minecraft.client.renderer.block.model.multipart.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.BlockModelRotation;
+import net.minecraft.client.resources.model.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.NamedRenderTypeManager;
 import net.minecraftforge.client.model.IModelBuilder;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.geometry.UnbakedGeometryHelper;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.Reader;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -58,7 +75,192 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final ResourceLocation BLOCK_ATLAS = InventoryMenu.BLOCK_ATLAS;
     public static final FileToIdConverter MODEL_LISTER = FileToIdConverter.json("latex_cover_models");
+    public static final FileToIdConverter STATE_LISTER = FileToIdConverter.json("latex_cover_model_blockstates");
     private static final ResourceLocation RENDERTYPE_SOLID = ResourceLocation.fromNamespaceAndPath(ResourceLocation.DEFAULT_NAMESPACE, "solid");
+
+    private static final LatexModelDefinition.Context LATEX_MODEL_DEFINITION_CONTEXT = new LatexModelDefinition.Context();
+
+    private static final ResourceLocation DEFAULT_TOP = Changed.modResource("default_top");
+    private static final ResourceLocation DEFAULT_BOTTOM = Changed.modResource("default_bottom");
+    private static final ResourceLocation DEFAULT_NORTH = Changed.modResource("default_north");
+    private static final ResourceLocation DEFAULT_SOUTH = Changed.modResource("default_south");
+    private static final ResourceLocation DEFAULT_EAST = Changed.modResource("default_east");
+    private static final ResourceLocation DEFAULT_WEST = Changed.modResource("default_west");
+    private static final ResourceLocation DEFAULT_EXTRA = Changed.modResource("default_extra");
+
+    public static class MultiVariantFaces {
+        private final Map<Direction, Variant> faces;
+        private final Variant extra;
+
+        public MultiVariantFaces(Map<Direction, Variant> faces, Variant extra) {
+            this.faces = faces;
+            this.extra = extra;
+        }
+
+        @OnlyIn(Dist.CLIENT)
+        public static class Deserializer implements JsonDeserializer<MultiVariantFaces> {
+            private Variant deserializeOrNull(JsonElement element, JsonDeserializationContext context) {
+                if (element.isJsonNull())
+                    return null;
+                return context.deserialize(element, Variant.class);
+            }
+
+            public MultiVariantFaces deserialize(JsonElement element, Type type, JsonDeserializationContext context) throws JsonParseException {
+                Map<Direction, Variant> map = Maps.newHashMap();
+                Variant extraModel;
+                if (!element.isJsonObject())
+                    throw new JsonParseException("Element is an object");
+
+                var object = element.getAsJsonObject();
+                if (object.has("top"))
+                    map.put(Direction.UP, deserializeOrNull(object.get("top"), context));
+                else
+                    map.put(Direction.UP, new Variant(DEFAULT_TOP, Transformation.identity(), false, 1));
+
+                if (object.has("bottom"))
+                    map.put(Direction.DOWN, deserializeOrNull(object.get("bottom"), context));
+                else
+                    map.put(Direction.DOWN, new Variant(DEFAULT_BOTTOM, Transformation.identity(), false, 1));
+
+                if (object.has("north"))
+                    map.put(Direction.NORTH, deserializeOrNull(object.get("north"), context));
+                else
+                    map.put(Direction.NORTH, new Variant(DEFAULT_NORTH, Transformation.identity(), false, 1));
+
+                if (object.has("south"))
+                    map.put(Direction.SOUTH, deserializeOrNull(object.get("south"), context));
+                else
+                    map.put(Direction.SOUTH, new Variant(DEFAULT_SOUTH, Transformation.identity(), false, 1));
+
+                if (object.has("east"))
+                    map.put(Direction.EAST, deserializeOrNull(object.get("east"), context));
+                else
+                    map.put(Direction.EAST, new Variant(DEFAULT_EAST, Transformation.identity(), false, 1));
+
+                if (object.has("west"))
+                    map.put(Direction.WEST, deserializeOrNull(object.get("west"), context));
+                else
+                    map.put(Direction.WEST, new Variant(DEFAULT_WEST, Transformation.identity(), false, 1));
+
+                if (object.has("extra"))
+                    extraModel = deserializeOrNull(object.get("extra"), context);
+                else
+                    extraModel = new Variant(DEFAULT_EXTRA, Transformation.identity(), false, 1);
+
+                return new MultiVariantFaces(map, extraModel);
+            }
+        }
+    }
+
+    public static class LatexModelDefinition {
+        private final Map<String, MultiVariantFaces> variants = Maps.newLinkedHashMap();
+
+        public static LatexModelDefinition fromStream(LatexModelDefinition.Context context, Reader p_111542_) {
+            return GsonHelper.fromJson(context.gson, p_111542_, LatexModelDefinition.class);
+        }
+
+        public static LatexModelDefinition fromJsonElement(LatexModelDefinition.Context context, JsonElement p_250730_) {
+            return context.gson.fromJson(p_250730_, LatexModelDefinition.class);
+        }
+
+        public LatexModelDefinition(Map<String, MultiVariantFaces> variants) {
+            this.variants.putAll(variants);
+        }
+
+        public LatexModelDefinition(List<LatexModelDefinition> definitions) {
+            for(LatexModelDefinition definition : definitions) {
+                this.variants.putAll(definition.variants);
+            }
+        }
+
+        @VisibleForTesting
+        public boolean hasVariant(String variantName) {
+            return this.variants.get(variantName) != null;
+        }
+
+        @VisibleForTesting
+        public MultiVariantFaces getVariant(String variantName) {
+            MultiVariantFaces multivariant = this.variants.get(variantName);
+            if (multivariant == null) {
+                throw new LatexModelDefinition.MissingVariantException();
+            } else {
+                return multivariant;
+            }
+        }
+
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            } else {
+                if (object instanceof LatexModelDefinition latexModelDefinition) {
+                    return this.variants.equals(latexModelDefinition.variants);
+                }
+
+                return false;
+            }
+        }
+
+        public int hashCode() {
+            return 31 * this.variants.hashCode();
+        }
+
+        public Map<String, MultiVariantFaces> getVariants() {
+            return this.variants;
+        }
+
+        @VisibleForTesting
+        public Set<MultiVariantFaces> getMultiVariants() {
+            return Sets.newHashSet(this.variants.values());
+        }
+
+        @OnlyIn(Dist.CLIENT)
+        public static final class Context {
+            protected final Gson gson = (new GsonBuilder())
+                    .registerTypeAdapter(LatexModelDefinition.class, new LatexModelDefinition.Deserializer())
+                    .registerTypeAdapter(Variant.class, new Variant.Deserializer())
+                    .registerTypeAdapter(MultiVariant.class, new MultiVariant.Deserializer())
+                    .registerTypeAdapter(MultiVariantFaces.class, new MultiVariantFaces.Deserializer()).create();
+            private StateDefinition<Block, BlockState> definition;
+
+            public StateDefinition<Block, BlockState> getDefinition() {
+                return this.definition;
+            }
+
+            public void setDefinition(StateDefinition<Block, BlockState> p_111553_) {
+                this.definition = p_111553_;
+            }
+        }
+
+        @OnlyIn(Dist.CLIENT)
+        public static class Deserializer implements JsonDeserializer<LatexModelDefinition> {
+            public LatexModelDefinition deserialize(JsonElement p_111559_, Type p_111560_, JsonDeserializationContext p_111561_) throws JsonParseException {
+                JsonObject jsonobject = p_111559_.getAsJsonObject();
+                Map<String, MultiVariantFaces> map = this.getVariants(p_111561_, jsonobject);
+                if (!map.isEmpty()) {
+                    return new LatexModelDefinition(map);
+                } else {
+                    throw new JsonParseException("'variants' not found");
+                }
+            }
+
+            protected Map<String, MultiVariantFaces> getVariants(JsonDeserializationContext p_111556_, JsonObject p_111557_) {
+                Map<String, MultiVariantFaces> map = Maps.newHashMap();
+                if (p_111557_.has("variants")) {
+                    JsonObject jsonobject = GsonHelper.getAsJsonObject(p_111557_, "variants");
+
+                    for(Map.Entry<String, JsonElement> entry : jsonobject.entrySet()) {
+                        map.put(entry.getKey(), p_111556_.deserialize(entry.getValue(), MultiVariantFaces.class));
+                    }
+                }
+
+                return map;
+            }
+        }
+
+        @OnlyIn(Dist.CLIENT)
+        protected class MissingVariantException extends RuntimeException {
+        }
+    }
 
     public static class ModelSet {
         @Nullable
@@ -90,6 +292,27 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
             this.surfaceEast = surfaceEast;
             this.surfaceWest = surfaceWest;
             this.extra = extra;
+        }
+
+        private static BakedModel getOrNull(@Nullable Variant variant, Function<ResourceLocation, BakedModel> resolver) {
+            if (variant == null)
+                return null;
+            return resolver.apply(variant.getModelLocation());
+        }
+
+        public static Map<LatexType, ModelSet> resolve(MultiVariantFaces multiVariantFaces, Function<ResourceLocation, Map<LatexType, BakedModel>> resolver) {
+            return getCoverTypes().collect(Collectors.toMap(Function.identity(), latexType -> {
+                Function<ResourceLocation, BakedModel> typedResolver = name -> resolver.apply(name).get(latexType);
+                return new ModelSet(
+                        getOrNull(multiVariantFaces.faces.get(Direction.UP), typedResolver),
+                        getOrNull(multiVariantFaces.faces.get(Direction.DOWN), typedResolver),
+                        getOrNull(multiVariantFaces.faces.get(Direction.NORTH), typedResolver),
+                        getOrNull(multiVariantFaces.faces.get(Direction.SOUTH), typedResolver),
+                        getOrNull(multiVariantFaces.faces.get(Direction.EAST), typedResolver),
+                        getOrNull(multiVariantFaces.faces.get(Direction.WEST), typedResolver),
+                        getOrNull(multiVariantFaces.extra, typedResolver)
+                );
+            }));
         }
 
         @Nullable
@@ -243,6 +466,110 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
                 NamedRenderTypeManager.get(RENDERTYPE_SOLID));
     }
 
+    private static CompletableFuture<Map<Block, LatexModelDefinition>> loadBlockStates(ResourceManager resources, Executor executor) {
+        return CompletableFuture.supplyAsync(() -> {
+            return STATE_LISTER.listMatchingResources(resources);
+        }, executor).thenCompose((namedResources) -> {
+            List<CompletableFuture<Pair<Block, LatexModelDefinition>>> list = new ArrayList<>(namedResources.size());
+
+            for (Map.Entry<ResourceLocation, Resource> entry : namedResources.entrySet()) {
+                list.add(CompletableFuture.supplyAsync(() -> {
+                    ResourceLocation blockId = STATE_LISTER.fileToId(entry.getKey());
+                    Block block = ForgeRegistries.BLOCKS.getValue(blockId);
+                    if (block == null) {
+                        LOGGER.error("Skipping {} as it does not map to a block", blockId);
+                        return null;
+                    }
+
+                    try (Reader reader = entry.getValue().openAsReader()) {
+                        return Pair.of(block, LatexModelDefinition.fromStream(LATEX_MODEL_DEFINITION_CONTEXT, reader));
+                    } catch (Exception exception) {
+                        LOGGER.error("Failed to load model definition {}", entry.getKey(), exception);
+                        return null;
+                    }
+                }, executor));
+            }
+
+            return Util.sequence(list).thenApply((result) -> {
+                return result.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableMap(Pair::getFirst, Pair::getSecond));
+            });
+        });
+    }
+
+    private static final Splitter COMMA_SPLITTER = Splitter.on(',');
+    private static final Splitter EQUAL_SPLITTER = Splitter.on('=').limit(2);
+
+    @Nullable
+    static <T extends Comparable<T>> T getValueHelper(Property<T> property, String p_119278_) {
+        return property.getValue(p_119278_).orElse((T)null);
+    }
+
+    private static Predicate<BlockState> predicate(StateDefinition<Block, BlockState> stateDefinition, String text) {
+        Map<Property<?>, Comparable<?>> map = Maps.newHashMap();
+
+        for(String s : COMMA_SPLITTER.split(text)) {
+            Iterator<String> iterator = EQUAL_SPLITTER.split(s).iterator();
+            if (iterator.hasNext()) {
+                String s1 = iterator.next();
+                Property<?> property = stateDefinition.getProperty(s1);
+                if (property != null && iterator.hasNext()) {
+                    String s2 = iterator.next();
+                    Comparable<?> comparable = getValueHelper(property, s2);
+                    if (comparable == null) {
+                        throw new RuntimeException("Unknown value: '" + s2 + "' for blockstate property: '" + s1 + "' " + property.getPossibleValues());
+                    }
+
+                    map.put(property, comparable);
+                } else if (!s1.isEmpty()) {
+                    throw new RuntimeException("Unknown blockstate property: '" + s1 + "'");
+                }
+            }
+        }
+
+        Block block = stateDefinition.getOwner();
+        return (p_119262_) -> {
+            if (p_119262_ != null && p_119262_.is(block)) {
+                for(Map.Entry<Property<?>, Comparable<?>> entry : map.entrySet()) {
+                    if (!Objects.equals(p_119262_.getValue(entry.getKey()), entry.getValue())) {
+                        return false;
+                    }
+                }
+
+                return true;
+            } else {
+                return false;
+            }
+        };
+    }
+
+    private static CompletableFuture<Map<BlockState, Map<LatexType, ModelSet>>> bakeBlockStateModels(Map<ResourceLocation, Map<LatexType, BakedModel>> bakedModels,
+                                                                                                     Map<Block, LatexModelDefinition> definitions) {
+        var futures = definitions.entrySet().stream().map(definitionEntry -> {
+            return CompletableFuture.supplyAsync(() -> {
+                return definitionEntry.getValue().getVariants().entrySet().stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
+                            return ModelSet.resolve(entry.getValue(), bakedModels::get);
+                        }));
+            }).thenApply(blockStateToModelSet -> {
+                Map<BlockState, Map<LatexType, ModelSet>> blockStateMap = Maps.newHashMap();
+                StateDefinition<Block, BlockState> stateDefinition = definitionEntry.getKey().getStateDefinition();
+                blockStateToModelSet.forEach((text, modelSet) -> {
+                    stateDefinition.getPossibleStates().stream().filter(predicate(stateDefinition, text)).forEach((blockState -> {
+                        if (blockStateMap.containsKey(blockState))
+                            throw new RuntimeException("Overlapping definition for " + blockState);
+                        blockStateMap.put(blockState, modelSet);
+                    }));
+                });
+                return blockStateMap;
+            });
+        }).toList();
+
+        return Util.sequence(futures).thenApply(list -> {
+            return list.stream().flatMap(map -> map.entrySet().stream())
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        });
+    }
+
     private static CompletableFuture<Map<ResourceLocation, BlockModel>> loadBlockModels(ResourceManager resources, Executor executor) {
         return CompletableFuture.supplyAsync(() -> {
             return MODEL_LISTER.listMatchingResources(resources);
@@ -307,14 +634,6 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
         });
     }
 
-    private static final ResourceLocation DEFAULT_TOP = Changed.modResource("default_top");
-    private static final ResourceLocation DEFAULT_BOTTOM = Changed.modResource("default_bottom");
-    private static final ResourceLocation DEFAULT_NORTH = Changed.modResource("default_north");
-    private static final ResourceLocation DEFAULT_SOUTH = Changed.modResource("default_south");
-    private static final ResourceLocation DEFAULT_EAST = Changed.modResource("default_east");
-    private static final ResourceLocation DEFAULT_WEST = Changed.modResource("default_west");
-    private static final ResourceLocation DEFAULT_EXTRA = Changed.modResource("default_extra");
-
     @Override
     public CompletableFuture<Void> reload(PreparationBarrier barrier, ResourceManager resources, ProfilerFiller profilerA, ProfilerFiller profilerB, Executor backgroundExecutor, Executor minecraftExecutor) {
         return loadBlockModels(resources, backgroundExecutor)
@@ -337,8 +656,10 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
 
                     return bakedModels;
                 })
+                .thenCombine(loadBlockStates(resources, minecraftExecutor), LatexCoveredBlocksRenderer::bakeBlockStateModels)
+                .thenCompose(Function.identity())
                 .thenAcceptAsync(bakedModels -> {
-                    // TODO load special models to attach to blockstates
+                    this.specialModelSets = bakedModels;
                 }, minecraftExecutor);
     }
 }
