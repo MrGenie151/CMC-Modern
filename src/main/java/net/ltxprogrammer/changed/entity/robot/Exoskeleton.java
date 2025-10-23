@@ -105,7 +105,14 @@ public class Exoskeleton extends AbstractRobot {
         return 2.0F / 16.0F;
     }
 
+    protected boolean targetAlreadyHasExo(LivingEntity entity) {
+        return AccessorySlots.isWearing(entity, stack -> stack.is(ChangedItems.EXOSKELETON.get()));
+    }
+
     protected boolean targetIsBenignLatex(LivingEntity entity) {
+        if (this.targetAlreadyHasExo(entity))
+            return false;
+
         if (ProcessTransfur.getPlayerTransfurVariantSafe(EntityUtil.playerOrNull(entity)).map(TransfurVariantInstance::isTransfurring).orElse(false))
             return false;
 
@@ -113,6 +120,9 @@ public class Exoskeleton extends AbstractRobot {
     }
 
     protected boolean targetHasBenignPants(LivingEntity entity) {
+        if (this.targetAlreadyHasExo(entity))
+            return false;
+
         return EntityUtil.maybeGetOverlaying(entity).getType().is(ChangedTags.EntityTypes.HUMANOIDS) &&
                 AccessorySlots.isWearing(entity, stack -> stack.is(ChangedItems.BENIGN_SHORTS.get()));
     }
