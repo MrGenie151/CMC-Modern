@@ -14,6 +14,7 @@ import net.ltxprogrammer.changed.extension.ChangedCompatibility;
 import net.ltxprogrammer.changed.entity.AccessoryEntities;
 import net.ltxprogrammer.changed.init.*;
 import net.ltxprogrammer.changed.item.ExtendedItemProperties;
+import net.ltxprogrammer.changed.network.packet.BasicPlayerInfoPacket;
 import net.ltxprogrammer.changed.network.packet.SyncMoversPacket;
 import net.ltxprogrammer.changed.network.packet.SyncTransfurPacket;
 import net.ltxprogrammer.changed.process.Pale;
@@ -482,6 +483,10 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
     @SubscribeEvent
     public static void onPlayerJoin(EntityJoinLevelEvent event) {
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
+            serverPlayer.connection.send(
+                    Changed.PACKET_HANDLER.toVanillaPacket(BasicPlayerInfoPacket.EMPTY, NetworkDirection.PLAY_TO_CLIENT)
+            );
+
             SyncTransfurPacket.Builder builderTf = new SyncTransfurPacket.Builder();
             builderTf.addPlayer(serverPlayer, true);
             if (builderTf.worthSending())
