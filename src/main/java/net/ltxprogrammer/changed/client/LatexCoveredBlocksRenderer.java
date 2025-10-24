@@ -361,6 +361,13 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
         return RenderType.solid();
     }
 
+
+    @Nullable
+    private static LatexCoverGetter latexCoverStateGetter = null;
+    public static Optional<LatexCoverGetter> getLatexCoverStateGetter() {
+        return Optional.ofNullable(latexCoverStateGetter);
+    }
+
     private boolean wrappedTesselate(
             BlockAndTintGetter level, LatexCoverGetter latexCoverGetter,
             BlockPos blockPos, VertexConsumer bufferBuilder,
@@ -390,6 +397,8 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
         long seed = coverState.getSeed(blockPos);
 
         final RenderType renderType = this.getRenderType(coverState);
+
+        latexCoverStateGetter = latexCoverGetter;
 
         if (surfaceTop && modelSet.surfaceTop != null) {
             modelRenderer.tesselateWithAO(level, modelSet.surfaceTop, blockState, blockPos, poseStack, bufferBuilder, true, random, seed, lightColor,
@@ -425,6 +434,8 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
             modelRenderer.tesselateWithAO(level, modelSet.extra, blockState, blockPos, poseStack, bufferBuilder, true, random, seed, lightColor,
                     ModelData.EMPTY, renderType);
         }
+
+        latexCoverStateGetter = null;
 
         return true;
     }

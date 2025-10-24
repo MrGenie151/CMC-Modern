@@ -298,6 +298,10 @@ public abstract class LatexType {
         return null;
     }
 
+    public boolean canOcclude(LatexCoverState latexCoverState, BlockGetter level, BlockPos pos, LatexCoverState other, BlockPos otherPos) {
+        return false;
+    }
+
     public static class None extends LatexType {
         @Override
         public ResourceLocation getLootTable() {

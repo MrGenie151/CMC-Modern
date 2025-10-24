@@ -53,6 +53,10 @@ public class LatexCoverState extends StateHolder<LatexType, LatexCoverState> {
         super(type, properties, codec);
     }
 
+    public boolean canOcclude(BlockGetter level, BlockPos pos, LatexCoverState other, BlockPos otherPos) {
+        return getType().canOcclude(this, level, pos, other, otherPos);
+    }
+
     public boolean isPresent() {
         return this.owner != ChangedLatexTypes.NONE.get();
     }

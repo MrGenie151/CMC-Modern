@@ -105,6 +105,14 @@ public abstract class SpreadingLatexType extends LatexType {
         });
     }
 
+    @Override
+    public boolean canOcclude(LatexCoverState latexCoverState, BlockGetter level, BlockPos pos, LatexCoverState other, BlockPos otherPos) {
+        if (other.getType() == this)
+            return FACES.values().stream().filter(other::getValue).allMatch(latexCoverState::getValue);
+
+        return false;
+    }
+
     // Used to more efficiently cache duplicate shapes
     protected LatexCoverState getVisualState(LatexCoverState state) {
         return state.setValue(SATURATION, 0);
