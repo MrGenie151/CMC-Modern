@@ -185,7 +185,11 @@ public abstract class SpreadingLatexType extends LatexType {
             var checkState = level.getBlockState(checkPos);
             state = state.setValue(face, canExistOnSurface(level, checkPos, checkState, direction.getOpposite()));
         }
-        return state;
+
+        LatexCoverState wantedState = state;
+        if (FACES.values().stream().noneMatch(wantedState::getValue) && level.getBlockState(blockPos).isAir())
+            return ChangedLatexTypes.NONE.get().defaultCoverState();
+        return wantedState;
     }
 
     @Override
@@ -230,7 +234,10 @@ public abstract class SpreadingLatexType extends LatexType {
 
     @Override
     public LatexCoverState updateShape(LatexCoverState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos blockPos, BlockPos neighborPos) {
-        return state.setValue(FACES.get(direction), canExistOnSurface(level, neighborPos, neighborState, direction.getOpposite()));
+        LatexCoverState wantedState = state.setValue(FACES.get(direction), canExistOnSurface(level, neighborPos, neighborState, direction.getOpposite()));
+        if (FACES.values().stream().noneMatch(wantedState::getValue) && level.getBlockState(blockPos).isAir())
+            return ChangedLatexTypes.NONE.get().defaultCoverState();
+        return wantedState;
     }
 
     @Override
@@ -244,14 +251,20 @@ public abstract class SpreadingLatexType extends LatexType {
 
     @Override
     public LatexCoverState updateInPlace(LatexCoverState state, BlockState oldState, BlockState newState, LevelAccessor level, BlockPos pos) {
-        if (newState.isAir())
-            return state;
-        if (newState.getBlock() instanceof LatexCoveringSource source)
-            return source.getLatexCoverState(newState, pos);
-        if (newState.is(ChangedTags.Blocks.DENY_LATEX_COVER) || newState.isCollisionShapeFullBlock(level, pos))
-            return ChangedLatexTypes.NONE.get().defaultCoverState();
+        LatexCoverState wantedState;
 
-        return state;
+        if (newState.isAir())
+            wantedState = state;
+        else if (newState.getBlock() instanceof LatexCoveringSource source)
+            wantedState = source.getLatexCoverState(newState, pos);
+        else if (newState.is(ChangedTags.Blocks.DENY_LATEX_COVER) || newState.isCollisionShapeFullBlock(level, pos))
+            wantedState = ChangedLatexTypes.NONE.get().defaultCoverState();
+        else
+            wantedState = state;
+
+        if (wantedState.getType() instanceof SpreadingLatexType && FACES.values().stream().noneMatch(wantedState::getValue) && newState.isAir())
+            return ChangedLatexTypes.NONE.get().defaultCoverState();
+        return wantedState;
     }
 
     @Override
