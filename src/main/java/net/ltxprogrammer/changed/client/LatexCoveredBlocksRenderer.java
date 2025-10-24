@@ -297,7 +297,22 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
         private static BakedModel getOrNull(@Nullable Variant variant, Function<ResourceLocation, BakedModel> resolver) {
             if (variant == null)
                 return null;
-            return resolver.apply(variant.getModelLocation());
+            try {
+                return resolver.apply(variant.getModelLocation());
+            } catch (Exception e) {
+                var modelLocation = variant.getModelLocation();
+                if (modelLocation.equals(DEFAULT_BOTTOM) ||
+                        modelLocation.equals(DEFAULT_TOP) ||
+                        modelLocation.equals(DEFAULT_NORTH) ||
+                        modelLocation.equals(DEFAULT_SOUTH) ||
+                        modelLocation.equals(DEFAULT_EAST) ||
+                        modelLocation.equals(DEFAULT_WEST) ||
+                        modelLocation.equals(DEFAULT_EXTRA))
+                    return null;
+
+                LOGGER.error("Failed to resolve model {}", variant.getModelLocation());
+                throw e;
+            }
         }
 
         public static Map<LatexType, ModelSet> resolve(MultiVariantFaces multiVariantFaces, Function<ResourceLocation, Map<LatexType, BakedModel>> resolver) {

@@ -6,7 +6,6 @@ import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.TransfurCause;
 import net.ltxprogrammer.changed.entity.beast.WhiteLatexEntity;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
-import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
 import net.ltxprogrammer.changed.init.*;
 import net.ltxprogrammer.changed.item.AbstractLatexBucket;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
@@ -51,7 +50,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.eventbus.api.Event;
@@ -375,11 +373,17 @@ public abstract class SpreadingLatexType extends LatexType {
         @Override
         public void initializeClient(Consumer<IClientLatexTypeExtensions> consumer) {
             consumer.accept(new IClientLatexTypeExtensions() {
-                private static final ResourceLocation DARK_LATEX_TEXTURE = Changed.modResource("block/dark_latex_block_top");
+                private static final ResourceLocation DARK_LATEX_TEXTURE_TOP = Changed.modResource("block/dark_latex_block_top");
+                private static final ResourceLocation DARK_LATEX_TEXTURE_BOTTOM = Changed.modResource("block/dark_latex_block_bottom");
+                private static final ResourceLocation DARK_LATEX_TEXTURE_SIDE = Changed.modResource("block/dark_latex_block_side");
 
                 @Override
                 public ResourceLocation getTextureForFace(Direction face) {
-                    return DARK_LATEX_TEXTURE;
+                    return switch (face) {
+                        case NORTH, SOUTH, EAST, WEST -> DARK_LATEX_TEXTURE_SIDE;
+                        case UP -> DARK_LATEX_TEXTURE_TOP;
+                        case DOWN -> DARK_LATEX_TEXTURE_BOTTOM;
+                    };
                 }
 
                 @Override
@@ -497,11 +501,17 @@ public abstract class SpreadingLatexType extends LatexType {
         @Override
         public void initializeClient(Consumer<IClientLatexTypeExtensions> consumer) {
             consumer.accept(new IClientLatexTypeExtensions() {
-                private static final ResourceLocation WHITE_LATEX_TEXTURE = Changed.modResource("block/white_latex_block");
+                private static final ResourceLocation WHITE_LATEX_TEXTURE_TOP = Changed.modResource("block/white_latex_block_top");
+                private static final ResourceLocation WHITE_LATEX_TEXTURE_BOTTOM = Changed.modResource("block/white_latex_block_bottom");
+                private static final ResourceLocation WHITE_LATEX_TEXTURE_SIDE = Changed.modResource("block/white_latex_block_side");
 
                 @Override
                 public ResourceLocation getTextureForFace(Direction face) {
-                    return WHITE_LATEX_TEXTURE;
+                    return switch (face) {
+                        case NORTH, SOUTH, EAST, WEST -> WHITE_LATEX_TEXTURE_SIDE;
+                        case UP -> WHITE_LATEX_TEXTURE_TOP;
+                        case DOWN -> WHITE_LATEX_TEXTURE_BOTTOM;
+                    };
                 }
 
                 @Override
