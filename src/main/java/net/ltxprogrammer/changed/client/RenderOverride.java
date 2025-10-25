@@ -1,6 +1,7 @@
 package net.ltxprogrammer.changed.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.block.DuctBlock;
 import net.ltxprogrammer.changed.client.renderer.model.DuctPlayerModel;

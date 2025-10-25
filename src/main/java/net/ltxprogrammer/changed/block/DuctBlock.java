@@ -36,19 +36,20 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class DuctBlock extends ChangedBlock implements SimpleWaterloggedBlock
-{
+public class DuctBlock extends ChangedBlock implements SimpleWaterloggedBlock {
     public static final BooleanProperty NORTH = BlockStateProperties.NORTH;
     public static final BooleanProperty EAST = BlockStateProperties.EAST;
     public static final BooleanProperty SOUTH = BlockStateProperties.SOUTH;
@@ -162,7 +163,7 @@ public class DuctBlock extends ChangedBlock implements SimpleWaterloggedBlock
     }
 
     @NotNull
-    public VoxelShape getCollisionShape(final BlockState blockState, final BlockGetter level, final BlockPos blockPos, final CollisionContext context) {
+    public VoxelShape getCollisionShape(BlockState blockState, BlockGetter level, BlockPos blockPos, CollisionContext context) {
         final VoxelShape shape = this.COMPUTED_SHAPES.get(blockState);
         if (shape == null) {
             throw new IllegalStateException("Undefined state shape");
@@ -170,8 +171,18 @@ public class DuctBlock extends ChangedBlock implements SimpleWaterloggedBlock
         return shape;
     }
 
+    @Override
+    public VoxelShape getVisualShape(BlockState blockState, BlockGetter level, BlockPos blockPos, CollisionContext context) {
+        if (context instanceof EntityCollisionContext entity && entity.getEntity() instanceof PlayerDataExtension ext) {
+            var mover = ext.getPlayerMover();
+            if (mover != null && mover.is(PlayerMover.DUCT_MOVER.get()))
+                return Shapes.empty(); // Allow players in duct to third-person out of the duct
+        }
+        return super.getVisualShape(blockState, level, blockPos, context);
+    }
+
     @NotNull
-    public VoxelShape getInteractionShape(final BlockState blockState, final BlockGetter level, final BlockPos blockPos) {
+    public VoxelShape getInteractionShape(BlockState blockState, BlockGetter level, BlockPos blockPos) {
         final VoxelShape shape = this.COMPUTED_SHAPES.get(blockState);
         if (shape == null)
             throw new IllegalStateException("Undefined state shape");
@@ -179,14 +190,14 @@ public class DuctBlock extends ChangedBlock implements SimpleWaterloggedBlock
     }
 
     @NotNull
-    public VoxelShape getShape(final BlockState blockState, final BlockGetter level, final BlockPos blockPos, final CollisionContext context) {
+    public VoxelShape getShape(BlockState blockState, BlockGetter level, BlockPos blockPos, CollisionContext context) {
         final VoxelShape shape = this.COMPUTED_SHAPES.get(blockState);
         if (shape == null)
             throw new IllegalStateException("Undefined state shape");
         return shape;
     }
 
-    public VoxelShape computeShape(final BlockState blockState) {
+    public VoxelShape computeShape(BlockState blockState) {
         final Optional<Direction.Axis> opt = nonJointedAxis(blockState);
         if (opt.isEmpty()) {
             VoxelShape shape = SHAPE_FRAME;
@@ -198,16 +209,16 @@ public class DuctBlock extends ChangedBlock implements SimpleWaterloggedBlock
         return SHAPE_DUCT.get(opt.get());
     }
 
-    public boolean isLadder(final BlockState state, final LevelReader level, final BlockPos pos, final LivingEntity entity) {
+    public boolean isLadder(BlockState state, LevelReader level, BlockPos pos, LivingEntity entity) {
         BlockPos entityBlockPos = EntityUtil.getBlock(entity.position().add(0.0, 0.25, 0.0));
         return super.isLadder(state, level, pos, entity) || entityBlockPos.equals(pos) || EntityUtil.getEyeBlock(entity).equals(pos);
     }
 
-    public BlockState getStateForPlacement(final BlockPlaceContext context) {
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
         return this.getWantedState(super.getStateForPlacement(context), context.getClickedPos(), context.getLevel());
     }
 
-    public BlockState updateShape(final BlockState blockState, final Direction direction, final BlockState blockStateOther, final LevelAccessor level, final BlockPos blockPos, final BlockPos blockPosOther) {
+    public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockStateOther, LevelAccessor level, BlockPos blockPos, BlockPos blockPosOther) {
         final BlockState tmp = blockState.setValue(BY_DIRECTION.get(direction), blockStateOther.is(ChangedTags.Blocks.DUCT_CONNECTOR));
         BlockState wanted = tmp.setValue(FULL, BY_DIRECTION.entrySet().stream().filter(entry -> tmp.getValue(entry.getValue()))
                 .anyMatch(entry -> {
@@ -262,7 +273,7 @@ public class DuctBlock extends ChangedBlock implements SimpleWaterloggedBlock
         };
     }
 
-    protected void createBlockStateDefinition(final StateDefinition.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(NORTH, EAST, SOUTH, WEST, UP, DOWN, FULL, VENTED, WATERLOGGED);
     }
@@ -274,11 +285,22 @@ public class DuctBlock extends ChangedBlock implements SimpleWaterloggedBlock
 
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos blockPos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        var direction = hitResult.getDirection(); // TODO isn't the face of the block the player clicked, need to find a better version
-        if (!state.getValue(BY_DIRECTION.get(direction)))
+        var direction = hitResult.getDirection();
+
+        var clickedToCenterDelta = Vec3.atCenterOf(blockPos).subtract(hitResult.getLocation());
+        var expectedNormal = Direction.getNearest(clickedToCenterDelta.x, clickedToCenterDelta.y, clickedToCenterDelta.z);
+        if (direction != expectedNormal)
             return super.use(state, level, blockPos, player, hand, hitResult);
-        if (!level.getBlockState(blockPos.relative(direction)).is(ChangedTags.Blocks.DUCT_EXIT))
+        // Clicked surface is an interior surface
+        if (Arrays.stream(FACES).noneMatch(state::getValue))
             return super.use(state, level, blockPos, player, hand, hitResult);
+        // At least one face is open
+        if (BY_DIRECTION.entrySet().stream().filter(entry -> state.getValue(entry.getValue()))
+                .noneMatch(entry -> {
+                    return level.getBlockState(blockPos.relative(entry.getKey())).is(ChangedTags.Blocks.DUCT_EXIT);
+                }))
+            return super.use(state, level, blockPos, player, hand, hitResult);
+        // At least one open face is connected to an exit
 
         if (player instanceof PlayerDataExtension playerDataExtension && ProcessTransfur.isPlayerLatex(player)
                 && playerDataExtension.getPlayerMover() == null) {
@@ -376,7 +398,7 @@ public class DuctBlock extends ChangedBlock implements SimpleWaterloggedBlock
                 player.zo = currentPos.getZ() + 0.5;
                 playDuctSound(nextPos);
 
-                coolDown = 5;
+                coolDown = input.getSprintKeyDown() ? 4 : 5;
             }
 
             @Override
