@@ -114,7 +114,10 @@ public class ChangedConfig {
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> whitelistCoverBlocks;
         public final ForgeConfigSpec.ConfigValue<Boolean> playerControllingAbilities;
         public final ForgeConfigSpec.ConfigValue<Boolean> isGrabEnabled;
-        public final ForgeConfigSpec.ConfigValue<Double> bpiSizeTolerance;
+        public final ForgeConfigSpec.ConfigValue<Double> bpiSizeMinimum;
+        public final ForgeConfigSpec.ConfigValue<Double> bpiSizeMaximum;
+        public final ForgeConfigSpec.ConfigValue<Double> bpiSizeMinimumNPC;
+        public final ForgeConfigSpec.ConfigValue<Double> bpiSizeMaximumNPC;
 
         public Server(ForgeConfigSpec.Builder builder) {
             builder.comment("Should transfurred players have a nametag");
@@ -127,8 +130,14 @@ public class ChangedConfig {
             playerControllingAbilities = builder.define("playerControllingAbilities", true);
             builder.comment("Can latexes use the grab ability on players.");
             isGrabEnabled = builder.define("isGrabEnabled", true);
-            builder.comment("Acceptable model scaling through BPI (Default: +/- 5%)");
-            bpiSizeTolerance = builder.defineInRange("bpiSizeTolerance", 0.05, 0.01, 0.95);
+            builder.comment("Acceptable model scaling through BPI, minimum value (Default: -5%)");
+            bpiSizeMinimum = builder.defineInRange("bpiSizeMinimum", 0.95, 0.05, 1024.0);
+            builder.comment("Acceptable model scaling through BPI, maximum value (Default: +5%)");
+            bpiSizeMaximum = builder.defineInRange("bpiSizeMaximum", 1.05, 0.05, 1024.0);
+            builder.comment("Acceptable model scaling through BPI when an NPC is spawned, minimum value (Default: -5%)");
+            bpiSizeMinimumNPC = builder.defineInRange("bpiSizeMinimumNPC", 0.95, 0.05, 1024.0);
+            builder.comment("Acceptable model scaling through BPI when an NPC is spawned, maximum value (Default: +5%)");
+            bpiSizeMaximumNPC = builder.defineInRange("bpiSizeMaximumNPC", 1.05, 0.05, 1024.0);
         }
 
         public Stream<RegistryElementPredicate<Block>> getBlacklistedCoverBlocks() {

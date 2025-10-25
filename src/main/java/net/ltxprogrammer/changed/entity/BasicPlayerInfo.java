@@ -2,10 +2,13 @@ package net.ltxprogrammer.changed.entity;
 
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.util.Color3;
+import net.ltxprogrammer.changed.util.EntityUtil;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
 import java.util.Random;
@@ -14,8 +17,28 @@ import java.util.Random;
  * This is basic info about the player, that they set.
  */
 public class BasicPlayerInfo {
-    public static float getSizeTolerance() {
-        return (float) Changed.config.server.bpiSizeTolerance.get().doubleValue();
+    public static float getSizeMinimum(LivingEntity entity) {
+        if (EntityUtil.maybeGetUnderlying(entity) instanceof Player)
+            return (float) Math.min(
+                    Changed.config.server.bpiSizeMinimum.get().doubleValue(),
+                    Changed.config.server.bpiSizeMaximum.get().doubleValue()
+            );
+        return (float) Math.min(
+                Changed.config.server.bpiSizeMinimumNPC.get().doubleValue(),
+                Changed.config.server.bpiSizeMaximumNPC.get().doubleValue()
+        );
+    }
+
+    public static float getSizeMaximum(LivingEntity entity) {
+        if (EntityUtil.maybeGetUnderlying(entity) instanceof Player)
+            return (float) Math.max(
+                    Changed.config.server.bpiSizeMinimum.get().doubleValue(),
+                    Changed.config.server.bpiSizeMaximum.get().doubleValue()
+            );
+        return (float) Math.max(
+                Changed.config.server.bpiSizeMinimumNPC.get().doubleValue(),
+                Changed.config.server.bpiSizeMaximumNPC.get().doubleValue()
+        );
     }
 
     // Default values here are based on Colin's properties
@@ -65,14 +88,16 @@ public class BasicPlayerInfo {
         this.load(tag);
     }
 
-    public static BasicPlayerInfo random(RandomSource random) {
+    public static BasicPlayerInfo random(RandomSource random, LivingEntity entity) {
         BasicPlayerInfo info = new BasicPlayerInfo();
         info.hairColor = Util.getRandom(HAIR_COLORS, random);
         info.irisLeftColor = Util.getRandom(IRIS_COLORS, random);
         info.irisRightColor = random.nextFloat() > 0.05f ? info.irisLeftColor : Util.getRandom(IRIS_COLORS, random); // 5% for dichrome eyes
         info.eyeStyle = Util.getRandom(EyeStyle.values(), random);
         info.overrideOthersToMatchStyle = false;
-        info.size = (random.nextFloat() * (random.nextBoolean() ? getSizeTolerance() : -getSizeTolerance())) + 1.0f;
+        float min = getSizeMinimum(entity);
+        float max = getSizeMaximum(entity);
+        info.size = random.nextFloat() * (max - min) + min;
         return info;
     }
 
@@ -136,12 +161,14 @@ public class BasicPlayerInfo {
         return eyeStyle;
     }
 
-    public float getSize() {
-        return Mth.clamp(size, 1.0f - getSizeTolerance(), 1.0f + getSizeTolerance());
+    public float getSize(LivingEntity entity) {
+        return Mth.clamp(size, getSizeMinimum(entity), getSizeMaximum(entity));
     }
 
-    public double getSizeValueForConfiguration() {
-        return (size - 1.0f + getSizeTolerance()) / (getSizeTolerance() * 2);
+    public double getSizeValueForConfiguration(LivingEntity entity) {
+        float min = getSizeMinimum(entity);
+        float max = getSizeMaximum(entity);
+        return (size - min) / (max - min);
     }
 
     public void copyFrom(BasicPlayerInfo other) {

@@ -84,13 +84,15 @@ public class BasicPlayerInfoScreen extends Screen {
             button.setMessage(Component.translatable("changed.config.bpi.eye_style", style.getName()));
         }).bounds(this.width / 2 - 155 + i % 2 * 160, this.height / 6 + 24 * (i >> 1), 150, 20).build());
         i += 2;
-        this.addRenderableWidget(new AbstractSliderButton(this.width / 2 - 155 + i % 2 * 160, this.height / 6 + 24 * (i >> 1), 150, 20, Component.translatable("changed.config.bpi.size"), bpi.getSizeValueForConfiguration()) {
+        this.addRenderableWidget(new AbstractSliderButton(this.width / 2 - 155 + i % 2 * 160, this.height / 6 + 24 * (i >> 1), 150, 20, Component.translatable("changed.config.bpi.size"), bpi.getSizeValueForConfiguration(player)) {
             {
                 this.updateMessage();
             }
 
             private double convertToScaledValue() {
-                return (this.value * BasicPlayerInfo.getSizeTolerance() * 2) - BasicPlayerInfo.getSizeTolerance() + 1.0;
+                float min = BasicPlayerInfo.getSizeMinimum(player);
+                float max = BasicPlayerInfo.getSizeMaximum(player);
+                return this.value * (max - min) + min;
             }
 
             @Override

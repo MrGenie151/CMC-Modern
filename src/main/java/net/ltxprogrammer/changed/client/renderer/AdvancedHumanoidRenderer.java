@@ -92,14 +92,14 @@ public abstract class AdvancedHumanoidRenderer<T extends ChangedEntity, M extend
         return true;
     }
 
-    protected void scaleForBPI(BasicPlayerInfo bpi, PoseStack poseStack) {
-        float forcedLimit = Mth.clamp(bpi.getSize(), 1.0f - BasicPlayerInfo.getSizeTolerance(), 1.05f + BasicPlayerInfo.getSizeTolerance());
+    protected void scaleForBPI(@NotNull T entity, BasicPlayerInfo bpi, PoseStack poseStack) {
+        float forcedLimit = Mth.clamp(bpi.getSize(entity), BasicPlayerInfo.getSizeMinimum(entity), 0.5f + BasicPlayerInfo.getSizeMaximum(entity));
         poseStack.scale(forcedLimit, forcedLimit, forcedLimit);
     }
 
     protected void setupRotations(@NotNull T entity, PoseStack poseStack, float bob, float bodyYRot, float partialTicks) {
         this.setModelResetPoseStack(entity, null);
-        this.scaleForBPI(entity.getBasicPlayerInfo(), poseStack);
+        this.scaleForBPI(entity, entity.getBasicPlayerInfo(), poseStack);
 
         float swimAmount = entity.getSwimAmount(partialTicks);
         boolean upright = isEntityUprightType(entity);

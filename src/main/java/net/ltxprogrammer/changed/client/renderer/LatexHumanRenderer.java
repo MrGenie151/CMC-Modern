@@ -15,6 +15,7 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 
 public class LatexHumanRenderer extends AdvancedHumanoidRenderer<LatexHuman, LatexHumanModel, ArmorHumanModel<LatexHuman>> {
 	public LatexHumanRenderer(EntityRendererProvider.Context context, boolean slim) {
@@ -51,7 +52,7 @@ public class LatexHumanRenderer extends AdvancedHumanoidRenderer<LatexHuman, Lat
 	}
 
 	@Override
-	protected void scaleForBPI(BasicPlayerInfo bpi, PoseStack poseStack) {
+	protected void scaleForBPI(@NotNull LatexHuman entity, BasicPlayerInfo bpi, PoseStack poseStack) {
 
 	}
 }

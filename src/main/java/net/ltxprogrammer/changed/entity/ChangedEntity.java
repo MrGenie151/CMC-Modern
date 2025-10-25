@@ -198,7 +198,7 @@ public abstract class ChangedEntity extends Monster {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(DATA_TARGET_ID, OptionalInt.empty());
-        this.entityData.define(DATA_LOCAL_VARIANT_INFO, BasicPlayerInfo.random(this.random));
+        this.entityData.define(DATA_LOCAL_VARIANT_INFO, BasicPlayerInfo.random(this.random, this));
         this.entityData.define(DATA_CHANGED_ENTITY_FLAGS, (byte)0);
     }
 
@@ -388,7 +388,7 @@ public abstract class ChangedEntity extends Monster {
             case CROUCHING -> EntityDimensions.scalable(core.width, core.height - 0.3f);
             case DYING -> EntityDimensions.fixed(0.2f, 0.2f);
             default -> core;
-        }).scale(getBasicPlayerInfo().getSize() * this.getScale());
+        }).scale(getBasicPlayerInfo().getSize(this) * this.getScale());
     }
 
     public LatexType getLatexType() {
