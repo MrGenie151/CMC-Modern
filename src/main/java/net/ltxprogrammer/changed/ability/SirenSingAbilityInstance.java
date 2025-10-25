@@ -56,30 +56,15 @@ public class SirenSingAbilityInstance extends AbstractAbilityInstance {
         if (target instanceof Player && !Changed.config.server.playerControllingAbilities.get())
             return;
 
-        Random random = new Random(target.getId() + ((target.getId() + target.tickCount) / 20));
-        if (random.nextFloat() > 0.5f * scale) {
-            if (!target.hasEffect(ChangedEffects.CONFUSION.get()))
-                target.addEffect(new MobEffectInstance(ChangedEffects.CONFUSION.get(), 20));
+        int seed = target.getId() * 131313 + ((target.getId() + target.tickCount) / 30);
+        Random random = new Random(seed);
+        random.nextInt();
+        random.nextInt();
+        float value = random.nextFloat();
+        if (value < 0.5f * scale) {
+             if (!target.hasEffect(ChangedEffects.CONFUSION.get()))
+                target.addEffect(new MobEffectInstance(ChangedEffects.CONFUSION.get(), 30));
         }
-    }
-
-    public void applyTugEffect(@Nullable LivingEntity target, float scale) {
-        if (scale <= 0f)
-            return;
-        if (target == null)
-            return;
-        if (target instanceof Player && !Changed.config.server.playerControllingAbilities.get())
-            return;
-
-        Random random = new Random(target.getId() + ((target.getId() + target.tickCount) / 80));
-        Vec3 xzDir = (new Vec3(random.nextDouble(-1, 1), 0, random.nextDouble(-1, 1))).normalize();
-
-        CameraUtil.tugEntityLookDirection(target, xzDir, 0.125 * scale);
-
-        if (!target.onGround())
-            return;
-        final double moveScale = (target.getSpeed() * 0.8 * (target instanceof Player ? 10.0 : 1.0)) * scale;
-        target.travel(xzDir.multiply(moveScale, 0, moveScale));
     }
 
     protected float computeEffectScale(@NotNull LivingEntity target) {
@@ -97,7 +82,7 @@ public class SirenSingAbilityInstance extends AbstractAbilityInstance {
         if (worldOcclusion)
             effectScale *= 0.25f;
 
-        effectScale *= Mth.map(this.entity.getEntity().distanceTo(target), 0, 8, 1.0f, 0.6f);
+        effectScale *= Mth.map(this.entity.getEntity().distanceTo(target), 0, 24, 1.0f, 0.6f);
 
         return effectScale;
     }
@@ -117,7 +102,7 @@ public class SirenSingAbilityInstance extends AbstractAbilityInstance {
         self.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 10, 1, false, false, false));
 
         level.getNearbyEntities(LivingEntity.class, TargetingConditions.DEFAULT, self,
-                new AABB(self.blockPosition()).inflate(8)).forEach(livingEntity -> {
+                new AABB(self.blockPosition()).inflate(16)).forEach(livingEntity -> {
             if (!this.shouldAffectEntity(livingEntity))
                 return;
 
@@ -125,25 +110,8 @@ public class SirenSingAbilityInstance extends AbstractAbilityInstance {
             if (scale <= 0)
                 return;
 
-            if (livingEntity.isInWater()) {
-                this.applyConfusionEffect(livingEntity, scale);
-            } else {
-                if (self instanceof ChangedEntity && livingEntity instanceof Player player) {
-                    var tag = new CompoundTag();
-                    tag.putUUID("id", player.getUUID());
-                    tag.putFloat("effectScale", scale);
-                    this.sendPayload(tag, player);
-                } else {
-                    applyTugEffect(livingEntity, scale);
-                }
-            }
+            this.applyConfusionEffect(livingEntity, scale);
         });
-    }
-
-    @Override
-    public void acceptPayload(CompoundTag tag) {
-        super.acceptPayload(tag);
-        applyTugEffect(this.entity.getLevel().getPlayerByUUID(tag.getUUID("id")), tag.getFloat("effectScale"));
     }
 
     @Override
