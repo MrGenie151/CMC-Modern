@@ -1,6 +1,7 @@
 package net.ltxprogrammer.changed.util;
 
 import net.ltxprogrammer.changed.entity.ChangedEntity;
+import net.ltxprogrammer.changed.entity.LivingEntityDataExtension;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.minecraft.core.BlockPos;
@@ -72,5 +73,27 @@ public class EntityUtil {
 
     public static BlockPos getBlock(double x, double y, double z) {
         return new BlockPos(Mth.floor(x), Mth.floor(y), Mth.floor(z));
+    }
+
+    public static void setNoControlTicks(LivingEntity entity, int ticks) {
+        if (entity instanceof LivingEntityDataExtension ext)
+            ext.setNoControlTicks(ticks);
+    }
+
+    public static int getNoControlTicks(LivingEntity entity) {
+        if (entity instanceof LivingEntityDataExtension ext)
+            return ext.getNoControlTicks();
+        return 0;
+    }
+
+    public static void setInvertControlTicks(LivingEntity entity, int ticks) {
+        if (entity instanceof LivingEntityDataExtension ext)
+            ext.setInvertControlTicks(ticks);
+    }
+
+    public static int getInvertControlTicks(LivingEntity entity) {
+        if (entity instanceof LivingEntityDataExtension ext)
+            return ext.getInvertControlTicks();
+        return 0;
     }
 }

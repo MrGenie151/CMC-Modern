@@ -1,21 +1,18 @@
 package net.ltxprogrammer.changed.effect;
 
-import net.ltxprogrammer.changed.entity.LivingEntityDataExtension;
 import net.ltxprogrammer.changed.util.EntityUtil;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.Vec3;
 
-public class Shock extends MobEffect {
-    public Shock() {
-        super(MobEffectCategory.HARMFUL, 0x88dfff);
+public class Confusion extends MobEffect {
+    public Confusion() {
+        super(MobEffectCategory.HARMFUL, 0xb688ff);
     }
 
     @Override
     public String getDescriptionId() {
-        return "effect.changed.shock";
+        return "effect.changed.confusion";
     }
 
     @Override
@@ -26,6 +23,6 @@ public class Shock extends MobEffect {
     @Override
     public void applyEffectTick(LivingEntity livingEntity, int amplifier) {
         super.applyEffectTick(livingEntity, amplifier);
-        EntityUtil.setNoControlTicks(livingEntity, 2);
+        EntityUtil.setInvertControlTicks(livingEntity, 2);
     }
 }

@@ -6,6 +6,8 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.GameProfile;
 import net.ltxprogrammer.changed.Changed;
+import net.ltxprogrammer.changed.ability.GrabEntityAbility;
+import net.ltxprogrammer.changed.client.InvertedInput;
 import net.ltxprogrammer.changed.client.LocalPlayerAccessor;
 import net.ltxprogrammer.changed.client.NullInput;
 import net.ltxprogrammer.changed.entity.LivingEntityDataExtension;
@@ -20,9 +22,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.Input;
-import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.stats.StatsCounter;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
@@ -160,7 +160,7 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements P
     }
 
     @Unique
-    private Input inputCopy = null;
+    private Input rootInput = null;
 
     @Inject(method = "tick", at = @At("HEAD"))
     public void tick(CallbackInfo callback) {
@@ -169,14 +169,32 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements P
             setPlayerMover(null);
 
         boolean isNullInput = input instanceof NullInput;
-        if (this.getNoControlTicks() > 0) {
-            if (!isNullInput) {
-                inputCopy = input;
+        boolean isInvertedInput = input instanceof InvertedInput;
+        if (!isNullInput && !isInvertedInput)
+            rootInput = input; // Save root input type
+
+        boolean shouldNullInput = this.getNoControlTicks() > 0 || GrabEntityAbility.isEntityNoControl(this);
+        boolean shouldInvertInput = this.getInvertControlTicks() > 0;
+
+        if (shouldNullInput) {
+            if (!isNullInput)
                 input = new NullInput();
-            }
+
+            return;
         } else if (isNullInput) {
-            input = inputCopy;
-            inputCopy = null;
+            input = rootInput;
+        }
+
+        isInvertedInput = input instanceof InvertedInput;
+
+        if (shouldInvertInput) {
+            if (!isInvertedInput) {
+                input = new InvertedInput(input);
+            }
+
+            return;
+        } else if (isInvertedInput) {
+            input = rootInput;
         }
     }
 

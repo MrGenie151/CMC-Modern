@@ -11,6 +11,9 @@ public interface LivingEntityDataExtension {
     int getNoControlTicks();
     void setNoControlTicks(int ticks);
 
+    int getInvertControlTicks();
+    void setInvertControlTicks(int ticks);
+
     @Nullable
     LivingEntity getGrabbedBy();
     void setGrabbedBy(@Nullable LivingEntity holder);

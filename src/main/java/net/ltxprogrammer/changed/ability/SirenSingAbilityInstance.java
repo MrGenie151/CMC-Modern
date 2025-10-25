@@ -1,9 +1,9 @@
 package net.ltxprogrammer.changed.ability;
 
 import net.ltxprogrammer.changed.Changed;
-import net.ltxprogrammer.changed.effect.Shock;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
+import net.ltxprogrammer.changed.init.ChangedEffects;
 import net.ltxprogrammer.changed.init.ChangedSounds;
 import net.ltxprogrammer.changed.init.ChangedTags;
 import net.ltxprogrammer.changed.util.CameraUtil;
@@ -48,7 +48,7 @@ public class SirenSingAbilityInstance extends AbstractAbilityInstance {
         lastSingTick = entity.getEntity().tickCount + (8 * 20) + 10;
     }
 
-    public void applyEffect(@Nullable LivingEntity target, float scale) {
+    public void applyConfusionEffect(@Nullable LivingEntity target, float scale) {
         if (scale <= 0f)
             return;
         if (target == null)
@@ -56,8 +56,22 @@ public class SirenSingAbilityInstance extends AbstractAbilityInstance {
         if (target instanceof Player && !Changed.config.server.playerControllingAbilities.get())
             return;
 
-        //Shock.setNoControlTicks(target, 5);
-        Random random = new Random(target.getId() + ((target.getId() + target.tickCount) / 40));
+        Random random = new Random(target.getId() + ((target.getId() + target.tickCount) / 20));
+        if (random.nextFloat() > 0.5f * scale) {
+            if (!target.hasEffect(ChangedEffects.CONFUSION.get()))
+                target.addEffect(new MobEffectInstance(ChangedEffects.CONFUSION.get(), 20));
+        }
+    }
+
+    public void applyTugEffect(@Nullable LivingEntity target, float scale) {
+        if (scale <= 0f)
+            return;
+        if (target == null)
+            return;
+        if (target instanceof Player && !Changed.config.server.playerControllingAbilities.get())
+            return;
+
+        Random random = new Random(target.getId() + ((target.getId() + target.tickCount) / 80));
         Vec3 xzDir = (new Vec3(random.nextDouble(-1, 1), 0, random.nextDouble(-1, 1))).normalize();
 
         CameraUtil.tugEntityLookDirection(target, xzDir, 0.125 * scale);
@@ -107,16 +121,21 @@ public class SirenSingAbilityInstance extends AbstractAbilityInstance {
             if (!this.shouldAffectEntity(livingEntity))
                 return;
 
-            if (self instanceof ChangedEntity && livingEntity instanceof Player player) {
-                float scale = this.computeEffectScale(player);
-                if (scale > 0) {
+            float scale = this.computeEffectScale(livingEntity);
+            if (scale <= 0)
+                return;
+
+            if (livingEntity.isInWater()) {
+                this.applyConfusionEffect(livingEntity, scale);
+            } else {
+                if (self instanceof ChangedEntity && livingEntity instanceof Player player) {
                     var tag = new CompoundTag();
                     tag.putUUID("id", player.getUUID());
                     tag.putFloat("effectScale", scale);
                     this.sendPayload(tag, player);
+                } else {
+                    applyTugEffect(livingEntity, scale);
                 }
-            } else {
-                applyEffect(livingEntity, this.computeEffectScale(livingEntity));
             }
         });
     }
@@ -124,7 +143,7 @@ public class SirenSingAbilityInstance extends AbstractAbilityInstance {
     @Override
     public void acceptPayload(CompoundTag tag) {
         super.acceptPayload(tag);
-        applyEffect(this.entity.getLevel().getPlayerByUUID(tag.getUUID("id")), tag.getFloat("effectScale"));
+        applyTugEffect(this.entity.getLevel().getPlayerByUUID(tag.getUUID("id")), tag.getFloat("effectScale"));
     }
 
     @Override

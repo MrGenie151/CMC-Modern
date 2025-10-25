@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.init;
 
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.effect.Caffeinated;
+import net.ltxprogrammer.changed.effect.Confusion;
 import net.ltxprogrammer.changed.effect.Hypercoagulation;
 import net.ltxprogrammer.changed.effect.Shock;
 import net.minecraft.world.effect.MobEffect;
@@ -14,5 +15,6 @@ public class ChangedEffects {
 
     public static final RegistryObject<Hypercoagulation> HYPERCOAGULATION = REGISTRY.register("hypercoagulation", Hypercoagulation::new);
     public static final RegistryObject<Shock> SHOCK = REGISTRY.register("shock", Shock::new);
+    public static final RegistryObject<Confusion> CONFUSION = REGISTRY.register("confusion", Confusion::new);
     public static final RegistryObject<Caffeinated> CAFFEINATED = REGISTRY.register("caffeinated", Caffeinated::new);
 }

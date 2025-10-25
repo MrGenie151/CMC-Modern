@@ -77,6 +77,8 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDa
 
     @Unique
     public int controlDisabledFor = 0;
+    @Unique
+    public int controlInvertedFor = 0;
     @Unique @Nullable
     public LivingEntity grabbedBy = null;
     @Unique
@@ -94,6 +96,16 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDa
     @Override
     public void setNoControlTicks(int ticks) {
         this.controlDisabledFor = ticks;
+    }
+
+    @Override
+    public int getInvertControlTicks() {
+        return controlInvertedFor;
+    }
+
+    @Override
+    public void setInvertControlTicks(int ticks) {
+        this.controlInvertedFor = ticks;
     }
 
     @Nullable
@@ -311,10 +323,16 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDa
                 move.setWantedPosition(move.getWantedX(), move.getWantedY(), move.getWantedZ(), move.getSpeedModifier());
             }
 
-            /*if ((Entity)this instanceof Player player)
-                DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> LocalUtil.mulInputImpulse(player, 0.05F));*/
-
             --controlDisabledFor;
+        }
+
+        if (controlInvertedFor > 0) {
+            if ((Entity)this instanceof Mob mob) {
+                MoveControl move = mob.getMoveControl();
+                move.setWantedPosition(move.getWantedX(), move.getWantedY(), move.getWantedZ(), move.getSpeedModifier());
+            }
+
+            --controlInvertedFor;
         }
 
         if (grabbedBy != null) {

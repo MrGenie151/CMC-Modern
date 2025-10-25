@@ -287,9 +287,10 @@
   "text.changed.warning.content1": "This modded version of Minecraft contains content from Changed,",
   "text.changed.warning.content2": "and is not suitable for all audiences.",
 
+  "effect.changed.caffeinated": "Caffeinated",
+  "effect.changed.confusion": "Confusion",
   "effect.changed.hypercoagulation": "Hypercoagulation",
   "effect.changed.shock": "Shock",
-  "effect.changed.caffeinated": "Caffeinated",
 
   "enchantment.changed.latex_protection": "Latex Protection",
   "enchantment.changed.latex_protection.desc": "Protects the wearer from being transfurred.",
