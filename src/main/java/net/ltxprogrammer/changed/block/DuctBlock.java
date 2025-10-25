@@ -55,6 +55,7 @@ public class DuctBlock extends ChangedBlock implements SimpleWaterloggedBlock
     public static final BooleanProperty WEST = BlockStateProperties.WEST;
     public static final BooleanProperty UP = BlockStateProperties.UP;
     public static final BooleanProperty DOWN = BlockStateProperties.DOWN;
+    public static final BooleanProperty FULL = BooleanProperty.create("full");
     public static final BooleanProperty VENTED = BooleanProperty.create("vented");
     public static final BooleanProperty[] FACES = { NORTH, EAST, SOUTH, WEST, UP, DOWN };
     public static final Map<Direction, BooleanProperty> BY_DIRECTION = Map.of(
@@ -110,12 +111,16 @@ public class DuctBlock extends ChangedBlock implements SimpleWaterloggedBlock
                 .setValue(WEST, false)
                 .setValue(UP, false)
                 .setValue(DOWN, false)
+                .setValue(FULL, false)
                 .setValue(VENTED, false));
         this.getStateDefinition().getPossibleStates().forEach(state -> this.COMPUTED_SHAPES.computeIfAbsent(state, this::computeShape));
     }
 
     protected static Optional<Direction.Axis> nonJointedAxis(final BlockState blockState) {
         Optional<Direction.Axis> candidate = Optional.empty();
+        if (blockState.getValue(FULL))
+            return Optional.empty();
+
         for (final Direction.Axis axis : Direction.Axis.values()) {
             if (blockState.getValue(BY_DIRECTION.get(Direction.fromAxisAndDirection(axis, Direction.AxisDirection.POSITIVE))) &&
                     blockState.getValue(BY_DIRECTION.get(Direction.fromAxisAndDirection(axis, Direction.AxisDirection.NEGATIVE))))
@@ -132,11 +137,15 @@ public class DuctBlock extends ChangedBlock implements SimpleWaterloggedBlock
 
     protected BlockState getWantedState(final BlockState current, final BlockPos blockPos, final BlockGetter level) {
         final AtomicReference<BlockState> wanted = new AtomicReference<>(current);
+        boolean shouldBeFull = false;
         for (final Direction direction : Direction.values()) {
-            if (level.getBlockState(blockPos.relative(direction)).is(ChangedTags.Blocks.DUCT_CONNECTOR)) {
+            BlockState otherBlockState = level.getBlockState(blockPos.relative(direction));
+            if (otherBlockState.is(ChangedTags.Blocks.DUCT_CONNECTOR)) {
                 wanted.set(wanted.get().setValue(BY_DIRECTION.get(direction), true));
+                shouldBeFull = shouldBeFull || (otherBlockState.getBlock() != this);
             }
         }
+        wanted.set(wanted.get().setValue(FULL, shouldBeFull));
         nonJointedAxis(wanted.get()).ifPresent(axis -> {
             try {
                 BlockState positive = level.getBlockState(blockPos.relative(Direction.fromAxisAndDirection(axis, Direction.AxisDirection.POSITIVE)));
@@ -199,7 +208,12 @@ public class DuctBlock extends ChangedBlock implements SimpleWaterloggedBlock
     }
 
     public BlockState updateShape(final BlockState blockState, final Direction direction, final BlockState blockStateOther, final LevelAccessor level, final BlockPos blockPos, final BlockPos blockPosOther) {
-        BlockState wanted = blockState.setValue(BY_DIRECTION.get(direction), blockStateOther.is(ChangedTags.Blocks.DUCT_CONNECTOR));
+        final BlockState tmp = blockState.setValue(BY_DIRECTION.get(direction), blockStateOther.is(ChangedTags.Blocks.DUCT_CONNECTOR));
+        BlockState wanted = tmp.setValue(FULL, BY_DIRECTION.entrySet().stream().filter(entry -> tmp.getValue(entry.getValue()))
+                .anyMatch(entry -> {
+                    return level.getBlockState(blockPos.relative(entry.getKey())).getBlock() != this;
+                }));
+
         final Optional<Direction.Axis> opt = nonJointedAxis(wanted);
         if (opt.isPresent()) {
             final BlockState positive = level.getBlockState(blockPos.relative(Direction.fromAxisAndDirection(opt.get(), Direction.AxisDirection.POSITIVE)));
@@ -250,7 +264,7 @@ public class DuctBlock extends ChangedBlock implements SimpleWaterloggedBlock
 
     protected void createBlockStateDefinition(final StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(NORTH, EAST, SOUTH, WEST, UP, DOWN, VENTED, WATERLOGGED);
+        builder.add(NORTH, EAST, SOUTH, WEST, UP, DOWN, FULL, VENTED, WATERLOGGED);
     }
 
     @Override
