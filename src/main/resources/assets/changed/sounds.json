@@ -347,6 +347,7 @@
     "category": "player",
     "subtitle": "subtitles.changed.item.bra.equip",
     "sounds": [
+      "changed:equip2",
       "changed:equip3"
     ]
   },
@@ -361,6 +362,7 @@
     "category": "player",
     "subtitle": "subtitles.changed.item.coat.equip",
     "sounds": [
+      "changed:equip2",
       "changed:equip3"
     ]
   },
@@ -382,6 +384,7 @@
     "category": "player",
     "subtitle": "subtitles.changed.item.gloves.equip",
     "sounds": [
+      "changed:equip2",
       "changed:equip3"
     ]
   },
@@ -403,6 +406,7 @@
     "category": "player",
     "subtitle": "subtitles.changed.item.shirt.equip",
     "sounds": [
+      "changed:equip2",
       "changed:equip3"
     ]
   },
@@ -417,6 +421,7 @@
     "category": "player",
     "subtitle": "subtitles.changed.item.shorts.equip",
     "sounds": [
+      "changed:equip2",
       "changed:equip3"
     ]
   },
@@ -438,6 +443,7 @@
     "category": "player",
     "subtitle": "subtitles.changed.item.wetsuit.equip",
     "sounds": [
+      "changed:equip2",
       "changed:equip3"
     ]
   },
