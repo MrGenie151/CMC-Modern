@@ -287,9 +287,10 @@
   "text.changed.warning.content1": "A Minecraft ezen módosított verziója Changed-ből származó tartalmat tartalmaz,",
   "text.changed.warning.content2": "és nem minden korosztály számára ajánlott.",
 
+  "effect.changed.caffeinated": "Koffeinezett",
+  "effect.changed.confusion": "Összezavarodás",
   "effect.changed.hypercoagulation": "Hiperkoaguláció",
   "effect.changed.shock": "Sokk",
-  "effect.changed.caffeinated": "Koffeinezett",
 
   "enchantment.changed.latex_protection": "Latexvédelem",
   "enchantment.changed.latex_protection.desc": "Védi a viselőjét a transzfurálástól.",
