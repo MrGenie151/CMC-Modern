@@ -65,15 +65,15 @@ public class KeypadBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     private void playUnlockSuccess() {
-        playSound(ChangedSounds.CHIME2, 1, 1);
+        playSound(ChangedSounds.KEYPAD_UNLOCK_SUCCESS, 1, 1);
     }
 
     private void playUnlockFail() {
-        playSound(ChangedSounds.BUZZER1, 1, 1);
+        playSound(ChangedSounds.KEYPAD_UNLOCK_FAIL, 1, 1);
     }
 
     private void playLock() {
-        playSound(ChangedSounds.KEY, 1, 1);
+        playSound(ChangedSounds.KEYPAD_LOCK, 1, 1);
     }
 
     private void setCode(List<Byte> newCode) {

@@ -30,6 +30,7 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -657,15 +658,15 @@ public abstract class ChangedEntity extends Monster {
                 if (underlyingPlayer != null) {
                     if (entity instanceof Player pvpLoser) {
                         ProcessTransfur.changeTransfur(underlyingPlayer, fusionVariant);
-                        ChangedSounds.broadcastSound(underlyingPlayer, ChangedSounds.POISON, 1f, 1f);
+                        ChangedSounds.broadcastSound(underlyingPlayer, ChangedSounds.LATEX_FUSE_ENTITY, 1f, 1f);
                         ProcessTransfur.killPlayerByAbsorption(pvpLoser, underlyingPlayer);
                     } else {
                         ProcessTransfur.changeTransfur(underlyingPlayer, fusionVariant);
-                        ChangedSounds.broadcastSound(underlyingPlayer, ChangedSounds.POISON, 1f, 1f);
+                        ChangedSounds.broadcastSound(underlyingPlayer, ChangedSounds.LATEX_FUSE_ENTITY, 1f, 1f);
                         entity.discard();
                     }
                 } else {
-                    ChangedSounds.broadcastSound(ProcessTransfur.changeTransfur(entity, fusionVariant), ChangedSounds.POISON, 1f, 1f);
+                    ChangedSounds.broadcastSound(ProcessTransfur.changeTransfur(entity, fusionVariant), ChangedSounds.LATEX_FUSE_ENTITY, 1f, 1f);
                     this.discard();
                 }
 
@@ -746,7 +747,7 @@ public abstract class ChangedEntity extends Monster {
         entity.knockback((double)0.4F, d1, d0);
 
         if(entity instanceof Player)
-            ChangedSounds.broadcastSound(entity, ChangedSounds.BLOW1, 1, entity.level().random.nextFloat() * 0.1F + 0.9F);
+            ChangedSounds.broadcastSound(entity, ChangedSounds.TRANSFUR_HURT, 1, entity.level().random.nextFloat() * 0.1F + 0.9F);
 
         entity.hurt(ChangedDamageSources.entityTransfur(entity.level().registryAccess(), source), 0.0F);
         boolean doesAbsorption = source.wantAbsorption();

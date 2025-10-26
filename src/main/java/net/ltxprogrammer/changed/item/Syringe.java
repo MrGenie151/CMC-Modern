@@ -149,7 +149,7 @@ public class Syringe extends Item implements SpecializedAnimations {
         if (player instanceof ServerPlayer) {
             CriteriaTriggers.CONSUME_ITEM.trigger((ServerPlayer)player, stack);
         }
-        ChangedSounds.broadcastSound(entity, ChangedSounds.SWORD1, 1, 1);
+        ChangedSounds.broadcastSound(entity, ChangedSounds.SYRINGE_PRICK, 1, 1);
         if (player != null)
             return usedOnPlayer(stack, level, player, player, false);
 

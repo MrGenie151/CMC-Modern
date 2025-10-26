@@ -71,7 +71,7 @@ public class Roomba extends AbstractRobot {
 
     @Override
     public SoundEvent getRunningSound() {
-        return ChangedSounds.VACUUM.get();
+        return ChangedSounds.ROOMBA_AMBIENT.get();
     }
 
     @Override

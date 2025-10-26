@@ -115,16 +115,6 @@ public class ClothingItem extends Item implements Clothing, ExtendedItemProperti
         return false;
     }
 
-    @Override
-    public SoundEvent getEquipSound(ItemStack itemStack) {
-        return ChangedSounds.EQUIP3.get();
-    }
-
-    @Override
-    public SoundEvent getBreakSound(ItemStack itemStack) {
-        return ChangedSounds.SLASH10.get();
-    }
-
     @Nullable
     @Override
     public String getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, String type) {

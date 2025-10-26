@@ -29,7 +29,7 @@ public class SummonSharksAbility extends SimpleAbility {
         if (level.isClientSide)
             return;
 
-        ChangedSounds.broadcastSound(entity.getEntity(), ChangedSounds.MONSTER2, 1.0f, 1.0f);
+        ChangedSounds.broadcastSound(entity.getEntity(), ChangedSounds.TIGER_SHARK_ROAR, 1.0f, 1.0f);
 
         var list = findWaterNearby(level, entity.getBlockPosition()).toList();
         int attempts = Math.min(list.size(), 2);

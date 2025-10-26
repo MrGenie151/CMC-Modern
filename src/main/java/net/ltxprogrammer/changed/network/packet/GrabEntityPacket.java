@@ -125,13 +125,13 @@ public class GrabEntityPacket implements ChangedPacket {
                         case RELEASE -> {
                             boolean wasSuited = ability.suited;
                             ability.releaseEntity();
-                            ChangedSounds.broadcastSound(sender, wasSuited ? ChangedSounds.POISON : ChangedSounds.BLOW1, 1.0f, 1.0f);
+                            ChangedSounds.broadcastSound(sender, wasSuited ? ChangedSounds.LATEX_UNSUIT_ENTITY : ChangedSounds.LATEX_UNGRAB_ENTITY, 1.0f, 1.0f);
                         }
                         case SUIT -> {
                             if (livingTarget instanceof Player && !Changed.config.server.isGrabEnabled.get())
                                 return;
 
-                            ChangedSounds.broadcastSound(sender, ChangedSounds.POISON, 1.0f, 1.0f);
+                            ChangedSounds.broadcastSound(sender, ChangedSounds.LATEX_SUIT_ENTITY, 1.0f, 1.0f);
                             ability.suitEntity(livingTarget);
                         }
                         case ARMS -> {
@@ -140,7 +140,7 @@ public class GrabEntityPacket implements ChangedPacket {
 
                             boolean wasSuited = ability.suited;
                             ability.grabEntity(livingTarget);
-                            ChangedSounds.broadcastSound(sender, wasSuited ? ChangedSounds.POISON : ChangedSounds.BLOW1, 1.0f, 1.0f);
+                            ChangedSounds.broadcastSound(sender, wasSuited ? ChangedSounds.LATEX_UNSUIT_ENTITY : ChangedSounds.LATEX_GRAB_ENTITY, 1.0f, 1.0f);
                         }
                     }
                 });

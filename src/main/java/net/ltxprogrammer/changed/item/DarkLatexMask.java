@@ -53,7 +53,7 @@ public class DarkLatexMask extends Item implements ExtendedItemProperties {
         if (TransfurVariant.getEntityVariant(wearer) == ChangedTransfurVariants.DARK_LATEX_WOLF_PARTIAL.get()) {
             if (wearer.getRandom().nextFloat() > 0.005f || wearer.level().isClientSide) return; // 0.5% chance every tick the entity will switch TF into the mask variant
 
-            ChangedSounds.broadcastSound(ProcessTransfur.changeTransfur(wearer, variant), ChangedSounds.POISON, 1.0f, 1.0f);
+            ChangedSounds.broadcastSound(ProcessTransfur.changeTransfur(wearer, variant), ChangedSounds.DARK_LATEX_MASK_COMPLETE_TRANSFUR, 1.0f, 1.0f);
             itemStack.shrink(1);
             return;
         }
