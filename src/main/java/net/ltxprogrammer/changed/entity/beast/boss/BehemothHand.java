@@ -107,7 +107,7 @@ public abstract class BehemothHand extends Behemoth {
 
         @Override
         public void start() {
-            ChangedSounds.broadcastSound(hand, ChangedSounds.POISON, 1.0f, 1.0f);
+            ChangedSounds.broadcastSound(hand, ChangedSounds.BEHEMOTH_HAND_ENTER_LATEX, 1.0f, 1.0f);
             hand.setInvisible(true);
             hand.setInvulnerable(true);
             hand.noPhysics = true;
@@ -130,7 +130,7 @@ public abstract class BehemothHand extends Behemoth {
 
         @Override
         public void stop() {
-            ChangedSounds.broadcastSound(hand, ChangedSounds.POISON, 1.0f, 1.0f);
+            ChangedSounds.broadcastSound(hand, ChangedSounds.BEHEMOTH_HAND_EXIT_LATEX, 1.0f, 1.0f);
             hand.setInvisible(false);
             hand.setInvulnerable(false);
             hand.noPhysics = false;

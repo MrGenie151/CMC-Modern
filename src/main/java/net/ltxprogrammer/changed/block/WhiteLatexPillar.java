@@ -140,7 +140,7 @@ public class WhiteLatexPillar extends AbstractCustomShapeTallBlock implements Wh
 
         boolean wantToAppear = WhiteLatexBlock.targetNearby(level, blockPos);
         if (blockState.getValue(EXTENDED) != wantToAppear) {
-            ChangedSounds.broadcastSound(level, ChangedSounds.POISON, blockPos, 1, 1);
+            ChangedSounds.broadcastSound(level, ChangedSounds.WHITE_LATEX_PILLAR_EXTEND, blockPos, 1, 1);
             level.setBlockAndUpdate(blockPos, blockState.setValue(EXTENDED, wantToAppear));
             level.setBlockAndUpdate(blockPos.above(), blockState.setValue(HALF, DoubleBlockHalf.UPPER).setValue(EXTENDED, wantToAppear));
         }

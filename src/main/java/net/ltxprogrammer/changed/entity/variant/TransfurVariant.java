@@ -351,7 +351,7 @@ public class TransfurVariant<T extends ChangedEntity> {
         TransfurMode transfurMode = TransfurMode.REPLICATION;
         List<Function<EntityType<?>, ? extends AbstractAbility<?>>> abilities = new ArrayList<>();
         float cameraZOffset = 0.0F;
-        ResourceLocation sound = ChangedSounds.POISON.getId();
+        ResourceLocation sound = ChangedSounds.TRANSFUR_BY_LATEX.getId();
 
         public Builder(Supplier<EntityType<T>> entityType) {
             this.entityType = entityType;

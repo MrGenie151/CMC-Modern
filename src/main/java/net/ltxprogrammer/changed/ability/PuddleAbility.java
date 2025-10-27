@@ -2,7 +2,6 @@ package net.ltxprogrammer.changed.ability;
 
 import net.ltxprogrammer.changed.entity.beast.DarkLatexWolfPup;
 import net.ltxprogrammer.changed.entity.latex.LatexType;
-import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.init.ChangedLatexTypes;
 import net.ltxprogrammer.changed.init.ChangedSounds;
 import net.minecraft.network.chat.Component;
@@ -17,7 +16,7 @@ public class PuddleAbility extends SimpleAbility {
     @Override
     public void startUsing(IAbstractChangedEntity entity) {
         if (entity.getChangedEntity() instanceof DarkLatexWolfPup pup) {
-            entity.getEntity().playSound(ChangedSounds.POISON.get(), 1, 1);
+            entity.getEntity().playSound(ChangedSounds.DARK_LATEX_PUP_FORM_PUDDLE.get(), 1, 1);
             pup.setPuddle(true);
         }
     }

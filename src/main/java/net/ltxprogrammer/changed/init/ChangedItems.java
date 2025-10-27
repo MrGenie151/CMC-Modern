@@ -61,8 +61,8 @@ public class ChangedItems {
     public static final DeferredRegister<Item> REGISTRY = DeferredRegister.create(ForgeRegistries.ITEMS, Changed.MODID);
     public static final RegistryObject<BenignShorts> BENIGN_SHORTS = register("benign_shorts", BenignShorts::new);
     public static final RegistryObject<PinkShorts> PINK_SHORTS = register("pink_shorts", PinkShorts::new);
-    public static final RegistryObject<ClothingItem> SPORTS_BRA = register("sports_bra", ClothingItem::new);
-    public static final RegistryObject<ClothingItem> BLACK_TSHIRT = register("black_tshirt", ClothingItem::new);
+    public static final RegistryObject<BraItem> SPORTS_BRA = register("sports_bra", BraItem::new);
+    public static final RegistryObject<ShirtItem> BLACK_TSHIRT = register("black_tshirt", ShirtItem::new);
     public static final RegistryObject<LabCoatItem> LAB_COAT = register("lab_coat", LabCoatItem::new);
     public static final RegistryObject<WetsuitItem> WETSUIT = register("wetsuit", WetsuitItem::new);
     public static final RegistryObject<NitrileGloves> NITRILE_GLOVES = register("nitrile_gloves", NitrileGloves::new);

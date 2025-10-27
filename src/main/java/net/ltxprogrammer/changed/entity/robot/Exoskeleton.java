@@ -466,7 +466,7 @@ public class Exoskeleton extends AbstractRobot {
                     if (this.attackTime == 0) {
                         this.exoskeleton.setActiveAttackTarget(target.getId());
                         if (!this.exoskeleton.isSilent()) {
-                            ChangedSounds.broadcastSound(exoskeleton, ChangedSounds.SHOT1, 1, 1);
+                            ChangedSounds.broadcastSound(exoskeleton, ChangedSounds.LASER_FIRE, 1, 1);
                         }
                     } else if (this.attackTime >= this.exoskeleton.getAttackDuration()) {
                         float amount = ProcessTransfur.difficultyAdjustTransfurAmount(exoskeleton.level().getDifficulty(), 11.0f);
@@ -475,7 +475,7 @@ public class Exoskeleton extends AbstractRobot {
                             if (ProcessTransfur.progressTransfur(target, amount, BenignShorts.getBenignTransfurVariant(target), TransfurContext.hazard(TransfurCause.BENIGN_SHORTS)))
                                 slottedItem.itemStack().shrink(1);
                             else
-                                ChangedSounds.broadcastSound(target, ChangedSounds.BLOW1, 1, 1);
+                                ChangedSounds.broadcastSound(target, ChangedSounds.TRANSFUR_HURT, 1, 1);
                         });
 
                         exoskeleton.setTarget(null);

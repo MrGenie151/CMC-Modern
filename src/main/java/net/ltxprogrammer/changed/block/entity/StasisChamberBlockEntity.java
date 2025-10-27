@@ -498,10 +498,10 @@ public class StasisChamberBlockEntity extends BaseContainerBlockEntity implement
                         return;
 
                     customLatexEntity.setRawFormFlags(configuredCustomLatex);
-                    ChangedSounds.broadcastSound(entity.getEntity(), ChangedSounds.POISON, 1.0f, 1.0f);
+                    ChangedSounds.broadcastSound(entity.getEntity(), ChangedSounds.STASIS_CHAMBER_MODIFY_LATEX, 1.0f, 1.0f);
                 } else ChangedTransfurVariants.Gendered.getOpposite(entity.getSelfVariant()).ifPresent(otherVariant -> {
                     entity.replaceVariant(otherVariant);
-                    ChangedSounds.broadcastSound(entity.getEntity(), ChangedSounds.POISON, 1.0f, 1.0f);
+                    ChangedSounds.broadcastSound(entity.getEntity(), ChangedSounds.STASIS_CHAMBER_MODIFY_LATEX, 1.0f, 1.0f);
                 });
             });
         }
@@ -785,10 +785,10 @@ public class StasisChamberBlockEntity extends BaseContainerBlockEntity implement
                         return;
 
                     customLatexEntity.setRawFormFlags(blockEntity.configuredCustomLatex);
-                    ChangedSounds.broadcastSound(entity.getEntity(), ChangedSounds.POISON, 1.0f, 1.0f);
+                    ChangedSounds.broadcastSound(entity.getEntity(), ChangedSounds.STASIS_CHAMBER_MODIFY_LATEX, 1.0f, 1.0f);
                 } else ChangedTransfurVariants.Gendered.getOpposite(entity.getSelfVariant()).ifPresent(otherVariant -> {
                     entity.replaceVariant(otherVariant);
-                    ChangedSounds.broadcastSound(entity.getEntity(), ChangedSounds.POISON, 1.0f, 1.0f);
+                    ChangedSounds.broadcastSound(entity.getEntity(), ChangedSounds.STASIS_CHAMBER_MODIFY_LATEX, 1.0f, 1.0f);
                 });
             });
 
@@ -834,7 +834,7 @@ public class StasisChamberBlockEntity extends BaseContainerBlockEntity implement
             newEntity.moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), facing.toYRot(), 0f);
             blockEntity.level.addFreshEntity(newEntity);
             blockEntity.chamberEntity(newEntity);
-            ChangedSounds.broadcastSound(newEntity, ChangedSounds.POISON, 1.0f, 1.0f);
+            ChangedSounds.broadcastSound(newEntity, ChangedSounds.STASIS_CHAMBER_CREATE_LATEX, 1.0f, 1.0f);
             return false;
         }),
         /**
@@ -847,7 +847,7 @@ public class StasisChamberBlockEntity extends BaseContainerBlockEntity implement
             if (entity == null || entity instanceof Player)
                 return false;
 
-            ChangedSounds.broadcastSound(entity, ChangedSounds.POISON, 1.0f, 1.0f);
+            ChangedSounds.broadcastSound(entity, ChangedSounds.STASIS_CHAMBER_DISCARD_LATEX, 1.0f, 1.0f);
             entity.stopRiding();
             entity.discard();
             return false;

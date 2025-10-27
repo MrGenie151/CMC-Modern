@@ -6,7 +6,9 @@ import net.ltxprogrammer.changed.data.AccessorySlotContext;
 import net.ltxprogrammer.changed.data.AccessorySlotType;
 import net.ltxprogrammer.changed.data.AccessorySlots;
 import net.ltxprogrammer.changed.init.ChangedAccessorySlots;
+import net.ltxprogrammer.changed.init.ChangedSounds;
 import net.ltxprogrammer.changed.util.Cacheable;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -50,5 +52,15 @@ public class WetsuitItem extends ClothingItem {
     @Override
     public boolean shouldDisableSlot(AccessorySlotContext<?> slotContext, AccessorySlotType otherSlot) {
         return super.shouldDisableSlot(slotContext, otherSlot) || otherSlot == ChangedAccessorySlots.LEGS.get();
+    }
+
+    @Override
+    public SoundEvent getEquipSound(ItemStack itemStack) {
+        return ChangedSounds.WETSUIT_EQUIP.get();
+    }
+
+    @Override
+    public SoundEvent getBreakSound(ItemStack itemStack) {
+        return ChangedSounds.WETSUIT_BREAK.get();
     }
 }

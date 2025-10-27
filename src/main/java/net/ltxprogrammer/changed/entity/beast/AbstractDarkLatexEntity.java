@@ -350,7 +350,7 @@ public abstract class AbstractDarkLatexEntity extends AbstractLatexWolf implemen
                 grabEntityAbilityInstance.releaseEntity();
                 Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY.with(() -> this),
                         new GrabEntityPacket(this, owner, GrabEntityPacket.GrabType.RELEASE));
-                ChangedSounds.broadcastSound(this, ChangedSounds.POISON, 1.0f, 1.0f);
+                ChangedSounds.broadcastSound(this, ChangedSounds.LATEX_UNSUIT_ENTITY, 1.0f, 1.0f);
             }
             if (this.getTarget() == owner)
                 this.setTarget(null);

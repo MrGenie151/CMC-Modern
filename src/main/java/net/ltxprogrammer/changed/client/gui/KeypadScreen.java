@@ -86,7 +86,7 @@ public class KeypadScreen extends AbstractContainerScreen<KeypadMenu> {
         }
 
         else if (!attemptedCode.isEmpty() && key == GLFW.GLFW_KEY_BACKSPACE) {
-            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(ChangedSounds.SWITCH1.get(), 1.0F));
+            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(ChangedSounds.KEYPAD_CLICK.get(), 1.0F));
             attemptedCode.remove(attemptedCode.size() - 1);
             return true;
         }
@@ -95,13 +95,13 @@ public class KeypadScreen extends AbstractContainerScreen<KeypadMenu> {
             return super.keyPressed(key, b, c);
 
         if (key >= GLFW.GLFW_KEY_0 && key <= GLFW.GLFW_KEY_9) {
-            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(ChangedSounds.SWITCH1.get(), 1.0F));
+            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(ChangedSounds.KEYPAD_CLICK.get(), 1.0F));
             attemptedCode.add((byte)(key - GLFW.GLFW_KEY_0));
             return true;
         }
 
         else if (key >= GLFW.GLFW_KEY_KP_0 && key <= GLFW.GLFW_KEY_KP_9) {
-            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(ChangedSounds.SWITCH1.get(), 1.0F));
+            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(ChangedSounds.KEYPAD_CLICK.get(), 1.0F));
             attemptedCode.add((byte)(key - GLFW.GLFW_KEY_KP_0));
             return true;
         }

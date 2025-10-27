@@ -245,7 +245,7 @@ public class LatexSwimMover extends PlayerMover<LatexSwimMover.MoverInstance> {
                 return;
 
             player.setInvulnerable(false);
-            player.playSound(ChangedSounds.POISON.get(), 1.0f, 1.0f);
+            player.playSound(ChangedSounds.ENTITY_EXIT_LATEX.get(), 1.0f, 1.0f);
         }
     }
 }

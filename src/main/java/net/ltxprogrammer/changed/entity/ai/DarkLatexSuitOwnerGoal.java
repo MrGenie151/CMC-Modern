@@ -42,7 +42,7 @@ public class DarkLatexSuitOwnerGoal extends MeleeAttackGoal {
                 ability.grabbedHasControl = true;
                 Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity),
                         new GrabEntityPacket(entity, target, GrabEntityPacket.GrabType.SUIT));
-                ChangedSounds.broadcastSound(entity, ChangedSounds.POISON, 1.0f, 1.0f);
+                ChangedSounds.broadcastSound(entity, ChangedSounds.LATEX_SUIT_ENTITY, 1.0f, 1.0f);
             }
         } else {
             // Re-evaluate nearby entities

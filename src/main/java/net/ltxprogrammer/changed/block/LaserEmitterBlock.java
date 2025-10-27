@@ -78,7 +78,7 @@ public class LaserEmitterBlock extends DirectionalBlock {
             level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.TRUE), 3);
             EmittedLaser.create(level, blockPos, direction).ifPresent(level::addFreshEntity);
             if (level instanceof ServerLevel serverLevel)
-                ChangedSounds.broadcastSound(serverLevel, ChangedSounds.SHOT1, blockPos, 1, 1);
+                ChangedSounds.broadcastSound(serverLevel, ChangedSounds.LASER_FIRE, blockPos, 1, 1);
         } else if (!shouldPower && blockState.getValue(POWERED)) {
             level.setBlockAndUpdate(blockPos, blockState.setValue(POWERED, Boolean.FALSE));
         }

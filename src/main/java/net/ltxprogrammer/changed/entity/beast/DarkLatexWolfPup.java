@@ -9,7 +9,6 @@ import net.ltxprogrammer.changed.init.ChangedTransfurVariants;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -59,7 +58,7 @@ public class DarkLatexWolfPup extends AbstractDarkLatexEntity {
     public boolean doHurtTarget(Entity entity) {
         if (entity instanceof LivingEntity livingEntity) {
             if (!this.isPuddle())
-                this.playSound(ChangedSounds.POISON.get(), 1.0f, 1.0f);
+                this.playSound(ChangedSounds.DARK_LATEX_PUP_FORM_PUDDLE.get(), 1.0f, 1.0f);
             this.setPuddle(true);
             ticksLeftAsPuddle = 120;
             livingEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 2, false, false, false)); // Slowness 2 for 5 seconds

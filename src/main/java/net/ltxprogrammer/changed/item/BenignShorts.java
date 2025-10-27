@@ -2,7 +2,9 @@ package net.ltxprogrammer.changed.item;
 
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
+import net.ltxprogrammer.changed.init.ChangedSounds;
 import net.ltxprogrammer.changed.init.ChangedTransfurVariants;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -27,5 +29,15 @@ public class BenignShorts extends ClothingItem implements Shorts {
         }
 
         return ChangedTransfurVariants.LATEX_BENIGN_WOLF.get();
+    }
+
+    @Override
+    public SoundEvent getEquipSound(ItemStack itemStack) {
+        return ChangedSounds.SHORTS_EQUIP.get();
+    }
+
+    @Override
+    public SoundEvent getBreakSound(ItemStack itemStack) {
+        return ChangedSounds.SHORTS_BREAK.get();
     }
 }

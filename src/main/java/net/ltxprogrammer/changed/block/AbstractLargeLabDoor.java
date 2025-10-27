@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Either;
 import net.ltxprogrammer.changed.block.entity.LabDoorOpenerEntity;
 import net.ltxprogrammer.changed.block.entity.OpenableDoor;
 import net.ltxprogrammer.changed.init.ChangedBlockEntities;
+import net.ltxprogrammer.changed.init.ChangedSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvent;
@@ -47,8 +48,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static net.ltxprogrammer.changed.init.ChangedSounds.OPEN2;
-
 public class AbstractLargeLabDoor extends HorizontalDirectionalBlock implements PartialEntityBlock, OpenableDoor {
     public static final EnumProperty<NineSection> SECTION = EnumProperty.create("section", NineSection.class);
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
@@ -63,12 +62,12 @@ public class AbstractLargeLabDoor extends HorizontalDirectionalBlock implements 
     public static final VoxelShape SHAPE_COLLISION_CLOSED = Shapes.or(SHAPE_FRAME, SHAPE_DOOR);
     public static final VoxelShape SHAPE_COLLISION_CLOSED_SLIM = Shapes.or(SHAPE_FRAME, SHAPE_DOOR_SLIM);
 
-    private final RegistryObject<SoundEvent> open, close;
+    private final RegistryObject<SoundEvent> open, close, locked;
 
     private final VoxelShape shapeFrame;
     private final VoxelShape shapeCollisionClosed;
 
-    public AbstractLargeLabDoor(RegistryObject<SoundEvent> open, RegistryObject<SoundEvent> close, boolean slim) {
+    public AbstractLargeLabDoor(RegistryObject<SoundEvent> open, RegistryObject<SoundEvent> close, RegistryObject<SoundEvent> locked, boolean slim) {
         super(Properties.of().sound(SoundType.METAL).requiresCorrectToolForDrops().strength(6.5F, 9.0F));
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
@@ -77,6 +76,7 @@ public class AbstractLargeLabDoor extends HorizontalDirectionalBlock implements 
                 .setValue(OPEN, Boolean.FALSE));
         this.open = open;
         this.close = close;
+        this.locked = locked;
 
         this.shapeFrame = SHAPE_FRAME;
         this.shapeCollisionClosed = slim ? SHAPE_COLLISION_CLOSED_SLIM : SHAPE_COLLISION_CLOSED;
@@ -232,7 +232,7 @@ public class AbstractLargeLabDoor extends HorizontalDirectionalBlock implements 
 
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (!state.getValue(POWERED)) {
-            level.playSound(null, pos, OPEN2.get(), SoundSource.BLOCKS, 1, 1);
+            level.playSound(null, pos, locked.get(), SoundSource.BLOCKS, 1, 1);
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
         return InteractionResult.FAIL;

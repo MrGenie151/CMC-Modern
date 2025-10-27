@@ -114,7 +114,7 @@ public class RetinalScanner extends AbstractCustomShapeBlock {
                 return InteractionResult.SUCCESS;
             } else if (player instanceof ServerPlayer serverPlayer) {
                 serverPlayer.setRespawnPosition(level.dimension(), blockPos, player.getYRot(), false, true);
-                ChangedSounds.broadcastSound((ServerLevel) level, ChangedSounds.SAVE, blockPos, 1, 1);
+                ChangedSounds.broadcastSound((ServerLevel) level, ChangedSounds.RETINAL_SCAN, blockPos, 1, 1);
                 return InteractionResult.SUCCESS;
             }
 

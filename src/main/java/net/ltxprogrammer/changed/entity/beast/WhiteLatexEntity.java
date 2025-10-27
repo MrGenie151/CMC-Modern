@@ -79,7 +79,7 @@ public abstract class WhiteLatexEntity extends WhiteLatexWolfMale {
         if (!this.level().addFreshEntity(behemoth))
             return;
         entities.forEach(Entity::discard);
-        ChangedSounds.broadcastSound(behemoth, ChangedSounds.POISON, 1.0f, 1.0f);
+        ChangedSounds.broadcastSound(behemoth, ChangedSounds.ENTITY_ENTER_LATEX, 1.0f, 1.0f);
     }
 
     @Override

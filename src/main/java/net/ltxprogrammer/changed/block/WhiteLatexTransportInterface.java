@@ -55,7 +55,7 @@ public interface WhiteLatexTransportInterface {
         entity.refreshDimensions();
         entity.setInvulnerable(true);
 
-        entity.playSound(ChangedSounds.POISON.get(), 1.0f, 1.0f);
+        entity.playSound(ChangedSounds.ENTITY_ENTER_LATEX.get(), 1.0f, 1.0f);
         if (!UniversalDist.isClientRemotePlayer(entity)) {
             final Vec3 center = new Vec3(0.5D, 0.5D, 0.5D);
             Vec3 surface = LatexCoverState.getAt(entity.level(), pos).findClosestSurface(center, null);

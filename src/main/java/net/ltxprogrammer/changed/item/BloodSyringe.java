@@ -55,7 +55,7 @@ public class BloodSyringe extends Item implements SpecializedAnimations {
         if (player instanceof ServerPlayer) {
             CriteriaTriggers.CONSUME_ITEM.trigger((ServerPlayer)player, stack);
         }
-        ChangedSounds.broadcastSound(entity, ChangedSounds.SWORD1, 1, 1);
+        ChangedSounds.broadcastSound(entity, ChangedSounds.SYRINGE_PRICK, 1, 1);
         if (player != null) {
             if (ProcessTransfur.isPlayerTransfurred(player) || (stack.getOrCreateTag().contains("owner") && stack.getTag().getUUID("owner").equals(player.getUUID()))) {
                 player.heal(1.0f);

@@ -73,7 +73,7 @@ public class LatexSyringe extends ItemNameBlockItem implements SpecializedAnimat
         if (player instanceof ServerPlayer) {
             CriteriaTriggers.CONSUME_ITEM.trigger((ServerPlayer)player, stack);
         }
-        ChangedSounds.broadcastSound(entity, ChangedSounds.SWORD1, 1, 1);
+        ChangedSounds.broadcastSound(entity, ChangedSounds.SYRINGE_PRICK, 1, 1);
         if (player != null) {
             CompoundTag tag = stack.getTag();
             TransfurCause cause = (player.getUsedItemHand() == InteractionHand.MAIN_HAND) == (player.getMainArm() == HumanoidArm.RIGHT) ? TransfurCause.SYRINGE : TransfurCause.SYRINGE_LEFT_HAND;
