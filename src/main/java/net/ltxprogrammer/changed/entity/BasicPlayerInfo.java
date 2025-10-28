@@ -203,5 +203,8 @@ public class BasicPlayerInfo {
         this.overrideOthersToMatchStyle = tag.getBoolean("overrideOthersToMatchStyle");
         if (tag.contains("scale"))
             this.size = tag.getFloat("scale");
+
+        if (Float.isNaN(this.size) || Float.isInfinite(this.size))
+            this.size = 1.0f;
     }
 }
