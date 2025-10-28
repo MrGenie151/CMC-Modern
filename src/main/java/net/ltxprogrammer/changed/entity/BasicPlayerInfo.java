@@ -18,27 +18,35 @@ import java.util.Random;
  */
 public class BasicPlayerInfo {
     public static float getSizeMinimum(LivingEntity entity) {
-        if (EntityUtil.maybeGetUnderlying(entity) instanceof Player)
+        try {
+            if (EntityUtil.maybeGetUnderlying(entity) instanceof Player)
+                return (float) Math.min(
+                        Changed.config.server.bpiSizeMinimum.get(),
+                        Changed.config.server.bpiSizeMaximum.get()
+                );
             return (float) Math.min(
-                    Changed.config.server.bpiSizeMinimum.get().doubleValue(),
-                    Changed.config.server.bpiSizeMaximum.get().doubleValue()
+                    Changed.config.server.bpiSizeMinimumNPC.get(),
+                    Changed.config.server.bpiSizeMaximumNPC.get()
             );
-        return (float) Math.min(
-                Changed.config.server.bpiSizeMinimumNPC.get().doubleValue(),
-                Changed.config.server.bpiSizeMaximumNPC.get().doubleValue()
-        );
+        } catch (Exception e) {
+            return 0.95f;
+        }
     }
 
     public static float getSizeMaximum(LivingEntity entity) {
-        if (EntityUtil.maybeGetUnderlying(entity) instanceof Player)
+        try {
+            if (EntityUtil.maybeGetUnderlying(entity) instanceof Player)
+                return (float) Math.max(
+                        Changed.config.server.bpiSizeMinimum.get(),
+                        Changed.config.server.bpiSizeMaximum.get()
+                );
             return (float) Math.max(
-                    Changed.config.server.bpiSizeMinimum.get().doubleValue(),
-                    Changed.config.server.bpiSizeMaximum.get().doubleValue()
+                    Changed.config.server.bpiSizeMinimumNPC.get(),
+                    Changed.config.server.bpiSizeMaximumNPC.get()
             );
-        return (float) Math.max(
-                Changed.config.server.bpiSizeMinimumNPC.get().doubleValue(),
-                Changed.config.server.bpiSizeMaximumNPC.get().doubleValue()
-        );
+        } catch (Exception e) {
+            return 1.05f;
+        }
     }
 
     // Default values here are based on Colin's properties

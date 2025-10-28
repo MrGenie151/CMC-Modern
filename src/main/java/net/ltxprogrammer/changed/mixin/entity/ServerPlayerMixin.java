@@ -47,6 +47,10 @@ public abstract class ServerPlayerMixin extends Player implements PlayerDataExte
     @Inject(method = "restoreFrom", at = @At("HEAD"))
     public void restoreFrom(ServerPlayer player, boolean restore, CallbackInfo callbackInfo) {
         ServerPlayer self = (ServerPlayer)(Object)this;
+
+        if (player instanceof PlayerDataExtension ext)
+            setBasicPlayerInfo(ext.getBasicPlayerInfo());
+
         if (player.level().getGameRules().getBoolean(ChangedGameRules.RULE_KEEP_FORM) || restore) {
             ProcessTransfur.ifPlayerTransfurred(player, oldVariant -> {
                 if (!oldVariant.willSurviveTransfur)
