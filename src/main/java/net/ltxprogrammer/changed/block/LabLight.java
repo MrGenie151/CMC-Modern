@@ -12,13 +12,14 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -34,12 +35,14 @@ public class LabLight extends AbstractCustomShapeBlock {
      * */
     public static final IntegerProperty SECTION = IntegerProperty.create("section", 0, 1);
     public static final BooleanProperty POWERED = BooleanProperty.create("powered");
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
     public static final VoxelShape SHAPE_WHOLE = Block.box(-16.0D, 14.0D, 0.0D, 16.0D, 16.0D, 16.0D);
 
     public LabLight(Properties properties) {
         super(properties.lightLevel((state) -> state.getValue(LabLight.POWERED) ? 15 : 0).emissiveRendering((state, level, pos) -> state.getValue(POWERED)));
-        this.registerDefaultState(this.stateDefinition.any().setValue(SECTION, 0).setValue(POWERED, false));
+        this.registerDefaultState(this.stateDefinition.any().setValue(SECTION, 0).setValue(POWERED, false)
+                .setValue(WATERLOGGED, false));
     }
 
     @Override
@@ -56,7 +59,7 @@ public class LabLight extends AbstractCustomShapeBlock {
 
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_54543_) {
         super.createBlockStateDefinition(p_54543_);
-        p_54543_.add(SECTION).add(POWERED);
+        p_54543_.add(SECTION).add(POWERED).add(WATERLOGGED);
     }
 
     @Nullable
@@ -179,13 +182,6 @@ public class LabLight extends AbstractCustomShapeBlock {
             p_49860_.destroyBlock(getBlockPos(p_49862_, p_49861_, 0), true);
     }
 
-    public RenderShape getRenderShape(BlockState p_54559_) {
-        if (p_54559_.getValue(SECTION) == 0)
-            return RenderShape.MODEL;
-        else
-            return RenderShape.INVISIBLE;
-    }
-
     public VoxelShape getOcclusionShape(BlockState p_54584_, BlockGetter p_54585_, BlockPos p_54586_) {
         return getInteractionShape(p_54584_, p_54585_, p_54586_);
     }
@@ -221,6 +217,10 @@ public class LabLight extends AbstractCustomShapeBlock {
     }
 
     public BlockState updateShape(BlockState p_52796_, Direction p_52797_, BlockState p_52798_, LevelAccessor p_52799_, BlockPos p_52800_, BlockPos p_52801_) {
+        if (p_52796_.getValue(WATERLOGGED)) {
+            p_52799_.scheduleTick(p_52800_, Fluids.WATER, Fluids.WATER.getTickDelay(p_52799_));
+        }
+
         int section = p_52796_.getValue(SECTION);
         Direction face = p_52796_.getValue(FACING);
         if (p_52797_.getAxis() == Direction.Axis.Y)
@@ -260,5 +260,10 @@ public class LabLight extends AbstractCustomShapeBlock {
 
             return section == 0 && p_52797_ == Direction.DOWN && !p_52796_.canSurvive(p_52799_, p_52800_) ? Blocks.AIR.defaultBlockState() : super.updateShape(p_52796_, p_52797_, p_52798_, p_52799_, p_52800_, p_52801_);
         }
+    }
+
+    @Override
+    public FluidState getFluidState(BlockState state) {
+        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
     }
 }

@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.world.features.structures;
 
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.block.GluBlock;
 import net.ltxprogrammer.changed.init.ChangedFacilityPieceTypes;
@@ -10,6 +11,7 @@ import net.ltxprogrammer.changed.util.CollectionUtil;
 import net.ltxprogrammer.changed.util.ResourceUtil;
 import net.ltxprogrammer.changed.world.features.structures.facility.*;
 import net.ltxprogrammer.changed.world.features.structures.facility.types.PieceType;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -28,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -128,7 +131,7 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
 
     private static void treeGenerate(FacilityGenerationContext facilityContext,
                                      Stack<ConfiguredFacilityPiece> stack, StructurePiece parentStructure,
-                                     GenStep start, int genDepth, int span, BoundingBox allowedRegion) {
+                                     GenStep start, int genDepth, int span, BoundingBox allowedRegion, boolean coerceZone) {
         var configuredParent = stack.peek();
         var parent = configuredParent.facilityPiece();
         var zone = start.getZone();
@@ -138,7 +141,7 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
             return configuredPiece.connectsTo().isEmpty() || configuredPiece.connectsTo().contains(zone);
         }, false);
 
-        int reroll = 10;
+        int reroll = 25;
         while (reroll > 0) {
             PieceType<?> pieceType;
             BoundingBox allowedRegionForPiece;
@@ -165,7 +168,12 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
                 pieceType = type.get().getPieceType();
                 allowedRegionForPiece = allowedRegion;
 
-                if (wantedZone != zone && pieceType.canBeReplacedBy(ChangedFacilityPieceTypes.TRANSITION.get())) {
+                if (!coerceZone && pieceType == ChangedFacilityPieceTypes.TRANSITION.get()) {
+                    pieceType = ChangedFacilityPieceTypes.CORRIDOR.get();
+                    wantedZone = zone;
+                }
+
+                if (coerceZone && wantedZone != zone && pieceType.canBeReplacedBy(ChangedFacilityPieceTypes.TRANSITION.get())) {
                     pieceType = ChangedFacilityPieceTypes.TRANSITION.get();
                 }
             }
@@ -190,12 +198,22 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
                         stack.push(nextConfiguredPiece);
 
                         var genStack = new FacilityGenerationStack(stack, nextStructure.getBoundingBox(), facilityContext.structureContext, nextSpan);
-                        List<GenStep> starts = new ArrayList<>();
+                        ObjectArrayList<GenStep> starts = new ObjectArrayList<>();
                         nextStructure.addSteps(genStack, starts);
+                        Util.shuffle(starts, facilityContext.structureContext.random());
 
                         int piecesBefore = ((StructurePiecesBuilderExtender)facilityContext.builder).pieceCount();
+                        AtomicBoolean firstStart = new AtomicBoolean(true);
                         starts.stream().filter(next -> !next.blockInfo().pos().equals(startPos)).forEach(next -> {
-                            treeGenerate(facilityContext, stack, nextStructure, next, genDepth, nextSpan, allowedRegion);
+                            boolean isFirstStart = firstStart.getAndSet(false);
+                            boolean isMinorBranch = coerceZone && !isFirstStart;
+                            treeGenerate(facilityContext, stack, nextStructure, next, genDepth,
+                                    isMinorBranch ? Math.min(10, nextSpan) : nextSpan, allowedRegion, coerceZone &&
+                                    isFirstStart);
+                            int piecesAfter = ((StructurePiecesBuilderExtender)facilityContext.builder).pieceCount();
+                            if (piecesAfter <= piecesBefore) { // Start failed to generate sufficient pieces, allow new branch to assume zone generation
+                                firstStart.set(true);
+                            }
                         });
                         int piecesAfter = ((StructurePiecesBuilderExtender)facilityContext.builder).pieceCount();
 
@@ -292,7 +310,7 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
 
         if (span > 0) {
             starts.forEach(start -> {
-                treeGenerate(facilityGenerationContext, stack, entrancePiece, start, genDepth, span - 1, allowedRegion);
+                treeGenerate(facilityGenerationContext, stack, entrancePiece, start, genDepth, span - 1, allowedRegion, true);
             });
         }
 

@@ -11,26 +11,26 @@ import org.jetbrains.annotations.Nullable;
 public class  FacilityCorridorSection extends FacilitySinglePiece {
     private static final WeightedRandomList<WeightedPieceNeighborSupplier> VALID_NEIGHBORS = WeightedRandomList.create(
             WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.STAIRCASE_START, 3),
-            WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.TRANSITION, 3),
+            //WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.TRANSITION, 3),
             WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.SPLIT, 12),
             WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.CORRIDOR, 8),
             WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.ROOM, 5));
     private static final WeightedRandomList<WeightedPieceNeighborSupplier> VALID_NEIGHBORS_MIN = WeightedRandomList.create(
             WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.STAIRCASE_START, 1),
-            WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.TRANSITION, 1),
-            WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.SPLIT, 3),
+            //WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.TRANSITION, 1),
+            WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.SPLIT, 15),
             WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.CORRIDOR, 15),
             WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.ROOM, 1));
 
     private static final WeightedRandomList<WeightedPieceNeighborSupplier> VALID_NEIGHBORS_HIGH_SPAN = WeightedRandomList.create(
             WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.STAIRCASE_START, 3),
-            WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.TRANSITION, 3),
+            //WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.TRANSITION, 3),
             WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.SPLIT, 12),
             WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.CORRIDOR, 8));
     private static final WeightedRandomList<WeightedPieceNeighborSupplier> VALID_NEIGHBORS_MIN_HIGH_SPAN = WeightedRandomList.create(
             WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.STAIRCASE_START, 1),
-            WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.TRANSITION, 1),
-            WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.SPLIT, 3),
+            //WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.TRANSITION, 1),
+            WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.SPLIT, 15),
             WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.CORRIDOR, 15));
 
     public FacilityCorridorSection(ResourceLocation templateName) {

@@ -5,22 +5,29 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import static net.ltxprogrammer.changed.block.LabLight.POWERED;
 
-public class LabLightSmall extends AbstractCustomShapeBlock {
+public class LabLightSmall extends AbstractCustomShapeBlock implements SimpleWaterloggedBlock {
     public static final VoxelShape SHAPE_WHOLE = Block.box(0.0D, 14.0D, 0.0D, 16.0D, 16.0D, 16.0D);
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
     public LabLightSmall(Properties properties) {
         super(properties.lightLevel((state) -> state.getValue(LabLight.POWERED) ? 15 : 0).emissiveRendering((state, level, pos) -> state.getValue(POWERED)));
-        this.registerDefaultState(this.stateDefinition.any().setValue(POWERED, false));
+        this.registerDefaultState(this.stateDefinition.any().setValue(POWERED, false).setValue(WATERLOGGED, false));
     }
 
     @Override
@@ -39,6 +46,7 @@ public class LabLightSmall extends AbstractCustomShapeBlock {
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(POWERED);
+        builder.add(WATERLOGGED);
     }
 
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block otherBlock, BlockPos otherPos, boolean p_52781_) {
@@ -66,5 +74,19 @@ public class LabLightSmall extends AbstractCustomShapeBlock {
 
     public VoxelShape getShape(BlockState p_54561_, BlockGetter p_54562_, BlockPos p_54563_, CollisionContext p_54564_) {
         return getInteractionShape(p_54561_, p_54562_, p_54563_);
+    }
+
+    @Override
+    public FluidState getFluidState(BlockState state) {
+        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
+    }
+
+    @Override
+    public BlockState updateShape(BlockState state, Direction direction, BlockState otherState, LevelAccessor level, BlockPos pos, BlockPos otherPos) {
+        if (state.getValue(WATERLOGGED)) {
+            level.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+        }
+
+        return super.updateShape(state, direction, otherState, level, pos, otherPos);
     }
 }

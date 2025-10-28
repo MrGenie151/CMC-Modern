@@ -1,5 +1,5 @@
 {
-  "parent": "changed:block/lab_light",
+  "parent": "changed:block/lab_light_full",
   "display": {
     "thirdperson": {
       "rotation": [
