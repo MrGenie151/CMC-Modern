@@ -44,6 +44,10 @@ public abstract class ChunkRenderDispatcherMixin {
     public LatexCoverState getLatexCoverState(RenderChunkRegion region, BlockPos blockPos) {
         int i = SectionPos.blockToSectionCoord(blockPos.getX()) - region.centerX;
         int j = SectionPos.blockToSectionCoord(blockPos.getZ()) - region.centerZ;
+
+        if (i < 0 || i >= region.chunks.length) return ChangedLatexTypes.NONE.get().defaultCoverState();
+        if (j < 0 || j >= region.chunks[0].length) return ChangedLatexTypes.NONE.get().defaultCoverState();
+
         return LatexCoverState.getAt(region.chunks[i][j].wrapped, blockPos);
     }
 
