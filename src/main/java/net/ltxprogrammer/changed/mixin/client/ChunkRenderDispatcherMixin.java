@@ -36,17 +36,16 @@ import java.util.Set;
 
 @Mixin(ChunkRenderDispatcher.RenderChunk.RebuildTask.class)
 public abstract class ChunkRenderDispatcherMixin {
-    @Shadow @Final ChunkRenderDispatcher.RenderChunk this$1;
+    @Shadow
+    @Final
+    ChunkRenderDispatcher.RenderChunk this$1;
 
     @Unique
     public LatexCoverState getLatexCoverState(RenderChunkRegion region, BlockPos blockPos) {
         int i = SectionPos.blockToSectionCoord(blockPos.getX()) - region.centerX;
         int j = SectionPos.blockToSectionCoord(blockPos.getZ()) - region.centerZ;
-        if (region instanceof RenderChunkRegionAccessor accessor) {
-            LevelChunk chunk = accessor.getLevel().getChunk(i, j);
-            return LatexCoverState.getAt(chunk, blockPos);
-        }
-        return ChangedLatexTypes.NONE.get().defaultCoverState();
+        LevelChunk chunk = ((RenderChunkRegionAccessor) region).getLevel().getChunk(i, j);
+        return LatexCoverState.getAt(chunk, blockPos);
     }
 
     @Unique
