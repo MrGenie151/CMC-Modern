@@ -16,6 +16,7 @@
   "changed:headless_knight": "QUADRUPED",
   "changed:latex_alien": "BIPED",
   "changed:latex_bee": "BIPED",
+  "changed:latex_benign_orca": "BIPED",
   "changed:latex_benign_wolf": "BIPED",
   "changed:latex_blue_dragon": "BIPED",
   "changed:latex_blue_wolf": "BIPED",

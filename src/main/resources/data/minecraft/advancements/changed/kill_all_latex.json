@@ -211,6 +211,20 @@
         ]
       }
     },
+    "changed:latex_benign_orca": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "predicate": {
+              "type": "changed:latex_benign_orca"
+            },
+            "entity": "this"
+          }
+        ]
+      }
+    },
     "changed:latex_benign_wolf": {
       "trigger": "minecraft:player_killed_entity",
       "conditions": {
@@ -1224,6 +1238,9 @@
     ],
     [
       "changed:beifeng"
+    ],
+    [
+      "changed:latex_benign_orca"
     ],
     [
       "changed:latex_benign_wolf"

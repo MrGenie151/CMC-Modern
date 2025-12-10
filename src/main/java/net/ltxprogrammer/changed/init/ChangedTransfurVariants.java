@@ -60,6 +60,8 @@ public class ChangedTransfurVariants {
             TransfurVariant.Builder.of(ChangedEntities.LATEX_ALIEN).stepSize(0.7f).nightVision().addAbility(ChangedAbilities.TOGGLE_NIGHT_VISION).absorbing());
     public static final RegistryObject<TransfurVariant<LatexBee>> LATEX_BEE = register("form_latex_bee",
             TransfurVariant.Builder.of(ChangedEntities.LATEX_BEE).extraJumps(4).reducedFall().extraHands().addAbility(ChangedAbilities.CREATE_HONEYCOMB).breatheMode(TransfurVariant.BreatheMode.WEAK).absorbing());
+    public static final RegistryObject<TransfurVariant<LatexBenignOrca>> LATEX_BENIGN_ORCA = register("form_latex_benign_orca",
+            TransfurVariant.Builder.of(ChangedEntities.BENIGN_LATEX_ORCA).stepSize(0.7f).gills().noVision().absorbing().disableItems().weakMining().jumpStrength(0.5F));
     public static final RegistryObject<TransfurVariant<LatexBenignWolf>> LATEX_BENIGN_WOLF = register("form_latex_benign_wolf",
             TransfurVariant.Builder.of(ChangedEntities.BENIGN_LATEX_WOLF).stepSize(0.7f).scares(AbstractSkeleton.class).noVision().absorbing().disableItems().weakMining().jumpStrength(0.5F));
     public static final RegistryObject<TransfurVariant<LatexBlueDragon>> LATEX_BLUE_DRAGON = register("form_latex_blue_dragon",
