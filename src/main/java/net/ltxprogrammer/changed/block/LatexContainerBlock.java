@@ -34,6 +34,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -50,7 +51,7 @@ public class LatexContainerBlock extends AbstractCustomShapeTallEntityBlock impl
     public static final VoxelShape SHAPE_WHOLE = Block.box(4.0D, 0.0D, 4.0D, 12.0D, 24, 12.0D);
 
     public LatexContainerBlock() {
-        super(BlockBehaviour.Properties.of().requiresCorrectToolForDrops().sound(SoundType.GLASS).strength(3.0F, 5.0F).requiresCorrectToolForDrops());
+        super(BlockBehaviour.Properties.of().requiresCorrectToolForDrops().sound(SoundType.GLASS).strength(3.0F, 5.0F));
     }
 
     @Override
@@ -130,6 +131,9 @@ public class LatexContainerBlock extends AbstractCustomShapeTallEntityBlock impl
 
     @Override
     public void onRemove(BlockState state, Level level, BlockPos blockPos, BlockState newState, boolean noSimulate) {
+        if (state.getBlock() == newState.getBlock()) return;
+        if (newState.isAir()) return;
+
         var blockEntity = getBlockEntity(state, level, blockPos);
         super.onRemove(state, level, blockPos, newState, noSimulate);
 
@@ -143,7 +147,13 @@ public class LatexContainerBlock extends AbstractCustomShapeTallEntityBlock impl
     }
 
     public boolean canSurvive(BlockState blockState, LevelReader level, BlockPos pos) {
-        return level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP);
+        if (blockState.getValue(HALF) == DoubleBlockHalf.LOWER) {
+            return level.getBlockState(pos.below())
+                    .isFaceSturdy(level, pos.below(), Direction.UP);
+        } else {
+            BlockState below = level.getBlockState(pos.below());
+            return below.is(this) && below.getValue(HALF) == DoubleBlockHalf.LOWER;
+        }
     }
 
     @Override
@@ -175,10 +185,8 @@ public class LatexContainerBlock extends AbstractCustomShapeTallEntityBlock impl
         return (double)falling.getStartPos().getY() - falling.getY();
     }
 
-    private static final Cacheable<ResourceLocation> MODEL_NAME = Cacheable.of(() -> {
-        return DistExecutor.unsafeCallWhenOn(Dist.CLIENT,
-                () -> () ->  new ModelResourceLocation(Changed.modResource("latex_container"), "inventory"));
-    });
+    private static final Cacheable<ResourceLocation> MODEL_NAME = Cacheable.of(() -> DistExecutor.unsafeCallWhenOn(Dist.CLIENT,
+            () -> () ->  new ModelResourceLocation(Changed.modResource("latex_container"), "inventory")));
 
     @Override
     public ResourceLocation getModelName() {
@@ -223,6 +231,13 @@ public class LatexContainerBlock extends AbstractCustomShapeTallEntityBlock impl
 
     @Override
     public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        if (state.getValue(HALF) != DoubleBlockHalf.LOWER) {
+            if (!canSurvive(state, level, pos)) {
+                level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+            }
+            return;
+        }
+
         if (FallingBlock.isFree(level.getBlockState(pos.below())) && pos.getY() >= level.getMinBuildHeight()) {
             var blockEntity = level.getBlockEntity(pos, ChangedBlockEntities.LATEX_CONTAINER.get());
             CompoundTag blockData = blockEntity.map(BlockEntity::saveWithFullMetadata).orElse(null);
@@ -252,8 +267,8 @@ public class LatexContainerBlock extends AbstractCustomShapeTallEntityBlock impl
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState otherState, LevelAccessor level, BlockPos pos, BlockPos otherPos) {
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         level.scheduleTick(pos, this, this.getDelayAfterPlace());
-        return super.updateShape(state, direction, otherState, level, pos, otherPos);
+        return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
     }
 }

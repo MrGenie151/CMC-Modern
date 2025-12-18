@@ -62,6 +62,7 @@ public class EmoteParticleOption implements ParticleOptions {
     @Override
     public void writeToNetwork(FriendlyByteBuf buffer) {
         buffer.writeInt(emote.ordinal());
+        buffer.writeInt(entity.getId());
     }
 
     @Override
