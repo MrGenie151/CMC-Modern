@@ -27,9 +27,11 @@ public class ChangedTransfurVariants {
     public static final RegistryObject<TransfurVariant<GasSkunk>> GAS_SKUNK = register("form_gas_skunk",
             TransfurVariant.Builder.of(ChangedEntities.GAS_SKUNK).stepSize(0.7f).sound(ChangedSounds.TRANSFUR_BY_NOT_LATEX.getId()));
     public static final RegistryObject<TransfurVariant<GasTiger>> GAS_TIGER = register("form_gas_tiger",
-            TransfurVariant.Builder.of(ChangedEntities.GAS_TIGER).jumpStrength(1.25f).stepSize(0.7f).reducedFall().scares(Creeper.class).nightVision().addAbility(ChangedAbilities.TOGGLE_NIGHT_VISION));
+            TransfurVariant.Builder.of(ChangedEntities.GAS_TIGER).jumpStrength(1.25f).stepSize(0.7f).reducedFall().scares(Creeper.class).nightVision().addAbility(ChangedAbilities.TOGGLE_NIGHT_VISION).sound(ChangedSounds.TRANSFUR_BY_NOT_LATEX.getId()));
     public static final RegistryObject<TransfurVariant<GasWolf>> GAS_WOLF = register("form_gas_wolf",
             TransfurVariant.Builder.of(ChangedEntities.GAS_WOLF).stepSize(0.7f).scares(AbstractSkeleton.class).sound(ChangedSounds.TRANSFUR_BY_NOT_LATEX.getId()));
+    public static final RegistryObject<TransfurVariant<GasWolfPup>> GAS_WOLF_PUP = register("form_gas_wolf_pup",
+            TransfurVariant.Builder.of(ChangedEntities.GAS_WOLF_PUP).scares(AbstractSkeleton.class).weakMining().holdItemsInMouth().reducedFall().sound(ChangedSounds.TRANSFUR_BY_NOT_LATEX.getId()));
     public static final RegistryObject<TransfurVariant<PooltoyWolf>> POOLTOY_WOLF = register("form_pooltoy_wolf",
             TransfurVariant.Builder.of(ChangedEntities.POOLTOY_WOLF).stepSize(0.7f).scares(AbstractSkeleton.class).breatheMode(TransfurVariant.BreatheMode.NONE).weakMining().transfurMode(TransfurMode.NONE));
     public static final RegistryObject<TransfurVariant<Beifeng>> BEIFENG = register("form_beifeng",

@@ -146,6 +146,9 @@ public class ChangedEntities {
     public static final RegistryObject<EntityType<GasWolf>> GAS_WOLF = registerSpawning("gas_wolf", 0x5D4743, 0xFFFFFF,
             EntityType.Builder.of(GasWolf::new, ChangedMobCategories.CHANGED).clientTrackingRange(10).sized(0.7F, 1.93F),
             ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, GasWolf::checkEntitySpawnRules);
+    public static final RegistryObject<EntityType<GasWolfPup>> GAS_WOLF_PUP = registerSpawning("gas_wolf_pup", 0x654D49, 0xFFFFFF,
+            EntityType.Builder.of(GasWolfPup::new, ChangedMobCategories.CHANGED).clientTrackingRange(10).sized(0.6F, 0.85F),
+            ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, GasWolfPup::checkEntitySpawnRules);
     public static final RegistryObject<EntityType<PooltoyWolf>> POOLTOY_WOLF = registerSpawning("pooltoy_wolf", 0x50c3ff, 0x57a9ec,
             EntityType.Builder.of(PooltoyWolf::new, MobCategory.MONSTER).clientTrackingRange(10).sized(0.7F * PooltoyWolf.SCALE, 1.93F * PooltoyWolf.SCALE),
             ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, PooltoyWolf::checkEntitySpawnRules);

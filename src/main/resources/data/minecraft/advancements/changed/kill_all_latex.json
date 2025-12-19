@@ -43,6 +43,20 @@
         ]
       }
     },
+    "changed:gas_wolf_pup": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "predicate": {
+              "type": "changed:gas_wolf_pup"
+            },
+            "entity": "this"
+          }
+        ]
+      }
+    },
     "changed:behemoth_head": {
       "trigger": "minecraft:player_killed_entity",
       "conditions": {
@@ -1202,6 +1216,9 @@
     ],
     [
       "changed:gas_wolf"
+    ],
+    [
+      "changed:gas_wolf_pup"
     ],
     [
       "changed:behemoth_head"
