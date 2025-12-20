@@ -90,10 +90,16 @@ public class ColorSelector extends EditBox {
             int endX = startX + this.height;
             int endY = startY + this.height;
 
-            graphics.fill(startX - 1, startY - 1, endX + 1, endY + 1, 0);
+            graphics.fill(
+                    startX - 1, startY - 1,
+                    endX + 1, endY + 1,
+                    0xFF000000 // alpha forced to be 255
+            );
 
             var color = colorGetter.get();
-            graphics.fill(startX, startY, endX, endY, color.toInt());
+
+            int argb = 0xFF000000 | color.toInt(); // alpha = 255
+            graphics.fill(startX, startY, endX, endY, argb);
         }
     }
 
