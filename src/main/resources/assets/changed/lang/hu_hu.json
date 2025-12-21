@@ -50,6 +50,10 @@
 
   "attribute.name.changed.transfur_damage": "Transzfur okozta sebzés",
   "attribute.name.changed.transfur_tolerance": "Transzfur-tűrés",
+  "attribute.name.changed.step_size": "Lépés mérete",
+  "attribute.name.changed.sprint_speed": "Futás sebessége",
+  "attribute.name.changed.sneak_speed": "Lopakodás sebessége",
+  "attribute.name.changed.air_capacity": "Légzéskapacitás",
 
   "subtitles.changed.block.cardboard_box.close": "Kartondoboz zárul",
   "subtitles.changed.block.cardboard_box.open": "Kartondoboz nyílik",
