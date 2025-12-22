@@ -6,9 +6,12 @@
   "refmap": "changed.refmap.json",
   "plugin": "net.ltxprogrammer.changed.mixin.compatibility.ChangedMixinPlugin",
   "mixins": [
+    "SleepTight.ArmRideAnimatorMixin",
+    "SleepTight.BedEntityMixin",
     "SleepTight.BipedalRideAnimatorMixin",
     "SleepTight.LeglessRideAnimatorMixin",
-    "SleepTight.QuadrupedalRideAnimatorMixin"
+    "SleepTight.QuadrupedalRideAnimatorMixin",
+    "SleepTight.TailRideAnimatorMixin"
   ],
   "client": [
     "BeyondEarth.OxygenSystemMixin",
