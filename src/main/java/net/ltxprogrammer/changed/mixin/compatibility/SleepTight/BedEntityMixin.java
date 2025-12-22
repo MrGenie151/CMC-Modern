@@ -35,7 +35,7 @@ public abstract class BedEntityMixin {
     @Inject(
             method = "positionRider(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/entity/Entity$MoveFunction;)V",
             at = @At("HEAD"),
-            cancellable = true
+            cancellable = true, remap = true
     )
     private void applyHeadOffset(
             Entity passenger,
