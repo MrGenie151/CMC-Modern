@@ -143,9 +143,12 @@ public class ChangedEntities {
     public static final RegistryObject<EntityType<GasTiger>> GAS_TIGER = registerSpawning("gas_tiger", 0xFFFFFF, 0x212121,
             EntityType.Builder.of(GasTiger::new, ChangedMobCategories.CHANGED).clientTrackingRange(10).sized(0.7F, 1.93F),
             ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, GasTiger::checkEntitySpawnRules);
-    public static final RegistryObject<EntityType<GasWolf>> GAS_WOLF = registerSpawning("gas_wolf", 0x5D4743, 0xFFFFFF,
-            EntityType.Builder.of(GasWolf::new, ChangedMobCategories.CHANGED).clientTrackingRange(10).sized(0.7F, 1.93F),
-            ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, GasWolf::checkEntitySpawnRules);
+    public static final RegistryObject<EntityType<GasWolfFemale>> GAS_WOLF_FEMALE = registerSpawning("gas_wolf_female", 0x5D4743, 0xFFFFFF,
+            EntityType.Builder.of(GasWolfFemale::new, ChangedMobCategories.CHANGED).clientTrackingRange(10).sized(0.7F, 1.93F),
+            ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, GasWolfFemale::checkEntitySpawnRules);
+    public static final RegistryObject<EntityType<GasWolfMale>> GAS_WOLF_MALE = registerSpawning("gas_wolf_male", 0x5D4743, 0xFFFFFF,
+            EntityType.Builder.of(GasWolfMale::new, ChangedMobCategories.CHANGED).clientTrackingRange(10).sized(0.7F, 1.93F),
+            ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, GasWolfMale::checkEntitySpawnRules);
     public static final RegistryObject<EntityType<GasWolfPup>> GAS_WOLF_PUP = registerSpawning("gas_wolf_pup", 0x654D49, 0xFFFFFF,
             EntityType.Builder.of(GasWolfPup::new, ChangedMobCategories.CHANGED).clientTrackingRange(10).sized(0.6F, 0.85F),
             ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, GasWolfPup::checkEntitySpawnRules);

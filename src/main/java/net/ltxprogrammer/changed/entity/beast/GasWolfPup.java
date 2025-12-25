@@ -2,8 +2,10 @@ package net.ltxprogrammer.changed.entity.beast;
 
 import net.ltxprogrammer.changed.entity.TransfurMode;
 import net.ltxprogrammer.changed.entity.variant.EntityShape;
-import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
+import net.ltxprogrammer.changed.init.ChangedSounds;
 import net.ltxprogrammer.changed.init.ChangedTransfurVariants;
+import net.ltxprogrammer.changed.process.ProcessTransfur;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
@@ -14,7 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import org.jetbrains.annotations.NotNull;
 
-public class GasWolfPup extends GasWolf {
+public class GasWolfPup extends GasWolfMale {
     protected static final int MAX_AGE = 72000;
     protected int age = 0;
     public GasWolfPup(EntityType<? extends GasWolfPup> type, Level level) {
@@ -36,15 +38,23 @@ public class GasWolfPup extends GasWolf {
     }
 
     @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        age = tag.getInt("age");
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putInt("age", age);
+    }
+
+    @Override
     public float getEyeHeightMul() {
         if (this.isCrouching())
             return 0.65F;
         else
             return 0.8F;
-    }
-
-    public boolean canBeLeashed(Player player) {
-        return !this.isLeashed();
     }
 
     @Override
@@ -53,13 +63,40 @@ public class GasWolfPup extends GasWolf {
     }
 
     @Override
-    public TransfurVariant<?> getTransfurVariant() {
-        return ChangedTransfurVariants.GAS_WOLF.get();
+    public @NotNull EntityShape getEntityShape() {
+        return EntityShape.FERAL;
     }
 
     @Override
-    public @NotNull EntityShape getEntityShape() {
-        return EntityShape.FERAL;
+    public void variantTick(Level level) {
+        super.variantTick(level);
+
+        age++;
+
+        var underlyingPlayer = getUnderlyingPlayer();
+        if (ProcessTransfur.ifPlayerTransfurred(underlyingPlayer, variant -> {
+            if (variant.ageAsVariant > MAX_AGE || age > MAX_AGE) {
+                var newVariant = ChangedTransfurVariants.Gendered.GAS_WOLVES.getRandomVariant(level().random);
+                ProcessTransfur.changeTransfur(underlyingPlayer, newVariant);
+                ChangedSounds.broadcastSound(this, newVariant.sound, 1.0f, 1.0f);
+                underlyingPlayer.heal(12.0f);
+            }
+        })) return;
+
+        if (age > MAX_AGE) {
+            var newVariant = ChangedTransfurVariants.Gendered.GAS_WOLVES.getRandomVariant(level().random);
+            var wolf = newVariant.getEntityType().create(level);
+            if (wolf != null) {
+                wolf.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
+                level.addFreshEntity(wolf);
+                ChangedSounds.broadcastSound(this, newVariant.sound, 1.0f, 1.0f);
+            }
+            this.discard();
+        }
+    }
+
+    public boolean canBeLeashed(Player player) {
+        return !this.isLeashed();
     }
 
     @Override
@@ -68,4 +105,4 @@ public class GasWolfPup extends GasWolf {
             return false;
         return super.isItemAllowedInSlot(stack, slot);
     }
-} //TODO: Add aging process when female gas wolf is implemented.
+} //TODO: potentially make tameable

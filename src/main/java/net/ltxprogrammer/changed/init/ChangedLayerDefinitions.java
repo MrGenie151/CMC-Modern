@@ -34,7 +34,8 @@ public class ChangedLayerDefinitions {
 
         event.registerLayerDefinition(GasSkunkModel.LAYER_LOCATION, GasSkunkModel::createBodyLayer);
         event.registerLayerDefinition(GasTigerModel.LAYER_LOCATION, GasTigerModel::createBodyLayer);
-        event.registerLayerDefinition(GasWolfModel.LAYER_LOCATION, GasWolfModel::createBodyLayer);
+        event.registerLayerDefinition(GasWolfFemaleModel.LAYER_LOCATION, GasWolfFemaleModel::createBodyLayer);
+        event.registerLayerDefinition(GasWolfMaleModel.LAYER_LOCATION, GasWolfMaleModel::createBodyLayer);
         event.registerLayerDefinition(GasWolfPupModel.LAYER_LOCATION, GasWolfPupModel::createBodyLayer);
         event.registerLayerDefinition(PooltoyWolfModel.LAYER_LOCATION, PooltoyWolfModel::createBodyLayer);
         event.registerLayerDefinition(DarkLatexDragonModel.LAYER_LOCATION, DarkLatexDragonModel::createBodyLayer);

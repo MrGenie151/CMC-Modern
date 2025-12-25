@@ -29,7 +29,8 @@ public class ChangedDataFixer {
     }
 
     private final HashMap<ResourceLocation, ResourceLocation> ENTITY_ID_REMAP = Util.make(new HashMap<>(), map -> {
-        map.put(Changed.modResource("aerosol_latex_wolf"), ChangedEntities.GAS_WOLF.getId());
+        map.put(Changed.modResource("aerosol_latex_wolf"), ChangedEntities.GAS_WOLF_MALE.getId());
+        map.put(Changed.modResource("gas_wolf"), ChangedEntities.GAS_WOLF_MALE.getId());
         map.put(Changed.modResource("dark_latex_dragon"), ChangedEntities.DARK_DRAGON.getId());
         map.put(Changed.modResource("latex_beifeng"), ChangedEntities.BEIFENG.getId());
         map.put(Changed.modResource("latex_crystal_wolf"), ChangedEntities.CRYSTAL_WOLF.getId());
@@ -47,7 +48,8 @@ public class ChangedDataFixer {
     });
 
     private final HashMap<ResourceLocation, ResourceLocation> ITEM_ID_REMAP = Util.make(new HashMap<>(), map -> {
-        map.put(Changed.modResource("aerosol_latex_wolf_spawn_egg"), spawnEggHelper(ChangedEntities.GAS_WOLF));
+        map.put(Changed.modResource("aerosol_latex_wolf_spawn_egg"), spawnEggHelper(ChangedEntities.GAS_WOLF_MALE));
+        map.put(Changed.modResource("gas_wolf_spawn_egg"), spawnEggHelper(ChangedEntities.GAS_WOLF_MALE));
         map.put(Changed.modResource("dark_latex_dragon_spawn_egg"), spawnEggHelper(ChangedEntities.DARK_DRAGON));
         map.put(Changed.modResource("latex_beifeng_spawn_egg"), spawnEggHelper(ChangedEntities.BEIFENG));
         map.put(Changed.modResource("latex_crystal_wolf_spawn_egg"), spawnEggHelper(ChangedEntities.CRYSTAL_WOLF));
@@ -101,7 +103,8 @@ public class ChangedDataFixer {
     });
 
     private final HashMap<ResourceLocation, ResourceLocation> VARIANT_ID_REMAP = Util.make(new HashMap<>(), map -> {
-        map.put(Changed.modResource("form_aerosol_latex_wolf"), ChangedTransfurVariants.GAS_WOLF.getId());
+        map.put(Changed.modResource("form_aerosol_latex_wolf"), ChangedTransfurVariants.GAS_WOLF_MALE.getId());
+        map.put(Changed.modResource("form_gas_wolf"), ChangedTransfurVariants.GAS_WOLF_MALE.getId());
         map.put(Changed.modResource("form_dark_latex_dragon"), ChangedTransfurVariants.DARK_DRAGON.getId());
         map.put(Changed.modResource("form_latex_beifeng"), ChangedTransfurVariants.BEIFENG.getId());
         map.put(Changed.modResource("form_latex_crystal_wolf"), ChangedTransfurVariants.CRYSTAL_WOLF.getId());

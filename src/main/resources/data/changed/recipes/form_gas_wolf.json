@@ -8,5 +8,6 @@
       "item": "changed:wolf_gas_canister"
     }
   ],
+  "gendered": true,
   "form": "changed:form_gas_wolf"
 }

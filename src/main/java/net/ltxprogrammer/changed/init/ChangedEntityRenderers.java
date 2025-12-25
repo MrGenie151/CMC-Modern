@@ -73,7 +73,8 @@ public class ChangedEntityRenderers {
 
         registerHumanoid(event, ChangedEntities.GAS_SKUNK.get(), GasSkunkRenderer::new);
         registerHumanoid(event, ChangedEntities.GAS_TIGER.get(), GasTigerRenderer::new);
-        registerHumanoid(event, ChangedEntities.GAS_WOLF.get(), GasWolfRenderer::new);
+        registerHumanoid(event, ChangedEntities.GAS_WOLF_FEMALE.get(), GasWolfFemaleRenderer::new);
+        registerHumanoid(event, ChangedEntities.GAS_WOLF_MALE.get(), GasWolfMaleRenderer::new);
         registerHumanoid(event, ChangedEntities.GAS_WOLF_PUP.get(), GasWolfPupRenderer::new);
         registerHumanoid(event, ChangedEntities.POOLTOY_WOLF.get(), PooltoyWolfRenderer::new);
         registerHumanoid(event, ChangedEntities.DARK_DRAGON.get(), DarkLatexDragonRenderer::new);
