@@ -17,11 +17,6 @@
           "type": "minecraft:item",
           "weight": 5,
           "name": "changed:erlenmeyer_flask"
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 5,
-          "name": "minecraft:iron_ingot"
         }
       ]
     },
@@ -46,6 +41,18 @@
           "weight": 5,
           "name": "changed:dark_latex_goo"
         }
+      ]
+    },
+    {
+      "rolls": {
+        "min": 1,
+        "max": 5
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "changed:dark_latex_goo"
+        }
       ],
       "functions": [
         {
@@ -62,11 +69,51 @@
       "entries": [
         {
           "type": "minecraft:item",
+          "weight": 1,
           "name": "changed:tsc_staff"
         },
         {
           "type": "minecraft:item",
+          "weight": 1,
           "name": "changed:tsc_baton"
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 8,
+          "functions": [
+            {
+              "function": "minecraft:set_damage",
+              "damage": {
+                "type": "minecraft:uniform",
+                "min": 0.4,
+                "max": 1.0
+              },
+              "add": false
+            }
+          ],
+          "name": "changed:tsc_staff"
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 8,
+          "functions": [
+            {
+              "function": "minecraft:set_damage",
+              "damage": {
+                "type": "minecraft:uniform",
+                "min": 0.4,
+                "max": 1.0
+              },
+              "add": false
+            }
+          ],
+          "name": "changed:tsc_baton"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.5
         }
       ]
     }

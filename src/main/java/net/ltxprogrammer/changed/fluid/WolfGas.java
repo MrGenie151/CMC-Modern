@@ -50,7 +50,7 @@ public abstract class WolfGas extends TransfurGas {
     }
 
     protected WolfGas() {
-        super(PROPERTIES, ChangedTransfurVariants.GAS_WOLF);
+        super(PROPERTIES, ChangedTransfurVariants.GAS_WOLF_MALE);
     }
 
     @Override

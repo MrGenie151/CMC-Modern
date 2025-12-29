@@ -143,9 +143,15 @@ public class ChangedEntities {
     public static final RegistryObject<EntityType<GasTiger>> GAS_TIGER = registerSpawning("gas_tiger", 0xFFFFFF, 0x212121,
             EntityType.Builder.of(GasTiger::new, ChangedMobCategories.CHANGED).clientTrackingRange(10).sized(0.7F, 1.93F),
             ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, GasTiger::checkEntitySpawnRules);
-    public static final RegistryObject<EntityType<GasWolf>> GAS_WOLF = registerSpawning("gas_wolf", 0x5D4743, 0xFFFFFF,
-            EntityType.Builder.of(GasWolf::new, ChangedMobCategories.CHANGED).clientTrackingRange(10).sized(0.7F, 1.93F),
-            ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, GasWolf::checkEntitySpawnRules);
+    public static final RegistryObject<EntityType<GasWolfFemale>> GAS_WOLF_FEMALE = registerSpawning("gas_wolf_female", 0x5D4743, 0xFFFFFF,
+            EntityType.Builder.of(GasWolfFemale::new, ChangedMobCategories.CHANGED).clientTrackingRange(10).sized(0.7F, 1.93F),
+            ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, GasWolfFemale::checkEntitySpawnRules);
+    public static final RegistryObject<EntityType<GasWolfMale>> GAS_WOLF_MALE = registerSpawning("gas_wolf_male", 0x5D4743, 0xFFFFFF,
+            EntityType.Builder.of(GasWolfMale::new, ChangedMobCategories.CHANGED).clientTrackingRange(10).sized(0.7F, 1.93F),
+            ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, GasWolfMale::checkEntitySpawnRules);
+    public static final RegistryObject<EntityType<GasWolfPup>> GAS_WOLF_PUP = registerSpawning("gas_wolf_pup", 0x654D49, 0xFFFFFF,
+            EntityType.Builder.of(GasWolfPup::new, ChangedMobCategories.CHANGED).clientTrackingRange(10).sized(0.6F, 0.85F),
+            ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, GasWolfPup::checkEntitySpawnRules);
     public static final RegistryObject<EntityType<PooltoyWolf>> POOLTOY_WOLF = registerSpawning("pooltoy_wolf", 0x50c3ff, 0x57a9ec,
             EntityType.Builder.of(PooltoyWolf::new, MobCategory.MONSTER).clientTrackingRange(10).sized(0.7F * PooltoyWolf.SCALE, 1.93F * PooltoyWolf.SCALE),
             ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, PooltoyWolf::checkEntitySpawnRules);
@@ -176,6 +182,9 @@ public class ChangedEntities {
     public static final RegistryObject<EntityType<Beifeng>> BEIFENG = registerSpawning("beifeng", 0x51659D, 0xFFE852,
             EntityType.Builder.of(Beifeng::new, ChangedMobCategories.UNDERGROUND).clientTrackingRange(10).sized(0.7F, 1.93F),
             ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, Beifeng::checkEntitySpawnRules);
+    public static final RegistryObject<EntityType<LatexBenignOrca>> BENIGN_LATEX_ORCA = registerSpawning("latex_benign_orca", 0x282828, 0xdfdfdf,
+            EntityType.Builder.of(LatexBenignOrca::new, ChangedMobCategories.AQUATIC).clientTrackingRange(10).sized(0.7F, 1.93F),
+            ChangedEntities::overworldOnly, SpawnPlacements.Type.IN_WATER, LatexBenignOrca::checkEntitySpawnRules);
     public static final RegistryObject<EntityType<LatexBenignWolf>> BENIGN_LATEX_WOLF = registerSpawning("latex_benign_wolf", 0x282828, 0x292929,
             EntityType.Builder.of(LatexBenignWolf::new, ChangedMobCategories.CHANGED).clientTrackingRange(10).sized(0.7F, 1.93F),
             ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, LatexBenignWolf::checkEntitySpawnRules);

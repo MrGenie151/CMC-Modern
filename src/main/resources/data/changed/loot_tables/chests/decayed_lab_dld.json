@@ -5,30 +5,32 @@
       "rolls": {
         "type": "minecraft:uniform",
         "min": 0.0,
-        "max": 3.0
+        "max": 2.0
       },
       "bonus_rolls": 0.0,
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "changed:dark_dragon_crystal_fragment"
+          "weight": 5,
+          "name": "changed:the_scarlet_crystal_mine_record"
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 5,
+          "name": "changed:crystal_zone_record"
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 8,
+          "name": "changed:black_goo_zone_record"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.5
         }
       ]
-    },
-    {
-      "type": "minecraft:item",
-      "weight": 5,
-      "name": "changed:the_scarlet_crystal_mine_record"
-    },
-    {
-      "type": "minecraft:item",
-      "weight": 5,
-      "name": "changed:crystal_zone_record"
-    },
-    {
-      "type": "minecraft:item",
-      "weight": 8,
-      "name": "changed:black_goo_zone_record"
     },
     {
       "rolls": {
@@ -78,6 +80,22 @@
               "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
+                "min": 3.0,
+                "max": 8.0
+              },
+              "add": false
+            }
+          ],
+          "name": "changed:dark_latex_crystal_fragment"
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
                 "min": 2.0,
                 "max": 6.0
               },
@@ -85,6 +103,22 @@
             }
           ],
           "name": "changed:beifeng_crystal_fragment"
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 0.0,
+                "max": 3.0
+              },
+              "add": false
+            }
+          ],
+          "name": "changed:dark_dragon_crystal_fragment"
         },
         {
           "type": "minecraft:item",
@@ -130,7 +164,12 @@
       ]
     },
     {
-      "rolls": 1,
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 0.0,
+        "max": 2.0
+      },
+      "bonus_rolls": 0.0,
       "entries": [
         {
           "type": "minecraft:item",
@@ -138,8 +177,10 @@
             {
               "function": "changed:random_variant",
               "variants": [
-                "changed:form_dark_dragon",
                 "changed:form_beifeng",
+                "changed:form_crystal_wolf",
+                "changed:form_crystal_wolf_horned",
+                "changed:form_dark_dragon",
                 "changed:form_latex_yufeng"
               ]
             },
@@ -154,6 +195,12 @@
             }
           ],
           "name": "changed:latex_syringe"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.34
         }
       ]
     }
