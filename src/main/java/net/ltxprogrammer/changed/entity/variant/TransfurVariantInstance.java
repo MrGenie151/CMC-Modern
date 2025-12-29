@@ -809,7 +809,7 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
             }
             
             else if (host.hasEffect(MobEffects.WATER_BREATHING) || !host.canDrownInFluidType(ForgeMod.WATER_TYPE.get())) {
-                airDelta = 4;
+                airDelta = 0;
                 this.ticksBreathingUnderwater = 0;
             }
 
