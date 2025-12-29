@@ -328,15 +328,15 @@ public class HumanoidAnimator<T extends ChangedEntity, M extends AdvancedHumanoi
 
     public static enum AnimateStage implements BiPredicate<HumanoidAnimator<?,?>, ChangedEntity> {
         INIT,
-        RIDE((animator, latex) -> animator.entityModel.riding),
-        SLEEP((animator, latex) -> latex.getPose() == Pose.SLEEPING),
+        RIDE(AnimateStage::isRiding),
+        SLEEP(AnimateStage::isSleeping),
         ATTACK,
-        CROUCH((animator, latex) -> animator.crouching),
-        STAND((animator, latex) -> !animator.crouching),
+        CROUCH(AnimateStage::isCrouching),
+        STAND(AnimateStage::isStanding),
         BOB,
-        CREATIVE_FLY((animator, latex) -> animator.flyAmount > 0f),
-        FALL_FLY((animator, latex) -> latex.isFallFlying()),
-        SWIM((animator, latex) -> animator.swimAmount > 0f),
+        CREATIVE_FLY(AnimateStage::isCreativeFlying),
+        FALL_FLY(AnimateStage::isFallFlying),
+        SWIM(AnimateStage::isSwimming),
         FINAL;
 
         public static final List<AnimateStage> ORDER = List.of(INIT, RIDE, SLEEP, ATTACK, CROUCH, STAND, BOB, CREATIVE_FLY, FALL_FLY, SWIM, FINAL);
@@ -358,6 +358,34 @@ public class HumanoidAnimator<T extends ChangedEntity, M extends AdvancedHumanoi
 
         private static boolean always(HumanoidAnimator<?,?> animator, ChangedEntity entity) {
             return true;
+        }
+
+        private static boolean isRiding(HumanoidAnimator<?,?> animator, ChangedEntity entity) {
+            return animator.entityModel.riding;
+        }
+
+        private static boolean isSleeping(HumanoidAnimator<?,?> animator, ChangedEntity entity) {
+            return entity.getPose() == Pose.SLEEPING;
+        }
+
+        private static boolean isCrouching(HumanoidAnimator<?,?> animator, ChangedEntity entity) {
+            return animator.crouching;
+        }
+
+        private static boolean isStanding(HumanoidAnimator<?,?> animator, ChangedEntity entity) {
+            return !animator.crouching;
+        }
+
+        private static boolean isCreativeFlying(HumanoidAnimator<?,?> animator, ChangedEntity entity) {
+            return animator.flyAmount > 0f;
+        }
+
+        private static boolean isFallFlying(HumanoidAnimator<?,?> animator, ChangedEntity entity) {
+            return entity.isFallFlying();
+        }
+
+        private static boolean isSwimming(HumanoidAnimator<?,?> animator, ChangedEntity entity) {
+            return animator.swimAmount > 0f;
         }
     }
 
