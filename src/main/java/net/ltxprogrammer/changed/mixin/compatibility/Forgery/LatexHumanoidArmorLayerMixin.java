@@ -26,10 +26,10 @@ public abstract class LatexHumanoidArmorLayerMixin<T extends ChangedEntity, M ex
         super(p_117346_);
     }
 
-    @Inject(method = "renderModel(Lnet/ltxprogrammer/changed/entity/ChangedEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/EquipmentSlot;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;IZLnet/ltxprogrammer/changed/client/renderer/model/armor/LatexHumanoidArmorModel;FFFLnet/minecraft/resources/ResourceLocation;)V", at = @At("HEAD"), cancellable = true)
-    private void hideArmor(T entity, ItemStack stack, EquipmentSlot slot, PoseStack pose, MultiBufferSource buffers, int packedLight, boolean foil, LatexHumanoidArmorModel<T, ?> model, float red, float green, float blue, ResourceLocation armorResource, CallbackInfo ci) {
+    @Inject(method = "renderModel(Lnet/ltxprogrammer/changed/entity/ChangedEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/EquipmentSlot;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/ltxprogrammer/changed/client/renderer/model/armor/LatexHumanoidArmorModel;FFFLnet/minecraft/resources/ResourceLocation;)V", at = @At("HEAD"), cancellable = true)
+    private void hideArmor(T entity, ItemStack stack, EquipmentSlot slot, PoseStack pose, MultiBufferSource buffers, int packedLight, LatexHumanoidArmorModel<? super T, ?> model, float red, float green, float blue, ResourceLocation armorResource, CallbackInfo ci) {
         if (FabConf.isEnabled("*.hide_armor") && entity.getUnderlyingPlayer() instanceof GetSuppressedSlots suppressedSlots
-        && suppressedSlots.fabrication$getSuppressedSlots().contains(slot))
+                && suppressedSlots.fabrication$getSuppressedSlots().contains(slot))
             ci.cancel();
     }
 }

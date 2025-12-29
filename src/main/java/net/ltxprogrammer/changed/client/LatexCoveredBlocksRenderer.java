@@ -2,10 +2,8 @@ package net.ltxprogrammer.changed.client;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.common.collect.Streams;
 import com.google.gson.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -30,12 +28,11 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.*;
-import net.minecraft.client.renderer.block.model.multipart.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.*;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -67,7 +64,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -168,7 +164,7 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
         }
 
         public LatexModelDefinition(List<LatexModelDefinition> definitions) {
-            for(LatexModelDefinition definition : definitions) {
+            for (LatexModelDefinition definition : definitions) {
                 this.variants.putAll(definition.variants);
             }
         }
@@ -248,7 +244,7 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
                 if (p_111557_.has("variants")) {
                     JsonObject jsonobject = GsonHelper.getAsJsonObject(p_111557_, "variants");
 
-                    for(Map.Entry<String, JsonElement> entry : jsonobject.entrySet()) {
+                    for (Map.Entry<String, JsonElement> entry : jsonobject.entrySet()) {
                         map.put(entry.getKey(), p_111556_.deserialize(entry.getValue(), MultiVariantFaces.class));
                     }
                 }
@@ -376,11 +372,10 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
         return RenderType.solid();
     }
 
+    private static final ThreadLocal<LatexCoverGetter> threadLocal = ThreadLocal.withInitial(() -> null);
 
-    @Nullable
-    private static LatexCoverGetter latexCoverStateGetter = null;
     public static Optional<LatexCoverGetter> getLatexCoverStateGetter() {
-        return Optional.ofNullable(latexCoverStateGetter);
+        return Optional.ofNullable(threadLocal.get());
     }
 
     private boolean wrappedTesselate(
@@ -413,7 +408,7 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
 
         final RenderType renderType = this.getRenderType(coverState);
 
-        latexCoverStateGetter = latexCoverGetter;
+        threadLocal.set(latexCoverGetter);
 
         if (surfaceTop && modelSet.surfaceTop != null) {
             modelRenderer.tesselateWithAO(level, modelSet.surfaceTop, blockState, blockPos, poseStack, bufferBuilder, true, random, seed, lightColor,
@@ -450,7 +445,7 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
                     ModelData.EMPTY, renderType);
         }
 
-        latexCoverStateGetter = null;
+        threadLocal.remove();
 
         return true;
     }
@@ -527,13 +522,13 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
 
     @Nullable
     static <T extends Comparable<T>> T getValueHelper(Property<T> property, String p_119278_) {
-        return property.getValue(p_119278_).orElse((T)null);
+        return property.getValue(p_119278_).orElse((T) null);
     }
 
     private static Predicate<BlockState> predicate(StateDefinition<Block, BlockState> stateDefinition, String text) {
         Map<Property<?>, Comparable<?>> map = Maps.newHashMap();
 
-        for(String s : COMMA_SPLITTER.split(text)) {
+        for (String s : COMMA_SPLITTER.split(text)) {
             Iterator<String> iterator = EQUAL_SPLITTER.split(s).iterator();
             if (iterator.hasNext()) {
                 String s1 = iterator.next();
@@ -555,7 +550,7 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
         Block block = stateDefinition.getOwner();
         return (p_119262_) -> {
             if (p_119262_ != null && p_119262_.is(block)) {
-                for(Map.Entry<Property<?>, Comparable<?>> entry : map.entrySet()) {
+                for (Map.Entry<Property<?>, Comparable<?>> entry : map.entrySet()) {
                     if (!Objects.equals(p_119262_.getValue(entry.getKey()), entry.getValue())) {
                         return false;
                     }
@@ -625,8 +620,8 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
     }
 
     private static CompletableFuture<Map<ResourceLocation, Map<LatexType, BakedModel>>> bakeModels(Function<ResourceLocation, TextureAtlasSprite> getSprite,
-                                                                                   Map<ResourceLocation, BlockModel> unbakedModels,
-                                                                                   Executor executor) {
+                                                                                                   Map<ResourceLocation, BlockModel> unbakedModels,
+                                                                                                   Executor executor) {
         final var modelBakes = unbakedModels.entrySet().stream().map(entry -> {
             final var stateBake = getCoverTypes()
                     .map(type -> {

@@ -5,13 +5,15 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "changed.refmap.json",
   "plugin": "net.ltxprogrammer.changed.mixin.compatibility.ChangedMixinPlugin",
-  "mixins": [],
+  "mixins": [
+    "SleepTight.HumanoidAnimatorMixin"
+  ],
   "client": [
     "BeyondEarth.OxygenSystemMixin",
     "CarryOn.HoldEntityAnimatorMixin",
     "CarryOn.PickupHandlerMixin",
-    "Create.HumanoidAnimatorMixin",
     "Create.AdvancedHumanoidRendererMixin",
+    "Create.HumanoidAnimatorMixin",
     "DoABarrelRoll.AdvancedHumanoidRendererMixin",
     "EMF.HumanoidAnimatorMixin",
     "EntityCulling.WaveVisionRendererMixin",
@@ -37,6 +39,7 @@
     "PlayerAnimator.HumanoidAnimatorMixin",
     "PresenceFootsteps.PFSolverMixin",
     "PresenceFootsteps.SoundEngineMixin",
+    "SleepTight.LivingEntityRendererMixin",
     "Sodium.ChunkRenderRebuildTaskMixin",
     "Sodium.ClonedChunkSectionMixin",
     "Sodium.WorldSliceMixin",

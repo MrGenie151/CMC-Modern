@@ -50,6 +50,10 @@
 
   "attribute.name.changed.transfur_damage": "Transfur Damage",
   "attribute.name.changed.transfur_tolerance": "Transfur Tolerance",
+  "attribute.name.changed.step_size": "Step Size",
+  "attribute.name.changed.sprint_speed": "Sprint Speed",
+  "attribute.name.changed.sneak_speed": "Sneak Speed",
+  "attribute.name.changed.air_capacity": "Air Capacity",
 
   "subtitles.changed.block.cardboard_box.close": "Cardboard box closes",
   "subtitles.changed.block.cardboard_box.open": "Cardboard box opens",

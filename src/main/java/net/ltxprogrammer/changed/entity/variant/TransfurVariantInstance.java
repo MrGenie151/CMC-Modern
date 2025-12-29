@@ -49,6 +49,7 @@ import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -806,6 +807,11 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
                 airDelta = 4;
                 this.ticksBreathingUnderwater++;
             }
+            
+            else if (host.hasEffect(MobEffects.WATER_BREATHING) || !host.canDrownInFluidType(ForgeMod.WATER_TYPE.get())) {
+                airDelta = 0;
+                this.ticksBreathingUnderwater = 0;
+            }
 
             else {
                 int i = EnchantmentHelper.getRespiration(host);
@@ -851,11 +857,12 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
             }
         }
 
-        if (!host.level().isClientSide)
+        if (!host.level().isClientSide) {
             host.setAirSupply(Mth.clamp(
-                (int)Math.round((float)air / airSupplyScale),
-                0,
-                host.getMaxAirSupply()));
+                    (int) Math.round((float) air / airSupplyScale),
+                    0,
+                    host.getMaxAirSupply()));
+        }
     }
 
     protected void tickAbilities() {
