@@ -34,7 +34,9 @@ public class ChangedLayerDefinitions {
 
         event.registerLayerDefinition(GasSkunkModel.LAYER_LOCATION, GasSkunkModel::createBodyLayer);
         event.registerLayerDefinition(GasTigerModel.LAYER_LOCATION, GasTigerModel::createBodyLayer);
-        event.registerLayerDefinition(GasWolfModel.LAYER_LOCATION, GasWolfModel::createBodyLayer);
+        event.registerLayerDefinition(GasWolfFemaleModel.LAYER_LOCATION, GasWolfFemaleModel::createBodyLayer);
+        event.registerLayerDefinition(GasWolfMaleModel.LAYER_LOCATION, GasWolfMaleModel::createBodyLayer);
+        event.registerLayerDefinition(GasWolfPupModel.LAYER_LOCATION, GasWolfPupModel::createBodyLayer);
         event.registerLayerDefinition(PooltoyWolfModel.LAYER_LOCATION, PooltoyWolfModel::createBodyLayer);
         event.registerLayerDefinition(DarkLatexDragonModel.LAYER_LOCATION, DarkLatexDragonModel::createBodyLayer);
         event.registerLayerDefinition(DarkLatexWolfFemaleModel.LAYER_LOCATION, DarkLatexWolfFemaleModel::createBodyLayer);
@@ -52,6 +54,7 @@ public class ChangedLayerDefinitions {
         event.registerLayerDefinition(LatexAlienModel.LAYER_LOCATION, LatexAlienModel::createBodyLayer);
         event.registerLayerDefinition(LatexBeeModel.LAYER_LOCATION, LatexBeeModel::createBodyLayer);
         event.registerLayerDefinition(LatexBeifengModel.LAYER_LOCATION, LatexBeifengModel::createBodyLayer);
+        event.registerLayerDefinition(LatexBenignOrcaModel.LAYER_LOCATION, LatexBenignOrcaModel::createBodyLayer);
         event.registerLayerDefinition(LatexBenignWolfModel.LAYER_LOCATION, LatexBenignWolfModel::createBodyLayer);
         event.registerLayerDefinition(LatexBlueDragonModel.LAYER_LOCATION, LatexBlueDragonModel::createBodyLayer);
         event.registerLayerDefinition(LatexBlueWolfModel.LAYER_LOCATION, LatexBlueWolfModel::createBodyLayer);

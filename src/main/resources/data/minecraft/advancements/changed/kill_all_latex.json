@@ -29,14 +29,42 @@
         ]
       }
     },
-    "changed:gas_wolf": {
+    "changed:gas_wolf_female": {
       "trigger": "minecraft:player_killed_entity",
       "conditions": {
         "entity": [
           {
             "condition": "minecraft:entity_properties",
             "predicate": {
-              "type": "changed:gas_wolf"
+              "type": "changed:gas_wolf_female"
+            },
+            "entity": "this"
+          }
+        ]
+      }
+    },
+    "changed:gas_wolf_male": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "predicate": {
+              "type": "changed:gas_wolf_male"
+            },
+            "entity": "this"
+          }
+        ]
+      }
+    },
+    "changed:gas_wolf_pup": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "predicate": {
+              "type": "changed:gas_wolf_pup"
             },
             "entity": "this"
           }
@@ -205,6 +233,20 @@
             "condition": "minecraft:entity_properties",
             "predicate": {
               "type": "changed:beifeng"
+            },
+            "entity": "this"
+          }
+        ]
+      }
+    },
+    "changed:latex_benign_orca": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "predicate": {
+              "type": "changed:latex_benign_orca"
             },
             "entity": "this"
           }
@@ -1187,7 +1229,13 @@
       "changed:gas_tiger"
     ],
     [
-      "changed:gas_wolf"
+      "changed:gas_wolf_female"
+    ],
+    [
+      "changed:gas_wolf_male"
+    ],
+    [
+      "changed:gas_wolf_pup"
     ],
     [
       "changed:behemoth_head"
@@ -1224,6 +1272,9 @@
     ],
     [
       "changed:beifeng"
+    ],
+    [
+      "changed:latex_benign_orca"
     ],
     [
       "changed:latex_benign_wolf"
