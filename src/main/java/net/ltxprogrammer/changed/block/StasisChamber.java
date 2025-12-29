@@ -14,10 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.*;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -309,6 +306,18 @@ public class StasisChamber extends HorizontalDirectionalBlock implements Partial
     protected void spawnDestroyParticles(Level level, Player player, BlockPos blockpos, BlockState blockState) {
         if (blockState.getValue(SECTION) == ThreeXThreeSection.MIDDLE_BOTTOM_MIDDLE)
             super.spawnDestroyParticles(level, player, blockpos, blockState);
+    }
+
+    public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState next, boolean noUpdate) {
+        if (!blockState.is(next.getBlock())) {
+            BlockEntity blockentity = level.getBlockEntity(blockPos);
+            if (blockentity instanceof Container) {
+                Containers.dropContents(level, blockPos, (Container)blockentity);
+                level.updateNeighbourForOutputSignal(blockPos, this);
+            }
+
+            super.onRemove(blockState, level, blockPos, next, noUpdate);
+        }
     }
 
     @Override
