@@ -44,7 +44,7 @@ public abstract class Gas extends ForgeFlowingFluid {
         @Override
         public boolean isAir() { // Requires accesstransformer to work
             return true;
-        } // For some Reason the Access Transformer stop working? check the FluidTypeMixin
+        }
     }
 
     public abstract Color3 getColor();
