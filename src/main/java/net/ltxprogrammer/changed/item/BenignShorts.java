@@ -21,7 +21,7 @@ public class BenignShorts extends ClothingItem implements Shorts {
 
     public static TransfurVariant<?> getBenignTransfurVariant(LivingEntity entity) {
         if (entity.isInWater()) {
-            // TODO: return ChangedTransfurVariants.BENIGN_ORCA.get()
+            return ChangedTransfurVariants.LATEX_BENIGN_ORCA.get();
         }
 
         if (entity.getRandom().nextBoolean()) {

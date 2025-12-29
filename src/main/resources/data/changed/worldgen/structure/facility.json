@@ -1,6 +1,6 @@
 {
   "type": "changed:facility",
   "biomes": "#changed:has_structure/facility",
-  "step": "underground_structures",
+  "step": "surface_structures",
   "spawn_overrides": {}
 }

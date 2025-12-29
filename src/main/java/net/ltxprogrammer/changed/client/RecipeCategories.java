@@ -165,6 +165,8 @@ public class RecipeCategories {
 
         event.addGendered(ChangedTransfurVariants.DARK_LATEX_WOLF_MALE);
         event.addGendered(ChangedTransfurVariants.DARK_LATEX_WOLF_FEMALE);
+        event.addGendered(ChangedTransfurVariants.GAS_WOLF_MALE);
+        event.addGendered(ChangedTransfurVariants.GAS_WOLF_FEMALE);
         event.addGendered(ChangedTransfurVariants.PHAGE_LATEX_WOLF_MALE);
         event.addGendered(ChangedTransfurVariants.PHAGE_LATEX_WOLF_FEMALE);
         event.addGendered(ChangedTransfurVariants.WHITE_LATEX_WOLF_MALE);

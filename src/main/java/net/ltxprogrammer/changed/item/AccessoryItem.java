@@ -10,7 +10,6 @@ import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.phys.AABB;
@@ -101,5 +100,7 @@ public interface AccessoryItem {
     default void accessoryTick(AccessorySlotContext<?> slotContext) {}
     default void accessorySwing(AccessorySlotContext<?> slotContext, InteractionHand hand) {}
     default void accessoryAttack(AccessorySlotContext<?> slotContext, InteractionHand hand, Entity target) {}
-    default void accessoryDamaged(AccessorySlotContext<?> slotContext, DamageSource source, float amount) {}
+    default float accessoryHurt(AccessorySlotContext<?> slotContext, DamageSource source, float amount) {
+        return amount;
+    }
 }

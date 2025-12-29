@@ -73,8 +73,14 @@ public abstract class WorldSliceMixin implements WorldSliceExtension {
         int relX = x - this.originX;
         int relY = y - this.originY;
         int relZ = z - this.originZ;
-        LatexCoverState var10000 = this.latexCoverStatesArrays[WorldSlice.getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)][WorldSlice.getLocalBlockIndex(relX & 15, relY & 15, relZ & 15)];
-        return Objects.requireNonNullElseGet(var10000, () -> ChangedLatexTypes.NONE.get().defaultCoverState());
+        int sectionIndex = WorldSlice.getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4);
+        int blockIndex = WorldSlice.getLocalBlockIndex(relX & 15, relY & 15, relZ & 15);
+        if (sectionIndex < 0 || sectionIndex >= SECTION_ARRAY_SIZE)
+            return ChangedLatexTypes.NONE.get().defaultCoverState();
+        if (blockIndex < 0 || blockIndex >= 4096)
+            return ChangedLatexTypes.NONE.get().defaultCoverState();
+        return Objects.requireNonNullElseGet(this.latexCoverStatesArrays[sectionIndex][blockIndex],
+                () -> ChangedLatexTypes.NONE.get().defaultCoverState());
     }
 
     @Inject(method = "copySectionData", at = @At("TAIL"))

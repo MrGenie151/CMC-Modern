@@ -5,6 +5,7 @@
 
     "changed:dark_latex_wolf_partial",
     "changed:green_lizard",
+    "changed:latex_benign_orca",
     "changed:latex_benign_wolf",
     "changed:latex_blue_dragon",
     "changed:latex_blue_wolf",
@@ -49,7 +50,8 @@
 
     "changed:gas_skunk",
     "changed:gas_tiger",
-    "changed:gas_wolf",
+    "changed:gas_wolf_female",
+    "changed:gas_wolf_male",
     "changed:dark_dragon",
     "changed:sniper_dog",
     "changed:beifeng",
