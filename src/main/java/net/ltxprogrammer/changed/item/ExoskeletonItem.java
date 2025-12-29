@@ -274,9 +274,6 @@ public class ExoskeletonItem<T extends AbstractRobot> extends PlaceableEntity<T>
 
     @Override
     public void accessoryDamaged(AccessorySlotContext<?> slotContext, DamageSource source, float amount) {
-        LivingEntity wearer = slotContext.wearer();
-        if (wearer != null && !wearer.getCombatTracker().takingDamage) return; // Stop causing item damage if the entity is not being affect by the damage source
-
         if (!source.is(DamageTypeTags.BYPASSES_ARMOR))
             degradeCharge(slotContext, (int)(4 * amount));
     }
