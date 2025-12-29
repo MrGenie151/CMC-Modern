@@ -803,11 +803,14 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
             airDelta = 0;
             this.ticksBreathingUnderwater = 0;
         } else if (host.isEyeInFluidType(Fluids.WATER.getFluidType())) {
-            if (host.hasEffect(MobEffects.WATER_BREATHING) || !host.canDrownInFluidType(ForgeMod.WATER_TYPE.get())) return;
-
             if (breatheMode.canBreatheWater()) {
                 airDelta = 4;
                 this.ticksBreathingUnderwater++;
+            }
+            
+            else if (host.hasEffect(MobEffects.WATER_BREATHING) || !host.canDrownInFluidType(ForgeMod.WATER_TYPE.get())) {
+                airDelta = 4;
+                this.ticksBreathingUnderwater = 0;
             }
 
             else {
