@@ -21,7 +21,6 @@
     "block.PowderSnowBlockMixin",
     "block.SimpleBlockFeatureMixin",
     "block.SpreadingSnowyDirtBlockMixin",
-    "client.RenderChunkRegionAccessor",
     "entity.ArrowMixin",
     "entity.EntityMixin",
     "entity.IronGolemMixin",
