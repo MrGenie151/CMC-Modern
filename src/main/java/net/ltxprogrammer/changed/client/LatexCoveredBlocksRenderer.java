@@ -372,10 +372,6 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
         return RenderType.solid();
     }
 
-
-//    Old Code
-//    @Nullable
-//    private static LatexCoverGetter latexCoverStateGetter = null;
     private static final ThreadLocal<LatexCoverGetter> threadLocal = ThreadLocal.withInitial(() -> null);
 
     public static Optional<LatexCoverGetter> getLatexCoverStateGetter() {
@@ -413,8 +409,6 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
         final RenderType renderType = this.getRenderType(coverState);
 
         threadLocal.set(latexCoverGetter);
-        //Old Code
-        //latexCoverStateGetter = latexCoverGetter;
 
         if (surfaceTop && modelSet.surfaceTop != null) {
             modelRenderer.tesselateWithAO(level, modelSet.surfaceTop, blockState, blockPos, poseStack, bufferBuilder, true, random, seed, lightColor,
@@ -452,8 +446,6 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
         }
 
         threadLocal.remove();
-        //Old Code
-        //latexCoverStateGetter = null;
 
         return true;
     }
@@ -483,7 +475,7 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
         } catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.forThrowable(throwable, "Tesselating latex cover in world");
             CrashReportCategory crashreportcategory = crashreport.addCategory("Block being tesselated");
-            CrashReportCategory.populateBlockDetails(crashreportcategory, level, blockPos, (BlockState) null);
+            CrashReportCategory.populateBlockDetails(crashreportcategory, level, blockPos, (BlockState)null);
             throw new ReportedException(crashreport);
         }
     }
