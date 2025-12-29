@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.ltxprogrammer.changed.client.ChangedClient;
 import net.ltxprogrammer.changed.client.LatexCoveredBlocksRenderer;
+import net.ltxprogrammer.changed.init.ChangedLatexTypes;
 import net.ltxprogrammer.changed.world.LatexCoverGetter;
 import net.ltxprogrammer.changed.world.LatexCoverState;
 import net.minecraft.client.Minecraft;
@@ -40,6 +41,10 @@ public abstract class ChunkRenderDispatcherMixin {
     public LatexCoverState getLatexCoverState(RenderChunkRegion region, BlockPos blockPos) {
         int i = SectionPos.blockToSectionCoord(blockPos.getX()) - region.centerX;
         int j = SectionPos.blockToSectionCoord(blockPos.getZ()) - region.centerZ;
+        if (i < 0 || i >= region.chunks.length)
+            return ChangedLatexTypes.NONE.get().defaultCoverState();
+        if (j < 0 || j >= region.chunks[i].length)
+            return ChangedLatexTypes.NONE.get().defaultCoverState();
         return LatexCoverState.getAt(region.chunks[i][j].wrapped, blockPos);
     }
 
