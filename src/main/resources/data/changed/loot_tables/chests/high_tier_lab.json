@@ -71,7 +71,7 @@
         },
         {
           "type": "minecraft:item",
-          "weight": 5,
+          "weight": 3,
           "name": "minecraft:diamond"
         },
         {
