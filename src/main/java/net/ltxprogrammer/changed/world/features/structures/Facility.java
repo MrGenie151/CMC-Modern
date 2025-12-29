@@ -9,13 +9,16 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class Facility extends Structure {
-    public static final int GENERATION_CHUNK_RADIUS = 6;
+    public static final int GENERATION_CHUNK_RADIUS = 8;
 
     public static final Codec<Facility> CODEC = simpleCodec(Facility::new);
 
@@ -40,11 +43,31 @@ public class Facility extends Structure {
 
         BoundingBox generationRegion = BoundingBox.fromCorners(minPos, maxPos);
 
-        FacilityKeystone keystone = FacilityPieces.generateFacility(builder, context, 5, 36, generationRegion);
-        builder.addPiece(keystone);
+        List<Integer> sizes = new ArrayList<>();
+        List<StructurePiece> largestSet = List.of();
+        FacilityKeystone largestKeystone = null;
 
-        Changed.LOGGER.info("Generated facility \"{}\" with {} pieces, at ChunkPos {}", keystone,
-                ((StructurePiecesBuilderExtender)builder).pieceCount(), center);
+        for (int reroll = 0; reroll < 1; reroll++) {
+            builder.clear();
+
+            FacilityKeystone keystone = FacilityPieces.generateFacility(builder, context, 5, 25, generationRegion);
+            builder.addPiece(keystone);
+
+            int size = ((StructurePiecesBuilderExtender)builder).pieceCount();
+            sizes.add(size);
+            if (((StructurePiecesBuilderExtender)builder).pieceCount() > largestSet.size()) {
+                largestSet = ((StructurePiecesBuilderExtender)builder).getPieces();
+                largestKeystone = keystone;
+            }
+        }
+
+        largestSet.forEach(builder::addPiece);
+
+        Changed.LOGGER.info("Generated facility \"{}\" with {} pieces (best of {}), at ChunkPos {}",
+                largestKeystone,
+                largestSet.size(),
+                sizes,
+                center);
     }
 
     @Override

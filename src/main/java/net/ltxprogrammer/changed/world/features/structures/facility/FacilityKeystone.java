@@ -82,7 +82,7 @@ public class FacilityKeystone extends StructurePiece {
         piecesByZone.forEach((zone, boundingBox) -> {
             zoneInfoBuilder.put(zone, new ActiveFacilityInstance.ZoneInfo(
                     FacilityZoneEntities.INSTANCE.getSpawns(zone).stream().map(ActiveFacilityInstance.SpawnInfo::new).toList(),
-                    boundingBox));
+                    boundingBox.stream().map(ActiveFacilityInstance.PieceInfo::new).toList()));
         });
 
         var facilityInstance = new ActiveFacilityInstance(zoneInfoBuilder.build());

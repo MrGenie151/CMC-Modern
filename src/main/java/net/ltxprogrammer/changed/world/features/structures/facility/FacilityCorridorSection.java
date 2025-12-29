@@ -20,7 +20,7 @@ public class  FacilityCorridorSection extends FacilitySinglePiece {
             //WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.TRANSITION, 1),
             WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.SPLIT, 15),
             WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.CORRIDOR, 15),
-            WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.ROOM, 1));
+            WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.ROOM, 5));
 
     private static final WeightedRandomList<WeightedPieceNeighborSupplier> VALID_NEIGHBORS_HIGH_SPAN = WeightedRandomList.create(
             WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.STAIRCASE_START, 3),
@@ -44,7 +44,7 @@ public class  FacilityCorridorSection extends FacilitySinglePiece {
     @Override
     public WeightedRandomList<WeightedPieceNeighborSupplier> getValidNeighbors(FacilityGenerationStack stack) {
         int corridors = stack.sequentialMatch(piece -> piece.facilityPiece().type == ChangedFacilityPieceTypes.CORRIDOR.get());
-        if (stack.getDepthRemaining() > 10) {
+        if (stack.getDepthRemaining() > 4) {
             if (corridors < 5)
                 return VALID_NEIGHBORS_MIN_HIGH_SPAN;
             return VALID_NEIGHBORS_HIGH_SPAN;

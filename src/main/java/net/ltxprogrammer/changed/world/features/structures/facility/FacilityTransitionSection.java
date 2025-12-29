@@ -9,7 +9,7 @@ import net.minecraft.util.random.WeightedRandomList;
 
 public class FacilityTransitionSection extends FacilitySinglePiece {
     private static final WeightedRandomList<WeightedPieceNeighborSupplier> VALID_NEIGHBORS = WeightedRandomList.create(
-            WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.CORRIDOR, 1));
+            WeightedPieceNeighborSupplier.of(ChangedFacilityPieceTypes.SPLIT, 1));
 
     public FacilityTransitionSection(ResourceLocation templateName) {
         super(ChangedFacilityPieceTypes.TRANSITION.get(), templateName, LootTables.LOW_TIER_LAB);
