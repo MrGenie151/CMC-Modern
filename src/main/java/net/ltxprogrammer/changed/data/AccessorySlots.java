@@ -272,12 +272,14 @@ public class AccessorySlots implements Container {
         }
     }
 
-    public void onEntityDamage(DamageSource source, float amount) {
+    public float onEntityDamage(DamageSource source, float amount) {
         for (var entry : items.entrySet()) {
             if (entry.getKey() != null && entry.getValue().getItem() instanceof AccessoryItem accessoryItem) {
-                accessoryItem.accessoryDamaged(AccessorySlotContext.of(this.owner, entry.getKey()), source, amount);
+                amount = accessoryItem.accessoryHurt(AccessorySlotContext.of(this.owner, entry.getKey()), source, amount);
             }
         }
+
+        return amount;
     }
 
     public boolean moveToSlot(@Nullable AccessorySlotType slot, ItemStack stack) {

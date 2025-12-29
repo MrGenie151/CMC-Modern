@@ -273,9 +273,10 @@ public class ExoskeletonItem<T extends AbstractRobot> extends PlaceableEntity<T>
     }
 
     @Override
-    public void accessoryDamaged(AccessorySlotContext<?> slotContext, DamageSource source, float amount) {
+    public float accessoryHurt(AccessorySlotContext<?> slotContext, DamageSource source, float amount) {
         if (!source.is(DamageTypeTags.BYPASSES_ARMOR))
             degradeCharge(slotContext, (int)(4 * amount));
+        return amount;
     }
 
     @Override
