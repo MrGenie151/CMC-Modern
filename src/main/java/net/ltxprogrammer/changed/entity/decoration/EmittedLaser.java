@@ -163,6 +163,7 @@ public class EmittedLaser extends Entity {
         }
 
         this.entityData.set(DATA_LENGTH_ID, length);
+        this.recalculateBoundingBox();
 
         ObjectArrayList<LivingEntity> entities = new ObjectArrayList<>(0);
         level().getEntities(EntityTypeTest.forClass(LivingEntity.class), this.getBoundingBox(), Objects::nonNull, entities);
