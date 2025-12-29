@@ -1,6 +1,5 @@
 package net.ltxprogrammer.changed.datagen;
 
-import net.ltxprogrammer.changed.datagen.ability_tree.AbilityTreeProviderImpl;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
@@ -24,7 +23,6 @@ public class GatherData {
         // All the Variables upwards of this comment may become needed by a specific kind of datagen
 
         generator.addProvider(true, new AccessoryEntityProvider(generator));
-        generator.addProvider(true, new AbilityTreeProviderImpl(packOutput));
         generator.addProvider(true, new TFTagsProvider(packOutput, lookupProvider, helper));
 
         CompletableFuture<HolderLookup.Provider> lookup0 =
