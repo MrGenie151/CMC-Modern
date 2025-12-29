@@ -6,12 +6,7 @@
   "refmap": "changed.refmap.json",
   "plugin": "net.ltxprogrammer.changed.mixin.compatibility.ChangedMixinPlugin",
   "mixins": [
-    "SleepTight.ArmRideAnimatorMixin",
-    "SleepTight.BedEntityMixin",
-    "SleepTight.BipedalRideAnimatorMixin",
-    "SleepTight.LeglessRideAnimatorMixin",
-    "SleepTight.QuadrupedalRideAnimatorMixin",
-    "SleepTight.TailRideAnimatorMixin"
+    "SleepTight.HumanoidAnimatorMixin"
   ],
   "client": [
     "BeyondEarth.OxygenSystemMixin",
@@ -44,6 +39,7 @@
     "PlayerAnimator.HumanoidAnimatorMixin",
     "PresenceFootsteps.PFSolverMixin",
     "PresenceFootsteps.SoundEngineMixin",
+    "SleepTight.LivingEntityRendererMixin",
     "Sodium.ChunkRenderRebuildTaskMixin",
     "Sodium.ClonedChunkSectionMixin",
     "Sodium.WorldSliceMixin",
