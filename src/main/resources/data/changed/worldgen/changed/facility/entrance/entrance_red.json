@@ -4,7 +4,7 @@
     "template": "changed:facility/entrance/entrance_red",
     "loot_table": "changed:chests/low_tier_lab"
   },
-  "spawn_weight": 20,
+  "spawn_weight": 5,
   "neighboring_zones": [
     "changed:office"
   ]

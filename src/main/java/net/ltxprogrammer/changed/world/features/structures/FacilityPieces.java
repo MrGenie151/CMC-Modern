@@ -18,8 +18,6 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.util.random.WeightedEntry;
-import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -39,6 +37,7 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
     public static FacilityPieces INSTANCE = new FacilityPieces();
 
     private final Map<PieceType<?>, FacilityPieceCollection> facilityPieceCollections = new HashMap<>();
+    private final Set<Zone> zonesWithDefinedPieces = new HashSet<>();
 
     private ConfiguredFacilityPiece processJSONFile(JsonObject root) {
         return ConfiguredFacilityPiece.CODEC.decode(JsonOps.INSTANCE, root)
@@ -55,6 +54,9 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
 
     @Override
     protected void apply(@NotNull Set<ConfiguredFacilityPiece> output, @NotNull ResourceManager resources, @NotNull ProfilerFiller profiler) {
+        facilityPieceCollections.clear();
+        zonesWithDefinedPieces.clear();
+
         for (var pieceType : ChangedRegistry.FACILITY_PIECE_TYPES.get().getValues()) {
             FacilityPieceCollectionBuilder builder = new FacilityPieceCollectionBuilder();
             output.stream().filter(piece -> piece.facilityPiece().getType() == pieceType).forEach(builder::register);
@@ -62,6 +64,10 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
             Changed.postModLoadingEvent(new GatherFacilityPiecesEvent(pieceType, builder));
 
             facilityPieceCollections.put(pieceType, builder.build());
+            facilityPieceCollections.get(pieceType).stream()
+                    .map(ConfiguredFacilityPiece::connectsTo)
+                    .flatMap(Set::stream)
+                    .forEach(zonesWithDefinedPieces::add);
         }
     }
 
@@ -112,6 +118,12 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
                 return count + 1;
             });
         }
+
+        public Stream<Zone> getRemainingZonesToGenerate() {
+            return INSTANCE.zonesWithDefinedPieces.stream().filter(zone -> {
+                return !zone.isUnique() || !piecesByZone.containsKey(zone);
+            });
+        }
     }
 
     private static int sequentialMatch(Stack<ConfiguredFacilityPiece> stack, Predicate<ConfiguredFacilityPiece> predicate, boolean includingNonSpan) {
@@ -131,7 +143,7 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
 
     private static void treeGenerate(FacilityGenerationContext facilityContext,
                                      Stack<ConfiguredFacilityPiece> stack, StructurePiece parentStructure,
-                                     GenStep start, int genDepth, int span, BoundingBox allowedRegion, boolean coerceZone) {
+                                     GenStep start, int genDepth, int span, BoundingBox allowedRegion, int zoneProtection) {
         var configuredParent = stack.peek();
         var parent = configuredParent.facilityPiece();
         var zone = start.getZone();
@@ -155,25 +167,38 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
                 var type = start.validTypes().getRandom(facilityContext.structureContext.random());
                 if (type.isEmpty())
                     break;
-                if (reroll > 5 && zone != null && zoneLength > zone.getMinimumLength()) { // Coerce the next piece to be a transition to another zone
-                    WeightedRandomList<WeightedEntry.Wrapper<Zone>> possibleZones = WeightedRandomList.create(
+                if (zoneProtection <= 0 && reroll > 5 && zone != null && zoneLength > zone.getMinimumLength()) { // Coerce the next piece to be a transition to another zone
+                    int zoneDelta = zoneLength - zone.getMinimumLength();
+
+                    if (facilityContext.structureContext.random().nextInt(4) < zoneDelta) {
+                        var remainingZones = facilityContext.getRemainingZonesToGenerate().collect(Collectors.toCollection(ArrayList::new));
+                        wantedZone = Util.getRandom(remainingZones, facilityContext.structureContext.random());
+                    }
+
+                    /*WeightedRandomList<WeightedEntry.Wrapper<Zone>> possibleZones = WeightedRandomList.create(
                             ChangedRegistry.FACILITY_ZONES.get().getValues().stream()
-                                    .map(facilityZone -> WeightedEntry.wrap(facilityZone, (int)(facilityZone.getGenerationWeight(36 - span) * 100)))
+                                    .map(facilityZone -> {
+                                        int weight = (int) (facilityZone.getGenerationWeight(36 - span) * 100);
+                                        if (weight <= 0)
+                                            return null;
+                                        return WeightedEntry.wrap(facilityZone, weight);
+                                    })
+                                    .filter(Objects::nonNull)
                                     .collect(Collectors.toList())
                     );
 
-                    wantedZone = possibleZones.getRandom(facilityContext.structureContext.random()).map(WeightedEntry.Wrapper::getData).orElse(zone);
+                    wantedZone = possibleZones.getRandom(facilityContext.structureContext.random()).map(WeightedEntry.Wrapper::getData).orElse(zone);*/
                 }
 
                 pieceType = type.get().getPieceType();
                 allowedRegionForPiece = allowedRegion;
 
-                if (!coerceZone && pieceType == ChangedFacilityPieceTypes.TRANSITION.get()) {
+                if (zoneProtection > 0 && pieceType == ChangedFacilityPieceTypes.TRANSITION.get()) {
                     pieceType = ChangedFacilityPieceTypes.CORRIDOR.get();
                     wantedZone = zone;
                 }
 
-                if (coerceZone && wantedZone != zone && pieceType.canBeReplacedBy(ChangedFacilityPieceTypes.TRANSITION.get())) {
+                if (zoneProtection <= 0 && wantedZone != zone && pieceType.canBeReplacedBy(ChangedFacilityPieceTypes.TRANSITION.get())) {
                     pieceType = ChangedFacilityPieceTypes.TRANSITION.get();
                 }
             }
@@ -202,16 +227,18 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
                         nextStructure.addSteps(genStack, starts);
                         Util.shuffle(starts, facilityContext.structureContext.random());
 
-                        int piecesBefore = ((StructurePiecesBuilderExtender)facilityContext.builder).pieceCount();
+                        int piecesStart = ((StructurePiecesBuilderExtender)facilityContext.builder).pieceCount();
                         AtomicBoolean firstStart = new AtomicBoolean(true);
                         starts.stream().filter(next -> !next.blockInfo().pos().equals(startPos)).forEach(next -> {
                             boolean isFirstStart = firstStart.getAndSet(false);
-                            boolean isMinorBranch = coerceZone && !isFirstStart;
+                            boolean isMinorBranch = zoneProtection <= 0 && !isFirstStart;
+                            int piecesBefore = ((StructurePiecesBuilderExtender)facilityContext.builder).pieceCount();
                             treeGenerate(facilityContext, stack, nextStructure, next, genDepth,
-                                    isMinorBranch ? Math.min(10, nextSpan) : nextSpan, allowedRegion, coerceZone &&
-                                    isFirstStart);
+                                    isFirstStart ? nextSpan : nextSpan - 5,
+                                    allowedRegion,
+                                    isFirstStart ? Math.max(zoneProtection - 1, 0) : 5);
                             int piecesAfter = ((StructurePiecesBuilderExtender)facilityContext.builder).pieceCount();
-                            if (piecesAfter <= piecesBefore) { // Start failed to generate sufficient pieces, allow new branch to assume zone generation
+                            if (piecesAfter <= piecesStart) { // Start failed to generate sufficient pieces, allow new branch to assume zone generation
                                 firstStart.set(true);
                             }
                         });
@@ -219,7 +246,7 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
 
                         stack.pop();
 
-                        if (resolvedPieceType.connectionsMeetExpectations((piecesAfter - piecesBefore) + 1)) {
+                        if (resolvedPieceType.connectionsMeetExpectations((piecesAfter - piecesStart) + 1)) {
                             if (resolvedPieceType != ChangedFacilityPieceTypes.SEAL.get())
                                 facilityContext.addPieceToCount(nextConfiguredPiece);
                             return nextStructure;
@@ -310,7 +337,7 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
 
         if (span > 0) {
             starts.forEach(start -> {
-                treeGenerate(facilityGenerationContext, stack, entrancePiece, start, genDepth, span - 1, allowedRegion, true);
+                treeGenerate(facilityGenerationContext, stack, entrancePiece, start, genDepth, span - 1, allowedRegion, 0);
             });
         }
 

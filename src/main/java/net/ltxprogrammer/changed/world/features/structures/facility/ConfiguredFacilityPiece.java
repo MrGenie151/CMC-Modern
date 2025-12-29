@@ -18,22 +18,22 @@ import java.util.Set;
  * @param connectsTo set of zones the piece can connect to, for optimization (empty = all)
  */
 public record ConfiguredFacilityPiece(FacilityPiece facilityPiece,
-                                   int spawnWeight,
-                                   int minimum,
-                                   int maximum,
-                                   Set<Zone> connectsTo) implements WeightedEntry {
+                                      Weight spawnWeight,
+                                      int minimum,
+                                      int maximum,
+                                      Set<Zone> connectsTo) implements WeightedEntry {
     public static Codec<ConfiguredFacilityPiece> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ((MapCodec<FacilityPiece>) ChangedRegistry.FACILITY_PIECE_TYPES.get().getCodec().dispatch("type", FacilityPiece::getType, PieceType::getCodec)
                     .fieldOf("piece")).forGetter(ConfiguredFacilityPiece::facilityPiece),
-            Codec.INT.fieldOf("spawn_weight").forGetter(ConfiguredFacilityPiece::spawnWeight),
+            Weight.CODEC.fieldOf("spawn_weight").forGetter(ConfiguredFacilityPiece::spawnWeight),
             Codec.INT.fieldOf("minimum").orElse(0).forGetter(ConfiguredFacilityPiece::minimum),
-            Codec.INT.fieldOf("maximum").orElse(10).forGetter(ConfiguredFacilityPiece::maximum),
+            Codec.INT.fieldOf("maximum").orElse(20).forGetter(ConfiguredFacilityPiece::maximum),
             ChangedRegistry.FACILITY_ZONES.get().getCodec().listOf().xmap(Set::copyOf, List::copyOf)
                     .fieldOf("neighboring_zones").forGetter(ConfiguredFacilityPiece::connectsTo)
     ).apply(instance, ConfiguredFacilityPiece::new));
 
     @Override
     public Weight getWeight() {
-        return Weight.of(spawnWeight);
+        return spawnWeight;
     }
 }

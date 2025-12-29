@@ -1,6 +1,7 @@
 package net.ltxprogrammer.changed.world.features.structures.facility;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.util.random.Weight;
 
 import java.util.Set;
 
@@ -24,6 +25,11 @@ public class FacilityPieceCollectionBuilder {
     }
 
     public FacilityPieceCollectionBuilder register(int weight, FacilityPiece piece) {
+        builder.add(new ConfiguredFacilityPiece(piece, Weight.of(weight), 0, 10, Set.of()));
+        return this;
+    }
+
+    public FacilityPieceCollectionBuilder register(Weight weight, FacilityPiece piece) {
         builder.add(new ConfiguredFacilityPiece(piece, weight, 0, 10, Set.of()));
         return this;
     }

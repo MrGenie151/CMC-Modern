@@ -10,10 +10,12 @@ import net.ltxprogrammer.changed.world.features.structures.facility.Zone;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.Weight;
 import net.minecraft.util.random.WeightedEntry;
@@ -28,6 +30,7 @@ import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.*;
@@ -223,10 +226,45 @@ public class ActiveFacilityInstance {
         }
     }
 
-    public record ZoneInfo(List<SpawnInfo> spawnLists, List<BoundingBox> pieceRegions) {
+    public static class PieceInfo {
+        public final BoundingBox region;
+        public final int availableSpawns;
+        public int spawnedEntities;
+
+        public static final Codec<PieceInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                BoundingBox.CODEC.fieldOf("region").forGetter(info -> info.region),
+                Codec.INT.fieldOf("availableSpawns").forGetter(info -> info.availableSpawns),
+                Codec.INT.fieldOf("spawnedEntities").forGetter(info -> info.spawnedEntities)
+        ).apply(instance, PieceInfo::new));
+
+        public PieceInfo(BoundingBox region, int availableSpawns, int spawnedEntities) {
+            this.region = region;
+            this.availableSpawns = availableSpawns;
+            this.spawnedEntities = spawnedEntities;
+        }
+
+        public PieceInfo(BoundingBox region) {
+            this(region, getAvailableSpawns(region), 0);
+        }
+
+        public boolean isInside(Vec3i position) {
+            return region.isInside(position);
+        }
+
+        private static int getAvailableSpawns(BoundingBox region) {
+            int mass = (region.getXSpan() - 2) * (region.getYSpan() - 2) * (region.getZSpan() - 2);
+            return Mth.clamp(mass / 64, 0, 4);
+        }
+
+        public boolean isNotExhausted() {
+            return spawnedEntities < availableSpawns;
+        }
+    }
+
+    public record ZoneInfo(List<SpawnInfo> spawnLists, List<PieceInfo> pieceRegions) {
         public static final Codec<ZoneInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Codec.list(SpawnInfo.CODEC).fieldOf("spawnLists").forGetter(ZoneInfo::spawnLists),
-                Codec.list(BoundingBox.CODEC).fieldOf("pieceRegions").forGetter(ZoneInfo::pieceRegions)
+                Codec.list(PieceInfo.CODEC).fieldOf("pieceRegions").forGetter(ZoneInfo::pieceRegions)
         ).apply(instance, ZoneInfo::new));
 
         public Optional<Pair<SpawnInfo, SpawnInfo.EntityInfo>> getNextSpawn(RandomSource random) {
@@ -237,18 +275,23 @@ public class ActiveFacilityInstance {
                     .map(pair -> pair.mapSecond(Optional::get));
         }
 
-        public Entity spawnRandomAt(ServerLevel level, BoundingBox region) {
+        public Entity spawnRandomAt(ServerLevel level, @Nullable PieceInfo piece) {
+            if (piece == null)
+                return null;
+            if (!piece.isNotExhausted())
+                return null;
+
             return getNextSpawn(level.getRandom()).map(pair -> {
                 var entityType = pair.getSecond().definition.entityType();
                 var spawnType = SpawnPlacements.getPlacementType(pair.getSecond().definition.entityType());
 
-                var possibleSpawns = BlockPos.betweenClosedStream(region).filter(blockPos -> { // Filter out blocks that spawn our entity outside a facility zone
+                var possibleSpawns = BlockPos.betweenClosedStream(piece.region).filter(blockPos -> { // Filter out blocks that spawn our entity outside a facility zone
                     BlockPos blockPos1 = blockPos.below();
                     BlockPos blockPos2 = blockPos.above();
 
-                    return (region.isInside(blockPos) || this.pieceRegions.stream().anyMatch(boundingBox -> boundingBox.isInside(blockPos))) &&
-                            (region.isInside(blockPos1) || this.pieceRegions.stream().anyMatch(boundingBox -> boundingBox.isInside(blockPos1))) &&
-                            (region.isInside(blockPos2) || this.pieceRegions.stream().anyMatch(boundingBox -> boundingBox.isInside(blockPos2)));
+                    return (piece.isInside(blockPos) || this.pieceRegions.stream().anyMatch(boundingBox -> boundingBox.isInside(blockPos))) &&
+                            (piece.isInside(blockPos1) || this.pieceRegions.stream().anyMatch(boundingBox -> boundingBox.isInside(blockPos1))) &&
+                            (piece.isInside(blockPos2) || this.pieceRegions.stream().anyMatch(boundingBox -> boundingBox.isInside(blockPos2)));
                 }).filter(blockPos -> { // Prevent unloaded chunks from loading
                     BlockPos blockPos1 = blockPos.below();
                     BlockPos blockPos2 = blockPos.above();
@@ -271,13 +314,17 @@ public class ActiveFacilityInstance {
 
                 pair.getFirst().available -= pair.getSecond().definition.cost();
                 pair.getSecond().spawnedCount++;
+                piece.spawnedEntities++;
 
                 return entity;
             }).orElse(null);
         }
 
         public Entity spawnRandom(ServerLevel level) {
-            return spawnRandomAt(level, Util.getRandom(pieceRegions, level.random));
+            var pieces = pieceRegions.stream().filter(PieceInfo::isNotExhausted).toList();
+            if (pieces.isEmpty())
+                return null;
+            return spawnRandomAt(level, Util.getRandom(pieces, level.random));
         }
     }
 
