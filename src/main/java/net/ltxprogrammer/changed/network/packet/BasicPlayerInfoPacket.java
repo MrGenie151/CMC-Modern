@@ -25,32 +25,25 @@ import java.util.function.Supplier;
 public class BasicPlayerInfoPacket implements ChangedPacket {
     public static final BasicPlayerInfoPacket EMPTY = new BasicPlayerInfoPacket(Map.of());
 
-    record Listing(BasicPlayerInfo info) {
-        static Listing fromStream(FriendlyByteBuf buf) {
-            return new Listing(new BasicPlayerInfo(buf.readNbt()));
-        }
-
-        void toStream(FriendlyByteBuf buf) {
-            var tag = new CompoundTag();
-            info.save(tag);
-            buf.writeNbt(tag);
-        }
-    }
-
-    private final Map<UUID, Listing> playerInfos;
-    public BasicPlayerInfoPacket(Map<UUID, Listing> playerInfos) {
+    private final Map<UUID, BasicPlayerInfo> playerInfos;
+    public BasicPlayerInfoPacket(Map<UUID, BasicPlayerInfo> playerInfos) {
         this.playerInfos = playerInfos;
     }
 
     public BasicPlayerInfoPacket(FriendlyByteBuf buffer) {
         this.playerInfos = new HashMap<>();
         buffer.readList(next ->
-                new Pair<>(next.readUUID(), Listing.fromStream(next))).forEach(pair ->
+                new Pair<>(next.readUUID(), new BasicPlayerInfo(next.readNbt()))).forEach(pair ->
                 playerInfos.put(pair.getFirst(), pair.getSecond()));
     }
 
     public void write(FriendlyByteBuf buffer) {
-        buffer.writeCollection(playerInfos.entrySet(), (next, form) -> { next.writeUUID(form.getKey()); form.getValue().toStream(next); });
+        buffer.writeCollection(playerInfos.entrySet(), (next, form) -> {
+            next.writeUUID(form.getKey());
+            CompoundTag bpiTag = new CompoundTag();
+            form.getValue().save(bpiTag);
+            next.writeNbt(bpiTag);
+        });
     }
 
     @Override
@@ -65,7 +58,7 @@ public class BasicPlayerInfoPacket implements ChangedPacket {
                     playerInfos.forEach((uuid, listing) -> {
                         var player = level.getPlayerByUUID(uuid);
                         if (player instanceof PlayerDataExtension ext && player != localPlayer) {
-                            ext.getBasicPlayerInfo().copyFrom(listing.info);
+                            ext.getBasicPlayerInfo().copyFrom(listing);
                         }
                     });
                 }
@@ -79,9 +72,13 @@ public class BasicPlayerInfoPacket implements ChangedPacket {
         else { // Mirror packet
             ServerPlayer sender = context.getSender();
             if (sender != null) {
-                if (sender instanceof PlayerDataExtension ext && playerInfos.containsKey(sender.getUUID()))
-                    ext.getBasicPlayerInfo().copyFrom(playerInfos.get(sender.getUUID()).info); // Keep player info state
-                Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY.with(() -> sender), BasicPlayerInfoPacket.Builder.of(sender));
+                if (sender instanceof PlayerDataExtension ext && playerInfos.containsKey(sender.getUUID())) {
+                    BasicPlayerInfo received = playerInfos.get(sender.getUUID());
+                    ext.getBasicPlayerInfo().copyFrom(received); // Keep player info state
+
+                    Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY.with(() -> sender),
+                            new BasicPlayerInfoPacket(Map.of(sender.getUUID(), received)));
+                }
             }
             context.setPacketHandled(true);
             return CompletableFuture.completedFuture(null);
@@ -89,11 +86,11 @@ public class BasicPlayerInfoPacket implements ChangedPacket {
     }
 
     public static class Builder {
-        private final Map<UUID, Listing> playerInfos = new HashMap<>();
+        private final Map<UUID, BasicPlayerInfo> playerInfos = new HashMap<>();
 
         public void addPlayer(Player player) {
             if (player instanceof PlayerDataExtension ext) {
-                playerInfos.put(player.getUUID(), new Listing(ext.getBasicPlayerInfo()));
+                playerInfos.put(player.getUUID(), ext.getBasicPlayerInfo());
             }
         }
 
