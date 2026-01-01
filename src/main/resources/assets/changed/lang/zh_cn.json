@@ -49,11 +49,15 @@
   "ability.changed.grab_entity.how_to_toggle_control": "按 [%s] 来切换身体控制权",
 
   "attribute.name.changed.transfur_damage": "兽化伤害",
+  "attribute.name.changed.transfur_damage.desc": "你单次攻击造成的兽化值（仅在兽化状态下生效）。",
   "attribute.name.changed.transfur_tolerance": "兽化抗性",
-  "attribute.name.changed.step_size": "步距",
+  "attribute.name.changed.transfur_tolerance.desc": "你对兽化攻击的抵抗力。",
   "attribute.name.changed.sprint_speed": "冲刺速度",
+  "attribute.name.changed.sprint_speed.desc": "冲刺时提升你的移动速度（仅在兽化状态下生效）。",
   "attribute.name.changed.sneak_speed": "潜行速度",
+  "attribute.name.changed.sneak_speed.desc": "潜行时提升你的移动速度（仅在兽化状态下生效）。",
   "attribute.name.changed.air_capacity": "肺活量",
+  "attribute.name.changed.air_capacity.desc": "你肺部能容纳的最大空气容量（仅在兽化状态下生效）。",
 
   "subtitles.changed.block.cardboard_box.close": "纸箱关闭",
   "subtitles.changed.block.cardboard_box.open": "纸箱打开",
