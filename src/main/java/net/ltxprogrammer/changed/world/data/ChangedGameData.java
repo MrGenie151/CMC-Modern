@@ -8,12 +8,16 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.datafix.DataFixTypes;
 
 import java.io.*;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 
 public class ChangedGameData {
     private final ServerLevel attachedLevel;
+
+    private final Set<File> badFiles = new HashSet<>();
 
     public final List<ActiveFacilityInstance> facilities = new ObjectArrayList<>(2);
 
@@ -103,7 +107,7 @@ public class ChangedGameData {
                     .map(ActiveFacilityInstance::getHeader)
                     .map(ActiveFacilityInstance.Header::getResourceName)
                     .noneMatch(resourceName::equals);
-        }).map(file -> {
+        }).filter(file -> !badFiles.contains(file)).map(file -> {
             ActiveFacilityInstance.Header header = new ActiveFacilityInstance.Header();
             if (!header.readInfoFromName(file.getName()))
                 return null;
@@ -117,6 +121,7 @@ public class ChangedGameData {
                 return facility;
             } catch (Exception e) {
                 Changed.LOGGER.error("Failed to load facility from disk ", e);
+                badFiles.add(pair.getFirst());
             }
             return null;
         }).filter(Objects::nonNull).forEach(facilities::add);

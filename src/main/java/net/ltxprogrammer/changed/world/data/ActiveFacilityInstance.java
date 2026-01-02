@@ -4,13 +4,13 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ltxprogrammer.changed.init.ChangedRegistry;
-import net.ltxprogrammer.changed.init.ChangedTags;
 import net.ltxprogrammer.changed.world.features.structures.facility.FacilityZoneEntities;
 import net.ltxprogrammer.changed.world.features.structures.facility.Zone;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -25,16 +25,14 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.storage.DimensionDataStorage;
-import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -230,21 +228,38 @@ public class ActiveFacilityInstance {
         public final BoundingBox region;
         public final int availableSpawns;
         public int spawnedEntities;
+        @Nullable private CompoundTag persistentData;
 
         public static final Codec<PieceInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 BoundingBox.CODEC.fieldOf("region").forGetter(info -> info.region),
                 Codec.INT.fieldOf("availableSpawns").forGetter(info -> info.availableSpawns),
-                Codec.INT.fieldOf("spawnedEntities").forGetter(info -> info.spawnedEntities)
+                Codec.INT.fieldOf("spawnedEntities").forGetter(info -> info.spawnedEntities),
+                CompoundTag.CODEC.optionalFieldOf("persistentData").forGetter(info -> {
+                    var additional = new CompoundTag();
+                    info.saveAdditionalData(additional);
+                    if (!additional.isEmpty()) {
+                        info.getOrCreatePersistentData().put("additionalData", additional);
+                    }
+
+                    return Optional.ofNullable(info.persistentData);
+                })
         ).apply(instance, PieceInfo::new));
 
-        public PieceInfo(BoundingBox region, int availableSpawns, int spawnedEntities) {
+        public PieceInfo(BoundingBox region, int availableSpawns, int spawnedEntities, Optional<CompoundTag> persistentData) {
             this.region = region;
             this.availableSpawns = availableSpawns;
             this.spawnedEntities = spawnedEntities;
+            this.persistentData = persistentData.orElse(null);
+
+            persistentData.ifPresent(tag -> {
+                var additional = tag.getCompound("additionalData");
+                if (!additional.isEmpty())
+                    this.readAdditionalData(additional);
+            });
         }
 
         public PieceInfo(BoundingBox region) {
-            this(region, getAvailableSpawns(region), 0);
+            this(region, getAvailableSpawns(region), 0, null);
         }
 
         public boolean isInside(Vec3i position) {
@@ -259,13 +274,65 @@ public class ActiveFacilityInstance {
         public boolean isNotExhausted() {
             return spawnedEntities < availableSpawns;
         }
+
+        public @Nullable CompoundTag getPersistentData() {
+            return persistentData;
+        }
+
+        public @NotNull CompoundTag getOrCreatePersistentData() {
+            if (persistentData == null)
+                persistentData = new CompoundTag();
+            return persistentData;
+        }
+
+        /**
+         * Saves piece level data to `tag`. This function is intended for future-proofing and for mixin hooks
+         * @param tag CompoundTag to save to.
+         */
+        public void saveAdditionalData(@NotNull CompoundTag tag) {
+
+        }
+
+        /**
+         * Reads piece level data from `tag`. This function is intended for future-proofing and for mixin hooks.
+         * This function WILL NOT be called if there is no additional data tag in the saved data, or if it is empty.
+         * @param tag CompoundTag to read from.
+         */
+        public void readAdditionalData(@NotNull CompoundTag tag) {
+
+        }
     }
 
-    public record ZoneInfo(List<SpawnInfo> spawnLists, List<PieceInfo> pieceRegions) {
+    public static class ZoneInfo {
+        public final List<SpawnInfo> spawnLists;
+        public final List<PieceInfo> pieceRegions;
+        private @Nullable CompoundTag persistentData;
+
         public static final Codec<ZoneInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                Codec.list(SpawnInfo.CODEC).fieldOf("spawnLists").forGetter(ZoneInfo::spawnLists),
-                Codec.list(PieceInfo.CODEC).fieldOf("pieceRegions").forGetter(ZoneInfo::pieceRegions)
+                Codec.list(SpawnInfo.CODEC).fieldOf("spawnLists").forGetter(info -> info.spawnLists),
+                Codec.list(PieceInfo.CODEC).fieldOf("pieceRegions").forGetter(info -> info.pieceRegions),
+                CompoundTag.CODEC.optionalFieldOf("persistentData").forGetter(info -> {
+                    var additional = new CompoundTag();
+                    info.saveAdditionalData(additional);
+                    if (!additional.isEmpty()) {
+                        info.getOrCreatePersistentData().put("additionalData", additional);
+                    }
+
+                    return Optional.ofNullable(info.persistentData);
+                })
         ).apply(instance, ZoneInfo::new));
+
+        public ZoneInfo(List<SpawnInfo> spawnLists, List<PieceInfo> pieceRegions, Optional<CompoundTag> persistentData) {
+            this.spawnLists = spawnLists;
+            this.pieceRegions = pieceRegions;
+            this.persistentData = persistentData.orElse(null);
+
+            persistentData.ifPresent(tag -> {
+                var additional = tag.getCompound("additionalData");
+                if (!additional.isEmpty())
+                    this.readAdditionalData(additional);
+            });
+        }
 
         public Optional<Pair<SpawnInfo, SpawnInfo.EntityInfo>> getNextSpawn(RandomSource random) {
             return WeightedRandomList.create(spawnLists.stream().filter(SpawnInfo::isNotExhausted).toList()).getRandom(random)
@@ -326,6 +393,33 @@ public class ActiveFacilityInstance {
                 return null;
             return spawnRandomAt(level, Util.getRandom(pieces, level.random));
         }
+
+        public @Nullable CompoundTag getPersistentData() {
+            return persistentData;
+        }
+
+        public @NotNull CompoundTag getOrCreatePersistentData() {
+            if (persistentData == null)
+                persistentData = new CompoundTag();
+            return persistentData;
+        }
+
+        /**
+         * Saves zone level data to `tag`. This function is intended for future-proofing and for mixin hooks
+         * @param tag CompoundTag to save to.
+         */
+        public void saveAdditionalData(@NotNull CompoundTag tag) {
+
+        }
+
+        /**
+         * Reads zone level data from `tag`. This function is intended for future-proofing and for mixin hooks.
+         * This function WILL NOT be called if there is no additional data tag in the saved data, or if it is empty.
+         * @param tag CompoundTag to read from.
+         */
+        public void readAdditionalData(@NotNull CompoundTag tag) {
+
+        }
     }
 
     private Header header;
@@ -339,15 +433,32 @@ public class ActiveFacilityInstance {
     }
 
     private final Map<Zone, ZoneInfo> zoneInfos;
+    private @Nullable CompoundTag persistentData;
 
     private boolean dirty = false;
 
     public static final Codec<ActiveFacilityInstance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.unboundedMap(ChangedRegistry.FACILITY_ZONES.get().getCodec(), ZoneInfo.CODEC).fieldOf("zoneInfos").forGetter(facility -> facility.zoneInfos)
+            Codec.unboundedMap(ChangedRegistry.FACILITY_ZONES.get().getCodec(), ZoneInfo.CODEC).fieldOf("zoneInfos").forGetter(facility -> facility.zoneInfos),
+            CompoundTag.CODEC.optionalFieldOf("persistentData").forGetter(facility -> {
+                var additional = new CompoundTag();
+                facility.saveAdditionalData(additional);
+                if (!additional.isEmpty()) {
+                    facility.getOrCreatePersistentData().put("additionalData", additional);
+                }
+
+                return Optional.ofNullable(facility.persistentData);
+            })
     ).apply(instance, ActiveFacilityInstance::new));
 
-    public ActiveFacilityInstance(Map<Zone, ZoneInfo> zoneInfos) {
+    public ActiveFacilityInstance(Map<Zone, ZoneInfo> zoneInfos, Optional<CompoundTag> persistentData) {
         this.zoneInfos = zoneInfos;
+        this.persistentData = persistentData.orElse(null);
+
+        persistentData.ifPresent(tag -> {
+            var additional = tag.getCompound("additionalData");
+            if (!additional.isEmpty())
+                this.readAdditionalData(additional);
+        });
     }
 
     public boolean isDirty() {
@@ -382,5 +493,32 @@ public class ActiveFacilityInstance {
             if (entity != null)
                 this.setDirty(true);
         });
+    }
+
+    public @Nullable CompoundTag getPersistentData() {
+        return persistentData;
+    }
+
+    public @NotNull CompoundTag getOrCreatePersistentData() {
+        if (persistentData == null)
+            persistentData = new CompoundTag();
+        return persistentData;
+    }
+
+    /**
+     * Saves facility level data to `tag`. This function is intended for future-proofing and for mixin hooks
+     * @param tag CompoundTag to save to.
+     */
+    public void saveAdditionalData(@NotNull CompoundTag tag) {
+
+    }
+
+    /**
+     * Reads facility level data from `tag`. This function is intended for future-proofing and for mixin hooks.
+     * This function WILL NOT be called if there is no additional data tag in the saved data, or if it is empty.
+     * @param tag CompoundTag to read from.
+     */
+    public void readAdditionalData(@NotNull CompoundTag tag) {
+
     }
 }
