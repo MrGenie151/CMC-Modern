@@ -79,7 +79,16 @@ public class ExoskeletonItem<T extends AbstractRobot> extends PlaceableEntity<T>
 
     @Override
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
-        return enchantment != Enchantments.MENDING && super.canApplyAtEnchantingTable(stack, enchantment);
+        if (enchantment == Enchantments.THORNS)
+            return true;
+        if (enchantment == Enchantments.ALL_DAMAGE_PROTECTION)
+            return true;
+        if (enchantment == Enchantments.FALL_PROTECTION)
+            return true;
+        if (enchantment == Enchantments.MENDING)
+            return false;
+
+        return super.canApplyAtEnchantingTable(stack, enchantment);
     }
 
     @Override
@@ -97,6 +106,14 @@ public class ExoskeletonItem<T extends AbstractRobot> extends PlaceableEntity<T>
     @Override
     public boolean shouldDisableSlot(AccessorySlotContext<?> slotContext, AccessorySlotType otherSlot) {
         return AccessoryItem.super.shouldDisableSlot(slotContext, otherSlot) || otherSlot == ChangedAccessorySlots.HANDS.get();
+    }
+
+    @Override
+    public boolean isConsideredByEnchantment(AccessorySlotContext<?> slotContext, Enchantment enchantment) {
+        return enchantment == Enchantments.THORNS ||
+                enchantment == Enchantments.ALL_DAMAGE_PROTECTION ||
+                enchantment == Enchantments.FALL_PROTECTION ||
+                AccessoryItem.super.isConsideredByEnchantment(slotContext, enchantment);
     }
 
     // TODO: extend functionality to allow custom values

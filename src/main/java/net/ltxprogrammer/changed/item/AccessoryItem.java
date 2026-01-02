@@ -11,6 +11,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.phys.AABB;
 
@@ -89,6 +90,10 @@ public interface AccessoryItem {
      * @return
      */
     default boolean shouldDisableSlot(AccessorySlotContext<?> slotContext, AccessorySlotType otherSlot) {
+        return false;
+    }
+
+    default boolean isConsideredByEnchantment(AccessorySlotContext<?> slotContext, Enchantment enchantment) {
         return false;
     }
 

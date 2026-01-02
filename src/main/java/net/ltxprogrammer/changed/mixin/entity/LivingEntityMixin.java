@@ -18,7 +18,6 @@ import net.ltxprogrammer.changed.data.AccessorySlots;
 import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.entity.latex.SpreadingLatexType;
 import net.ltxprogrammer.changed.entity.robot.Exoskeleton;
-import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
 import net.ltxprogrammer.changed.fluid.AbstractLatexFluid;
 import net.ltxprogrammer.changed.fluid.Gas;
@@ -37,6 +36,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -46,6 +46,7 @@ import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -56,6 +57,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PacketDistributor;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -541,5 +543,23 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDa
             return original.call(instance, reader, blockPos, entity);
         final SoundType coveredSound = coverState.getSoundType(reader, blockPos.above(), entity);
         return coveredSound != null ? coveredSound : original.call(instance, reader, blockPos, entity);
+    }
+
+    @WrapOperation(method = "getDamageAfterMagicAbsorb",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;getDamageProtection(Ljava/lang/Iterable;Lnet/minecraft/world/damagesource/DamageSource;)I"))
+    public int andAccessorySlots(Iterable<ItemStack> armorSlots, DamageSource damageSource, Operation<Integer> original) {
+        MutableInt total = new MutableInt();
+
+        accessorySlots.forEachSlot((slot, itemStack) -> {
+            if (!itemStack.isEmpty() && itemStack.getItem() instanceof AccessoryItem accessoryItem) {
+                for (Map.Entry<Enchantment, Integer> entry : itemStack.getAllEnchantments().entrySet()) {
+                    if (accessoryItem.isConsideredByEnchantment(new AccessorySlotContext<>((LivingEntity)(Object)this, slot, itemStack), entry.getKey())) {
+                        total.add(entry.getKey().getDamageProtection(entry.getValue(), damageSource));
+                    }
+                }
+            }
+        });
+
+        return total.intValue() + original.call(armorSlots, damageSource);
     }
 }
