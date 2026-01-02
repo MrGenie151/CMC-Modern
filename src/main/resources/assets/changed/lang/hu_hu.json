@@ -49,11 +49,15 @@
   "ability.changed.grab_entity.how_to_toggle_control": "Nyomja meg a(z) [%s] gombot az irányítás váltásához",
 
   "attribute.name.changed.transfur_damage": "Transzfur okozta sebzés",
+  "attribute.name.changed.transfur_damage.desc": "Mennyire vagy képes transzfurálni az ellenségeidet (Csak transzfurált állapotban érvényes).",
   "attribute.name.changed.transfur_tolerance": "Transzfur-tűrés",
-  "attribute.name.changed.step_size": "Lépés mérete",
+  "attribute.name.changed.transfur_tolerance.desc": "Milyen jól tudsz ellenállni a transzfurálásnak.",
   "attribute.name.changed.sprint_speed": "Futás sebessége",
+  "attribute.name.changed.sprint_speed.desc": "Megsokszorozza a sebességedet futás közben (Csak transzfurált állapotban érvényes).",
   "attribute.name.changed.sneak_speed": "Lopakodás sebessége",
+  "attribute.name.changed.sneak_speed.desc": "Megsokszorozza a sebességedet lopakodás közben (Csak transzfurált állapotban érvényes).",
   "attribute.name.changed.air_capacity": "Légzéskapacitás",
+  "attribute.name.changed.air_capacity.desc": "Mennyi levegőt tudsz megtartani (Csak transzfurált állapotban érvényes).",
 
   "subtitles.changed.block.cardboard_box.close": "Kartondoboz zárul",
   "subtitles.changed.block.cardboard_box.open": "Kartondoboz nyílik",
