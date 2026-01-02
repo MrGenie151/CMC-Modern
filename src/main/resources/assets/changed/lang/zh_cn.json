@@ -65,7 +65,7 @@
   "subtitles.changed.block.crystal.extend": "水晶生长",
   "subtitles.changed.block.gas.ambient": "漏气的嘶嘶声",
   "subtitles.changed.block.keypad.click": "密码盘按键被按下",
-  "subtitles.changed.block.keypad.lock": "密码盘按键的咔哒声",
+  "subtitles.changed.block.keypad.lock": "密码盘落锁咔哒声",
   "subtitles.changed.block.keypad.unlock_fail": "密码盘解锁失败",
   "subtitles.changed.block.keypad.unlock_success": "密码盘解锁成功",
   "subtitles.changed.block.lab_door.close": "实验室门关闭",
