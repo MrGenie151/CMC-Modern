@@ -140,7 +140,18 @@ public class LatexHumanoidArmorLayer<T extends ChangedEntity, M extends Advanced
                             ArmorMaterial material, PoseStack pose, MultiBufferSource buffers, int packedLight, ArmorTrim trim, LatexHumanoidArmorModel<? super T, ?> model, boolean inner) {
         model.prepareVisibility(slot, stack);
 
-        TextureAtlasSprite textureatlassprite = this.armorTrimAtlas.getSprite(inner ? trim.innerTexture(material) : trim.outerTexture(material));
+        ResourceLocation trimTexture = switch (slot) {
+            case HEAD -> entity.getEntityShape().headShape.getTrimTexture(trim, material);
+            case CHEST -> entity.getEntityShape().torsoShape.getTrimTexture(trim, material);
+            case LEGS -> entity.getEntityShape().legsShape.getTrimTexture(trim, material);
+            case FEET -> entity.getEntityShape().feetShape.getTrimTexture(trim, material);
+            default -> null; // Failsafe below
+        };
+
+        if (trimTexture == null)
+            trimTexture = inner ? trim.innerTexture(material) : trim.outerTexture(material);
+
+        TextureAtlasSprite textureatlassprite = this.armorTrimAtlas.getSprite(trimTexture);
         VertexConsumer vertexconsumer = textureatlassprite.wrap(buffers.getBuffer(Sheets.armorTrimsSheet()));
         model.renderForSlot(entity, (RenderLayerParent) this.parent, stack, slot, pose,
                 vertexconsumer, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
