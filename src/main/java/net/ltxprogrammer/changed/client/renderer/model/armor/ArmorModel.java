@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.client.renderer.model.armor;
 
 import net.minecraft.client.model.geom.LayerDefinitions;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
+import org.jetbrains.annotations.NotNull;
 
 public enum ArmorModel {
     ARMOR_OUTER(
@@ -10,15 +11,15 @@ public enum ArmorModel {
             LayerDefinitions.OUTER_ARMOR_DEFORMATION,
             LayerDefinitions.INNER_ARMOR_DEFORMATION,
             new CubeDeformation(0.95F),
-            new CubeDeformation(-0.25F),
-            new CubeDeformation(-0.25F),
+            LatexHumanoidArmorModel.HIDDEN_CUBE,
+            LatexHumanoidArmorModel.HIDDEN_CUBE,
             LayerDefinitions.OUTER_ARMOR_DEFORMATION),
     ARMOR_INNER(
             "armor_inner",
             ArmorModelType.ARMOR,
-            new CubeDeformation(-0.25F),
+            LatexHumanoidArmorModel.HIDDEN_CUBE,
             LayerDefinitions.OUTER_ARMOR_DEFORMATION,
-            new CubeDeformation(-0.25F),
+            LatexHumanoidArmorModel.HIDDEN_CUBE,
             LayerDefinitions.INNER_ARMOR_DEFORMATION,
             new CubeDeformation(0.45F),
             LayerDefinitions.INNER_ARMOR_DEFORMATION),

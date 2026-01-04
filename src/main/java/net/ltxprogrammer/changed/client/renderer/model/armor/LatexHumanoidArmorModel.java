@@ -13,6 +13,7 @@ import net.ltxprogrammer.changed.item.Clothing;
 import net.ltxprogrammer.changed.item.Shorts;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -31,6 +32,24 @@ import java.util.Map;
 public abstract class LatexHumanoidArmorModel<T extends ChangedEntity, M extends AdvancedHumanoidModel<T>> extends AdvancedHumanoidModel<T> implements AdvancedHumanoidModelInterface<T, M> {
     public static final ModelPart EMPTY_PART = new ModelPart(List.of(), Map.of());
     public final ArmorModel armorModel;
+
+    /**
+     * Represents a deformation that hides the cube.
+     * CubeListBuilderMixin will not add cubes that use this deformation,
+     * saving memory and render steps on geometry that shouldn't be visible anyway.
+     * It overrides extend() so that existing armor model code is compatible.
+     */
+    public static final CubeDeformation HIDDEN_CUBE = new CubeDeformation(0.0f) {
+        @Override
+        public @NotNull CubeDeformation extend(float scale) {
+            return this;
+        }
+
+        @Override
+        public @NotNull CubeDeformation extend(float x, float y, float z) {
+            return this;
+        }
+    };
 
     public LatexHumanoidArmorModel(ModelPart root, ArmorModel model) {
         super(root);
