@@ -5,6 +5,7 @@ import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
+import net.ltxprogrammer.changed.init.ChangedAbilities;
 import net.ltxprogrammer.changed.init.ChangedAttributes;
 import net.ltxprogrammer.changed.init.ChangedTags;
 import net.ltxprogrammer.changed.network.packet.GrabEntityPacket;
@@ -26,6 +27,7 @@ import net.minecraftforge.network.PacketDistributor;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -471,6 +473,17 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
                 return;
             if (grabbedEntity instanceof Player && !Changed.config.server.isGrabEnabled.get())
                 return;
+
+            IAbstractChangedEntity grabbedEntityGrabber = GrabEntityAbility.getGrabber(grabbedEntity);
+            if (grabbedEntityGrabber != null) {
+                Optional<GrabEntityAbilityInstance> grabAbilityInstanceSafe = grabbedEntityGrabber.getAbilityInstanceSafe(ChangedAbilities.GRAB_ENTITY_ABILITY.get());
+                if (grabAbilityInstanceSafe.isPresent()) {
+                    GrabEntityAbilityInstance grabEntityAbilityInstance = grabAbilityInstanceSafe.get();
+                    if (grabEntityAbilityInstance.suited) return;
+                    Changed.PACKET_HANDLER.sendToServer(new GrabEntityPacket(grabbedEntityGrabber.getChangedEntity(), grabbedEntity, GrabEntityPacket.GrabType.RELEASE));
+                    // Fail-safe for moments where a player or entity try to "steal" a grabbed entity
+                }
+            }
 
             this.grabbedEntity = grabbedEntity;
             Changed.PACKET_HANDLER.sendToServer(GrabEntityPacket.initialGrab((Player)entity.getEntity(), grabbedEntity));
