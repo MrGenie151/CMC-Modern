@@ -170,7 +170,7 @@ public class ChangedLayerDefinitions {
         ArmorLatexMaleBuffTaurUpperModel.MODEL_SET.registerDefinitions(event::registerLayerDefinition);
         ArmorLatexFemaleTaurUpperModel.MODEL_SET.registerDefinitions(event::registerLayerDefinition);
         ArmorLatexHeavyTaurUpperModel.MODEL_SET.registerDefinitions(event::registerLayerDefinition);
-        ArmorLatexCentaurLowerModel.MODEL_SET.registerDefinitions(event::registerLayerDefinition);
+        ArmorLatexCentaurLowerModel.MODEL_SET_WITH_TORSO.registerDefinitions(event::registerLayerDefinition);
 
         ArmorLatexMaleBirdModel.MODEL_SET.registerDefinitions(event::registerLayerDefinition);
         ArmorLatexFemaleBirdModel.MODEL_SET.registerDefinitions(event::registerLayerDefinition);

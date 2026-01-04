@@ -21,6 +21,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -82,10 +83,10 @@ public class FacilityKeystone extends StructurePiece {
         piecesByZone.forEach((zone, boundingBox) -> {
             zoneInfoBuilder.put(zone, new ActiveFacilityInstance.ZoneInfo(
                     FacilityZoneEntities.INSTANCE.getSpawns(zone).stream().map(ActiveFacilityInstance.SpawnInfo::new).toList(),
-                    boundingBox.stream().map(ActiveFacilityInstance.PieceInfo::new).toList()));
+                    boundingBox.stream().map(ActiveFacilityInstance.PieceInfo::new).toList(), Optional.empty()));
         });
 
-        var facilityInstance = new ActiveFacilityInstance(zoneInfoBuilder.build());
+        var facilityInstance = new ActiveFacilityInstance(zoneInfoBuilder.build(), Optional.empty());
         facilityInstance.setHeader(header);
         return facilityInstance;
     }

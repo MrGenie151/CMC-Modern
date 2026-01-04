@@ -16,7 +16,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CustomLatexRenderer extends AdvancedHumanoidRenderer<CustomLatexEntity, CustomLatexModel, LatexHumanoidArmorModel<CustomLatexEntity, ?>> {
@@ -81,7 +80,7 @@ public class CustomLatexRenderer extends AdvancedHumanoidRenderer<CustomLatexEnt
 			this.bakedFemaleMerUpper = ArmorSirenUpperBodyModel.MODEL_SET.createModels(models);
 			this.bakedHeavyMerUpper = ArmorHeavyMermaidSharkUpperBodyModel.MODEL_SET.createModels(models);
 
-			this.bakedTaur = ArmorLatexCentaurLowerModel.MODEL_SET.createModels(models);
+			this.bakedTaur = ArmorLatexCentaurLowerModel.MODEL_SET_WITH_TORSO.createModels(models);
 			this.bakedMer = ArmorSirenAbdomenModel.MODEL_SET.createModels(models);
 		}
 
