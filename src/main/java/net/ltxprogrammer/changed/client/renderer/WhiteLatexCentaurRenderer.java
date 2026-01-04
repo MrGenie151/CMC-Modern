@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 public class WhiteLatexCentaurRenderer extends AdvancedHumanoidRenderer<WhiteLatexCentaur, WhiteLatexCentaurModel, ArmorLatexMaleTaurUpperModel<WhiteLatexCentaur>> {
     public WhiteLatexCentaurRenderer(EntityRendererProvider.Context context) {
         super(context, new WhiteLatexCentaurModel(context.bakeLayer(WhiteLatexCentaurModel.LAYER_LOCATION)),
-                ArmorModelPicker.centaur(context.getModelSet(), ArmorLatexMaleTaurUpperModel.MODEL_SET, ArmorLatexCentaurLowerModel.MODEL_SET), 0.7f);
+                ArmorModelPicker.centaur(context.getModelSet(), ArmorLatexMaleTaurUpperModel.MODEL_SET, ArmorLatexCentaurLowerModel.MODEL_SET_WITH_TORSO), 0.7f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
         this.addLayer(CustomEyesLayer.builder(this, context.getModelSet())
                 .withSclera(Color3.fromInt(0x1b1b1b)).withIris(Color3.fromInt(0xdfdfdf)).build());
