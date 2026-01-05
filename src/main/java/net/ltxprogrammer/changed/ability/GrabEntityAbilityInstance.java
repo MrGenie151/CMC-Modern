@@ -347,8 +347,19 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
 
             handleInstructions(level);
 
-            if (this.grabbedEntity instanceof LivingEntityDataExtension ext)
+            if (this.grabbedEntity instanceof LivingEntityDataExtension ext) {
+                IAbstractChangedEntity grabber = GrabEntityAbility.getGrabber(grabbedEntity);
+                if (grabber != null && !grabber.getEntity().is(entity.getEntity())) {
+                    Optional<GrabEntityAbilityInstance> grabAbilityInstanceSafe = grabber.getAbilityInstanceSafe(ChangedAbilities.GRAB_ENTITY_ABILITY.get());
+                    // moment where a player or entity update the state after other "steal" they grabbed entity
+                    grabAbilityInstanceSafe.ifPresent((instance) -> {
+                        this.grabStrength = instance.grabStrength;   // For Prevent "Grab Trade" making the player full stuck
+                        this.grabStrengthO = instance.grabStrengthO; // Maybe Remove this just for the sake of fun & giggles?
+                        instance.releaseEntity();
+                    });
+                }
                 ext.setGrabbedBy(this.entity.getEntity());
+            }
 
             if (!grabbedHasControl) {
                 handleEscape();
@@ -487,33 +498,20 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
             return;
 
         var grabbedEntity = this.getHoveredEntity(entity);
-
-        if (grabbedEntity != null && !entity.getLevel().isClientSide && entity.getEntity() instanceof PlayerDataExtension ext) {
-            if (!this.entity.getEntity().getBoundingBox().inflate(0.5, 0.0, 0.5).intersects(grabbedEntity.getBoundingBox()))
-                return;
-            if (grabbedEntity instanceof Player && !Changed.config.server.isGrabEnabled.get())
-                return;
-
-            IAbstractChangedEntity grabbedEntityGrabber = GrabEntityAbility.getGrabber(grabbedEntity);
-            if (grabbedEntityGrabber != null) {
-                Optional<GrabEntityAbilityInstance> grabAbilityInstanceSafe = grabbedEntityGrabber.getAbilityInstanceSafe(ChangedAbilities.GRAB_ENTITY_ABILITY.get());
-                if (grabAbilityInstanceSafe.isPresent()) {
-                    GrabEntityAbilityInstance grabEntityAbilityInstance = grabAbilityInstanceSafe.get();
-                    if (grabEntityAbilityInstance.suited) return;
-                    grabEntityAbilityInstance.releaseEntity();
-                    Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY.with(grabbedEntityGrabber::getChangedEntity), new GrabEntityPacket(grabbedEntityGrabber.getChangedEntity(), grabbedEntity, GrabEntityPacket.GrabType.RELEASE));
-                    // Fail-safe for moments where a player or entity try to "steal" a grabbed entity
-                }
-            }
-        }
-
         if (grabbedEntity != null && entity.getLevel().isClientSide && entity.getEntity() instanceof PlayerDataExtension ext) {
             if (!this.entity.getEntity().getBoundingBox().inflate(0.5, 0.0, 0.5).intersects(grabbedEntity.getBoundingBox()))
                 return;
             if (grabbedEntity instanceof Player && !Changed.config.server.isGrabEnabled.get())
                 return;
-            if (GrabEntityAbility.getGrabber(grabbedEntity) != null) // The client will never try to grab a grabbed entity
-                return;
+
+            IAbstractChangedEntity grabber = GrabEntityAbility.getGrabber(grabbedEntity);
+            if (grabber != null) {// will try to grab a grabbed entity
+                Optional<GrabEntityAbilityInstance> grabAbilityInstanceSafe = grabber.getAbilityInstanceSafe(ChangedAbilities.GRAB_ENTITY_ABILITY.get());
+                if (grabAbilityInstanceSafe.isPresent()) {
+                    GrabEntityAbilityInstance grabEntityAbilityInstance = grabAbilityInstanceSafe.get();
+                    if (grabEntityAbilityInstance.suited) return; // can't grab an entity that is fully covered
+                }
+            }
 
             this.grabbedEntity = grabbedEntity;
             Changed.PACKET_HANDLER.sendToServer(GrabEntityPacket.initialGrab((Player)entity.getEntity(), grabbedEntity));
