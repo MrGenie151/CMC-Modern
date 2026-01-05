@@ -3,7 +3,6 @@ package net.ltxprogrammer.changed.ability;
 import com.mojang.datafixers.util.Pair;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.entity.*;
-import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
 import net.ltxprogrammer.changed.init.ChangedAbilities;
 import net.ltxprogrammer.changed.init.ChangedAttributes;
@@ -173,9 +172,28 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
             return;
         }
 
+        if (!this.canReplaceGrabberOfEntity(entity)) return;
         this.releaseEntity();
         this.grabbedEntity = entity;
         this.grabStrength = 1.0f;
+    }
+
+    public boolean canReplaceGrabberOfEntity(LivingEntity grabbedEntity) {
+        IAbstractChangedEntity grabbedEntityGrabber = GrabEntityAbility.getGrabber(grabbedEntity);
+        if (grabbedEntityGrabber != null) {
+            Optional<GrabEntityAbilityInstance> grabAbilityInstanceSafe = grabbedEntityGrabber.getAbilityInstanceSafe(ChangedAbilities.GRAB_ENTITY_ABILITY.get());
+            if (grabAbilityInstanceSafe.isPresent()) {
+                GrabEntityAbilityInstance grabEntityAbilityInstance = grabAbilityInstanceSafe.get();
+                if (grabEntityAbilityInstance.suited) return false; // is fully covered so the player can't steal grab
+
+                grabEntityAbilityInstance.releaseEntity();
+                Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY.with(grabbedEntityGrabber::getChangedEntity), new GrabEntityPacket(grabbedEntityGrabber.getChangedEntity(), grabbedEntity, GrabEntityPacket.GrabType.RELEASE));
+                if (this.grabbedEntity instanceof LivingEntityDataExtension lext) lext.setGrabbedBy(null); // to insure the free of the entity
+                return true;
+            }
+            return false;
+        }
+        return true;
     }
 
     @Override
