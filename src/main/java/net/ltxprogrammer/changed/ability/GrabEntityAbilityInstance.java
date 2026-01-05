@@ -480,6 +480,7 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
                 if (grabAbilityInstanceSafe.isPresent()) {
                     GrabEntityAbilityInstance grabEntityAbilityInstance = grabAbilityInstanceSafe.get();
                     if (grabEntityAbilityInstance.suited) return;
+                    grabEntityAbilityInstance.releaseEntity();
                     Changed.PACKET_HANDLER.sendToServer(new GrabEntityPacket(grabbedEntityGrabber.getChangedEntity(), grabbedEntity, GrabEntityPacket.GrabType.RELEASE));
                     // Fail-safe for moments where a player or entity try to "steal" a grabbed entity
                 }
