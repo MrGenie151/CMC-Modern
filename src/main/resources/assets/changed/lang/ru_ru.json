@@ -281,7 +281,7 @@
   "command.changed.success.regresstf.many": "Регрессировали прогресс трансфурмации для %s игрок(ов)",
   "command.changed.success.abilitytree.grant": "Дали узел %s игроку %s",
   "command.changed.success.abilitytree.grant.many": "Дали узлы %s игроку %s",
-  "command.changed.success.abilitytree.refund.many": "Возвратили узел(ы) %s игроку %s"
+  "command.changed.success.abilitytree.refund.many": "Возвратили узел(ы) %s игроку %s",
   "command.changed.error.not_latex_form": "Несуществующая форма",
   "command.changed.error.not_cause": "Неверная причина трансфурмации",
   "command.changed.error.used_by_other_mod": "Игрок уже использует другой мод",
@@ -908,3 +908,4 @@
   "builtin_resources.changed:instant_transfur": "Changed Instant Transfur",
   "builtin_resources.changed:changed_pbr": "Changed PBR"
 }
+
