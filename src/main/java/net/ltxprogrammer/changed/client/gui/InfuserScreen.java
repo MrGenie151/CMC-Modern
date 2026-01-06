@@ -22,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraftforge.network.PacketDistributor;
+import org.jetbrains.annotations.NotNull;
 
 public class InfuserScreen extends AbstractContainerScreen<InfuserMenu> implements RecipeUpdateListener {
     public static class Switch extends AbstractButton {
@@ -57,22 +58,21 @@ public class InfuserScreen extends AbstractContainerScreen<InfuserMenu> implemen
         }
 
         public void renderWidget(GuiGraphics graphics, int p_93844_, int p_93845_, float p_93846_) {
+            super.renderWidget(graphics, p_93844_, p_93845_, p_93846_);
             Minecraft minecraft = Minecraft.getInstance();
-            RenderSystem.setShaderTexture(0, sheet);
-            RenderSystem.enableDepthTest();
             Font font = minecraft.font;
-            graphics.setColor(1.0F, 1.0F, 1.0F, this.alpha);
+            graphics.setColor(1.0F, 1.0F, 1.0F, 1.0f);
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
+            RenderSystem.enableDepthTest();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             int switchX = this.isHoveredOrFocused() ? this.width : 0;
             int switchY = this.disabled ? this.height * 2 : (this.toggle ? this.height : 0);
             graphics.blit(sheet, this.getX(), this.getY(), switchX, switchY, this.width, this.height, this.width * 2, this.height * 3);
-            super.renderWidget(graphics, p_93844_, p_93845_, p_93846_);
         }
 
         @Override
-        protected void updateWidgetNarration(NarrationElementOutput p_259858_) {
+        protected void updateWidgetNarration(@NotNull NarrationElementOutput p_259858_) {
             this.defaultButtonNarrationText(p_259858_);
         }
 
@@ -101,12 +101,13 @@ public class InfuserScreen extends AbstractContainerScreen<InfuserMenu> implemen
         this.addRenderableWidget(new ImageButton(this.leftPos + 16, this.height / 2 - 25, 20, 18, 0, 0, 19, RECIPE_BUTTON_LOCATION, (p_98484_) -> {
             this.recipeBookComponent.toggleVisibility();
             this.leftPos = this.recipeBookComponent.updateScreenPosition(this.width, this.imageWidth);
-            ((ImageButton)p_98484_).setPosition(this.leftPos + 16, this.height / 2 - 25);
+            p_98484_.setPosition(this.leftPos + 16, this.height / 2 - 20);
             maleFemaleSwitch.setPosition(this.leftPos + 135, this.topPos + 61);
         }));
         this.addWidget(this.recipeBookComponent);
         this.setInitialFocus(this.recipeBookComponent);
-        this.titleLabelX = 29;
+        this.titleLabelX = 5;
+        this.titleLabelY = 5;
 
         maleFemaleSwitch = new Switch(this, Changed.modResource("male_female_switch"), this.leftPos + 135, this.topPos + 61, 20, 10, Component.empty(), false,
                 GENDER_SWITCH_LOCATION);
@@ -116,12 +117,9 @@ public class InfuserScreen extends AbstractContainerScreen<InfuserMenu> implemen
     private static final ResourceLocation texture = Changed.modResource("textures/gui/infuser.png");
 
     @Override
-    public void render(GuiGraphics graphics, int p_98480_, int p_98481_, float p_98482_) {
+    public void render(@NotNull GuiGraphics graphics, int p_98480_, int p_98481_, float p_98482_) {
         var variant = Syringe.getVariant(menu.getResultSlot().getItem());
-        if (variant != null && !variant.isGendered())
-            maleFemaleSwitch.disabled = true;
-        else
-            maleFemaleSwitch.disabled = false;
+        maleFemaleSwitch.disabled = variant != null && !variant.isGendered();
 
         this.renderBackground(graphics);
         if (this.recipeBookComponent.isVisible() && this.widthTooNarrow) {
@@ -170,7 +168,7 @@ public class InfuserScreen extends AbstractContainerScreen<InfuserMenu> implemen
     }
 
     @Override
-    public RecipeBookComponent getRecipeBookComponent() {
+    public @NotNull RecipeBookComponent getRecipeBookComponent() {
         return this.recipeBookComponent;
     }
 }
