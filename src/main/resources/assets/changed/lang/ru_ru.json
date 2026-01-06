@@ -288,7 +288,7 @@
   "command.changed.error.no_special_form": "У вас нет особой формы, посетите https://www.patreon.com/ltxprogrammer",
   "command.changed.error.not_transfurred": "Игрок не трансфурмирован",
   "command.changed.error.not_tree": "Неверная ветка способностей",
-  "command.changed.error.not_node": "Неверный узел ветки способностей"
+  "command.changed.error.not_node": "Неверный узел ветки способностей",
 
   "gamerule.changed:fusabilityDurationPlayer": "Длительность возможности слияния после трансфурмации (в тиках)",
   "gamerule.changed:keepConscious": "Вы не потеряете свой разум при трансфурмации",
@@ -426,7 +426,7 @@
   "block.changed.tiles_caution_slab": "Предупреждающая плита",
   "block.changed.tiles_caution_stairs": "Предупреждающие ступени",
   "block.changed.tiles_grayblue": "Серо-синяя плитка",
- "block.changed.tiles_grayblue_bolted": "Серо-синяя плитка с болтами",
+  "block.changed.tiles_grayblue_bolted": "Серо-синяя плитка с болтами",
   "block.changed.tiles_grayblue_bolted_connected": "Серо-синяя соединённая плитка с болтами",
   "block.changed.tiles_grayblue_bolted_slab": "Серо-синяя плита с болтами",
   "block.changed.tiles_grayblue_bolted_stairs": "Серо-синие ступени с болтами",
@@ -880,7 +880,7 @@
 
   "changed.exoskeleton.prompt": "[%s]> %s",
   "changed.exoskeleton.battery_low": "Низкий уровень заряда батареи",
-  "changed.exoskeleton.battery_critical": "Критический уровень заряда батареи"
+  "changed.exoskeleton.battery_critical": "Критический уровень заряда батареи",
    
   "changed.tamed_dark_latex.active": "Активно",
   "changed.tamed_dark_latex.inactive": "Неактивно",
@@ -908,4 +908,5 @@
   "builtin_resources.changed:instant_transfur": "Changed Instant Transfur",
   "builtin_resources.changed:changed_pbr": "Changed PBR"
 }
+
 
