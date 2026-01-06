@@ -98,10 +98,10 @@ public class InfuserScreen extends AbstractContainerScreen<InfuserMenu> implemen
         this.widthTooNarrow = this.width < 379;
         this.recipeBookComponent.init(this.width, this.height, this.minecraft, this.widthTooNarrow, this.menu);
         this.leftPos = this.recipeBookComponent.updateScreenPosition(this.width, this.imageWidth);
-        this.addRenderableWidget(new ImageButton(this.leftPos + 16, this.height / 2 - 25, 20, 18, 0, 0, 19, RECIPE_BUTTON_LOCATION, (p_98484_) -> {
+        this.addRenderableWidget(new ImageButton(this.leftPos + 16, this.height / 2 - 30, 20, 18, 0, 0, 19, RECIPE_BUTTON_LOCATION, (p_98484_) -> {
             this.recipeBookComponent.toggleVisibility();
             this.leftPos = this.recipeBookComponent.updateScreenPosition(this.width, this.imageWidth);
-            p_98484_.setPosition(this.leftPos + 16, this.height / 2 - 20);
+            p_98484_.setPosition(this.leftPos + 16, this.height / 2 - 30);
             maleFemaleSwitch.setPosition(this.leftPos + 135, this.topPos + 61);
         }));
         this.addWidget(this.recipeBookComponent);
