@@ -24,6 +24,7 @@
     "entity.ArrowMixin",
     "entity.EntityMixin",
     "entity.IronGolemMixin",
+    "entity.LightingBoltMixin",
     "entity.LivingEntityMixin",
     "entity.MobMixin",
     "entity.NearestAttackableTargetGoalMixin",
