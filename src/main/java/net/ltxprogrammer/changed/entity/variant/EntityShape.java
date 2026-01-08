@@ -1,7 +1,13 @@
 package net.ltxprogrammer.changed.entity.variant;
 
+import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
+import net.ltxprogrammer.changed.entity.ChangedEntity;
+import net.ltxprogrammer.changed.entity.decoration.AbstractArmorStand;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.common.IExtensibleEnum;
+
+import java.util.Optional;
 
 /**
  * Describes the shape of the entity, and what armor they can wear
@@ -73,5 +79,20 @@ public enum EntityShape implements EntityShapeProvider, IExtensibleEnum, StringR
 
     public static EntityShape create(String name, String serialName, ClothingShape.Head headShape, ClothingShape.Torso torsoShape, ClothingShape.Legs legsShape, ClothingShape.Feet feetShape) {
         throw new IllegalStateException("Enum not extended");
+    }
+
+    public interface Provider {
+        EntityShape getEntityShape();
+    }
+
+    public static Optional<EntityShape> getShapeOf(LivingEntity livingEntity) {
+        return IAbstractChangedEntity.forEitherSafe(livingEntity)
+                .map(IAbstractChangedEntity::getChangedEntity)
+                .map(ChangedEntity::getEntityShape)
+                .or(() -> {
+                    if (livingEntity instanceof Provider provider)
+                        return Optional.of(provider.getEntityShape());
+                    return Optional.empty();
+                });
     }
 }

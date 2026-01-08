@@ -72,7 +72,7 @@ import java.util.function.Predicate;
 
 import static net.ltxprogrammer.changed.entity.variant.TransfurVariant.findEntityTransfurVariant;
 
-public abstract class ChangedEntity extends Monster {
+public abstract class ChangedEntity extends Monster implements EntityShape.Provider {
     @Nullable private Player underlyingPlayer;
     private HairStyle hairStyle;
     private EyeStyle eyeStyle;
