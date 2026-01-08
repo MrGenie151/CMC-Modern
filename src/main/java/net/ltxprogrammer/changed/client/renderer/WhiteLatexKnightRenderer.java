@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class WhiteLatexKnightRenderer extends AdvancedHumanoidRenderer<WhiteLatexKnight, WhiteLatexKnightModel, ArmorLatexWhiteKnightModel<WhiteLatexKnight>> {
+public class WhiteLatexKnightRenderer extends AdvancedHumanoidRenderer<WhiteLatexKnight, WhiteLatexKnightModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/white_latex_knight.png");
+
     public WhiteLatexKnightRenderer(EntityRendererProvider.Context context) {
         super(context, new WhiteLatexKnightModel(context.bakeLayer(WhiteLatexKnightModel.LAYER_LOCATION)), ArmorLatexWhiteKnightModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -23,7 +25,7 @@ public class WhiteLatexKnightRenderer extends AdvancedHumanoidRenderer<WhiteLate
     }
 
     @Override
-    public ResourceLocation getTextureLocation(WhiteLatexKnight p_114482_) {
-        return Changed.modResource("textures/white_latex_knight.png");
+    public ResourceLocation getTextureLocation(WhiteLatexKnight entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexYuinRenderer extends AdvancedHumanoidRenderer<LatexYuin, LatexYuinModel, ArmorLatexDeerModel<LatexYuin>> {
+public class LatexYuinRenderer extends AdvancedHumanoidRenderer<LatexYuin, LatexYuinModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_yuin.png");
+
     public LatexYuinRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexYuinModel(context.bakeLayer(LatexYuinModel.LAYER_LOCATION)), ArmorLatexDeerModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -23,7 +25,7 @@ public class LatexYuinRenderer extends AdvancedHumanoidRenderer<LatexYuin, Latex
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexYuin p_114482_) {
-        return Changed.modResource("textures/latex_yuin.png");
+    public ResourceLocation getTextureLocation(LatexYuin entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

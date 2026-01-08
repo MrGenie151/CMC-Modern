@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexBeifengRenderer extends AdvancedHumanoidRenderer<Beifeng, LatexBeifengModel, ArmorLatexMaleDragonModel<Beifeng>> {
+public class LatexBeifengRenderer extends AdvancedHumanoidRenderer<Beifeng, LatexBeifengModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/beifeng.png");
+
     public LatexBeifengRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexBeifengModel(context.bakeLayer(LatexBeifengModel.LAYER_LOCATION)), ArmorLatexMaleDragonModel.MODEL_SET, 0.5f);
         this.addLayer(TransfurCapeLayer.normalCape(this, context.getModelSet()));
@@ -21,7 +23,7 @@ public class LatexBeifengRenderer extends AdvancedHumanoidRenderer<Beifeng, Late
     }
 
     @Override
-    public ResourceLocation getTextureLocation(Beifeng p_114482_) {
-        return Changed.modResource("textures/beifeng.png");
+    public ResourceLocation getTextureLocation(Beifeng entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

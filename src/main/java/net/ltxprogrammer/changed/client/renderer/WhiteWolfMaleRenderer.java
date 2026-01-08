@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.entity.beast.WhiteWolfMale;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class WhiteWolfMaleRenderer extends AdvancedHumanoidRenderer<WhiteWolfMale, WhiteWolfMaleModel, ArmorLatexMaleWolfModel<WhiteWolfMale>> {
+public class WhiteWolfMaleRenderer extends AdvancedHumanoidRenderer<WhiteWolfMale, WhiteWolfMaleModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/white_wolf_male.png");
+
     public WhiteWolfMaleRenderer(EntityRendererProvider.Context context) {
         super(context, new WhiteWolfMaleModel(context.bakeLayer(WhiteLatexWolfMaleModel.LAYER_LOCATION)), ArmorLatexMaleWolfModel.MODEL_SET, 0.5f);
         this.addLayer(new CustomEyesLayer<>(this, context.getModelSet()));
@@ -20,7 +22,7 @@ public class WhiteWolfMaleRenderer extends AdvancedHumanoidRenderer<WhiteWolfMal
     }
 
     @Override
-    public ResourceLocation getTextureLocation(WhiteWolfMale p_114482_) {
-        return Changed.modResource("textures/white_wolf_male.png");
+    public ResourceLocation getTextureLocation(WhiteWolfMale entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

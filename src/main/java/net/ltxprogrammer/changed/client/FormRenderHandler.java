@@ -101,7 +101,7 @@ public abstract class FormRenderHandler {
             return;
         }
 
-        if (livingRenderer instanceof AdvancedHumanoidRenderer<?,?,?> advRenderer && living instanceof ChangedEntity changedEntity) {
+        if (livingRenderer instanceof AdvancedHumanoidRenderer<?,?> advRenderer && living instanceof ChangedEntity changedEntity) {
             renderingHand = true;
 
             AdvancedHumanoidModel entModel = advRenderer.getModel(changedEntity);

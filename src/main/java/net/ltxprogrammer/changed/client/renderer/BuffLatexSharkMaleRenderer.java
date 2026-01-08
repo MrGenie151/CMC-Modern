@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.entity.beast.BuffLatexSharkMale;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class BuffLatexSharkMaleRenderer extends AdvancedHumanoidRenderer<BuffLatexSharkMale, BuffLatexSharkMaleModel, ArmorLatexMaleBuffSharkModel<BuffLatexSharkMale>> {
+public class BuffLatexSharkMaleRenderer extends AdvancedHumanoidRenderer<BuffLatexSharkMale, BuffLatexSharkMaleModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_shark_buff_male.png");
+
     public BuffLatexSharkMaleRenderer(EntityRendererProvider.Context context) {
         super(context, new BuffLatexSharkMaleModel(context.bakeLayer(BuffLatexSharkMaleModel.LAYER_LOCATION)), ArmorLatexMaleBuffSharkModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, this.model));
@@ -22,8 +24,8 @@ public class BuffLatexSharkMaleRenderer extends AdvancedHumanoidRenderer<BuffLat
     }
 
     @Override
-    public ResourceLocation getTextureLocation(BuffLatexSharkMale p_114482_) {
-        return Changed.modResource("textures/latex_shark_buff_male.png");
+    public ResourceLocation getTextureLocation(BuffLatexSharkMale entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 
     @Override

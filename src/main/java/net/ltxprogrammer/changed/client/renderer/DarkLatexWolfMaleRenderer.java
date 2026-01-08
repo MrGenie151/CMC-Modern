@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class DarkLatexWolfMaleRenderer extends AdvancedHumanoidRenderer<DarkLatexWolfMale, DarkLatexWolfMaleModel, ArmorLatexMaleWolfModel<DarkLatexWolfMale>> {
+public class DarkLatexWolfMaleRenderer extends AdvancedHumanoidRenderer<DarkLatexWolfMale, DarkLatexWolfMaleModel> {
+	public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/dark_latex_wolf_male.png");
+
 	public DarkLatexWolfMaleRenderer(EntityRendererProvider.Context context) {
 		super(context, new DarkLatexWolfMaleModel(context.bakeLayer(DarkLatexWolfMaleModel.LAYER_LOCATION)), ArmorLatexMaleWolfModel.MODEL_SET, 0.5f);
 		this.addLayer(new LatexParticlesLayer<>(this, getModel(), model::isPartNotMask));
@@ -24,7 +26,7 @@ public class DarkLatexWolfMaleRenderer extends AdvancedHumanoidRenderer<DarkLate
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(DarkLatexWolfMale p_114482_) {
-		return Changed.modResource("textures/dark_latex_wolf_male.png");
+	public ResourceLocation getTextureLocation(DarkLatexWolfMale entity) {
+		return DEFAULT_SKIN_LOCATION;
 	}
 }

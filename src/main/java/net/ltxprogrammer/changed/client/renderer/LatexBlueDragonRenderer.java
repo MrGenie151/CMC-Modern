@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexBlueDragonRenderer extends AdvancedHumanoidRenderer<LatexBlueDragon, LatexBlueDragonModel, ArmorLatexMaleDragonModel<LatexBlueDragon>> {
+public class LatexBlueDragonRenderer extends AdvancedHumanoidRenderer<LatexBlueDragon, LatexBlueDragonModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_blue_dragon.png");
+
     public LatexBlueDragonRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexBlueDragonModel(context.bakeLayer(LatexBlueDragonModel.LAYER_LOCATION)), ArmorLatexMaleDragonModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -23,7 +25,7 @@ public class LatexBlueDragonRenderer extends AdvancedHumanoidRenderer<LatexBlueD
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexBlueDragon p_114482_) {
-        return Changed.modResource("textures/latex_blue_dragon.png");
+    public ResourceLocation getTextureLocation(LatexBlueDragon entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

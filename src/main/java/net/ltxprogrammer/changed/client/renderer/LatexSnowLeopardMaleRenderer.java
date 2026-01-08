@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.entity.beast.LatexSnowLeopardMale;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexSnowLeopardMaleRenderer extends AdvancedHumanoidRenderer<LatexSnowLeopardMale, LatexSnowLeopardMaleModel, ArmorLatexMaleCatModel<LatexSnowLeopardMale>> {
+public class LatexSnowLeopardMaleRenderer extends AdvancedHumanoidRenderer<LatexSnowLeopardMale, LatexSnowLeopardMaleModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_snow_leopard_male.png");
+
     public LatexSnowLeopardMaleRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexSnowLeopardMaleModel(context.bakeLayer(LatexSnowLeopardMaleModel.LAYER_LOCATION)), ArmorLatexMaleCatModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -21,7 +23,7 @@ public class LatexSnowLeopardMaleRenderer extends AdvancedHumanoidRenderer<Latex
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexSnowLeopardMale p_114482_) {
-        return Changed.modResource("textures/latex_snow_leopard_male.png");
+    public ResourceLocation getTextureLocation(LatexSnowLeopardMale entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

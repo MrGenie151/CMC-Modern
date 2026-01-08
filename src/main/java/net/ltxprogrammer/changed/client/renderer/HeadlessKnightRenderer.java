@@ -12,7 +12,9 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.layers.SaddleLayer;
 import net.minecraft.resources.ResourceLocation;
 
-public class HeadlessKnightRenderer extends AdvancedHumanoidRenderer<HeadlessKnight, HeadlessKnightModel, ArmorLatexCentaurLowerModel<HeadlessKnight>> {
+public class HeadlessKnightRenderer extends AdvancedHumanoidRenderer<HeadlessKnight, HeadlessKnightModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/headless_knight.png");
+
     public HeadlessKnightRenderer(EntityRendererProvider.Context context) {
         super(context, new HeadlessKnightModel(context.bakeLayer(HeadlessKnightModel.LAYER_LOCATION)), ArmorLatexCentaurLowerModel.MODEL_SET_NO_TORSO, 0.7f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -22,8 +24,8 @@ public class HeadlessKnightRenderer extends AdvancedHumanoidRenderer<HeadlessKni
     }
 
     @Override
-    public ResourceLocation getTextureLocation(HeadlessKnight p_114482_) {
-        return Changed.modResource("textures/headless_knight.png");
+    public ResourceLocation getTextureLocation(HeadlessKnight entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 
     @Override

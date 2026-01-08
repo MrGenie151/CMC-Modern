@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexSniperDogRenderer extends AdvancedHumanoidRenderer<SniperDog, LatexSniperDogModel, ArmorLatexMaleWolfModel<SniperDog>> {
+public class LatexSniperDogRenderer extends AdvancedHumanoidRenderer<SniperDog, LatexSniperDogModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/sniper_dog.png");
+
     public LatexSniperDogRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexSniperDogModel(context.bakeLayer(LatexSniperDogModel.LAYER_LOCATION)), ArmorLatexMaleWolfModel.MODEL_SET, 0.5f);
         this.addLayer(TransfurCapeLayer.normalCape(this, context.getModelSet()));
@@ -21,7 +23,7 @@ public class LatexSniperDogRenderer extends AdvancedHumanoidRenderer<SniperDog, 
     }
 
     @Override
-    public ResourceLocation getTextureLocation(SniperDog p_114482_) {
-        return Changed.modResource("textures/sniper_dog.png");
+    public ResourceLocation getTextureLocation(SniperDog entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

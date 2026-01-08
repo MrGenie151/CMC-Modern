@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexMothRenderer extends AdvancedHumanoidRenderer<LatexMoth, LatexMothModel, ArmorLatexMothModel<LatexMoth>> {
+public class LatexMothRenderer extends AdvancedHumanoidRenderer<LatexMoth, LatexMothModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_moth.png");
+
     public LatexMothRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexMothModel(context.bakeLayer(LatexMothModel.LAYER_LOCATION)), ArmorLatexMothModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -23,7 +25,7 @@ public class LatexMothRenderer extends AdvancedHumanoidRenderer<LatexMoth, Latex
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexMoth p_114482_) {
-        return Changed.modResource("textures/latex_moth.png");
+    public ResourceLocation getTextureLocation(LatexMoth entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

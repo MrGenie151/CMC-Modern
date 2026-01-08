@@ -10,7 +10,9 @@ import net.ltxprogrammer.changed.entity.beast.LatexKobold;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexKoboldRenderer extends AdvancedHumanoidRenderer<LatexKobold, LatexKoboldModel, ArmorLatexMaleDragonModel<LatexKobold>> {
+public class LatexKoboldRenderer extends AdvancedHumanoidRenderer<LatexKobold, LatexKoboldModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_kobold.png");
+
     public LatexKoboldRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexKoboldModel(context.bakeLayer(LatexKoboldModel.LAYER_LOCATION)), ArmorLatexMaleDragonModel.MODEL_SET, 0.5f);
         this.addLayer(TransfurCapeLayer.normalCape(this, context.getModelSet()));
@@ -19,7 +21,7 @@ public class LatexKoboldRenderer extends AdvancedHumanoidRenderer<LatexKobold, L
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexKobold p_114482_) {
-        return Changed.modResource("textures/latex_kobold.png");
+    public ResourceLocation getTextureLocation(LatexKobold entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

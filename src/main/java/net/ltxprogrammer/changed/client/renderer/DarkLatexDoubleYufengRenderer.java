@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class DarkLatexDoubleYufengRenderer extends AdvancedHumanoidRenderer<DarkLatexDoubleYufeng, DarkLatexDoubleYufengModel, ArmorLatexMaleDoubleHeadedWingedDragonModel<DarkLatexDoubleYufeng>> {
+public class DarkLatexDoubleYufengRenderer extends AdvancedHumanoidRenderer<DarkLatexDoubleYufeng, DarkLatexDoubleYufengModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/dark_latex_yufeng.png");
+
     public static final ArmorModelSet<DarkLatexDoubleYufeng, ArmorLatexMaleDoubleHeadedWingedDragonModel<DarkLatexDoubleYufeng>> ARMOR_MODEL_SET =
             ArmorModelSet.castOf(ArmorLatexMaleDoubleHeadedWingedDragonModel.MODEL_SET, ArmorLatexMaleDoubleHeadedWingedDragonModel::new);
 
@@ -28,7 +30,7 @@ public class DarkLatexDoubleYufengRenderer extends AdvancedHumanoidRenderer<Dark
     }
 
     @Override
-    public ResourceLocation getTextureLocation(DarkLatexDoubleYufeng p_114482_) {
-        return Changed.modResource("textures/dark_latex_yufeng.png");
+    public ResourceLocation getTextureLocation(DarkLatexDoubleYufeng entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

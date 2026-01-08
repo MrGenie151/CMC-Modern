@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexGoldenDragonRenderer extends AdvancedHumanoidRenderer<LatexGoldenDragon, LatexGoldenDragonModel, ArmorLatexMaleWingedDragonModel<LatexGoldenDragon>> {
+public class LatexGoldenDragonRenderer extends AdvancedHumanoidRenderer<LatexGoldenDragon, LatexGoldenDragonModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_golden_dragon.png");
+
     public LatexGoldenDragonRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexGoldenDragonModel(context.bakeLayer(LatexGoldenDragonModel.LAYER_LOCATION)), ArmorLatexMaleWingedDragonModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -23,7 +25,7 @@ public class LatexGoldenDragonRenderer extends AdvancedHumanoidRenderer<LatexGol
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexGoldenDragon p_114482_) {
-        return Changed.modResource("textures/latex_golden_dragon.png");
+    public ResourceLocation getTextureLocation(LatexGoldenDragon entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

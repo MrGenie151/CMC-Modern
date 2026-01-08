@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.entity.beast.GreenLizard;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class GreenLizardRenderer extends AdvancedHumanoidRenderer<GreenLizard, GreenLizardModel, ArmorLatexMaleDragonModel<GreenLizard>> {
+public class GreenLizardRenderer extends AdvancedHumanoidRenderer<GreenLizard, GreenLizardModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/green_lizard.png");
+
     public GreenLizardRenderer(EntityRendererProvider.Context context) {
         super(context, new GreenLizardModel(context.bakeLayer(GreenLizardModel.LAYER_LOCATION)), ArmorLatexMaleDragonModel.MODEL_SET, 0.5f);
         this.addLayer(TransfurCapeLayer.normalCape(this, context.getModelSet()));
@@ -21,7 +23,7 @@ public class GreenLizardRenderer extends AdvancedHumanoidRenderer<GreenLizard, G
     }
 
     @Override
-    public ResourceLocation getTextureLocation(GreenLizard p_114482_) {
-        return Changed.modResource("textures/green_lizard.png");
+    public ResourceLocation getTextureLocation(GreenLizard entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

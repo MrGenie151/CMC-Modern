@@ -11,7 +11,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class SharkRenderer extends AdvancedFeralRenderer<FeralShark, SharkModel<FeralShark>, ArmorNoneModel<FeralShark>> {
+public class SharkRenderer extends AdvancedFeralRenderer<FeralShark, SharkModel<FeralShark>> {
     private static final ResourceLocation SHARK_LOCATION = Changed.modResource("textures/shark.png");
 
     public SharkRenderer(EntityRendererProvider.Context context) {

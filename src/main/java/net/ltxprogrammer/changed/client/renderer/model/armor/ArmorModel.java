@@ -74,4 +74,12 @@ public enum ArmorModel {
         this.slightAltDeformation = slightAltDeformation;
         this.dualDeformation = dualDeformation;
     }
+
+    public boolean isArmor() {
+        return this.modelType == ArmorModelType.ARMOR;
+    }
+
+    public boolean isClothing() {
+        return this.modelType == ArmorModelType.CLOTHING;
+    }
 }

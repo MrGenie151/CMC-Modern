@@ -10,7 +10,9 @@ import net.ltxprogrammer.changed.entity.beast.GasSkunk;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class GasSkunkRenderer extends AdvancedHumanoidRenderer<GasSkunk, GasSkunkModel, ArmorLatexMaleWolfModel<GasSkunk>> {
+public class GasSkunkRenderer extends AdvancedHumanoidRenderer<GasSkunk, GasSkunkModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/gas_skunk.png");
+
     public GasSkunkRenderer(EntityRendererProvider.Context context) {
         super(context, new GasSkunkModel(context.bakeLayer(GasSkunkModel.LAYER_LOCATION)), ArmorLatexMaleWolfModel.MODEL_SET, 0.5f);
         this.addLayer(TransfurCapeLayer.normalCape(this, context.getModelSet()));
@@ -19,7 +21,7 @@ public class GasSkunkRenderer extends AdvancedHumanoidRenderer<GasSkunk, GasSkun
     }
 
     @Override
-    public ResourceLocation getTextureLocation(GasSkunk p_114482_) {
-        return Changed.modResource("textures/gas_skunk.png");
+    public ResourceLocation getTextureLocation(GasSkunk entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

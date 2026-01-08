@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexTrafficConeDragonRenderer extends AdvancedHumanoidRenderer<LatexTrafficConeDragon, LatexTrafficConeDragonModel, ArmorLatexBigTailDragonModel<LatexTrafficConeDragon>> {
+public class LatexTrafficConeDragonRenderer extends AdvancedHumanoidRenderer<LatexTrafficConeDragon, LatexTrafficConeDragonModel> {
+	public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_traffic_cone_dragon.png");
+
 	public LatexTrafficConeDragonRenderer(EntityRendererProvider.Context context) {
 		super(context, new LatexTrafficConeDragonModel(context.bakeLayer(LatexTrafficConeDragonModel.LAYER_LOCATION)), ArmorLatexBigTailDragonModel.MODEL_SET, 0.5f);
 		this.addLayer(new LatexParticlesLayer<>(this, this.model));
@@ -23,7 +25,7 @@ public class LatexTrafficConeDragonRenderer extends AdvancedHumanoidRenderer<Lat
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(LatexTrafficConeDragon p_114482_) {
-		return Changed.modResource("textures/latex_traffic_cone_dragon.png");
+	public ResourceLocation getTextureLocation(LatexTrafficConeDragon entity) {
+		return DEFAULT_SKIN_LOCATION;
 	}
 }

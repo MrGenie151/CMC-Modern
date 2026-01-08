@@ -109,7 +109,7 @@ public abstract class HumanoidModelMixin<T extends LivingEntity> extends Ageable
                 final EntityRenderDispatcher dispatcher = minecraft.getEntityRenderDispatcher();
                 final var latexRenderer = dispatcher.getRenderer(variant.getChangedEntity());
 
-                if (!(latexRenderer instanceof AdvancedHumanoidRenderer<?,?,?> latexHumanoidRenderer)) return;
+                if (!(latexRenderer instanceof AdvancedHumanoidRenderer<?,?> latexHumanoidRenderer)) return;
 
                 final var latexModel = latexHumanoidRenderer.getModel(variant.getChangedEntity());
 

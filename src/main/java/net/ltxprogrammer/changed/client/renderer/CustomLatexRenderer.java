@@ -16,10 +16,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class CustomLatexRenderer extends AdvancedHumanoidRenderer<CustomLatexEntity, CustomLatexModel, LatexHumanoidArmorModel<CustomLatexEntity, ?>> {
-	public static class CustomArmorPicker extends ArmorModelPicker<CustomLatexEntity> {
+public class CustomLatexRenderer extends AdvancedHumanoidRenderer<CustomLatexEntity, CustomLatexModel> {
+	public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/custom_latex.png");
+
+	public static class CustomArmorPicker extends ArmorModelPicker<CustomLatexEntity, LatexHumanoidArmorModel<CustomLatexEntity, ?>> {
 		// Upper
 		private final Map<ArmorModel, ? extends LatexHumanoidArmorModel<ChangedEntity, ?>> bakedMaleCanine;
 		private final Map<ArmorModel, ? extends LatexHumanoidArmorModel<ChangedEntity, ?>> bakedMaleFeline;
@@ -140,12 +144,14 @@ public class CustomLatexRenderer extends AdvancedHumanoidRenderer<CustomLatexEnt
 		}
 
 		@Override
-		public void applyAnimatorProperties(CustomLatexEntity entity, HumanoidAnimator<?, ?> other) {
+		public void forEach(CustomLatexEntity entity, Predicate<ArmorModel> predicate, BiConsumer<ArmorModel, ? super LatexHumanoidArmorModel<CustomLatexEntity, ?>> consumer) {
 			Stream.of(EquipmentSlot.values()).filter(slot -> slot.getType() == EquipmentSlot.Type.ARMOR)
 					.map(slot -> this.getModelSetForSlot(entity, slot))
 					.forEach(set -> {
-						set.get(ArmorModel.ARMOR_INNER).getAnimator(entity).copyProperties(other);
-						set.get(ArmorModel.ARMOR_OUTER).getAnimator(entity).copyProperties(other);
+						set.forEach((layer, model) -> {
+							if (predicate.test(layer))
+								consumer.accept(layer, model);
+						});
 					});
 		}
 
@@ -177,7 +183,7 @@ public class CustomLatexRenderer extends AdvancedHumanoidRenderer<CustomLatexEnt
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(CustomLatexEntity p_114482_) {
-		return Changed.modResource("textures/custom_latex.png");
+	public ResourceLocation getTextureLocation(CustomLatexEntity entity) {
+		return DEFAULT_SKIN_LOCATION;
 	}
 }

@@ -11,12 +11,12 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class AdvancedFeralRenderer<T extends ChangedEntity, M extends AdvancedHumanoidModel<T>, A extends LatexHumanoidArmorModel<T, ?>> extends AdvancedHumanoidRenderer<T, M, A> {
-    public AdvancedFeralRenderer(EntityRendererProvider.Context context, M main, ArmorModelPicker<? super T> modelPicker, float shadowSize) {
+public abstract class AdvancedFeralRenderer<T extends ChangedEntity, M extends AdvancedHumanoidModel<T>> extends AdvancedHumanoidRenderer<T, M> {
+    public AdvancedFeralRenderer(EntityRendererProvider.Context context, M main, ArmorModelPicker<T, ? extends LatexHumanoidArmorModel<? super T, ?>> modelPicker, float shadowSize) {
         super(context, main, modelPicker, shadowSize);
     }
 
-    public AdvancedFeralRenderer(EntityRendererProvider.Context context, M main, ArmorModelSet<? super T, ?> modelSet, float shadowSize) {
+    public AdvancedFeralRenderer(EntityRendererProvider.Context context, M main, ArmorModelSet<? super T, ? extends LatexHumanoidArmorModel<? super T, ?>> modelSet, float shadowSize) {
         super(context, main, modelSet, shadowSize);
     }
 

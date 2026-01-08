@@ -9,7 +9,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexBeeRenderer extends AdvancedHumanoidRenderer<LatexBee, LatexBeeModel, ArmorLatexBeeModel<LatexBee>> {
+public class LatexBeeRenderer extends AdvancedHumanoidRenderer<LatexBee, LatexBeeModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_bee.png");
+
     public LatexBeeRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexBeeModel(context.bakeLayer(LatexBeeModel.LAYER_LOCATION)), ArmorLatexBeeModel.MODEL_SET, 0.5f);
         var translucent = new LatexTranslucentLayer<>(this, this.model, Changed.modResource("textures/latex_bee_translucent.png"));
@@ -23,7 +25,7 @@ public class LatexBeeRenderer extends AdvancedHumanoidRenderer<LatexBee, LatexBe
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexBee p_114482_) {
-        return Changed.modResource("textures/latex_bee.png");
+    public ResourceLocation getTextureLocation(LatexBee entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

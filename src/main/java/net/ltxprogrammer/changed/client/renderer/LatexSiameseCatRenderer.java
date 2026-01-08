@@ -13,7 +13,9 @@ import net.ltxprogrammer.changed.entity.beast.LatexSnowLeopardFemale;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexSiameseCatRenderer extends AdvancedHumanoidRenderer<LatexSiameseCat, LatexSiameseCatModel, ArmorLatexFemaleCatModel<LatexSiameseCat>> {
+public class LatexSiameseCatRenderer extends AdvancedHumanoidRenderer<LatexSiameseCat, LatexSiameseCatModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_siamese_cat.png");
+
     public LatexSiameseCatRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexSiameseCatModel(context.bakeLayer(LatexSiameseCatModel.LAYER_LOCATION)), ArmorLatexFemaleCatModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -23,7 +25,7 @@ public class LatexSiameseCatRenderer extends AdvancedHumanoidRenderer<LatexSiame
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexSiameseCat p_114482_) {
-        return Changed.modResource("textures/latex_siamese_cat.png");
+    public ResourceLocation getTextureLocation(LatexSiameseCat entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

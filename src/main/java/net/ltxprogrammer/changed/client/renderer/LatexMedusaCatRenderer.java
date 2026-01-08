@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexMedusaCatRenderer extends AdvancedHumanoidRenderer<LatexMedusaCat, LatexMedusaCatModel, ArmorLatexFemaleCatModel<LatexMedusaCat>> {
+public class LatexMedusaCatRenderer extends AdvancedHumanoidRenderer<LatexMedusaCat, LatexMedusaCatModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_medusa_cat.png");
+
     public LatexMedusaCatRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexMedusaCatModel(context.bakeLayer(LatexMedusaCatModel.LAYER_LOCATION)), ArmorLatexFemaleCatModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -23,7 +25,7 @@ public class LatexMedusaCatRenderer extends AdvancedHumanoidRenderer<LatexMedusa
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexMedusaCat p_114482_) {
-        return Changed.modResource("textures/latex_medusa_cat.png");
+    public ResourceLocation getTextureLocation(LatexMedusaCat entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

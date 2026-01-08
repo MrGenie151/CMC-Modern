@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.entity.beast.LatexFennecFox;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexFennecFoxRenderer extends AdvancedHumanoidRenderer<LatexFennecFox, LatexFennecFoxModel, ArmorLatexMaleWolfModel<LatexFennecFox>> {
+public class LatexFennecFoxRenderer extends AdvancedHumanoidRenderer<LatexFennecFox, LatexFennecFoxModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_fennec_fox.png");
+
     public LatexFennecFoxRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexFennecFoxModel(context.bakeLayer(LatexFennecFoxModel.LAYER_LOCATION)), ArmorLatexMaleWolfModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -21,7 +23,7 @@ public class LatexFennecFoxRenderer extends AdvancedHumanoidRenderer<LatexFennec
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexFennecFox p_114482_) {
-        return Changed.modResource("textures/latex_fennec_fox.png");
+    public ResourceLocation getTextureLocation(LatexFennecFox entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

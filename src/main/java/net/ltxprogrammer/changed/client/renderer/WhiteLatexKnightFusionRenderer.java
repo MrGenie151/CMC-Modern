@@ -9,7 +9,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class WhiteLatexKnightFusionRenderer extends AdvancedHumanoidRenderer<WhiteLatexKnightFusion, WhiteLatexKnightFusionModel, ArmorLatexMaleWolfModel<WhiteLatexKnightFusion>> {
+public class WhiteLatexKnightFusionRenderer extends AdvancedHumanoidRenderer<WhiteLatexKnightFusion, WhiteLatexKnightFusionModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/white_latex_knight_fusion.png");
+
     public WhiteLatexKnightFusionRenderer(EntityRendererProvider.Context context) {
         super(context, new WhiteLatexKnightFusionModel(context.bakeLayer(WhiteLatexKnightFusionModel.LAYER_LOCATION)), ArmorLatexMaleWolfModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -24,7 +26,7 @@ public class WhiteLatexKnightFusionRenderer extends AdvancedHumanoidRenderer<Whi
     }
 
     @Override
-    public ResourceLocation getTextureLocation(WhiteLatexKnightFusion p_114482_) {
-        return Changed.modResource("textures/white_latex_knight_fusion.png");
+    public ResourceLocation getTextureLocation(WhiteLatexKnightFusion entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

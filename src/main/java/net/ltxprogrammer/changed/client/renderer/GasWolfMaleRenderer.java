@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.entity.beast.GasWolfMale;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class GasWolfMaleRenderer extends AdvancedHumanoidRenderer<GasWolfMale, GasWolfMaleModel, ArmorLatexMaleWolfModel<GasWolfMale>> {
+public class GasWolfMaleRenderer extends AdvancedHumanoidRenderer<GasWolfMale, GasWolfMaleModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/gas_wolf_male.png");
+
     public GasWolfMaleRenderer(EntityRendererProvider.Context context) {
         super(context, new GasWolfMaleModel(context.bakeLayer( GasWolfMaleModel.LAYER_LOCATION)), ArmorLatexMaleWolfModel.MODEL_SET, 0.5f);
         this.addLayer(TransfurCapeLayer.normalCape(this, context.getModelSet()));
@@ -21,7 +23,7 @@ public class GasWolfMaleRenderer extends AdvancedHumanoidRenderer<GasWolfMale, G
     }
 
     @Override
-    public ResourceLocation getTextureLocation(GasWolfMale p_114482_) {
-        return Changed.modResource("textures/gas_wolf_male.png");
+    public ResourceLocation getTextureLocation(GasWolfMale entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

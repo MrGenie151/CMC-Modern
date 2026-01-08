@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexMimicPlantRenderer extends AdvancedHumanoidRenderer<LatexMimicPlant, LatexMimicPlantModel, ArmorLatexMaleWolfModel<LatexMimicPlant>> {
+public class LatexMimicPlantRenderer extends AdvancedHumanoidRenderer<LatexMimicPlant, LatexMimicPlantModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_mimic_plant.png");
+
     public LatexMimicPlantRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexMimicPlantModel(context.bakeLayer(LatexMimicPlantModel.LAYER_LOCATION)), ArmorLatexMaleWolfModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -23,7 +25,7 @@ public class LatexMimicPlantRenderer extends AdvancedHumanoidRenderer<LatexMimic
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexMimicPlant p_114482_) {
-        return Changed.modResource("textures/latex_mimic_plant.png");
+    public ResourceLocation getTextureLocation(LatexMimicPlant entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

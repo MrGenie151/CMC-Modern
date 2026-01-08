@@ -53,7 +53,7 @@ public abstract class RenderEventsMixin {
 
         return Optional.ofNullable(ProcessTransfur.ifPlayerTransfurred(currentPlayer, variant -> {
             EntityRenderer renderer = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(variant.getChangedEntity());
-            if (renderer instanceof AdvancedHumanoidRenderer<?,?,?> advanced) {
+            if (renderer instanceof AdvancedHumanoidRenderer<?,?> advanced) {
                 var changedModel = advanced.getModel(variant.getChangedEntity());
 
                 if (part == playerModel.rightArm)
@@ -101,7 +101,7 @@ public abstract class RenderEventsMixin {
         ProcessTransfur.ifPlayerTransfurred(currentPlayer, variant -> {
             matrix.pushPose(); // reset matrix to entity
             EntityRenderer renderer = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(variant.getChangedEntity());
-            if (renderer instanceof AdvancedHumanoidRenderer<?,?,?> advanced) {
+            if (renderer instanceof AdvancedHumanoidRenderer<?,?> advanced) {
                 int perspective = CarryRenderHelper.getPerspective();
                 var entity = variant.getChangedEntity();
                 AdvancedHumanoidModel entityModel = advanced.getModel(entity);

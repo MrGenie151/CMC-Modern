@@ -10,7 +10,9 @@ import net.ltxprogrammer.changed.entity.beast.DarkDragon;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class DarkLatexDragonRenderer extends AdvancedHumanoidRenderer<DarkDragon, DarkLatexDragonModel, ArmorLatexMaleWingedDragonModel<DarkDragon>> {
+public class DarkLatexDragonRenderer extends AdvancedHumanoidRenderer<DarkDragon, DarkLatexDragonModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/dark_dragon.png");
+
     public DarkLatexDragonRenderer(EntityRendererProvider.Context context) {
         super(context, new DarkLatexDragonModel(context.bakeLayer(DarkLatexDragonModel.LAYER_LOCATION)), ArmorLatexMaleWingedDragonModel.MODEL_SET, 0.5f);
         this.addLayer(TransfurCapeLayer.normalCape(this, context.getModelSet()));
@@ -19,7 +21,7 @@ public class DarkLatexDragonRenderer extends AdvancedHumanoidRenderer<DarkDragon
     }
 
     @Override
-    public ResourceLocation getTextureLocation(DarkDragon p_114482_) {
-        return Changed.modResource("textures/dark_dragon.png");
+    public ResourceLocation getTextureLocation(DarkDragon entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

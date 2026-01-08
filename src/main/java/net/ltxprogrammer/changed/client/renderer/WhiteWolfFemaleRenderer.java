@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.entity.beast.WhiteWolfFemale;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class WhiteWolfFemaleRenderer extends AdvancedHumanoidRenderer<WhiteWolfFemale, WhiteWolfFemaleModel, ArmorLatexFemaleWolfModel<WhiteWolfFemale>> {
+public class WhiteWolfFemaleRenderer extends AdvancedHumanoidRenderer<WhiteWolfFemale, WhiteWolfFemaleModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/white_wolf_female.png");
+
     public WhiteWolfFemaleRenderer(EntityRendererProvider.Context context) {
         super(context, new WhiteWolfFemaleModel(context.bakeLayer(WhiteLatexWolfFemaleModel.LAYER_LOCATION)), ArmorLatexFemaleWolfModel.MODEL_SET, 0.5f);
         this.addLayer(new CustomEyesLayer<>(this, context.getModelSet()));
@@ -20,7 +22,7 @@ public class WhiteWolfFemaleRenderer extends AdvancedHumanoidRenderer<WhiteWolfF
     }
 
     @Override
-    public ResourceLocation getTextureLocation(WhiteWolfFemale p_114482_) {
-        return Changed.modResource("textures/white_wolf_female.png");
+    public ResourceLocation getTextureLocation(WhiteWolfFemale entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

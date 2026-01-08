@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.item.AbdomenArmor;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexSirenRenderer extends AdvancedHumanoidRenderer<LatexSiren, LatexSirenModel, ArmorSirenUpperBodyModel<LatexSiren>> {
+public class LatexSirenRenderer extends AdvancedHumanoidRenderer<LatexSiren, LatexSirenModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_siren.png");
+
     public LatexSirenRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexSirenModel(context.bakeLayer(LatexSirenModel.LAYER_LOCATION)),
                 ArmorModelPicker.legless(context.getModelSet(), ArmorSirenUpperBodyModel.MODEL_SET, ArmorSirenAbdomenModel.MODEL_SET), 0.5f);
@@ -23,7 +25,7 @@ public class LatexSirenRenderer extends AdvancedHumanoidRenderer<LatexSiren, Lat
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexSiren p_114482_) {
-        return Changed.modResource("textures/latex_siren.png");
+    public ResourceLocation getTextureLocation(LatexSiren entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

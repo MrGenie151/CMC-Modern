@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.entity.beast.LatexShark;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexSharkRenderer extends AdvancedHumanoidRenderer<LatexShark, LatexSharkModel, ArmorLatexMaleSharkModel<LatexShark>> {
+public class LatexSharkRenderer extends AdvancedHumanoidRenderer<LatexShark, LatexSharkModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_shark.png");
+
     public LatexSharkRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexSharkModel(context.bakeLayer(LatexSharkModel.LAYER_LOCATION)), ArmorLatexMaleSharkModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, this.model));
@@ -21,7 +23,7 @@ public class LatexSharkRenderer extends AdvancedHumanoidRenderer<LatexShark, Lat
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexShark p_114482_) {
-        return Changed.modResource("textures/latex_shark.png");
+    public ResourceLocation getTextureLocation(LatexShark entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

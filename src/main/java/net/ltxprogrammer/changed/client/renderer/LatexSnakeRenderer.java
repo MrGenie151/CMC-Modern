@@ -16,7 +16,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexSnakeRenderer extends AdvancedHumanoidRenderer<LatexSnake, LatexSnakeModel, ArmorSnakeUpperBodyModel<LatexSnake>> {
+public class LatexSnakeRenderer extends AdvancedHumanoidRenderer<LatexSnake, LatexSnakeModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_snake.png");
+
     public LatexSnakeRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexSnakeModel(context.bakeLayer(LatexSnakeModel.LAYER_LOCATION)),
                 ArmorModelPicker.legless(context.getModelSet(), ArmorSnakeUpperBodyModel.MODEL_SET, ArmorSnakeAbdomenModel.MODEL_SET), 0.5f);
@@ -28,7 +30,7 @@ public class LatexSnakeRenderer extends AdvancedHumanoidRenderer<LatexSnake, Lat
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexSnake p_114482_) {
-        return Changed.modResource("textures/latex_snake.png");
+    public ResourceLocation getTextureLocation(LatexSnake entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

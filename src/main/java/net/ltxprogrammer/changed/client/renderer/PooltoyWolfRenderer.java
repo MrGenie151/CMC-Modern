@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class PooltoyWolfRenderer extends AdvancedHumanoidRenderer<PooltoyWolf, PooltoyWolfModel, ArmorPooltoyWolfModel<PooltoyWolf>> {
+public class PooltoyWolfRenderer extends AdvancedHumanoidRenderer<PooltoyWolf, PooltoyWolfModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/pooltoy_wolf.png");
+
     public PooltoyWolfRenderer(EntityRendererProvider.Context context) {
         super(context, new PooltoyWolfModel(context.bakeLayer(PooltoyWolfModel.LAYER_LOCATION)), ArmorPooltoyWolfModel.MODEL_SET, 0.5f);
         var translucent = new LatexTranslucentLayer<>(this, this.model, Changed.modResource("textures/pooltoy_wolf_translucent.png"));
@@ -23,8 +25,8 @@ public class PooltoyWolfRenderer extends AdvancedHumanoidRenderer<PooltoyWolf, P
     }
 
     @Override
-    public ResourceLocation getTextureLocation(PooltoyWolf p_114482_) {
-        return Changed.modResource("textures/pooltoy_wolf.png");
+    public ResourceLocation getTextureLocation(PooltoyWolf entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 
     @Override

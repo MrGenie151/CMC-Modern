@@ -8,12 +8,14 @@ import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 
 public class BehemothHeadRenderer extends MobRenderer<BehemothHead, BehemothHeadModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/behemoth_head.png");
+    
     public BehemothHeadRenderer(EntityRendererProvider.Context context) {
         super(context, new BehemothHeadModel(context.bakeLayer(BehemothHeadModel.LAYER_LOCATION)), 3.0f);
     }
 
     @Override
-    public ResourceLocation getTextureLocation(BehemothHead p_114482_) {
-        return Changed.modResource("textures/behemoth_head.png");
+    public ResourceLocation getTextureLocation(BehemothHead entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

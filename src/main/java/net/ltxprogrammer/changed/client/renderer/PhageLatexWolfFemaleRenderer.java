@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class PhageLatexWolfFemaleRenderer extends AdvancedHumanoidRenderer<PhageLatexWolfFemale, PhageLatexWolfFemaleModel, ArmorLatexFemaleWolfModel<PhageLatexWolfFemale>> {
+public class PhageLatexWolfFemaleRenderer extends AdvancedHumanoidRenderer<PhageLatexWolfFemale, PhageLatexWolfFemaleModel> {
+	public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/phage_latex_wolf_female.png");
+
 	public PhageLatexWolfFemaleRenderer(EntityRendererProvider.Context context) {
 		super(context, new PhageLatexWolfFemaleModel(context.bakeLayer(PhageLatexWolfFemaleModel.LAYER_LOCATION)), ArmorLatexFemaleWolfModel.MODEL_SET, 0.5f);
 		this.addLayer(new LatexParticlesLayer<>(this, getModel(), model::isPartNotMask));
@@ -26,7 +28,7 @@ public class PhageLatexWolfFemaleRenderer extends AdvancedHumanoidRenderer<Phage
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(PhageLatexWolfFemale p_114482_) {
-		return Changed.modResource("textures/phage_latex_wolf_female.png");
+	public ResourceLocation getTextureLocation(PhageLatexWolfFemale entity) {
+		return DEFAULT_SKIN_LOCATION;
 	}
 }

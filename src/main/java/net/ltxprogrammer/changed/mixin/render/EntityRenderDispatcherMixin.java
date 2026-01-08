@@ -129,7 +129,7 @@ public abstract class EntityRenderDispatcherMixin {
             if (name.equals("default") && renderer instanceof LivingEntityRenderer<?,?> playerRenderer) {
                 playerRenderer.layers.stream().filter(PlayerLayerWrapper::isWrappable).forEach(layer -> {
                     ChangedEntityRenderers.getCopyPlayerLayers().forEach(type -> {
-                        if (this.renderers.get(type) instanceof AdvancedHumanoidRenderer<?,?,?> advanced)
+                        if (this.renderers.get(type) instanceof AdvancedHumanoidRenderer<?,?> advanced)
                             advanced.wrapLayer(layer);
                     });
                 });
@@ -138,7 +138,7 @@ public abstract class EntityRenderDispatcherMixin {
             if (renderer instanceof LivingEntityRenderer<?,?> playerRenderer) {
                 playerRenderer.layers.stream().filter(PlayerLayerWrapper::isWrappable).forEach(layer -> {
                     ChangedEntityRenderers.getComplexRenderers(name).forEach(type -> {
-                        if (type instanceof AdvancedHumanoidRenderer<?,?,?> advanced)
+                        if (type instanceof AdvancedHumanoidRenderer<?,?> advanced)
                             advanced.wrapLayer(layer);
                     });
                 });
