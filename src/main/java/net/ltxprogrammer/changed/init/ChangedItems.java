@@ -120,6 +120,13 @@ public class ChangedItems {
     public static final RegistryObject<TscBaton> TSC_BATON = register("tsc_baton", TscBaton::new);
     public static final RegistryObject<TscShield> TSC_SHIELD = register("tsc_shield", TscShield::new);
 
+    public static final RegistryObject<AbstractArmorStandItem> BIPED_ARMOR_STAND = register("biped_armor_stand", () -> new AbstractArmorStandItem((new Item.Properties()).stacksTo(16),
+            ChangedEntities.BIPED_ARMOR_STAND));
+    public static final RegistryObject<AbstractArmorStandItem> CENTAUR_ARMOR_STAND = register("centaur_armor_stand", () -> new AbstractArmorStandItem((new Item.Properties()).stacksTo(16),
+            ChangedEntities.CENTAUR_ARMOR_STAND));
+    public static final RegistryObject<AbstractArmorStandItem> LEGLESS_ARMOR_STAND = register("legless_armor_stand", () -> new AbstractArmorStandItem((new Item.Properties()).stacksTo(16),
+            ChangedEntities.LEGLESS_ARMOR_STAND));
+
     public static final RegistryObject<AbdomenArmor> LEATHER_UPPER_ABDOMEN_ARMOR = register("leather_upper_abdomen_armor",
             () -> new DyeableAbdomenArmor(ArmorMaterials.LEATHER, ArmorItem.Type.LEGGINGS));
     public static final RegistryObject<AbdomenArmor> LEATHER_LOWER_ABDOMEN_ARMOR = register("leather_lower_abdomen_armor",

@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.entity.decoration;
 
 import net.ltxprogrammer.changed.entity.variant.EntityShape;
 import net.ltxprogrammer.changed.init.ChangedEntities;
+import net.ltxprogrammer.changed.init.ChangedItems;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -24,6 +25,6 @@ public class BipedArmorStand extends AbstractArmorStand {
 
     @Override
     public ItemStack getPickResult() {
-        return ItemStack.EMPTY;
+        return new ItemStack(ChangedItems.BIPED_ARMOR_STAND.get());
     }
 }

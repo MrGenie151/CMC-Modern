@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.entity.decoration;
 
 import net.ltxprogrammer.changed.entity.variant.EntityShape;
 import net.ltxprogrammer.changed.init.ChangedEntities;
+import net.ltxprogrammer.changed.init.ChangedItems;
 import net.minecraft.core.Rotations;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -35,7 +36,7 @@ public class CentaurArmorStand extends AbstractArmorStand {
 
     @Override
     public ItemStack getPickResult() {
-        return ItemStack.EMPTY;
+        return new ItemStack(ChangedItems.CENTAUR_ARMOR_STAND.get());
     }
 
     @Override
