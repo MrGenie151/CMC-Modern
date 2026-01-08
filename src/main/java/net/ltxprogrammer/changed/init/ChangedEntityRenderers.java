@@ -167,5 +167,9 @@ public class ChangedEntityRenderers {
         event.registerEntityRenderer(ChangedEntities.GAS_PARTICLE.get(), GasParticleRenderer::new);
         event.registerEntityRenderer(ChangedEntities.WALL_SIGN.get(), WallSignRenderer::new);
         event.registerEntityRenderer(ChangedEntities.EMITTED_LASER.get(), EmittedLaserRenderer::new);
+
+        event.registerEntityRenderer(ChangedEntities.BIPED_ARMOR_STAND.get(), BipedArmorStandRenderer::new);
+        event.registerEntityRenderer(ChangedEntities.CENTAUR_ARMOR_STAND.get(), CentaurArmorStandRenderer::new);
+        event.registerEntityRenderer(ChangedEntities.LEGLESS_ARMOR_STAND.get(), LeglessArmorStandRenderer::new);
     }
 }

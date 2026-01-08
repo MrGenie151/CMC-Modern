@@ -8,17 +8,13 @@ import net.ltxprogrammer.changed.entity.beast.*;
 import net.ltxprogrammer.changed.entity.beast.boss.BehemothHandLeft;
 import net.ltxprogrammer.changed.entity.beast.boss.BehemothHandRight;
 import net.ltxprogrammer.changed.entity.beast.boss.BehemothHead;
-import net.ltxprogrammer.changed.entity.decoration.EmittedLaser;
-import net.ltxprogrammer.changed.entity.decoration.WallSign;
+import net.ltxprogrammer.changed.entity.decoration.*;
 import net.ltxprogrammer.changed.entity.projectile.GasParticle;
 import net.ltxprogrammer.changed.entity.projectile.LatexInkball;
 import net.ltxprogrammer.changed.entity.robot.Exoskeleton;
 import net.ltxprogrammer.changed.entity.robot.Roomba;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
@@ -373,7 +369,13 @@ public class ChangedEntities {
     public static final RegistryObject<EntityType<WallSign>> WALL_SIGN = REGISTRY.register("wall_sign",
             () -> EntityType.Builder.of(WallSign::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE).build("wall_sign"));
     public static final RegistryObject<EntityType<EmittedLaser>> EMITTED_LASER = REGISTRY.register("emitted_laser",
-            () -> EntityType.Builder.of(EmittedLaser::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE).build("wall_sign"));
+            () -> EntityType.Builder.of(EmittedLaser::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE).build("emitted_laser"));
+    public static final RegistryObject<EntityType<BipedArmorStand>> BIPED_ARMOR_STAND = REGISTRY.register("biped_armor_stand",
+            () -> EntityType.Builder.<BipedArmorStand>of(BipedArmorStand::new, MobCategory.MISC).sized(0.7F, 1.93F).clientTrackingRange(10).build("biped_armor_stand"));
+    public static final RegistryObject<EntityType<CentaurArmorStand>> CENTAUR_ARMOR_STAND = REGISTRY.register("centaur_armor_stand",
+            () -> EntityType.Builder.<CentaurArmorStand>of(CentaurArmorStand::new, MobCategory.MISC).sized(1.25F, 2.0F).clientTrackingRange(10).build("centaur_armor_stand"));
+    public static final RegistryObject<EntityType<LeglessArmorStand>> LEGLESS_ARMOR_STAND = REGISTRY.register("legless_armor_stand",
+            () -> EntityType.Builder.<LeglessArmorStand>of(LeglessArmorStand::new, MobCategory.MISC).sized(0.7F, 1.93F).clientTrackingRange(10).build("legless_armor_stand"));
 
     // TODO make register function for non `ChangedEntity`
 
@@ -439,5 +441,8 @@ public class ChangedEntities {
         ATTR_FUNC_REGISTRY.forEach((pair) -> event.put(pair.getFirst().get(), pair.getSecond().get().build()));
         event.put(ROOMBA.get(), Roomba.createAttributes().build());
         event.put(EXOSKELETON.get(), Exoskeleton.createAttributes().build());
+        event.put(BIPED_ARMOR_STAND.get(), LivingEntity.createLivingAttributes().build());
+        event.put(CENTAUR_ARMOR_STAND.get(), LivingEntity.createLivingAttributes().build());
+        event.put(LEGLESS_ARMOR_STAND.get(), LivingEntity.createLivingAttributes().build());
     }
 }
