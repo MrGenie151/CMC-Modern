@@ -283,6 +283,9 @@ public interface IAbstractChangedEntity {
     }
 
     static IAbstractChangedEntity forEntity(ChangedEntity entity) {
+        if (entity.getUnderlyingPlayer() != null)
+            return forPlayer(entity.getUnderlyingPlayer());
+
         Cacheable<ChangedEntity> cached = Cacheable.of(() -> entity);
 
         return new IAbstractChangedEntity() {

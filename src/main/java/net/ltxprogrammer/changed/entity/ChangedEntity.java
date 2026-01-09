@@ -530,28 +530,25 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
                 return false;
         }
 
-        TransfurVariant<?> playerVariant = TransfurVariant.getEntityVariant(livingEntity);
+        TransfurVariant<?> targetVariant = TransfurVariant.getEntityVariant(livingEntity);
         TransfurVariant<?> selfVariant = getSelfVariant();
-        if (TransfurVariant.getPublicTransfurVariants().anyMatch(possibleFusion ->
-                possibleFusion.isFusionOf(selfVariant, livingEntity.getClass()) ||
-                possibleFusion.isFusionOf(playerVariant, this.getClass())
-        ))
-            return true;
+        if (ChangedFusions.INSTANCE.getFusionDefinitions().anyMatch(fusionDefinition ->
+                fusionDefinition.matches(selfVariant, livingEntity.getClass()) ||
+                fusionDefinition.matches(targetVariant, this.getClass()) ||
+                fusionDefinition.matches(selfVariant, targetVariant))) { // Fusion definition exists for target and this entity
+            if (!(livingEntity instanceof Player player))
+                return true; // Always fuse with NPCs
+            if (livingEntity.level().getGameRules().getBoolean(ChangedGameRules.RULE_NPC_WANT_FUSE_PLAYER)) {
+                var instance = ProcessTransfur.getPlayerTransfurVariant(player);
+                if (instance == null || instance.ageAsVariant < livingEntity.level().getGameRules().getInt(ChangedGameRules.RULE_FUSABILITY_DURATION_PLAYER))
+                    return true;
+            }
+        }
+
         if (!livingEntity.getType().is(ChangedTags.EntityTypes.HUMANOIDS) && !(livingEntity instanceof ChangedEntity))
             return false;
-        if (getLatexType().isHostileTo(LatexType.getEntityLatexType(livingEntity)))
-            return true;
-        if (livingEntity instanceof Player player) {
-            if (!livingEntity.level().getGameRules().getBoolean(ChangedGameRules.RULE_NPC_WANT_FUSE_PLAYER))
-                return false;
-            var instance = ProcessTransfur.getPlayerTransfurVariant(player);
-            if (instance != null && instance.ageAsVariant > livingEntity.level().getGameRules().getInt(ChangedGameRules.RULE_FUSABILITY_DURATION_PLAYER))
-                return false;
-        }
-        if (TransfurVariant.getPublicTransfurVariants().anyMatch(possibleFusion -> possibleFusion.isFusionOf(selfVariant, playerVariant)))
-            return true;
 
-        return false;
+        return getLatexType().isHostileTo(LatexType.getEntityLatexType(livingEntity));
     }
 
     public TransfurContext getReplicateContext() {
@@ -657,6 +654,11 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
                     possibleFusion = List.of();
             }
 
+            if (entity instanceof Player && !source.isPlayer()) {
+                if (!level().getGameRules().getBoolean(ChangedGameRules.RULE_NPC_WANT_FUSE_PLAYER))
+                    possibleFusion = List.of();
+            }
+
             if (!possibleFusion.isEmpty()) {
                 TransfurVariant<?> fusionVariant = Util.getRandom(possibleFusion, random);
 
@@ -692,6 +694,11 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
             { // Check if attacker can't fuse
                 var instance = ProcessTransfur.getPlayerTransfurVariant(underlyingPlayer);
                 if (instance != null && instance.ageAsVariant > level().getGameRules().getInt(ChangedGameRules.RULE_FUSABILITY_DURATION_PLAYER))
+                    possibleMobFusions.clear();
+            }
+
+            if (entity instanceof Player && !source.isPlayer()) {
+                if (!level().getGameRules().getBoolean(ChangedGameRules.RULE_NPC_WANT_FUSE_PLAYER))
                     possibleMobFusions.clear();
             }
         }
