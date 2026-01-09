@@ -162,6 +162,10 @@
   "item.changed.tsc_baton": "TSC 惊雷科技电棍",
   "item.changed.tsc_shield": "TSC 惊雷科技防暴盾",
 
+  "item.changed.biped_armor_stand": "双足盔甲架",
+  "item.changed.centaur_armor_stand": "人马型盔甲架",
+  "item.changed.legless_armor_stand": "无足盔甲架",
+
   "item.changed.leather_upper_abdomen_armor": "皮革上腹甲",
   "item.changed.leather_lower_abdomen_armor": "皮革下腹甲",
   "item.changed.chainmail_upper_abdomen_armor": "锁链上腹甲",
@@ -510,6 +514,8 @@
   "entity.changed.behemoth_hand_left": "白胶巨兽左手",
   "entity.changed.behemoth_hand_right": "白胶巨兽右手",
   "entity.changed.beifeng": "北风",
+  "entity.changed.biped_armor_stand": "双足盔甲架",
+  "entity.changed.centaur_armor_stand": "人马型盔甲架",
   "entity.changed.crystal_wolf": "魔晶狼",
   "entity.changed.crystal_wolf_horned": "有角魔晶狼",
   "entity.changed.dark_latex_wolf_female": "雌性黑胶狼",
@@ -582,6 +588,7 @@
   "entity.changed.latex_watermelon_cat": "胶液西瓜猫",
   "entity.changed.latex_white_tiger": "胶液白虎",
   "entity.changed.latex_yuin": "胶液 Yuin",
+  "entity.changed.legless_armor_stand": "无足盔甲架",
   "entity.changed.milk_pudding": "牛奶布丁",
   "entity.changed.phage_latex_wolf_female": "雌性噬菌体胶狼",
   "entity.changed.phage_latex_wolf_male": "雄性噬菌体胶狼",
