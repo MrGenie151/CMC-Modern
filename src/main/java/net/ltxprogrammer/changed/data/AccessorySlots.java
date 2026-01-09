@@ -423,15 +423,22 @@ public class AccessorySlots implements Container {
     }
 
     public static Consumer<ItemStack> dropItemHandler(LivingEntity entity) {
-        return stack -> {
-            if (stack.isEmpty()) return;
+        if (entity instanceof Player player)
+            return stack -> {
+                if (stack.isEmpty()) return;
 
-            ItemEntity itemEntity = new ItemEntity(entity.level(), entity.getX(), entity.getY() + 0.5, entity.getZ(), stack);
-            itemEntity.setPickUpDelay(40);
-            itemEntity.setDeltaMovement(itemEntity.getDeltaMovement().multiply(0, 1, 0));
+                player.drop(stack, true, false);
+            };
+        else
+            return stack -> {
+                if (stack.isEmpty()) return;
 
-            entity.level().addFreshEntity(itemEntity);
-        };
+                ItemEntity itemEntity = new ItemEntity(entity.level(), entity.getX(), entity.getY() + 0.5, entity.getZ(), stack);
+                itemEntity.setPickUpDelay(40);
+                itemEntity.setDeltaMovement(itemEntity.getDeltaMovement().multiply(0, 1, 0));
+
+                entity.level().addFreshEntity(itemEntity);
+            };
     }
 
     @Override
@@ -510,9 +517,10 @@ public class AccessorySlots implements Container {
             ChangedCompatibility.shouldAccessoryDropOnDeath(event);
             Changed.postModEvent(event);
             return event.shouldDrop();
-        }).forEach(entry -> {
-            consumer.accept(entry.getValue());
-            entry.getValue().setCount(0);
+        }).forEach(entry -> consumer.accept(entry.getValue()));
+
+        this.items.keySet().forEach(slotType -> {
+            this.items.put(slotType, ItemStack.EMPTY);
         });
     }
 
