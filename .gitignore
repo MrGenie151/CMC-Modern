@@ -12,3 +12,4 @@ src/test
 # Ignore Intellij IDEA files
 /.idea/
 /.venv/
+.DS_Store
