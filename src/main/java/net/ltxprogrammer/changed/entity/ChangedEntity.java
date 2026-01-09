@@ -1171,6 +1171,14 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
 
     }
 
+    public void onSuitOther(IAbstractChangedEntity other, TransfurVariant<?> variant) {
+
+    }
+
+    public void copyTraitsFrom(IAbstractChangedEntity entity) {
+
+    }
+
     public CompoundTag savePlayerVariantData() {
         return new CompoundTag();
     }

@@ -249,14 +249,14 @@ public class TransfurVariant<T extends ChangedEntity> {
 
         if (entity instanceof Mob mob) {
             newEntity.setNoAi(mob.isNoAi());
-        }
-
-        if (entity instanceof Mob mob) {
             newEntity.setLeftHanded(mob.isLeftHanded());
         }
 
         if (entity instanceof Player player) {
             newEntity.getBasicPlayerInfo().copyFrom(((PlayerDataExtension)player).getBasicPlayerInfo());
+            if (ProcessTransfur.isPlayerTransfurred(player))
+                newEntity.copyTraitsFrom(IAbstractChangedEntity.forPlayer(player));
+
             if (!ProcessTransfur.killPlayerByTransfur(player, cause != null ? cause : newEntity)) {
                 newEntity.discard();
                 var instance = ProcessTransfur.setPlayerTransfurVariant(player, this, TransfurContext.hazard(TransfurCause.GRAB_REPLICATE), 1.0f);
@@ -269,6 +269,7 @@ public class TransfurVariant<T extends ChangedEntity> {
             }
         } else if (entity instanceof ChangedEntity changedEntity) {
             newEntity.getBasicPlayerInfo().copyFrom(changedEntity.getBasicPlayerInfo());
+            newEntity.copyTraitsFrom(IAbstractChangedEntity.forEntity(changedEntity));
             // Take armor and held items
             Arrays.stream(EquipmentSlot.values()).forEach(slot -> {
                 newEntity.setItemSlot(slot, entity.getItemBySlot(slot).copy());

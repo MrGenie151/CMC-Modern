@@ -360,7 +360,9 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
             }
 
             if (this.suited && this.grabbedEntity instanceof Player player && !ProcessTransfur.isPlayerTransfurred(player)) {
-                ProcessTransfur.setPlayerTransfurVariant(player, this.entity.getSelfVariant(), TransfurContext.latexHazard(this.entity, TransfurCause.GRAB_REPLICATE), 1.0f, true);
+                var suitVariant = ProcessTransfur.setPlayerTransfurVariant(player, this.entity.getSelfVariant(), TransfurContext.latexHazard(this.entity, TransfurCause.GRAB_REPLICATE), 1.0f, true);
+                if (suitVariant != null)
+                    this.entity.getChangedEntity().onSuitOther(IAbstractChangedEntity.forPlayer(player), suitVariant.getParent());
             }
 
             else if (!this.suited && this.grabbedEntity instanceof Player player && ProcessTransfur.isPlayerTransfurred(player)) {
