@@ -162,6 +162,10 @@
   "item.changed.tsc_baton": "TSC baton",
   "item.changed.tsc_shield": "TSC pajzs",
 
+  "item.changed.biped_armor_stand": "Kétlábú páncélállvány",
+  "item.changed.centaur_armor_stand": "Kentaur páncélállvány",
+  "item.changed.legless_armor_stand": "Lábatlan páncélállvány",
+
   "item.changed.leather_upper_abdomen_armor": "Bőr felhaspáncél",
   "item.changed.leather_lower_abdomen_armor": "Bőr alhaspáncél",
   "item.changed.chainmail_upper_abdomen_armor": "Lánc felhaspáncél",
@@ -510,6 +514,8 @@
   "entity.changed.behemoth_hand_left": "Behemót balkéz",
   "entity.changed.behemoth_hand_right": "Behemót jobbkéz",
   "entity.changed.beifeng": "Pejfeng",
+  "entity.changed.biped_armor_stand": "Kétlábú páncélállvány",
+  "entity.changed.centaur_armor_stand": "Kentaur páncélállvány",
   "entity.changed.crystal_wolf": "Kristály farkas",
   "entity.changed.crystal_wolf_horned": "Szarvas kristály farkas",
   "entity.changed.dark_dragon": "Sötét sárkány",
@@ -582,6 +588,7 @@
   "entity.changed.latex_watermelon_cat": "Latex görögdinnye-macska",
   "entity.changed.latex_white_tiger": "Latex fehér tigris",
   "entity.changed.latex_yuin": "Latex jüin",
+  "entity.changed.legless_armor_stand": "Lábatlan páncélállvány",
   "entity.changed.milk_pudding": "Tejpuding",
   "entity.changed.phage_latex_wolf_female": "Nőstény bakteriofág latex farkas",
   "entity.changed.phage_latex_wolf_male": "Hím bakteriofág latex farkas",
