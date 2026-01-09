@@ -87,7 +87,7 @@ public class AccessoryEntities extends SimplePreparableReloadListener<List<Pair<
                     // Available slots changed, reopen menu for player
 
                     if (entity instanceof ServerPlayer player && player.containerMenu instanceof AccessoryAccessMenu menu && menu.owner == player) {
-                        AccessoryAccessMenu.openForPlayer(player);
+                        AccessoryAccessMenu.openForPlayer(player, menu.getCarried());
                     }
                 }
             }

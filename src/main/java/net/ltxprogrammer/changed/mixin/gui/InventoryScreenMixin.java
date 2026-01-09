@@ -42,7 +42,7 @@ public abstract class InventoryScreenMixin extends EffectRenderingInventoryScree
     @Inject(method = "init", at = @At("RETURN"))
     protected void addAccessoryButton(CallbackInfo ci) {
         this.addRenderableWidget(new ImageButton(this.leftPos - 24, this.height / 2 - 22, 20, 20, 0, 0, 20, ACCESSORY_ICON, 20, 40, (button) -> {
-            AccessorySlots.openAccessoriesMenu(menu.owner);
+            AccessorySlots.openAccessoriesMenu(menu.owner, menu.getCarried());
         }));
     }
 

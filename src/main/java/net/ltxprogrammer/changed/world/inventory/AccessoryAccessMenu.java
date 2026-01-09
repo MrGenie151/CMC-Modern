@@ -43,29 +43,35 @@ public class AccessoryAccessMenu extends AbstractContainerMenu {
     private ImmutableList<AccessorySlotType> builtSlots;
     private final Map<Integer, Slot> customSlots = new HashMap<>();
 
-    private AccessoryAccessMenu(int id, Player owner, List<AccessorySlotType> slotTypes) {
+    private AccessoryAccessMenu(int id, Player owner, List<AccessorySlotType> slotTypes, ItemStack carried) {
         super(ChangedMenus.ACCESSORY_ACCESS.get(), id);
         this.owner = owner;
         this.inventory = owner.getInventory();
         this.accessorySlots = AccessorySlots.getForEntity(owner).orElseGet(AccessorySlots::new);
         this.createSlots(inventory, slotTypes);
-
-        if (owner.containerMenu != null) {
-            this.setCarried(owner.containerMenu.getCarried());
-            owner.containerMenu.setCarried(ItemStack.EMPTY);
-        }
+        this.setCarried(carried);
     }
 
     public AccessoryAccessMenu(int id, Player owner) {
-        this(id, owner, AccessorySlots.getForEntity(owner).orElseGet(AccessorySlots::new).getOrderedSlots());
+        this(id, owner, AccessorySlots.getForEntity(owner).orElseGet(AccessorySlots::new).getOrderedSlots(), ItemStack.EMPTY);
     }
 
-    public static void openForPlayer(ServerPlayer player) {
-        final var registry = ChangedRegistry.ACCESSORY_SLOTS.get();
+    public AccessoryAccessMenu(int id, Inventory inventory, FriendlyByteBuf extra) {
+        this(id, inventory.player, readSlotTypes(extra), ItemStack.EMPTY);
+    }
+
+    public static void openForPlayer(ServerPlayer player, ItemStack carryRequest) {
         final var slots = AccessorySlots.getForEntity(player).orElseGet(AccessorySlots::new);
 
+        if (!player.getAbilities().instabuild) {
+            carryRequest = player.inventoryMenu.getCarried();
+            player.inventoryMenu.setCarried(ItemStack.EMPTY);
+        }
+
+        final ItemStack resolvedCarryRequest = carryRequest;
+
         NetworkHooks.openScreen(player,
-                new SimpleMenuProvider((id, inv, accessor) -> new AccessoryAccessMenu(id, accessor, slots.getOrderedSlots()), Component.empty()),
+                new SimpleMenuProvider((id, inv, accessor) -> new AccessoryAccessMenu(id, accessor, slots.getOrderedSlots(), resolvedCarryRequest), Component.empty()),
                 extra -> {
                     extra.writeCollection(slots.getOrderedSlots(), ChangedRegistry.ACCESSORY_SLOTS::writeRegistryObject);
                 });
@@ -75,10 +81,6 @@ public class AccessoryAccessMenu extends AbstractContainerMenu {
         if (buffer == null)
             return List.of();
         return buffer.readList(ChangedRegistry.ACCESSORY_SLOTS::readRegistryObject);
-    }
-
-    public AccessoryAccessMenu(int id, Inventory inventory, FriendlyByteBuf extra) {
-        this(id, inventory.player, readSlotTypes(extra));
     }
 
     protected void makeAccessorySlots(List<AccessorySlotType> slotTypes) {

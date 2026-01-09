@@ -66,9 +66,9 @@ public class AccessorySlots implements Container {
 
     public static final AccessorySlots DUMMY = new AccessorySlots(null);
 
-    public static void openAccessoriesMenu(@NotNull LivingEntity entity) {
+    public static void openAccessoriesMenu(@NotNull LivingEntity entity, ItemStack carried) {
         if (entity.level().isClientSide)
-            Changed.PACKET_HANDLER.sendToServer(new AccessorySyncPacket(entity.getId(), AccessorySlots.DUMMY));
+            Changed.PACKET_HANDLER.sendToServer(new AccessorySyncPacket(entity.getId(), carried));
     }
 
     public AccessorySlots(@Nullable LivingEntity owner) {
