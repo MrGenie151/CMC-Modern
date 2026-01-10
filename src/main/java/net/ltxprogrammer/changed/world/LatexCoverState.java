@@ -1,10 +1,12 @@
 package net.ltxprogrammer.changed.world;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.entity.latex.LatexType;
+import net.ltxprogrammer.changed.entity.latex.SpreadingLatexType;
 import net.ltxprogrammer.changed.init.ChangedLatexTypes;
 import net.ltxprogrammer.changed.init.ChangedRegistry;
 import net.ltxprogrammer.changed.util.Cacheable;
@@ -18,6 +20,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -40,7 +43,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.*;
 
 public class LatexCoverState extends StateHolder<LatexType, LatexCoverState> {
     protected static final Direction[] UPDATE_SHAPE_ORDER = new Direction[]{Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.DOWN, Direction.UP};
@@ -292,6 +295,10 @@ public class LatexCoverState extends StateHolder<LatexType, LatexCoverState> {
         this.getType().onRemove(this.asState(), level, blockPos, oldState, flag);
     }
 
+    public void onStruckByLighting(Level level, BlockPos blockPos, LightningBolt lightningBolt) {
+        this.getType().onStruckByLighting(this, level, blockPos, lightningBolt);
+    }
+
     public void onLatexCoverStateChange(Level level, BlockPos blockPos, LatexCoverState oldState) {
 
     }
@@ -398,6 +405,52 @@ public class LatexCoverState extends StateHolder<LatexType, LatexCoverState> {
     public Vec3 findClosestSurface(Vec3 position, @Nullable Direction.Axis axis) {
         return getType().findClosestSurface(this.asState(), position, axis);
     }
+
+    public static Set<LatexNode> collectConnectedLatex(
+            ServerLevel level,
+            BlockPos source,
+            int maxDepth
+    ) {
+        Set<BlockPos> visited = new HashSet<>();
+        Set<LatexNode> result = new HashSet<>();
+
+        Queue<Pair<BlockPos, Integer>> queue = new ArrayDeque<>();
+        queue.add(Pair.of(source, 0));
+        visited.add(source);
+
+        LatexCoverState sourceState = LatexCoverState.getAt(level, source);
+        if (sourceState.isAir())
+            return result;
+
+        while (!queue.isEmpty()) {
+            var entry = queue.poll();
+            BlockPos pos = entry.getFirst();
+            int depth = entry.getSecond();
+
+            if (depth > maxDepth)
+                continue;
+
+            LatexCoverState state = LatexCoverState.getAt(level, pos);
+            if (state.isAir() || !state.is(sourceState.getType()))
+                continue;
+
+            if (!(state.getType() instanceof SpreadingLatexType))
+                continue;
+
+            result.add(new LatexNode(pos, state));
+
+            for (Direction dir : Direction.values()) {
+                BlockPos next = pos.relative(dir);
+                if (visited.add(next)) {
+                    queue.add(Pair.of(next, depth + 1));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public record LatexNode(BlockPos pos, LatexCoverState state) {};
 
     public interface ShapeGetter {
         VoxelShape get(LatexCoverState state, LatexCoverGetter p_45741_, BlockPos p_45742_, CollisionContext p_45743_);

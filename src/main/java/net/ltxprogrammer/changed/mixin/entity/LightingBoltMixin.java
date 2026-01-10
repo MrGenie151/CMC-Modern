@@ -26,11 +26,10 @@ public abstract class LightingBoltMixin extends Entity {
 
     @Inject(method = "powerLightningRod", at = @At("TAIL"), cancellable = false)
     private void latexCoverIsStruckByLighting(CallbackInfo ci) {
-        // Latex is Weak to Shock, and a LightingBolt is a very powerful shock soo it die when struck by it
         BlockPos strikePosition = this.getStrikePosition();
         Level level = level();
         LatexCoverState strikePositionCoverState = LatexCoverState.getAt(level, strikePosition);
-        if (strikePositionCoverState.isAir()) return;
-        LatexCoverState.setAtAndUpdate(level, strikePosition, ChangedLatexTypes.NONE.get().defaultCoverState());
+        LightningBolt self = (LightningBolt) (Object) this;
+        strikePositionCoverState.onStruckByLighting(level, strikePosition, self);
     }
 }
