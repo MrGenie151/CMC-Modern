@@ -115,7 +115,7 @@ public abstract class LatexType {
 
             List<LivingEntity> entities = level.getEntitiesOfClass(
                     LivingEntity.class,
-                    new AABB(strikePosition).inflate(6),
+                    new AABB(strikePosition).inflate(24),
                     entity -> entity instanceof PureWhiteLatexWolf || entity instanceof Behemoth
                             || ProcessTransfur.getPlayerTransfurVariantSafe(EntityUtil.playerOrNull(entity)).map(TransfurVariantInstance::getChangedEntity).orElse(null) instanceof WhiteLatexEntity
             );
@@ -139,6 +139,9 @@ public abstract class LatexType {
         // Latex is Weak to Shock, and a LightingBolt is a very powerful shock soo it die when struck by it
         if (strikePositionCoverState.isAir()) return;
         LatexCoverState.setAtAndUpdate(level, strikePosition, ChangedLatexTypes.NONE.get().defaultCoverState());
+        for (Direction value : Direction.values()) {
+            LatexCoverState.setAtAndUpdate(level, strikePosition.relative(value), ChangedLatexTypes.NONE.get().defaultCoverState()); // Cross like removal
+        }
 
     }
 
