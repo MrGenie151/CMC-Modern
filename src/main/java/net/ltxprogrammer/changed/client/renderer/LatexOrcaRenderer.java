@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.entity.beast.LatexOrca;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexOrcaRenderer extends AdvancedHumanoidRenderer<LatexOrca, LatexOrcaModel, ArmorLatexOrcaModel<LatexOrca>> {
+public class LatexOrcaRenderer extends AdvancedHumanoidRenderer<LatexOrca, LatexOrcaModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_orca.png");
+
     public LatexOrcaRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexOrcaModel(context.bakeLayer(LatexOrcaModel.LAYER_LOCATION)), ArmorLatexOrcaModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, this.model));
@@ -22,7 +24,7 @@ public class LatexOrcaRenderer extends AdvancedHumanoidRenderer<LatexOrca, Latex
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexOrca p_114482_) {
-        return Changed.modResource("textures/latex_orca.png");
+    public ResourceLocation getTextureLocation(LatexOrca entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

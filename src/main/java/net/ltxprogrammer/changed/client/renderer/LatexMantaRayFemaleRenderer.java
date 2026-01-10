@@ -15,7 +15,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexMantaRayFemaleRenderer extends AdvancedHumanoidRenderer<LatexMantaRayFemale, LatexMantaRayFemaleModel, ArmorFemaleMantaRayUpperBodyModel<LatexMantaRayFemale>> {
+public class LatexMantaRayFemaleRenderer extends AdvancedHumanoidRenderer<LatexMantaRayFemale, LatexMantaRayFemaleModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_manta_ray_female.png");
+
     public LatexMantaRayFemaleRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexMantaRayFemaleModel(context.bakeLayer(LatexMantaRayFemaleModel.LAYER_LOCATION)),
                 ArmorModelPicker.legless(context.getModelSet(), ArmorFemaleMantaRayUpperBodyModel.MODEL_SET, ArmorFemaleMantaRayAbdomenModel.MODEL_SET), 0.5f);
@@ -27,7 +29,7 @@ public class LatexMantaRayFemaleRenderer extends AdvancedHumanoidRenderer<LatexM
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexMantaRayFemale p_114482_) {
-        return Changed.modResource("textures/latex_manta_ray_female.png");
+    public ResourceLocation getTextureLocation(LatexMantaRayFemale entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

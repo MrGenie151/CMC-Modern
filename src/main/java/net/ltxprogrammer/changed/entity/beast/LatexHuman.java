@@ -142,12 +142,31 @@ public class LatexHuman extends ChangedEntity implements ComplexRenderer {
     @Override
     public void onReplicateOther(IAbstractChangedEntity other, TransfurVariant<?> variant) {
         super.onReplicateOther(other, variant);
-        //if (this.getUUID() != this.getRepresentUUID()) return;
 
         if (variant.is(ChangedTransfurVariants.LATEX_HUMAN)) {
             if (other.getChangedEntity() instanceof LatexHuman human) {
                 human.setRepresentPlayer(this.getRepresentUUID());
             }
+        }
+    }
+
+    @Override
+    public void onSuitOther(IAbstractChangedEntity other, TransfurVariant<?> variant) {
+        super.onSuitOther(other, variant);
+
+        if (variant.is(ChangedTransfurVariants.LATEX_HUMAN)) {
+            if (other.getChangedEntity() instanceof LatexHuman human) {
+                human.setRepresentPlayer(this.getRepresentUUID());
+            }
+        }
+    }
+
+    @Override
+    public void copyTraitsFrom(IAbstractChangedEntity entity) {
+        super.copyTraitsFrom(entity);
+
+        if (entity.getChangedEntity() instanceof LatexHuman human) {
+            this.setRepresentPlayer(human.getRepresentUUID());
         }
     }
 

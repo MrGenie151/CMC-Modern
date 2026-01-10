@@ -1,5 +1,7 @@
 package net.ltxprogrammer.changed.mixin.gui;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.data.AccessorySlots;
 import net.minecraft.client.gui.components.Button;
@@ -13,6 +15,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -25,20 +28,37 @@ public abstract class CreativeModeInventoryScreenMixin extends EffectRenderingIn
     @Shadow private static CreativeModeTab selectedTab;
     @Unique private static final ResourceLocation ACCESSORY_ICON = Changed.modResource("textures/gui/basic_player_info.png");
 
-    @Unique private Button accessoryButton;
+    @Unique private boolean buttonClicked;
 
     public CreativeModeInventoryScreenMixin(CreativeModeInventoryScreen.ItemPickerMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
     }
 
+    @Unique private Button accessoryButton;
+
     @Inject(method = "init", at = @At("RETURN"))
     protected void addAccessoryButton(CallbackInfo ci) {
         accessoryButton = this.addRenderableWidget(new ImageButton(this.leftPos - 24, this.height / 2 - 22, 20, 20, 0, 0, 20, ACCESSORY_ICON, 20, 40, (button) -> {
-            if (menu.inventoryMenu instanceof InventoryMenu invMenu)
-                AccessorySlots.openAccessoriesMenu(invMenu.owner);
+            if (menu.inventoryMenu instanceof InventoryMenu invMenu) {
+                // Dev note: carried stack isn't tracked on the server in the creative inventory, as opposed to the regular inventory.
+                // We need to send the carried stack in the request to open the accessory menu.
+                AccessorySlots.openAccessoriesMenu(invMenu.owner, this.menu.getCarried());
+                this.menu.setCarried(ItemStack.EMPTY);
+                this.buttonClicked = true;
+            }
         }));
 
         accessoryButton.visible = selectedTab.getType() == CreativeModeTab.Type.INVENTORY;
+    }
+
+    @WrapMethod(method = "mouseReleased")
+    protected boolean preventItemThrow(double x, double y, int button, Operation<Boolean> original) {
+        if (this.buttonClicked) {
+            this.buttonClicked = false;
+            return true;
+        } else {
+            return original.call(x, y, button);
+        }
     }
 
     @Inject(method = "selectTab", at = @At("RETURN"))

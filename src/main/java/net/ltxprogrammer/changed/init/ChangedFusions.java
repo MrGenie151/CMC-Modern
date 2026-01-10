@@ -80,17 +80,15 @@ public class ChangedFusions extends SimplePreparableReloadListener<List<ChangedF
     }
 
     public Stream<TransfurVariant<?>> getFusionsFor(TransfurVariant<?> variantA, TransfurVariant<?> variantB) {
-        return getFusionDefinitions().mapMulti((fusionDefinition, next) -> {
-            if (fusionDefinition.matches(variantA, variantB))
-                next.accept(fusionDefinition.fusion());
-        });
+        return getFusionDefinitions().filter(fusionDefinition -> {
+            return fusionDefinition.matches(variantA, variantB);
+        }).map(FusionDefinition::fusion);
     }
 
     public Stream<TransfurVariant<?>> getFusionsFor(TransfurVariant<?> variant, Class<? extends LivingEntity> mob) {
-        return getFusionDefinitions().mapMulti((fusionDefinition, next) -> {
-            if (fusionDefinition.matches(variant, mob))
-                next.accept(fusionDefinition.fusion());
-        });
+        return getFusionDefinitions().filter(fusionDefinition -> {
+            return fusionDefinition.matches(variant, mob);
+        }).map(FusionDefinition::fusion);
     }
 
     private FusionDefinition processJSONFile(ResourceLocation name, JsonObject root) throws ClassNotFoundException {

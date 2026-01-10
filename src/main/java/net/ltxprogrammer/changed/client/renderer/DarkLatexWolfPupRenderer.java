@@ -12,7 +12,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Pose;
 import org.jetbrains.annotations.NotNull;
 
-public class DarkLatexWolfPupRenderer extends AdvancedHumanoidRenderer<DarkLatexWolfPup, DarkLatexWolfPupModel, ArmorNoneModel<DarkLatexWolfPup>> {
+public class DarkLatexWolfPupRenderer extends AdvancedHumanoidRenderer<DarkLatexWolfPup, DarkLatexWolfPupModel> {
+	public static final ResourceLocation PUDDLE_SKIN_LOCATION = Changed.modResource("textures/dark_latex_pup_puddle.png");
+	public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/dark_latex_wolf_pup.png");
+
 	public DarkLatexWolfPupRenderer(EntityRendererProvider.Context context) {
 		super(context, new DarkLatexWolfPupModel(context.bakeLayer(DarkLatexWolfPupModel.LAYER_LOCATION)), ArmorNoneModel.MODEL_SET, 0.4F);
 		this.addLayer(new LatexParticlesLayer<>(this, getModel(), model::isPartNotMask));
@@ -25,7 +28,7 @@ public class DarkLatexWolfPupRenderer extends AdvancedHumanoidRenderer<DarkLatex
 
 	@Override
 	public ResourceLocation getTextureLocation(DarkLatexWolfPup entity) {
-		return entity.isPuddle() ? Changed.modResource("textures/dark_latex_pup_puddle.png") : Changed.modResource("textures/dark_latex_wolf_pup.png");
+		return entity.isPuddle() ? PUDDLE_SKIN_LOCATION : DEFAULT_SKIN_LOCATION;
 	}
 
 	@Override

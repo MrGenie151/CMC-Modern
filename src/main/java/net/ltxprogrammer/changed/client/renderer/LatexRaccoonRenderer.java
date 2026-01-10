@@ -10,7 +10,9 @@ import net.ltxprogrammer.changed.entity.beast.LatexRaccoon;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexRaccoonRenderer extends AdvancedHumanoidRenderer<LatexRaccoon, LatexRaccoonModel, ArmorLatexMaleCatModel<LatexRaccoon>> {
+public class LatexRaccoonRenderer extends AdvancedHumanoidRenderer<LatexRaccoon, LatexRaccoonModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_raccoon.png");
+
     public LatexRaccoonRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexRaccoonModel(context.bakeLayer(LatexRaccoonModel.LAYER_LOCATION)), ArmorLatexMaleCatModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -19,7 +21,7 @@ public class LatexRaccoonRenderer extends AdvancedHumanoidRenderer<LatexRaccoon,
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexRaccoon p_114482_) {
-        return Changed.modResource("textures/latex_raccoon.png");
+    public ResourceLocation getTextureLocation(LatexRaccoon entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

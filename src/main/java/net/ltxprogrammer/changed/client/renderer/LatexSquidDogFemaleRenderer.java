@@ -10,7 +10,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexSquidDogFemaleRenderer extends AdvancedHumanoidRenderer<LatexSquidDogFemale, LatexSquidDogFemaleModel, ArmorLatexFemaleSquidDogModel<LatexSquidDogFemale>> {
+public class LatexSquidDogFemaleRenderer extends AdvancedHumanoidRenderer<LatexSquidDogFemale, LatexSquidDogFemaleModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_squid_dog_female.png");
+
     public LatexSquidDogFemaleRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexSquidDogFemaleModel(context.bakeLayer(LatexSquidDogFemaleModel.LAYER_LOCATION)), ArmorLatexFemaleSquidDogModel.MODEL_SET, 0.65f);
         this.addLayer(new DoubleItemInHandLayer<>(this, context.getItemInHandRenderer()));
@@ -22,10 +24,9 @@ public class LatexSquidDogFemaleRenderer extends AdvancedHumanoidRenderer<LatexS
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexSquidDogFemale p_114482_) {
-        return Changed.modResource("textures/latex_squid_dog_female.png");
+    public ResourceLocation getTextureLocation(LatexSquidDogFemale entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
-
 
     @Override
     protected void scale(LatexSquidDogFemale entity, PoseStack pose, float partialTick) {

@@ -162,6 +162,10 @@
   "item.changed.tsc_baton": "TSC Baton",
   "item.changed.tsc_shield": "TSC Shield",
 
+  "item.changed.biped_armor_stand": "Bipedal Armor Stand",
+  "item.changed.centaur_armor_stand": "Centaur Armor Stand",
+  "item.changed.legless_armor_stand": "Legless Armor Stand",
+
   "item.changed.leather_upper_abdomen_armor": "Leather Upper Abdomen Armor",
   "item.changed.leather_lower_abdomen_armor": "Leather Lower Abdomen Armor",
   "item.changed.chainmail_upper_abdomen_armor": "Chainmail Upper Abdomen Armor",
@@ -510,6 +514,8 @@
   "entity.changed.behemoth_hand_left": "Left Behemoth Hand",
   "entity.changed.behemoth_hand_right": "Right Behemoth Hand",
   "entity.changed.beifeng": "Beifeng",
+  "entity.changed.biped_armor_stand": "Bipedal Armor Stand",
+  "entity.changed.centaur_armor_stand": "Centaur Armor Stand",
   "entity.changed.crystal_wolf": "Crystal Wolf",
   "entity.changed.crystal_wolf_horned": "Horned Crystal Wolf",
   "entity.changed.dark_latex_wolf_female": "Female Dark Latex Wolf",
@@ -582,6 +588,7 @@
   "entity.changed.latex_watermelon_cat": "Latex Watermelon Cat",
   "entity.changed.latex_white_tiger": "Latex White Tiger",
   "entity.changed.latex_yuin": "Latex Yuin",
+  "entity.changed.legless_armor_stand": "Legless Armor Stand",
   "entity.changed.milk_pudding": "Milk Pudding",
   "entity.changed.phage_latex_wolf_female": "Female Phage Latex Wolf",
   "entity.changed.phage_latex_wolf_male": "Male Phage Latex Wolf",

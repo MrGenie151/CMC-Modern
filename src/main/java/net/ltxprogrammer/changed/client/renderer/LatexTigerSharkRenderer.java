@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.entity.beast.LatexTigerShark;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexTigerSharkRenderer extends AdvancedHumanoidRenderer<LatexTigerShark, LatexTigerSharkModel, ArmorLatexMaleSharkModel<LatexTigerShark>> {
+public class LatexTigerSharkRenderer extends AdvancedHumanoidRenderer<LatexTigerShark, LatexTigerSharkModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_tiger_shark.png");
+
     public LatexTigerSharkRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexTigerSharkModel(context.bakeLayer(LatexTigerSharkModel.LAYER_LOCATION)), ArmorLatexMaleSharkModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, this.model));
@@ -21,7 +23,7 @@ public class LatexTigerSharkRenderer extends AdvancedHumanoidRenderer<LatexTiger
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexTigerShark p_114482_) {
-        return Changed.modResource("textures/latex_tiger_shark.png");
+    public ResourceLocation getTextureLocation(LatexTigerShark entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

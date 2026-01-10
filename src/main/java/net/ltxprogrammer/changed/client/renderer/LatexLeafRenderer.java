@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexLeafRenderer extends AdvancedHumanoidRenderer<LatexLeaf, LatexLeafModel, ArmorLatexBigTailDragonModel<LatexLeaf>> {
+public class LatexLeafRenderer extends AdvancedHumanoidRenderer<LatexLeaf, LatexLeafModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_leaf.png");
+
     public LatexLeafRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexLeafModel(context.bakeLayer(LatexLeafModel.LAYER_LOCATION)), ArmorLatexBigTailDragonModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, this.model));
@@ -23,7 +25,7 @@ public class LatexLeafRenderer extends AdvancedHumanoidRenderer<LatexLeaf, Latex
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexLeaf p_114482_) {
-        return Changed.modResource("textures/latex_leaf.png");
+    public ResourceLocation getTextureLocation(LatexLeaf entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

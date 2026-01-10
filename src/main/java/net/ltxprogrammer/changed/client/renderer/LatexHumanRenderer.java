@@ -17,7 +17,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
-public class LatexHumanRenderer extends AdvancedHumanoidRenderer<LatexHuman, LatexHumanModel, ArmorHumanModel<LatexHuman>> {
+public class LatexHumanRenderer extends AdvancedHumanoidRenderer<LatexHuman, LatexHumanModel> {
 	public LatexHumanRenderer(EntityRendererProvider.Context context, boolean slim) {
 		super(context, new LatexHumanModel(context.bakeLayer(
 				slim ? LatexHumanModel.LAYER_LOCATION_SLIM : LatexHumanModel.LAYER_LOCATION)), ArmorHumanModel.MODEL_SET, 0.5f);

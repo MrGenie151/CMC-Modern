@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.entity.beast.LatexMantaRayMale;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexMantaRayMaleRenderer extends AdvancedHumanoidRenderer<LatexMantaRayMale, LatexMantaRayMaleModel, ArmorLatexOrcaModel<LatexMantaRayMale>> {
+public class LatexMantaRayMaleRenderer extends AdvancedHumanoidRenderer<LatexMantaRayMale, LatexMantaRayMaleModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_manta_ray_male.png");
+
     public LatexMantaRayMaleRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexMantaRayMaleModel(context.bakeLayer(LatexMantaRayMaleModel.LAYER_LOCATION)), ArmorLatexMaleSharkModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, this.model));
@@ -22,7 +24,7 @@ public class LatexMantaRayMaleRenderer extends AdvancedHumanoidRenderer<LatexMan
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexMantaRayMale p_114482_) {
-        return Changed.modResource("textures/latex_manta_ray_male.png");
+    public ResourceLocation getTextureLocation(LatexMantaRayMale entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

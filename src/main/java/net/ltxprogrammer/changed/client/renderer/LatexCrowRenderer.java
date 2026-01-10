@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.entity.beast.LatexCrow;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexCrowRenderer extends AdvancedHumanoidRenderer<LatexCrow, LatexCrowModel, ArmorLatexMaleBirdModel<LatexCrow>> {
+public class LatexCrowRenderer extends AdvancedHumanoidRenderer<LatexCrow, LatexCrowModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_crow.png");
+
     public LatexCrowRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexCrowModel(context.bakeLayer(LatexCrowModel.LAYER_LOCATION)), ArmorLatexMaleBirdModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, this.model));
@@ -22,6 +24,6 @@ public class LatexCrowRenderer extends AdvancedHumanoidRenderer<LatexCrow, Latex
 
     @Override
     public ResourceLocation getTextureLocation(LatexCrow entity) {
-        return Changed.modResource("textures/latex_crow.png");
+        return DEFAULT_SKIN_LOCATION;
     }
 }

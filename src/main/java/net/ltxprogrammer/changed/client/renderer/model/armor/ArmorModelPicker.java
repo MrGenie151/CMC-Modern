@@ -1,40 +1,44 @@
 package net.ltxprogrammer.changed.client.renderer.model.armor;
 
-import net.ltxprogrammer.changed.client.renderer.animate.HumanoidAnimator;
-import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.item.AbdomenArmor;
 import net.ltxprogrammer.changed.item.QuadrupedalArmor;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 
-public abstract class ArmorModelPicker<T extends ChangedEntity> {
-    public abstract LatexHumanoidArmorModel<T, ?> getModelForSlot(T entity, EquipmentSlot slot);
-    public abstract Map<ArmorModel, LatexHumanoidArmorModel<T, ?>> getModelSetForSlot(T entity, EquipmentSlot slot);
+public abstract class ArmorModelPicker<T extends LivingEntity, M extends EntityModel<? super T>> {
+    public abstract M getModelForSlot(T entity, EquipmentSlot slot);
+    public abstract Map<ArmorModel, ? extends M> getModelSetForSlot(T entity, EquipmentSlot slot);
 
-    public abstract void applyAnimatorProperties(T entity, HumanoidAnimator<?,?> other);
+    public abstract void forEach(T entity, Predicate<ArmorModel> predicate, BiConsumer<ArmorModel, ? super M> consumer);
 
     public abstract void prepareAndSetupModels(T entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch);
 
-    public static <T extends ChangedEntity> ArmorModelPicker<T> basic(EntityModelSet models, ArmorModelSet<T, ?> full) {
+    public static <T extends LivingEntity, M extends EntityModel<? super T>> ArmorModelPicker<T, M> basic(EntityModelSet models, ArmorModelSet<? super T, ? extends M> full) {
         return new ArmorModelPicker<>() {
-            final Map<ArmorModel, ? extends LatexHumanoidArmorModel<T, ?>> baked = full.createModels(models);
+            final Map<ArmorModel, ? extends M> baked = full.createModels(models);
 
             @Override
-            public LatexHumanoidArmorModel<T, ?> getModelForSlot(T entity, EquipmentSlot slot) {
+            public M getModelForSlot(T entity, EquipmentSlot slot) {
                 return baked.get(slot == EquipmentSlot.LEGS ? ArmorModel.ARMOR_INNER : ArmorModel.ARMOR_OUTER);
             }
 
             @Override
-            public Map<ArmorModel, LatexHumanoidArmorModel<T, ?>> getModelSetForSlot(T entity, EquipmentSlot slot) {
+            public Map<ArmorModel, ? extends M> getModelSetForSlot(T entity, EquipmentSlot slot) {
                 return Map.copyOf(baked);
             }
 
             @Override
-            public void applyAnimatorProperties(T entity, HumanoidAnimator<?, ?> other) {
-                baked.get(ArmorModel.ARMOR_INNER).getAnimator(entity).copyProperties(other);
-                baked.get(ArmorModel.ARMOR_OUTER).getAnimator(entity).copyProperties(other);
+            public void forEach(T entity, Predicate<ArmorModel> predicate, BiConsumer<ArmorModel, ? super M> consumer) {
+                Arrays.stream(ArmorModel.values()).filter(predicate).forEach(model -> {
+                    consumer.accept(model, baked.get(model));
+                });
             }
 
             @Override
@@ -50,29 +54,29 @@ public abstract class ArmorModelPicker<T extends ChangedEntity> {
         };
     }
 
-    public static <T extends ChangedEntity> ArmorModelPicker<T> centaur(EntityModelSet models, ArmorModelSet<T, ?> upperBody, ArmorModelSet<T, ?> lowerBody) {
+    public static <T extends LivingEntity, M extends EntityModel<? super T>> ArmorModelPicker<T, M> centaur(EntityModelSet models, ArmorModelSet<? super T, ? extends M> upperBody, ArmorModelSet<? super T, ? extends M> lowerBody) {
         return new ArmorModelPicker<>() {
-            final Map<ArmorModel, ? extends LatexHumanoidArmorModel<T, ?>> bakedUpper = upperBody.createModels(models);
-            final Map<ArmorModel, ? extends LatexHumanoidArmorModel<T, ?>> bakedLower = lowerBody.createModels(models);
+            final Map<ArmorModel, ? extends M> bakedUpper = upperBody.createModels(models);
+            final Map<ArmorModel, ? extends M> bakedLower = lowerBody.createModels(models);
 
             @Override
-            public LatexHumanoidArmorModel<T, ?> getModelForSlot(T entity, EquipmentSlot slot) {
+            public M getModelForSlot(T entity, EquipmentSlot slot) {
                 return QuadrupedalArmor.useQuadrupedalModel(slot) ?
                         bakedLower.get(QuadrupedalArmor.useInnerQuadrupedalModel(slot) ? ArmorModel.ARMOR_INNER : ArmorModel.ARMOR_OUTER) :
                         bakedUpper.get(slot == EquipmentSlot.LEGS ? ArmorModel.ARMOR_INNER : ArmorModel.ARMOR_OUTER);
             }
 
             @Override
-            public Map<ArmorModel, LatexHumanoidArmorModel<T, ?>> getModelSetForSlot(T entity, EquipmentSlot slot) {
+            public Map<ArmorModel, ? extends M> getModelSetForSlot(T entity, EquipmentSlot slot) {
                 return Map.copyOf(slot == EquipmentSlot.LEGS || slot == EquipmentSlot.FEET ? bakedLower : bakedUpper);
             }
 
             @Override
-            public void applyAnimatorProperties(T entity, HumanoidAnimator<?, ?> other) {
-                bakedUpper.get(ArmorModel.ARMOR_INNER).getAnimator(entity).copyProperties(other);
-                bakedUpper.get(ArmorModel.ARMOR_OUTER).getAnimator(entity).copyProperties(other);
-                bakedLower.get(ArmorModel.ARMOR_INNER).getAnimator(entity).copyProperties(other);
-                bakedLower.get(ArmorModel.ARMOR_OUTER).getAnimator(entity).copyProperties(other);
+            public void forEach(T entity, Predicate<ArmorModel> predicate, BiConsumer<ArmorModel, ? super M> consumer) {
+                Arrays.stream(ArmorModel.values()).filter(predicate).forEach(model -> {
+                    consumer.accept(model, bakedUpper.get(model));
+                    consumer.accept(model, bakedLower.get(model));
+                });
             }
 
             @Override
@@ -96,29 +100,29 @@ public abstract class ArmorModelPicker<T extends ChangedEntity> {
         };
     }
 
-    public static <T extends ChangedEntity> ArmorModelPicker<T> legless(EntityModelSet models, ArmorModelSet<T, ?> upperBody, ArmorModelSet<T, ?> lowerBody) {
+    public static <T extends LivingEntity, M extends EntityModel<? super T>> ArmorModelPicker<T, M> legless(EntityModelSet models, ArmorModelSet<? super T, ? extends M> upperBody, ArmorModelSet<? super T, ? extends M> lowerBody) {
         return new ArmorModelPicker<>() {
-            final Map<ArmorModel, ? extends LatexHumanoidArmorModel<T, ?>> bakedUpper = upperBody.createModels(models);
-            final Map<ArmorModel, ? extends LatexHumanoidArmorModel<T, ?>> bakedLower = lowerBody.createModels(models);
+            final Map<ArmorModel, ? extends M> bakedUpper = upperBody.createModels(models);
+            final Map<ArmorModel, ? extends M> bakedLower = lowerBody.createModels(models);
 
             @Override
-            public LatexHumanoidArmorModel<T, ?> getModelForSlot(T entity, EquipmentSlot slot) {
+            public M getModelForSlot(T entity, EquipmentSlot slot) {
                 return AbdomenArmor.useAbdomenModel(slot) ?
                         bakedLower.get(AbdomenArmor.useInnerAbdomenModel(slot) ? ArmorModel.ARMOR_INNER : ArmorModel.ARMOR_OUTER) :
                         bakedUpper.get(slot == EquipmentSlot.LEGS ? ArmorModel.ARMOR_INNER : ArmorModel.ARMOR_OUTER);
             }
 
             @Override
-            public Map<ArmorModel, LatexHumanoidArmorModel<T, ?>> getModelSetForSlot(T entity, EquipmentSlot slot) {
+            public Map<ArmorModel, ? extends M> getModelSetForSlot(T entity, EquipmentSlot slot) {
                 return Map.copyOf(slot == EquipmentSlot.LEGS || slot == EquipmentSlot.FEET ? bakedLower : bakedUpper);
             }
 
             @Override
-            public void applyAnimatorProperties(T entity, HumanoidAnimator<?, ?> other) {
-                bakedUpper.get(ArmorModel.ARMOR_INNER).getAnimator(entity).copyProperties(other);
-                bakedUpper.get(ArmorModel.ARMOR_OUTER).getAnimator(entity).copyProperties(other);
-                bakedLower.get(ArmorModel.ARMOR_INNER).getAnimator(entity).copyProperties(other);
-                bakedLower.get(ArmorModel.ARMOR_OUTER).getAnimator(entity).copyProperties(other);
+            public void forEach(T entity, Predicate<ArmorModel> predicate, BiConsumer<ArmorModel, ? super M> consumer) {
+                Arrays.stream(ArmorModel.values()).filter(predicate).forEach(model -> {
+                    consumer.accept(model, bakedUpper.get(model));
+                    consumer.accept(model, bakedLower.get(model));
+                });
             }
 
             @Override

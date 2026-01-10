@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.entity.beast.GasTiger;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class GasTigerRenderer extends AdvancedHumanoidRenderer<GasTiger, GasTigerModel, ArmorLatexMaleCatModel<GasTiger>> {
+public class GasTigerRenderer extends AdvancedHumanoidRenderer<GasTiger, GasTigerModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/gas_tiger.png");
+
     public GasTigerRenderer(EntityRendererProvider.Context context) {
         super(context, new GasTigerModel(context.bakeLayer(GasTigerModel.LAYER_LOCATION)), ArmorLatexMaleCatModel.MODEL_SET, 0.5f);
         this.addLayer(TransfurCapeLayer.normalCape(this, context.getModelSet()));
@@ -21,7 +23,7 @@ public class GasTigerRenderer extends AdvancedHumanoidRenderer<GasTiger, GasTige
     }
 
     @Override
-    public ResourceLocation getTextureLocation(GasTiger p_114482_) {
-        return Changed.modResource("textures/gas_tiger.png");
+    public ResourceLocation getTextureLocation(GasTiger entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

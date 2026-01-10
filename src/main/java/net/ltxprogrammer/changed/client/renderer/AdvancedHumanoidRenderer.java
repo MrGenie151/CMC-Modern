@@ -29,17 +29,17 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class AdvancedHumanoidRenderer<T extends ChangedEntity, M extends AdvancedHumanoidModel<T>, A extends LatexHumanoidArmorModel<T, ?>> extends MobRenderer<T, M> {
+public abstract class AdvancedHumanoidRenderer<T extends ChangedEntity, M extends AdvancedHumanoidModel<T>> extends MobRenderer<T, M> {
     @Nullable
     private LatexHumanoidHairLayer<T, M> hairLayer;
 
-    private LatexHumanoidArmorLayer<T, M, A> armorLayer;
+    private LatexHumanoidArmorLayer<T, M> armorLayer;
 
     public @Nullable LatexHumanoidHairLayer<T, M> getHairLayer() {
         return hairLayer;
     }
 
-    public LatexHumanoidArmorLayer<T, M, A> getArmorLayer() {
+    public LatexHumanoidArmorLayer<T, M> getArmorLayer() {
         return armorLayer;
     }
 
@@ -76,7 +76,7 @@ public abstract class AdvancedHumanoidRenderer<T extends ChangedEntity, M extend
     }
 
     public AdvancedHumanoidRenderer(EntityRendererProvider.Context context, M main,
-                                    ArmorModelPicker<? super T> modelPicker, float shadowSize) {
+                                    ArmorModelPicker<T, ? extends LatexHumanoidArmorModel<? super T, ?>> modelPicker, float shadowSize) {
         super(context, main, shadowSize);
         if (main == null) return;
         this.armorLayer = new LatexHumanoidArmorLayer<>(this, modelPicker, context.getModelManager());
@@ -84,7 +84,7 @@ public abstract class AdvancedHumanoidRenderer<T extends ChangedEntity, M extend
     }
 
     public AdvancedHumanoidRenderer(EntityRendererProvider.Context context, M main,
-                                    ArmorModelSet<? super T, ?> modelSet, float shadowSize) {
+                                    ArmorModelSet<? super T, ? extends LatexHumanoidArmorModel<? super T, ?>> modelSet, float shadowSize) {
         this(context, main, ArmorModelPicker.basic(context.getModelSet(), modelSet), shadowSize);
     }
 

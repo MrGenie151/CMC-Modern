@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.ltxprogrammer.changed.client.renderer.AdvancedHumanoidRenderer;
 import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
 import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModelInterface;
+import net.ltxprogrammer.changed.client.renderer.model.armor.ArmorModel;
 import net.ltxprogrammer.changed.client.renderer.model.armor.ArmorModelPicker;
 import net.ltxprogrammer.changed.client.renderer.model.armor.LatexHumanoidArmorModel;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
@@ -35,13 +36,13 @@ import javax.annotation.Nullable;
 import java.util.Map;
 
 @OnlyIn(Dist.CLIENT)
-public class LatexHumanoidArmorLayer<T extends ChangedEntity, M extends AdvancedHumanoidModel<T>, A extends LatexHumanoidArmorModel<T, ?>> extends RenderLayer<T, M> {
+public class LatexHumanoidArmorLayer<T extends ChangedEntity, M extends AdvancedHumanoidModel<T>> extends RenderLayer<T, M> {
     private static final Map<String, ResourceLocation> ARMOR_LOCATION_CACHE = Maps.newHashMap();
-    final AdvancedHumanoidRenderer<T, M, A> parent;
-    public final ArmorModelPicker<? super T> modelPicker;
+    final AdvancedHumanoidRenderer<T, M> parent;
+    public final ArmorModelPicker<T, ? extends LatexHumanoidArmorModel<? super T, ?>> modelPicker;
     private final TextureAtlas armorTrimAtlas;
 
-    public LatexHumanoidArmorLayer(AdvancedHumanoidRenderer<T, M, A> parentModel, ArmorModelPicker<? super T> modelPicker, ModelManager modelManager) {
+    public LatexHumanoidArmorLayer(AdvancedHumanoidRenderer<T, M> parentModel, ArmorModelPicker<T, ? extends LatexHumanoidArmorModel<? super T, ?>> modelPicker, ModelManager modelManager) {
         super(parentModel);
         this.parent = parentModel;
         this.modelPicker = modelPicker;
@@ -51,8 +52,12 @@ public class LatexHumanoidArmorLayer<T extends ChangedEntity, M extends Advanced
     public void render(PoseStack pose, MultiBufferSource buffers, int packedLight, T entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
         if (!parent.shouldRenderArmor(entity)) return;
 
-        if (parent.getModel(entity) instanceof AdvancedHumanoidModelInterface advancedModel)
-            this.modelPicker.applyAnimatorProperties(entity, advancedModel.getAnimator(entity));
+        if (parent.getModel(entity) instanceof AdvancedHumanoidModelInterface advancedModel) {
+            final var animator = advancedModel.getAnimator(entity);
+            this.modelPicker.forEach(entity, ArmorModel::isArmor, (layer, model) -> {
+                model.getAnimator(entity).copyProperties(animator);
+            });
+        }
         this.modelPicker.prepareAndSetupModels(entity, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch);
         boolean firstPerson = ChangedCompatibility.isFirstPersonRendering();
 

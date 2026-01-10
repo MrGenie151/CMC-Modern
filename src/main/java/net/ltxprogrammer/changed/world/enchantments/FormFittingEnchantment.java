@@ -3,6 +3,7 @@ package net.ltxprogrammer.changed.world.enchantments;
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.variant.ClothingShape;
+import net.ltxprogrammer.changed.entity.variant.EntityShape;
 import net.ltxprogrammer.changed.init.ChangedEnchantments;
 import net.ltxprogrammer.changed.item.ExtendedItemProperties;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -128,12 +129,11 @@ public class FormFittingEnchantment extends Enchantment {
     public static @NotNull ItemStack getFormFitted(LivingEntity wearer, ItemStack itemStack, EquipmentSlot slot) {
         if (slot.getType() != EquipmentSlot.Type.ARMOR)
             return itemStack;
-        if (EnchantmentHelper.getItemEnchantmentLevel(ChangedEnchantments.FORM_FITTING.get(), itemStack) <= 0)
+        if (EnchantmentHelper.getTagEnchantmentLevel(ChangedEnchantments.FORM_FITTING.get(), itemStack) <= 0)
             return itemStack;
 
-        final ItemStack equivalent = IAbstractChangedEntity.forEitherSafe(wearer)
-                .map(IAbstractChangedEntity::getChangedEntity)
-                .map(ChangedEntity::getEntityShape).map(shape -> {
+        final ItemStack equivalent = EntityShape.getShapeOf(wearer)
+                .map(shape -> {
                     return switch (slot) {
                         case HEAD -> findEquivalentItemForHeadShape(shape.headShape, itemStack);
                         case CHEST -> findEquivalentItemForTorsoShape(shape.torsoShape, itemStack);
@@ -152,15 +152,5 @@ public class FormFittingEnchantment extends Enchantment {
                 });
 
         return equivalent == null ? itemStack : equivalent;
-    }
-
-    public static float getLatexProtection(LivingEntity entity, float progression) {
-        int protection = EnchantmentHelper.getEnchantmentLevel(Enchantments.ALL_DAMAGE_PROTECTION, entity);
-        int tfResistance = EnchantmentHelper.getEnchantmentLevel(ChangedEnchantments.TRANSFUR_RESISTANCE.get(), entity);
-
-        float tfResistanceDiscount = progression * (float)tfResistance * 0.15F;
-        float protectionDiscount = progression * (float)protection * 0.075F;
-
-        return progression - Math.max(tfResistanceDiscount, protectionDiscount);
     }
 }

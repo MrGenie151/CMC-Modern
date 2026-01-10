@@ -9,7 +9,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexStigerRenderer extends AdvancedHumanoidRenderer<LatexStiger, LatexStigerModel, ArmorLatexStigerModel<LatexStiger>> {
+public class LatexStigerRenderer extends AdvancedHumanoidRenderer<LatexStiger, LatexStigerModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_stiger.png");
+
     public LatexStigerRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexStigerModel(context.bakeLayer(LatexStigerModel.LAYER_LOCATION)), ArmorLatexStigerModel.MODEL_SET, 0.5f);
         this.addLayer(new DoubleItemInHandLayer<>(this, context.getItemInHandRenderer()));
@@ -23,7 +25,7 @@ public class LatexStigerRenderer extends AdvancedHumanoidRenderer<LatexStiger, L
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexStiger p_114482_) {
-        return Changed.modResource("textures/latex_stiger.png");
+    public ResourceLocation getTextureLocation(LatexStiger entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

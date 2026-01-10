@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.entity.beast.LatexSquirrel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexSquirrelRenderer extends AdvancedHumanoidRenderer<LatexSquirrel, LatexSquirrelModel, ArmorLatexMaleWolfModel<LatexSquirrel>> {
+public class LatexSquirrelRenderer extends AdvancedHumanoidRenderer<LatexSquirrel, LatexSquirrelModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_squirrel.png");
+
     public LatexSquirrelRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexSquirrelModel(context.bakeLayer(LatexSquirrelModel.LAYER_LOCATION)), ArmorLatexMaleWolfModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -21,7 +23,7 @@ public class LatexSquirrelRenderer extends AdvancedHumanoidRenderer<LatexSquirre
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexSquirrel p_114482_) {
-        return Changed.modResource("textures/latex_squirrel.png");
+    public ResourceLocation getTextureLocation(LatexSquirrel entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

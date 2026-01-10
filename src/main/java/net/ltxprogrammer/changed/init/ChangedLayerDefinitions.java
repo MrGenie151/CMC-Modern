@@ -193,5 +193,15 @@ public class ChangedLayerDefinitions {
 
         event.registerLayerDefinition(LatexContainerRenderer.LAYER_LOCATION, LatexContainerRenderer::createLatexFill);
         event.registerLayerDefinition(PillowRenderer.LAYER_LOCATION, PillowRenderer::createBodyLayer);
+
+        event.registerLayerDefinition(BipedArmorStandModel.ARMOR_STAND, BipedArmorStandModel::createStandLayer);
+        event.registerLayerDefinition(CentaurArmorStandModel.ARMOR_STAND, CentaurArmorStandModel::createStandLayer);
+        event.registerLayerDefinition(LeglessArmorStandModel.ARMOR_STAND, LeglessArmorStandModel::createStandLayer);
+
+        BipedArmorStandModel.MODEL_SET.registerDefinitions(event::registerLayerDefinition);
+        CentaurArmorStandModel.MODEL_SET_UPPER.registerDefinitions(event::registerLayerDefinition);
+        CentaurArmorStandModel.MODEL_SET_LOWER.registerDefinitions(event::registerLayerDefinition);
+        LeglessArmorStandModel.MODEL_SET_UPPER.registerDefinitions(event::registerLayerDefinition);
+        LeglessArmorStandModel.MODEL_SET_LOWER.registerDefinitions(event::registerLayerDefinition);
     }
 }

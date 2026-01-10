@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexRedDragonRenderer extends AdvancedHumanoidRenderer<LatexRedDragon, LatexRedDragonModel, ArmorLatexMaleWingedDragonModel<LatexRedDragon>> {
+public class LatexRedDragonRenderer extends AdvancedHumanoidRenderer<LatexRedDragon, LatexRedDragonModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_red_dragon.png");
+
     public LatexRedDragonRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexRedDragonModel(context.bakeLayer(LatexRedDragonModel.LAYER_LOCATION)), ArmorLatexMaleWingedDragonModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -23,7 +25,7 @@ public class LatexRedDragonRenderer extends AdvancedHumanoidRenderer<LatexRedDra
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexRedDragon p_114482_) {
-        return Changed.modResource("textures/latex_red_dragon.png");
+    public ResourceLocation getTextureLocation(LatexRedDragon entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexPinkDeerRenderer extends AdvancedHumanoidRenderer<LatexPinkDeer, LatexPinkDeerModel, ArmorLatexMaleDragonModel<LatexPinkDeer>> {
+public class LatexPinkDeerRenderer extends AdvancedHumanoidRenderer<LatexPinkDeer, LatexPinkDeerModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_pink_deer.png");
+
     public LatexPinkDeerRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexPinkDeerModel(context.bakeLayer(LatexPinkDeerModel.LAYER_LOCATION)), ArmorLatexMaleDragonModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -23,7 +25,7 @@ public class LatexPinkDeerRenderer extends AdvancedHumanoidRenderer<LatexPinkDee
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexPinkDeer p_114482_) {
-        return Changed.modResource("textures/latex_pink_deer.png");
+    public ResourceLocation getTextureLocation(LatexPinkDeer entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

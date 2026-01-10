@@ -14,7 +14,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Pose;
 import org.jetbrains.annotations.NotNull;
 
-public class PureWhiteLatexWolfPupRenderer extends AdvancedHumanoidRenderer<PureWhiteLatexWolfPup, PureWhiteLatexWolfPupModel, ArmorNoneModel<PureWhiteLatexWolfPup>> {
+public class PureWhiteLatexWolfPupRenderer extends AdvancedHumanoidRenderer<PureWhiteLatexWolfPup, PureWhiteLatexWolfPupModel> {
+	public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/pure_white_latex_wolf_pup.png");
+
 	public PureWhiteLatexWolfPupRenderer(EntityRendererProvider.Context context) {
 		super(context, new PureWhiteLatexWolfPupModel(context.bakeLayer(PureWhiteLatexWolfPupModel.LAYER_LOCATION)), ArmorNoneModel.MODEL_SET, 0.4F);
 		this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -22,7 +24,7 @@ public class PureWhiteLatexWolfPupRenderer extends AdvancedHumanoidRenderer<Pure
 
 	@Override
 	public ResourceLocation getTextureLocation(PureWhiteLatexWolfPup entity) {
-		return Changed.modResource("textures/pure_white_latex_wolf_pup.png");
+		return DEFAULT_SKIN_LOCATION;
 	}
 
 	@Override

@@ -713,7 +713,7 @@ public abstract class TransfurAnimator {
         if (!(playerRenderer instanceof LivingEntityRenderer<?,?> livingPlayerRenderer)) return;
         if (!(livingPlayerRenderer.getModel() instanceof HumanoidModel<?> playerHumanoidModel)) return;
 
-        if (!(latexRenderer instanceof AdvancedHumanoidRenderer<?,?,?> latexHumanoidRenderer)) return;
+        if (!(latexRenderer instanceof AdvancedHumanoidRenderer<?,?> latexHumanoidRenderer)) return;
 
         final float transfurProgression = variant.getTransfurProgression(partialTick);
         final float coverProgress = getCoverProgression(transfurProgression);
@@ -796,7 +796,7 @@ public abstract class TransfurAnimator {
     public static <T extends LivingEntity, M extends EntityModel<T>> boolean isLayerAllowed(RenderLayer<T, M> layer) {
         if (layer instanceof HumanoidArmorLayer<?,?,?>)
             return true;
-        if (layer instanceof LatexHumanoidArmorLayer<?,?,?>)
+        if (layer instanceof LatexHumanoidArmorLayer<?,?>)
             return true;
         if (layer instanceof AccessoryLayer<?,?>)
             return true;

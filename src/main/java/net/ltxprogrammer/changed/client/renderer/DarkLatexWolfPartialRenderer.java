@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
-public class DarkLatexWolfPartialRenderer extends AdvancedHumanoidRenderer<DarkLatexWolfPartial, DarkLatexWolfPartialModel, ArmorLatexMaleWolfModel<DarkLatexWolfPartial>> {
+public class DarkLatexWolfPartialRenderer extends AdvancedHumanoidRenderer<DarkLatexWolfPartial, DarkLatexWolfPartialModel> {
 	public DarkLatexWolfPartialRenderer(EntityRendererProvider.Context context, boolean slim) {
 		super(context, DarkLatexWolfPartialModel.human(context.bakeLayer(
 				slim ? DarkLatexWolfPartialModel.LAYER_LOCATION_HUMAN_SLIM : DarkLatexWolfPartialModel.LAYER_LOCATION_HUMAN)), ArmorLatexMaleWolfModel.MODEL_SET, 0.5f);

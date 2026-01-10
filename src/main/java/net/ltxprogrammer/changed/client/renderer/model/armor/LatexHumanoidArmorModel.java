@@ -95,11 +95,11 @@ public abstract class LatexHumanoidArmorModel<T extends ChangedEntity, M extends
         }
     }
 
-    protected static void unprepareUnifiedLegsForArmor(ItemStack stack, ModelPart LeftLeg, ModelPart RightLeg) {
+    public static void unprepareUnifiedLegsForArmor(ItemStack stack, ModelPart LeftLeg, ModelPart RightLeg) {
         unprepareUnifiedLegsForArmor(stack, LeftLeg, RightLeg, null);
     }
 
-    protected static void unprepareUnifiedLegsForArmor(ItemStack stack, ModelPart LeftLeg, ModelPart RightLeg, @Nullable ModelPart Tail) {
+    public static void unprepareUnifiedLegsForArmor(ItemStack stack, ModelPart LeftLeg, ModelPart RightLeg, @Nullable ModelPart Tail) {
         if (stack.getItem() instanceof Shorts) {
             setAllPartsVisibility(LeftLeg, true);
             setAllPartsVisibility(RightLeg, true);
@@ -108,7 +108,7 @@ public abstract class LatexHumanoidArmorModel<T extends ChangedEntity, M extends
         }
     }
 
-    protected static void addUnifiedLegs(PartDefinition partDefinition, ArmorModel layer) {
+    public static void addUnifiedLegs(PartDefinition partDefinition, ArmorModel layer) {
         int calfUVy = switch (layer) {
             case CLOTHING_INNER, CLOTHING_MIDDLE, ARMOR_INNER -> 20;
             default -> 16;
@@ -186,19 +186,19 @@ public abstract class LatexHumanoidArmorModel<T extends ChangedEntity, M extends
         PartDefinition LeftPad = LeftFoot.addOrReplaceChild("LeftPad", CubeListBuilder.create().texOffs(23, 21).mirror().addBox(-1.5F, 0.0F, -1.3F, 3.0F, 2.0F, 3.0F, layer.deformation.extend(-0.025F)).mirror(false), PartPose.offset(0.0F, 4.275F, -2.925F));
     }
 
-    protected static void addBreastplate(PartDefinition torso, ArmorModel layer) {
+    public static void addBreastplate(PartDefinition torso, ArmorModel layer) {
         addBreastplate(torso, layer, 0.0f, 0.0f, 0.0f);
     }
 
-    protected static void addBreastplate(PartDefinition torso, ArmorModel layer, float angle) {
+    public static void addBreastplate(PartDefinition torso, ArmorModel layer, float angle) {
         addBreastplate(torso, layer, 0.0f, 0.0f, 0.0f, angle);
     }
 
-    protected static void addBreastplate(PartDefinition torso, ArmorModel layer, float yOffset, float zOffset, float sizeOffset) {
+    public static void addBreastplate(PartDefinition torso, ArmorModel layer, float yOffset, float zOffset, float sizeOffset) {
         addBreastplate(torso, layer, yOffset, zOffset, sizeOffset, Mth.DEG_TO_RAD * -16F);
     }
 
-    protected static void addBreastplate(PartDefinition torso, ArmorModel layer, float yOffset, float zOffset, float sizeOffset, float angle) {
+    public static void addBreastplate(PartDefinition torso, ArmorModel layer, float yOffset, float zOffset, float sizeOffset, float angle) {
         switch (layer) {
             case ARMOR_OUTER -> {
                 PartDefinition Plantoids = torso.addOrReplaceChild("Plantoids", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, -2.0F + zOffset));

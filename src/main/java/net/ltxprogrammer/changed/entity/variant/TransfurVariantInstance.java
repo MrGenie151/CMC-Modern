@@ -480,6 +480,8 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
             if (instance.isDead() && !event.getEntity().level().getGameRules().getBoolean(ChangedGameRules.RULE_KEEP_FORM))
                 ProcessTransfur.removePlayerTransfurVariant(event.getEntity());
         });
+
+        AccessoryEntities.INSTANCE.forceReloadAccessories(event.getEntity());
     }
 
     @SubscribeEvent

@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexCrystalWolfHornedRenderer extends AdvancedHumanoidRenderer<CrystalWolfHorned, LatexCrystalWolfHornedModel, ArmorLatexMaleWolfModel<CrystalWolfHorned>> {
+public class LatexCrystalWolfHornedRenderer extends AdvancedHumanoidRenderer<CrystalWolfHorned, LatexCrystalWolfHornedModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/crystal_wolf_horned.png");
+
     public LatexCrystalWolfHornedRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexCrystalWolfHornedModel(context.bakeLayer(LatexCrystalWolfHornedModel.LAYER_LOCATION)), ArmorLatexMaleWolfModel.MODEL_SET, 0.5f);
         this.addLayer(TransfurCapeLayer.normalCape(this, context.getModelSet()));
@@ -21,7 +23,7 @@ public class LatexCrystalWolfHornedRenderer extends AdvancedHumanoidRenderer<Cry
     }
 
     @Override
-    public ResourceLocation getTextureLocation(CrystalWolfHorned p_114482_) {
-        return Changed.modResource("textures/crystal_wolf_horned.png");
+    public ResourceLocation getTextureLocation(CrystalWolfHorned entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

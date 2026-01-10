@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexWatermelonCatRenderer extends AdvancedHumanoidRenderer<LatexWatermelonCat, LatexWatermelonCatModel, ArmorLatexFemaleCatModel<LatexWatermelonCat>> {
+public class LatexWatermelonCatRenderer extends AdvancedHumanoidRenderer<LatexWatermelonCat, LatexWatermelonCatModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_watermelon_cat.png");
+
     public LatexWatermelonCatRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexWatermelonCatModel(context.bakeLayer(LatexWatermelonCatModel.LAYER_LOCATION)), ArmorLatexFemaleCatModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, this.model));
@@ -23,7 +25,7 @@ public class LatexWatermelonCatRenderer extends AdvancedHumanoidRenderer<LatexWa
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexWatermelonCat p_114482_) {
-        return Changed.modResource("textures/latex_watermelon_cat.png");
+    public ResourceLocation getTextureLocation(LatexWatermelonCat entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

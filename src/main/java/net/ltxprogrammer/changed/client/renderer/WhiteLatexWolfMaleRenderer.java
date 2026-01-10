@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.entity.beast.WhiteLatexWolfMale;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class WhiteLatexWolfMaleRenderer extends AdvancedHumanoidRenderer<WhiteLatexWolfMale, WhiteLatexWolfMaleModel, ArmorLatexMaleWolfModel<WhiteLatexWolfMale>> {
+public class WhiteLatexWolfMaleRenderer extends AdvancedHumanoidRenderer<WhiteLatexWolfMale, WhiteLatexWolfMaleModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/white_latex_wolf_male.png");
+
     public WhiteLatexWolfMaleRenderer(EntityRendererProvider.Context context) {
         super(context, new WhiteLatexWolfMaleModel(context.bakeLayer(WhiteLatexWolfMaleModel.LAYER_LOCATION)), ArmorLatexMaleWolfModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -21,7 +23,7 @@ public class WhiteLatexWolfMaleRenderer extends AdvancedHumanoidRenderer<WhiteLa
     }
 
     @Override
-    public ResourceLocation getTextureLocation(WhiteLatexWolfMale p_114482_) {
-        return Changed.modResource("textures/white_latex_wolf_male.png");
+    public ResourceLocation getTextureLocation(WhiteLatexWolfMale entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexPurpleFoxRenderer extends AdvancedHumanoidRenderer<LatexPurpleFox, LatexPurpleFoxModel, ArmorLatexMaleWolfModel<LatexPurpleFox>> {
+public class LatexPurpleFoxRenderer extends AdvancedHumanoidRenderer<LatexPurpleFox, LatexPurpleFoxModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_purple_fox.png");
+
     public LatexPurpleFoxRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexPurpleFoxModel(context.bakeLayer(LatexPurpleFoxModel.LAYER_LOCATION)), ArmorLatexMaleWolfModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -23,7 +25,7 @@ public class LatexPurpleFoxRenderer extends AdvancedHumanoidRenderer<LatexPurple
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexPurpleFox p_114482_) {
-        return Changed.modResource("textures/latex_purple_fox.png");
+    public ResourceLocation getTextureLocation(LatexPurpleFox entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

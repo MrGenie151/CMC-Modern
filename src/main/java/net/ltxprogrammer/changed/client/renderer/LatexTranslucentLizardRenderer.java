@@ -9,7 +9,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexTranslucentLizardRenderer extends AdvancedHumanoidRenderer<LatexTranslucentLizard, LatexTranslucentLizardModel, ArmorLatexMaleDragonModel<LatexTranslucentLizard>> {
+public class LatexTranslucentLizardRenderer extends AdvancedHumanoidRenderer<LatexTranslucentLizard, LatexTranslucentLizardModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_translucent_lizard_inner.png");
+
     public LatexTranslucentLizardRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexTranslucentLizardModel(context.bakeLayer(LatexTranslucentLizardModel.LAYER_LOCATION)), ArmorLatexMaleDragonModel.MODEL_SET, 0.5f);
         var translucent = new LatexTranslucentLayer<>(this, this.model, Changed.modResource("textures/latex_translucent_lizard_outer.png"));
@@ -22,7 +24,7 @@ public class LatexTranslucentLizardRenderer extends AdvancedHumanoidRenderer<Lat
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexTranslucentLizard p_114482_) {
-        return Changed.modResource("textures/latex_translucent_lizard_inner.png");
+    public ResourceLocation getTextureLocation(LatexTranslucentLizard entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

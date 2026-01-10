@@ -46,7 +46,7 @@ public class MugBlock extends Block implements SimpleWaterloggedBlock {
 
     @Override
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
-        return List.of(new ItemStack(ChangedBlocks.CANNED_SOUP.get(), state.getValue(MUGS)));
+        return List.of(new ItemStack(ChangedBlocks.MUG.get(), state.getValue(MUGS)));
     }
 
     public VoxelShape shapeForState(BlockState state) {

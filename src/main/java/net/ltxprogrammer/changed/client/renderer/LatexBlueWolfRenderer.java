@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.entity.beast.LatexBlueWolf;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexBlueWolfRenderer extends AdvancedHumanoidRenderer<LatexBlueWolf, LatexBlueWolfModel, ArmorLatexFemaleWolfModel<LatexBlueWolf>> {
+public class LatexBlueWolfRenderer extends AdvancedHumanoidRenderer<LatexBlueWolf, LatexBlueWolfModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_blue_wolf.png");
+
     public LatexBlueWolfRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexBlueWolfModel(context.bakeLayer(LatexBlueWolfModel.LAYER_LOCATION)), ArmorLatexFemaleWolfModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -21,7 +23,7 @@ public class LatexBlueWolfRenderer extends AdvancedHumanoidRenderer<LatexBlueWol
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexBlueWolf p_114482_) {
-        return Changed.modResource("textures/latex_blue_wolf.png");
+    public ResourceLocation getTextureLocation(LatexBlueWolf entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

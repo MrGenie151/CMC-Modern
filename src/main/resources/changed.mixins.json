@@ -71,6 +71,7 @@
     "gui.PauseScreenMixin",
     "gui.RecipeBookTabButtonMixin",
     "gui.RecipeButtonMixin",
+    "gui.SmithingScreenMixin",
     "gui.SplashManagerMixin",
     "gui.TitleScreenMixin",
     "item.ItemRendererMixin",

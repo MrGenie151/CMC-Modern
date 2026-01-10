@@ -11,7 +11,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Pose;
 import org.jetbrains.annotations.NotNull;
 
-public class GasWolfPupRenderer extends AdvancedHumanoidRenderer<GasWolfPup, GasWolfPupModel, ArmorNoneModel<GasWolfPup>> {
+public class GasWolfPupRenderer extends AdvancedHumanoidRenderer<GasWolfPup, GasWolfPupModel> {
+	public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/gas_wolf_pup.png");
+
 	public GasWolfPupRenderer(EntityRendererProvider.Context context) {
 		super(context, new GasWolfPupModel(context.bakeLayer(GasWolfPupModel.LAYER_LOCATION)), ArmorNoneModel.MODEL_SET, 0.4F);
         this.addLayer(new CustomCoatLayer<>(this, this.getModel(), Changed.modResource("textures/gas_wolf_pup_coat")));
@@ -21,7 +23,7 @@ public class GasWolfPupRenderer extends AdvancedHumanoidRenderer<GasWolfPup, Gas
 
 	@Override
 	public ResourceLocation getTextureLocation(GasWolfPup entity) {
-		return Changed.modResource("textures/gas_wolf_pup.png");
+		return DEFAULT_SKIN_LOCATION;
 	}
 
 	@Override

@@ -166,9 +166,7 @@ public abstract class EntityMixin extends net.minecraftforge.common.capabilities
             return;
         }
 
-        IAbstractChangedEntity.forEitherSafe(livingEntity)
-                .map(IAbstractChangedEntity::getChangedEntity)
-                .map(ChangedEntity::getEntityShape)
+        EntityShape.getShapeOf(livingEntity)
                 .map(EntityShape::isLegless)
                 .flatMap(legless -> {
                     if (legless && livingEntity.isEyeInFluid(FluidTags.WATER)) {

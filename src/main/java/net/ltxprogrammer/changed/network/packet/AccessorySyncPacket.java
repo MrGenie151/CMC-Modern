@@ -1,5 +1,6 @@
 package net.ltxprogrammer.changed.network.packet;
 
+import com.mojang.datafixers.util.Either;
 import net.ltxprogrammer.changed.data.AccessorySlotType;
 import net.ltxprogrammer.changed.data.AccessorySlots;
 import net.ltxprogrammer.changed.util.UniversalDist;
@@ -28,11 +29,20 @@ public class AccessorySyncPacket implements ChangedPacket {
     private final int entityId;
     private final boolean partial;
     private final AccessorySlots slots;
+    private ItemStack carryRequest = null;
 
     public AccessorySyncPacket(int entityId, AccessorySlots slots) {
         this.entityId = entityId;
         this.partial = false;
         this.slots = slots;
+    }
+
+    public AccessorySyncPacket(int entityId, ItemStack carryRequest) {
+        this.entityId = entityId;
+        this.partial = false;
+        this.slots = AccessorySlots.DUMMY;
+
+        this.carryRequest = carryRequest;
     }
 
     public AccessorySyncPacket(int entityId, Map<AccessorySlotType, ItemStack> slots) {
@@ -47,13 +57,19 @@ public class AccessorySyncPacket implements ChangedPacket {
         this.entityId = buffer.readInt();
         this.partial = buffer.readBoolean();
         this.slots = new AccessorySlots(null);
-        slots.readNetwork(buffer);
+        buffer.readEither(
+                leftBuffer -> leftBuffer,
+                rightBuffer -> ItemStack.of(rightBuffer.readAnySizeNbt())
+                ).ifLeft(slots::readNetwork).ifRight(stack -> carryRequest = stack);
     }
 
     @Override
     public void write(FriendlyByteBuf buffer) {
         buffer.writeInt(entityId);
         buffer.writeBoolean(partial);
+        buffer.writeEither(carryRequest == null ? Either.left(slots) : Either.right(carryRequest),
+                (leftBuffer, slots) -> slots.writeNetwork(leftBuffer),
+                (rightBuffer, stack) -> rightBuffer.writeNbt(stack.serializeNBT()));
         slots.writeNetwork(buffer);
     }
 
@@ -75,7 +91,7 @@ public class AccessorySyncPacket implements ChangedPacket {
                 return CompletableFuture.failedFuture(new IllegalStateException("Sender is null (Shouldn't be possible)"));
 
             context.setPacketHandled(true);
-            AccessoryAccessMenu.openForPlayer(sender);
+            AccessoryAccessMenu.openForPlayer(sender, carryRequest == null ? ItemStack.EMPTY : carryRequest);
 
             return CompletableFuture.completedFuture(null);
         }

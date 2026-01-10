@@ -181,6 +181,10 @@ public class ChangedTabs {
                         output.accept(ChangedBlocks.WHITE_LATEX_BLOCK.get());
                         output.accept(ChangedBlocks.WHITE_LATEX_PILLAR.get());
 
+                        output.accept(ChangedItems.BIPED_ARMOR_STAND.get());
+                        output.accept(ChangedItems.CENTAUR_ARMOR_STAND.get());
+                        output.accept(ChangedItems.LEGLESS_ARMOR_STAND.get());
+
                         WallSignItem.fillItemList(CHANGED_ONLY_WALL_SIGNS, params, output);
 
                         ChangedBlocks.PILLOWS.values().stream().map(RegistryObject::get).forEach(output::accept);

@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.entity.beast.LatexDeer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexDeerRenderer extends AdvancedHumanoidRenderer<LatexDeer, LatexDeerModel, ArmorLatexDeerModel<LatexDeer>> {
+public class LatexDeerRenderer extends AdvancedHumanoidRenderer<LatexDeer, LatexDeerModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_deer.png");
+
     public LatexDeerRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexDeerModel(context.bakeLayer(LatexDeerModel.LAYER_LOCATION)), ArmorLatexDeerModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -21,7 +23,7 @@ public class LatexDeerRenderer extends AdvancedHumanoidRenderer<LatexDeer, Latex
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexDeer p_114482_) {
-        return Changed.modResource("textures/latex_deer.png");
+    public ResourceLocation getTextureLocation(LatexDeer entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

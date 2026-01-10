@@ -12,7 +12,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexPinkYuinDragonRenderer extends AdvancedHumanoidRenderer<LatexPinkYuinDragon, LatexPinkYuinDragonModel, ArmorLatexMaleWingedDragonModel<LatexPinkYuinDragon>> {
+public class LatexPinkYuinDragonRenderer extends AdvancedHumanoidRenderer<LatexPinkYuinDragon, LatexPinkYuinDragonModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_pink_yuin_dragon.png");
+
     public LatexPinkYuinDragonRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexPinkYuinDragonModel(context.bakeLayer(LatexPinkYuinDragonModel.LAYER_LOCATION)), ArmorLatexMaleWingedDragonModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -23,7 +25,7 @@ public class LatexPinkYuinDragonRenderer extends AdvancedHumanoidRenderer<LatexP
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexPinkYuinDragon p_114482_) {
-        return Changed.modResource("textures/latex_pink_yuin_dragon.png");
+    public ResourceLocation getTextureLocation(LatexPinkYuinDragon entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

@@ -22,6 +22,7 @@ import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.Optional;
 
 public interface ExtendedItemProperties {
     @Nullable
@@ -48,10 +49,7 @@ public interface ExtendedItemProperties {
     default boolean allowedToWear(ItemStack itemStack, LivingEntity wearer, EquipmentSlot slot) {
         if (!(itemStack.getEquipmentSlot() == slot || (itemStack.getItem() instanceof ArmorItem armorItem && armorItem.getEquipmentSlot() == slot)))
             return false;
-        final EntityShape entityShape = IAbstractChangedEntity.forEitherSafe(wearer)
-                .map(IAbstractChangedEntity::getChangedEntity)
-                .map(ChangedEntity::getEntityShape)
-                .orElse(EntityShape.ANTHRO);
+        final EntityShape entityShape = EntityShape.getShapeOf(wearer).orElse(EntityShape.ANTHRO);
         return switch (slot) {
             case HEAD -> entityShape.getHeadShape() == getExpectedHeadShape(itemStack);
             case CHEST -> entityShape.getTorsoShape() == getExpectedTorsoShape(itemStack);

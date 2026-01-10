@@ -9,7 +9,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexPinkWyvernRenderer extends AdvancedHumanoidRenderer<LatexPinkWyvern, LatexPinkWyvernModel, ArmorLatexMaleDragonModel<LatexPinkWyvern>> {
+public class LatexPinkWyvernRenderer extends AdvancedHumanoidRenderer<LatexPinkWyvern, LatexPinkWyvernModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_pink_wyvern.png");
+
     public LatexPinkWyvernRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexPinkWyvernModel(context.bakeLayer(LatexPinkWyvernModel.LAYER_LOCATION)), ArmorLatexMaleDragonModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexTranslucentLayer<>(this, this.model, Changed.modResource("textures/latex_pink_wyvern_translucent.png")));
@@ -21,7 +23,7 @@ public class LatexPinkWyvernRenderer extends AdvancedHumanoidRenderer<LatexPinkW
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexPinkWyvern p_114482_) {
-        return Changed.modResource("textures/latex_pink_wyvern.png");
+    public ResourceLocation getTextureLocation(LatexPinkWyvern entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

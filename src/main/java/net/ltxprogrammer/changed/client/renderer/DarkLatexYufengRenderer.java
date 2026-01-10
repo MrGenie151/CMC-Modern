@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class DarkLatexYufengRenderer extends AdvancedHumanoidRenderer<DarkLatexYufeng, DarkLatexYufengModel, ArmorLatexMaleWingedDragonModel<DarkLatexYufeng>> {
+public class DarkLatexYufengRenderer extends AdvancedHumanoidRenderer<DarkLatexYufeng, DarkLatexYufengModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/dark_latex_yufeng.png");
+
     public DarkLatexYufengRenderer(EntityRendererProvider.Context context) {
         super(context, new DarkLatexYufengModel(context.bakeLayer(DarkLatexYufengModel.LAYER_LOCATION)), ArmorLatexMaleWingedDragonModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel(), model::isPartNotMask));
@@ -24,7 +26,7 @@ public class DarkLatexYufengRenderer extends AdvancedHumanoidRenderer<DarkLatexY
     }
 
     @Override
-    public ResourceLocation getTextureLocation(DarkLatexYufeng p_114482_) {
-        return Changed.modResource("textures/dark_latex_yufeng.png");
+    public ResourceLocation getTextureLocation(DarkLatexYufeng entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

@@ -9,7 +9,9 @@ import net.ltxprogrammer.changed.entity.beast.LatexAlien;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexAlienRenderer extends AdvancedHumanoidRenderer<LatexAlien, LatexAlienModel, ArmorLatexAlienModel<LatexAlien>> {
+public class LatexAlienRenderer extends AdvancedHumanoidRenderer<LatexAlien, LatexAlienModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_alien.png");
+
     public LatexAlienRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexAlienModel(context.bakeLayer(LatexAlienModel.LAYER_LOCATION)), ArmorLatexAlienModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, this.model));
@@ -17,7 +19,7 @@ public class LatexAlienRenderer extends AdvancedHumanoidRenderer<LatexAlien, Lat
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexAlien p_114482_) {
-        return Changed.modResource("textures/latex_alien.png");
+    public ResourceLocation getTextureLocation(LatexAlien entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }

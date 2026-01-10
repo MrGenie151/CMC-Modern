@@ -11,7 +11,9 @@ import net.ltxprogrammer.changed.entity.beast.LatexMingCat;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class LatexMingCatRenderer extends AdvancedHumanoidRenderer<LatexMingCat, LatexMingCatModel, ArmorLatexMaleCatModel<LatexMingCat>> {
+public class LatexMingCatRenderer extends AdvancedHumanoidRenderer<LatexMingCat, LatexMingCatModel> {
+    public static final ResourceLocation DEFAULT_SKIN_LOCATION = Changed.modResource("textures/latex_ming_cat.png");
+
     public LatexMingCatRenderer(EntityRendererProvider.Context context) {
         super(context, new LatexMingCatModel(context.bakeLayer(LatexMingCatModel.LAYER_LOCATION)), ArmorLatexMaleCatModel.MODEL_SET, 0.5f);
         this.addLayer(new LatexParticlesLayer<>(this, getModel()));
@@ -21,7 +23,7 @@ public class LatexMingCatRenderer extends AdvancedHumanoidRenderer<LatexMingCat,
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LatexMingCat p_114482_) {
-        return Changed.modResource("textures/latex_ming_cat.png");
+    public ResourceLocation getTextureLocation(LatexMingCat entity) {
+        return DEFAULT_SKIN_LOCATION;
     }
 }
