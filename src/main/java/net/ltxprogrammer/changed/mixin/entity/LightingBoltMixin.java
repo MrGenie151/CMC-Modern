@@ -24,12 +24,15 @@ public abstract class LightingBoltMixin extends Entity {
         super(entityType, level);
     }
 
-    @Inject(method = "powerLightningRod", at = @At("TAIL"), cancellable = false)
+    @Inject(method = "spawnFire", at = @At("HEAD"), cancellable = true) // This trigger is better
     private void latexCoverIsStruckByLighting(CallbackInfo ci) {
         BlockPos strikePosition = this.getStrikePosition();
         Level level = level();
         LatexCoverState strikePositionCoverState = LatexCoverState.getAt(level, strikePosition);
         LightningBolt self = (LightningBolt) (Object) this;
-        strikePositionCoverState.onStruckByLighting(level, strikePosition, self);
+        if (!strikePositionCoverState.isAir()) {
+            ci.cancel();
+            strikePositionCoverState.onStruckByLighting(level, strikePosition, self);
+        }
     }
 }

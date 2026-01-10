@@ -3,16 +3,14 @@ package net.ltxprogrammer.changed.entity.latex;
 import net.ltxprogrammer.changed.block.WhiteLatexTransportInterface;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.TransfurCause;
+import net.ltxprogrammer.changed.entity.animation.StunAnimationParameters;
 import net.ltxprogrammer.changed.entity.beast.PureWhiteLatexWolf;
 import net.ltxprogrammer.changed.entity.beast.PureWhiteLatexWolfPup;
 import net.ltxprogrammer.changed.entity.beast.WhiteLatexEntity;
 import net.ltxprogrammer.changed.entity.beast.boss.Behemoth;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
-import net.ltxprogrammer.changed.init.ChangedEffects;
-import net.ltxprogrammer.changed.init.ChangedLatexTypes;
-import net.ltxprogrammer.changed.init.ChangedLootContextParamSets;
-import net.ltxprogrammer.changed.init.ChangedRegistry;
+import net.ltxprogrammer.changed.init.*;
 import net.ltxprogrammer.changed.item.AbstractLatexBucket;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.util.EntityUtil;
@@ -122,7 +120,7 @@ public abstract class LatexType {
             for (LivingEntity living : entities) {
                 boolean entityInWhiteLatex = WhiteLatexTransportInterface.isEntityInWhiteLatex(living);
                 if (entityInWhiteLatex || latexNodes.stream().map(LatexCoverState.LatexNode::pos).anyMatch((pos -> living.blockPosition().equals(pos)))) {
-                    living.addEffect(
+                    if (living.addEffect(
                             new MobEffectInstance(
                                     ChangedEffects.SHOCK.get(),
                                     20 * 4, // 4 seconds
@@ -130,19 +128,19 @@ public abstract class LatexType {
                                     true, // can be considered "ambient" in this context
                                     true // can bee seen by the player
                             )
-                    );
+                    )) {
+                        ChangedAnimationEvents.broadcastEntityAnimation(living, ChangedAnimationEvents.SHOCK_STUN.get(), StunAnimationParameters.INSTANCE);
+                    }
                 }
             }
+
+            // Latex is Weak to Shock, and a LightingBolt is a very powerful shock soo it die when struck by it
+            if (strikePositionCoverState.isAir()) return;
+            LatexCoverState.setAtAndUpdate(level, strikePosition, ChangedLatexTypes.NONE.get().defaultCoverState());
+            for (Direction value : Direction.values()) {
+                LatexCoverState.setAtAndUpdate(level, strikePosition.relative(value), ChangedLatexTypes.NONE.get().defaultCoverState()); // Cross like removal
+            }
         }
-
-
-        // Latex is Weak to Shock, and a LightingBolt is a very powerful shock soo it die when struck by it
-        if (strikePositionCoverState.isAir()) return;
-        LatexCoverState.setAtAndUpdate(level, strikePosition, ChangedLatexTypes.NONE.get().defaultCoverState());
-        for (Direction value : Direction.values()) {
-            LatexCoverState.setAtAndUpdate(level, strikePosition.relative(value), ChangedLatexTypes.NONE.get().defaultCoverState()); // Cross like removal
-        }
-
     }
 
     public void animateTick(LatexCoverState state, Level level, BlockPos pos, RandomSource random) {}
