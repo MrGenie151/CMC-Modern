@@ -543,7 +543,7 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
     public static void syncEntityPosRotWithEntity(LivingEntity set, LivingEntity get) {
         if (get.level() instanceof ServerLevel getServerLevel) {
             Level setLevel = set.level();
-            if (getServerLevel.dimension().equals(setLevel.dimension())) set.changeDimension(getServerLevel);
+            if (!getServerLevel.dimension().equals(setLevel.dimension())) set.changeDimension(getServerLevel);
         }
 
         set.setDeltaMovement(get.getDeltaMovement());
