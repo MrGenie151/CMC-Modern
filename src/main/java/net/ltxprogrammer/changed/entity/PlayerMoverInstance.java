@@ -40,5 +40,6 @@ public abstract class PlayerMoverInstance<T extends PlayerMover<?>> {
         return eyeHeight;
     }
 
+    public void onAdd(Player player) {}
     public void onRemove(Player player) {}
 }

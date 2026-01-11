@@ -36,6 +36,9 @@ public interface WhiteLatexTransportInterface {
     }
 
     static void entityEnterLatex(LivingEntity entity, BlockPos pos) {
+        if (entity.level().isClientSide)
+            return;
+
         if (TransfurVariant.getEntityVariant(entity) != null && !(TransfurVariant.getEntityVariant(entity).getEntityType().is(ChangedTags.EntityTypes.WHITE_LATEX_SWIMMING)))
             return;
 
@@ -53,30 +56,30 @@ public interface WhiteLatexTransportInterface {
 
         if (entity instanceof PlayerDataExtension ext && (!entity.level().isClientSide || UniversalDist.isLocalPlayer(entity)))
             ext.setPlayerMoverType(PlayerMover.LATEX_SWIM.get());
+        else {
+            entity.refreshDimensions();
+            entity.setInvulnerable(true);
 
-        entity.refreshDimensions();
-        entity.setInvulnerable(true);
-
-        entity.playSound(ChangedSounds.ENTITY_ENTER_LATEX.get(), 1.0f, 1.0f);
-        if (!UniversalDist.isClientRemotePlayer(entity)) {
-            final Vec3 center = new Vec3(0.5D, 0.5D, 0.5D);
-            Vec3 surface = LatexCoverState.getAt(entity.level(), pos).findClosestSurface(center, null);
-            Vec3 delta = surface.subtract(center);
-            final Direction closestDirection = center.equals(surface) ? null : Direction.getNearest(delta.x, delta.y, delta.z);
-            final Vec3 surfaceNormal = closestDirection == null ? null : new Vec3(closestDirection.getNormal().getX(), closestDirection.getNormal().getY(), closestDirection.getNormal().getZ())
-                    .multiply(-1, -1, -1);
-            surface = closestDirection == null ? surface : switch (closestDirection) {
-                case NORTH, SOUTH, EAST, WEST -> surface.add(surfaceNormal.multiply(LatexSwimMover.SIZE_RADIUS, LatexSwimMover.SIZE_RADIUS, LatexSwimMover.SIZE_RADIUS));
-                case UP -> surface.add(surfaceNormal.multiply(LatexSwimMover.SIZE_HEIGHT, LatexSwimMover.SIZE_HEIGHT, LatexSwimMover.SIZE_HEIGHT));
-                default -> surface;
-            };
-
-            entity.moveTo(pos.getX() + surface.x, pos.getY() + surface.y, pos.getZ() + surface.z, entity.getYRot(), entity.getXRot());
+            entity.playSound(ChangedSounds.ENTITY_ENTER_LATEX.get(), 1.0f, 1.0f);
         }
+
+        final Vec3 center = new Vec3(0.5D, 0.5D, 0.5D);
+        Vec3 surface = LatexCoverState.getAt(entity.level(), pos).findClosestSurface(center, null);
+        Vec3 delta = surface.subtract(center);
+        final Direction closestDirection = center.equals(surface) ? null : Direction.getNearest(delta.x, delta.y, delta.z);
+        final Vec3 surfaceNormal = closestDirection == null ? null : new Vec3(closestDirection.getNormal().getX(), closestDirection.getNormal().getY(), closestDirection.getNormal().getZ())
+                .multiply(-1, -1, -1);
+        surface = closestDirection == null ? surface : switch (closestDirection) {
+            case NORTH, SOUTH, EAST, WEST -> surface.add(surfaceNormal.multiply(LatexSwimMover.SIZE_RADIUS, LatexSwimMover.SIZE_RADIUS, LatexSwimMover.SIZE_RADIUS));
+            case UP -> surface.add(surfaceNormal.multiply(LatexSwimMover.SIZE_HEIGHT, LatexSwimMover.SIZE_HEIGHT, LatexSwimMover.SIZE_HEIGHT));
+            default -> surface;
+        };
+
+        entity.teleportTo(pos.getX() + surface.x, pos.getY() + surface.y, pos.getZ() + surface.z);
     }
 
     static Optional<BlockPos> isBoundingBoxInWhiteLatex(LivingEntity entity) {
-        AABB testHitbox = entity.getBoundingBox().inflate(-0.05);
+        AABB testHitbox = entity.getBoundingBox().inflate(-0.15);
         return BlockPos.betweenClosedStream(testHitbox).filter(blockPos -> {
             final BlockState blockState = entity.level().getBlockState(blockPos);
             if (blockState.getBlock() instanceof WhiteLatexTransportInterface transportInterface)
