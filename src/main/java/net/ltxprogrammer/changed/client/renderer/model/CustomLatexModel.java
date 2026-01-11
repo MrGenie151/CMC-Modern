@@ -187,7 +187,7 @@ public class CustomLatexModel extends AdvancedHumanoidModel<CustomLatexEntity> i
                 bipedalAnimators.get(CustomLatexEntity.TailType.CAT).addPreset(AnimatorPresets.catLike(
                         Head, CatEars.getChild("LeftEar2"), CatEars.getChild("RightEar2"),
                         Torso, LeftArm, RightArm,
-                        WolfTail, List.of(tailPrimary, tailSecondary, tailTertiary, tailQuaternary),
+                        CatTail, List.of(tailPrimary, tailSecondary, tailTertiary, tailQuaternary),
                         LeftLeg, leftLowerLeg, leftFoot, leftFoot.getChild("LeftPad"), RightLeg, rightLowerLeg, rightFoot, rightFoot.getChild("RightPad")));
             }
 
@@ -199,7 +199,7 @@ public class CustomLatexModel extends AdvancedHumanoidModel<CustomLatexEntity> i
                 bipedalAnimators.get(CustomLatexEntity.TailType.SHARK).addPreset(AnimatorPresets.sharkLike(
                         Head,
                         Torso, LeftArm, RightArm,
-                        WolfTail, List.of(tailPrimary, tailSecondary, tailTertiary),
+                        SharkTail, List.of(tailPrimary, tailSecondary, tailTertiary),
                         LeftLeg, leftLowerLeg, leftFoot, leftFoot.getChild("LeftPad"), RightLeg, rightLowerLeg, rightFoot, rightFoot.getChild("RightPad")));
             }
 
@@ -212,7 +212,7 @@ public class CustomLatexModel extends AdvancedHumanoidModel<CustomLatexEntity> i
                 bipedalAnimators.get(CustomLatexEntity.TailType.DRAGON).addPreset(AnimatorPresets.dragonLike(
                         Head,
                         Torso, LeftArm, RightArm,
-                        WolfTail, List.of(tailPrimary, tailSecondary, tailTertiary, tailQuaternary),
+                        DragonTail, List.of(tailPrimary, tailSecondary, tailTertiary, tailQuaternary),
                         LeftLeg, leftLowerLeg, leftFoot, leftFoot.getChild("LeftPad"), RightLeg, rightLowerLeg, rightFoot, rightFoot.getChild("RightPad")));
             }
         }
@@ -251,7 +251,7 @@ public class CustomLatexModel extends AdvancedHumanoidModel<CustomLatexEntity> i
                                 Torso, LeftArm, RightArm,
                                 LowerTorso, FrontLeftLeg, leftLowerLeg, leftLowerLeg.getChild("LeftFoot3"), FrontRightLeg, rightLowerLeg, rightLowerLeg.getChild("RightFoot3"),
                                 BackLeftLeg, leftLowerLeg2, leftFoot2, leftFoot2.getChild("LeftPad2"), BackRightLeg, rightLowerLeg2, rightFoot2, rightFoot2.getChild("RightPad2")))
-                        .addAnimator(new WolfTailInitAnimator<>(Tail, List.of(tailPrimary, tailSecondary, tailTertiary)));
+                        .addAnimator(new WolfTailInitAnimator<>(WolfTailTaur, List.of(tailPrimary, tailSecondary, tailTertiary)));
             }
 
             {
@@ -265,7 +265,7 @@ public class CustomLatexModel extends AdvancedHumanoidModel<CustomLatexEntity> i
                                 Torso, LeftArm, RightArm,
                                 LowerTorso, FrontLeftLeg, leftLowerLeg, leftLowerLeg.getChild("LeftFoot3"), FrontRightLeg, rightLowerLeg, rightLowerLeg.getChild("RightFoot3"),
                                 BackLeftLeg, leftLowerLeg2, leftFoot2, leftFoot2.getChild("LeftPad2"), BackRightLeg, rightLowerLeg2, rightFoot2, rightFoot2.getChild("RightPad2")))
-                        .addAnimator(new CatTailInitAnimator<>(Tail, List.of(tailPrimary, tailSecondary, tailTertiary, tailQuaternary)));
+                        .addAnimator(new CatTailInitAnimator<>(CatTailTaur, List.of(tailPrimary, tailSecondary, tailTertiary, tailQuaternary)));
             }
 
             {
@@ -278,7 +278,7 @@ public class CustomLatexModel extends AdvancedHumanoidModel<CustomLatexEntity> i
                                 Torso, LeftArm, RightArm,
                                 LowerTorso, FrontLeftLeg, leftLowerLeg, leftLowerLeg.getChild("LeftFoot3"), FrontRightLeg, rightLowerLeg, rightLowerLeg.getChild("RightFoot3"),
                                 BackLeftLeg, leftLowerLeg2, leftFoot2, leftFoot2.getChild("LeftPad2"), BackRightLeg, rightLowerLeg2, rightFoot2, rightFoot2.getChild("RightPad2")))
-                        .addAnimator(new SharkTailInitAnimator<>(Tail, List.of(tailPrimary, tailSecondary, tailTertiary)));
+                        .addAnimator(new SharkTailInitAnimator<>(SharkTailTaur, List.of(tailPrimary, tailSecondary, tailTertiary)));
             }
 
             {
@@ -292,7 +292,7 @@ public class CustomLatexModel extends AdvancedHumanoidModel<CustomLatexEntity> i
                                 Torso, LeftArm, RightArm,
                                 LowerTorso, FrontLeftLeg, leftLowerLeg, leftLowerLeg.getChild("LeftFoot3"), FrontRightLeg, rightLowerLeg, rightLowerLeg.getChild("RightFoot3"),
                                 BackLeftLeg, leftLowerLeg2, leftFoot2, leftFoot2.getChild("LeftPad2"), BackRightLeg, rightLowerLeg2, rightFoot2, rightFoot2.getChild("RightPad2")))
-                        .addAnimator(new DragonTailInitAnimator<>(Tail, List.of(tailPrimary, tailSecondary, tailTertiary, tailQuaternary)));
+                        .addAnimator(new DragonTailInitAnimator<>(DragonTailTaur, List.of(tailPrimary, tailSecondary, tailTertiary, tailQuaternary)));
             }
         }
     }

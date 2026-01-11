@@ -3,8 +3,8 @@ package net.ltxprogrammer.changed.ability;
 import com.mojang.datafixers.util.Pair;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.entity.*;
-import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
+import net.ltxprogrammer.changed.init.ChangedAbilities;
 import net.ltxprogrammer.changed.init.ChangedAttributes;
 import net.ltxprogrammer.changed.init.ChangedTags;
 import net.ltxprogrammer.changed.network.packet.GrabEntityPacket;
@@ -62,6 +62,10 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
     }
 
     public boolean shouldAnimateArms() {
+        return grabbedEntity != null && !suited;
+    }
+
+    public boolean canGrabbedEntityBeStolen() {
         return grabbedEntity != null && !suited;
     }
 
@@ -148,7 +152,14 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
         this.grabCooldown = 40;
     }
 
-    public void suitEntity(LivingEntity entity) {
+    public boolean suitEntity(LivingEntity entity) {
+        var prevGrabber = GrabEntityAbility.getGrabberSafe(entity)
+                .flatMap(current -> current.getAbilityInstanceSafe(ChangedAbilities.GRAB_ENTITY_ABILITY.get()))
+                .filter(current -> current != this);
+
+        if (prevGrabber.map(ability -> !ability.canGrabbedEntityBeStolen()).orElse(false))
+            return false;
+
         getController().resetHoldTicks();
 
         ProcessTransfur.forceNearbyToRetarget(entity.level(), entity);
@@ -159,21 +170,56 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
         this.grabbedEntity = entity;
         this.suited = true;
         this.grabStrength = 1.0f;
+
+        prevGrabber.ifPresent(this::stealGrabFrom);
+        return true;
     }
 
-    public void grabEntity(LivingEntity entity) {
+    public boolean grabEntity(LivingEntity entity) {
+        var prevGrabber = GrabEntityAbility.getGrabberSafe(entity)
+                .flatMap(current -> current.getAbilityInstanceSafe(ChangedAbilities.GRAB_ENTITY_ABILITY.get()))
+                .filter(current -> current != this);
+
+        if (prevGrabber.map(ability -> !ability.canGrabbedEntityBeStolen()).orElse(false))
+            return false;
+
         getController().resetHoldTicks();
 
         if (this.grabbedEntity == entity) {
             this.suited = false;
             this.grabbedHasControl = false;
             //this.grabStrength = 1.0f;
-            return;
+            return true;
         }
 
         this.releaseEntity();
         this.grabbedEntity = entity;
         this.grabStrength = 1.0f;
+
+        prevGrabber.ifPresent(this::stealGrabFrom);
+        return true;
+    }
+
+    protected void stealGrabFrom(GrabEntityAbilityInstance other) {
+        if (other == this)
+            return;
+
+        // Copy escape state
+        this.grabStrength = other.grabStrength;
+        this.grabStrengthO = other.grabStrengthO;
+        this.escapeKeyForwardO = other.escapeKeyForwardO;
+        this.escapeKeyBackwardO = other.escapeKeyBackwardO;
+        this.escapeKeyLeftO = other.escapeKeyLeftO;
+        this.escapeKeyRightO = other.escapeKeyRightO;
+        this.escapeKeyForward = other.escapeKeyForward;
+        this.escapeKeyBackward = other.escapeKeyBackward;
+        this.escapeKeyLeft = other.escapeKeyLeft;
+        this.escapeKeyRight = other.escapeKeyRight;
+        this.ticksUnpressed = other.ticksUnpressed;
+        this.lastEscapeKey = other.lastEscapeKey;
+        this.currentEscapeKey = other.currentEscapeKey;
+        this.ticksGrabbed = other.ticksGrabbed;
+        other.releaseEntity();
     }
 
     @Override
@@ -360,7 +406,9 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
             }
 
             if (this.suited && this.grabbedEntity instanceof Player player && !ProcessTransfur.isPlayerTransfurred(player)) {
-                ProcessTransfur.setPlayerTransfurVariant(player, this.entity.getSelfVariant(), TransfurContext.latexHazard(this.entity, TransfurCause.GRAB_REPLICATE), 1.0f, true);
+                var suitVariant = ProcessTransfur.setPlayerTransfurVariant(player, this.entity.getSelfVariant(), TransfurContext.latexHazard(this.entity, TransfurCause.GRAB_REPLICATE), 1.0f, true);
+                if (suitVariant != null)
+                    this.entity.getChangedEntity().onSuitOther(IAbstractChangedEntity.forPlayer(player), suitVariant.getParent());
             }
 
             else if (!this.suited && this.grabbedEntity instanceof Player player && ProcessTransfur.isPlayerTransfurred(player)) {
@@ -472,11 +520,10 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
             if (grabbedEntity instanceof Player && !Changed.config.server.isGrabEnabled.get())
                 return;
 
-            this.grabbedEntity = grabbedEntity;
+            if (!this.grabEntity(grabbedEntity))
+                return;
             Changed.PACKET_HANDLER.sendToServer(GrabEntityPacket.initialGrab((Player)entity.getEntity(), grabbedEntity));
-            this.grabStrength = 1.0f;
             this.instructionTicks = 180;
-            getController().resetHoldTicks();
         }
     }
 

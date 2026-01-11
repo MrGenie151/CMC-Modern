@@ -30,19 +30,17 @@ public class DarkLatexSuitOwnerGoal extends MeleeAttackGoal {
         }
 
         if (target == entity.getOwner()) {
-            if (ProcessTransfur.getPlayerTransfurVariantSafe(EntityUtil.playerOrNull(target)).map(TransfurVariantInstance::isTransfurring).orElse(false))
-                return; // Wait for player to TF
-
             double reachSqr = this.getAttackReachSqr(target) * 0.9;
 
             if (distanceSquared <= reachSqr && this.getTicksUntilNextAttack() <= 0) {
                 this.resetAttackCooldown();
 
-                ability.suitEntity(target);
-                ability.grabbedHasControl = true;
-                Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity),
-                        new GrabEntityPacket(entity, target, GrabEntityPacket.GrabType.SUIT));
-                ChangedSounds.broadcastSound(entity, ChangedSounds.LATEX_SUIT_ENTITY, 1.0f, 1.0f);
+                if (ability.suitEntity(target)) {
+                    ability.grabbedHasControl = true;
+                    Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity),
+                            new GrabEntityPacket(entity, target, GrabEntityPacket.GrabType.SUIT));
+                    ChangedSounds.broadcastSound(entity, ChangedSounds.LATEX_SUIT_ENTITY, 1.0f, 1.0f);
+                }
             }
         } else {
             // Re-evaluate nearby entities
