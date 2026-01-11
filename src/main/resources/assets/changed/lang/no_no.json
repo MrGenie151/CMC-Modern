@@ -49,7 +49,15 @@
   "ability.changed.grab_entity.how_to_toggle_control": "Trykk på [%s] for å veksle kontroll",
 
   "attribute.name.changed.transfur_damage": "Forvandpels skade",
+  "attribute.name.changed.transfur_damage.desc": "Hvor raskt du kan forvandpels fiender (Gjelder kun mens forvandpelset).",
   "attribute.name.changed.transfur_tolerance": "Forvandpels toleranse",
+  "attribute.name.changed.transfur_tolerance.desc": "Hvor godt du kan motstå å bli forvandpelset.",
+  "attribute.name.changed.sprint_speed": "Sprintfart",
+  "attribute.name.changed.sprint_speed.desc": "Multipliserer farten din mens sprinter (Gjelder kun mens forvandpelset).",
+  "attribute.name.changed.sneak_speed": "Luskfart",
+  "attribute.name.changed.sneak_speed.desc": "Multipliserer farten din mens lusker (Gjelder kun mens forvandpelset).",
+  "attribute.name.changed.air_capacity": "Luftskapasitet",
+  "attribute.name.changed.air_capacity.desc": "Hvor mye luft du kan beholde (Gjelder kun mens forvandpelset).",
 
   "subtitles.changed.block.cardboard_box.close": "Pappeske lukkes",
   "subtitles.changed.block.cardboard_box.open": "Pappeske åpnes",
@@ -153,6 +161,10 @@
   "item.changed.tsc_staff": "TSC stab",
   "item.changed.tsc_baton": "TSC taktpinne",
   "item.changed.tsc_shield": "TSC skjold",
+
+  "item.changed.biped_armor_stand": "Tobeint rustningsstativ",
+  "item.changed.centaur_armor_stand": "Kentaur rustningsstativ",
+  "item.changed.legless_armor_stand": "Beinløs rustningsstativ",
 
   "item.changed.leather_upper_abdomen_armor": "Lær øvre bukrustning",
   "item.changed.leather_lower_abdomen_armor": "Lær nedre bukrustning",
@@ -502,6 +514,8 @@
   "entity.changed.behemoth_hand_left": "Venstre behemoth hånd",
   "entity.changed.behemoth_hand_right": "Høyre behemoth hånd",
   "entity.changed.beifeng": "Beifeng",
+  "entity.changed.biped_armor_stand": "Tobeint rustningsstativ",
+  "entity.changed.centaur_armor_stand": "Kentaur rustningsstativ",
   "entity.changed.crystal_wolf": "Krystall ulv",
   "entity.changed.crystal_wolf_horned": "Krystall ulv med horn",
   "entity.changed.dark_latex_wolf_female": "Kvinnelig mørk lateks ulv",
@@ -574,6 +588,7 @@
   "entity.changed.latex_watermelon_cat": "Lateks vannmelon katt",
   "entity.changed.latex_white_tiger": "Lateks hvit tiger",
   "entity.changed.latex_yuin": "Lateks yuin",
+  "entity.changed.legless_armor_stand": "Beinløs rustningsstativ",
   "entity.changed.milk_pudding": "Melkepudding",
   "entity.changed.phage_latex_wolf_female": "Kvinnelig bakteriofag lateks ulv",
   "entity.changed.phage_latex_wolf_male": "Mannlig bakteriofag lateks ulv",
@@ -743,7 +758,7 @@
   "changed:advancements.main.transfur_mask.description": "Skaffe og ta på en mørk lateks maske.",
 
   "changed:advancements.main.transfur_legless.title": "Beina mine!",
-  "changed:advancements.main.transfur_legless.description": "Forvandpels deg selv inn i en beinløse form",
+  "changed:advancements.main.transfur_legless.description": "Forvandpels deg selv inn i en beinløs form",
 
   "changed:advancements.main.beehive_sleep.title": "Drøm søtere",
   "changed:advancements.main.beehive_sleep.description": "Sov i en bikubeseng",

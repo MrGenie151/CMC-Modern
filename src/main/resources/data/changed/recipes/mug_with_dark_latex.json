@@ -1,0 +1,37 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "changed:dark_latex_bucket"
+    },
+    {
+      "item": "changed:mug"
+    },
+    {
+      "item": "changed:mug"
+    },
+    {
+      "item": "changed:mug"
+    },
+    {
+      "item": "changed:mug"
+    },
+    {
+      "item": "changed:mug"
+    },
+    {
+      "item": "changed:mug"
+    },
+    {
+      "item": "changed:mug"
+    },
+    {
+      "item": "changed:mug"
+    }
+  ],
+  "result": {
+    "count": 8,
+    "item": "changed:mug_with_dark_latex"
+  }
+}
