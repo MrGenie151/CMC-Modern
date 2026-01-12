@@ -49,7 +49,7 @@ public class LatexMantaRayFemale extends AbstractLatexMantaRay {
     }
 
     public Color3 getTransfurColor(TransfurCause cause) {
-        return Color3.getColor("#6f7696");
+        return Color3.getColor("#d2d9e1");
     }
 
     @Override

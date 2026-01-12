@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.init;
 
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.recipe.InfuserRecipe;
+import net.ltxprogrammer.changed.recipe.ContainerFillingRecipe;
 import net.ltxprogrammer.changed.recipe.PurifierRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.registries.DeferredRegister;
@@ -13,4 +14,6 @@ public class ChangedRecipeSerializers {
 
     public static RegistryObject<RecipeSerializer<InfuserRecipe>> INFUSER_RECIPE = REGISTRY.register("infuser", InfuserRecipe.Serializer::new);
     public static RegistryObject<RecipeSerializer<PurifierRecipe>> PURIFIER_RECIPE = REGISTRY.register("purifier", PurifierRecipe.Serializer::new);
+
+    public static RegistryObject<RecipeSerializer<ContainerFillingRecipe>> CONTAINER_FILL_RECIPE = REGISTRY.register("crafting_container_fill", ContainerFillingRecipe.Serializer::new);
 }

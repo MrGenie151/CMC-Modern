@@ -89,21 +89,23 @@ public class LatexFennecFoxModel extends AdvancedHumanoidModel<LatexFennecFox> i
                 .texOffs(15, 32).addBox(-2.0F, -3.0F, -6.0F, 4.0F, 2.0F, 2.0F, CubeDeformation.NONE)
                 .texOffs(24, 22).addBox(-1.5F, -1.0F, -5.0F, 3.0F, 1.0F, 1.0F, CubeDeformation.NONE), PartPose.offset(0.0F, -0.5F, 0.0F));
 
-        PartDefinition RightEar = Head.addOrReplaceChild("RightEar", CubeListBuilder.create(), PartPose.offsetAndRotation(-2.7F, -6.05F, -1.0F, -0.2618F, 0.0873F, -0.3054F));
+        PartDefinition RightEar = Head.addOrReplaceChild("RightEar", CubeListBuilder.create(), PartPose.offset(-2.5F, -5.65F, -0.8F));
 
-        PartDefinition RightEarPivot = RightEar.addOrReplaceChild("RightEarPivot", CubeListBuilder.create().texOffs(58, 57).addBox(-2.9F, -3.2F, -1.0F, 4.0F, 6.0F, 1.0F, CubeDeformation.NONE)
-                .texOffs(32, 25).addBox(-1.3F, -3.85F, -0.3F, 2.0F, 2.0F, 1.0F, new CubeDeformation(0.04F))
-                .texOffs(0, 21).addBox(-1.9F, -4.2F, -1.0F, 3.0F, 1.0F, 1.0F, CubeDeformation.NONE)
-                .texOffs(37, 0).addBox(-0.9F, -5.2F, -1.0F, 2.0F, 1.0F, 1.0F, CubeDeformation.NONE)
-                .texOffs(0, 0).addBox(-2.3F, -1.85F, -0.3F, 3.0F, 4.0F, 1.0F, new CubeDeformation(0.04F)), PartPose.offsetAndRotation(0.5F, -1.25F, 0.0F, -0.1309F, 0.5236F, -0.3491F));
+        PartDefinition RightEarPivot = RightEar.addOrReplaceChild("RightEarPivot", CubeListBuilder.create().texOffs(58, 57).addBox(-2.9F, -3.5F, -1.0F, 4.0F, 7.0F, 1.0F, CubeDeformation.NONE)
+                .texOffs(32, 44).addBox(-3.9F, -1.5F, -1.0F, 1.0F, 3.0F, 1.0F, CubeDeformation.NONE)
+                .texOffs(0, 0).addBox(-2.3F, -2.15F, -0.3F, 3.0F, 5.0F, 1.0F, new CubeDeformation(0.04F))
+                .texOffs(0, 22).addBox(-1.9F, -4.5F, -1.0F, 3.0F, 1.0F, 1.0F, CubeDeformation.NONE)
+                .texOffs(37, 0).addBox(-0.9F, -5.5F, -1.0F, 2.0F, 1.0F, 1.0F, CubeDeformation.NONE)
+                .texOffs(32, 25).addBox(-1.3F, -4.15F, -0.3F, 2.0F, 2.0F, 1.0F, new CubeDeformation(0.04F)), PartPose.offsetAndRotation(0.0F, -2.85F, 0.3F, -0.2967F, 0.6109F, -0.4992F));
 
-        PartDefinition LeftEar = Head.addOrReplaceChild("LeftEar", CubeListBuilder.create(), PartPose.offsetAndRotation(2.7F, -6.05F, -1.0F, -0.2618F, -0.0873F, 0.3054F));
+        PartDefinition LeftEar = Head.addOrReplaceChild("LeftEar", CubeListBuilder.create(), PartPose.offset(2.5F, -5.65F, -0.8F));
 
-        PartDefinition LeftEarPivot = LeftEar.addOrReplaceChild("LeftEarPivot", CubeListBuilder.create().texOffs(48, 57).addBox(-1.1F, -3.2F, -1.0F, 4.0F, 6.0F, 1.0F, CubeDeformation.NONE)
-                .texOffs(0, 16).addBox(-0.7F, -1.85F, -0.3F, 3.0F, 4.0F, 1.0F, new CubeDeformation(0.04F))
-                .texOffs(32, 22).addBox(-0.7F, -3.85F, -0.3F, 2.0F, 2.0F, 1.0F, new CubeDeformation(0.04F))
-                .texOffs(0, 5).addBox(-1.1F, -4.2F, -1.0F, 3.0F, 1.0F, 1.0F, CubeDeformation.NONE)
-                .texOffs(20, 36).addBox(-1.1F, -5.2F, -1.0F, 2.0F, 1.0F, 1.0F, CubeDeformation.NONE), PartPose.offsetAndRotation(-0.5F, -1.25F, 0.0F, -0.1309F, -0.5236F, 0.3491F));
+        PartDefinition LeftEarPivot = LeftEar.addOrReplaceChild("LeftEarPivot", CubeListBuilder.create().texOffs(44, 44).addBox(2.9F, -1.5F, -1.0F, 1.0F, 3.0F, 1.0F, CubeDeformation.NONE)
+                .texOffs(0, 16).addBox(-0.7F, -2.15F, -0.3F, 3.0F, 5.0F, 1.0F, new CubeDeformation(0.04F))
+                .texOffs(0, 6).addBox(-1.1F, -4.5F, -1.0F, 3.0F, 1.0F, 1.0F, CubeDeformation.NONE)
+                .texOffs(20, 36).addBox(-1.1F, -5.5F, -1.0F, 2.0F, 1.0F, 1.0F, CubeDeformation.NONE)
+                .texOffs(32, 22).addBox(-0.7F, -4.15F, -0.3F, 2.0F, 2.0F, 1.0F, new CubeDeformation(0.04F))
+                .texOffs(48, 57).addBox(-1.1F, -3.5F, -1.0F, 4.0F, 7.0F, 1.0F, CubeDeformation.NONE), PartPose.offsetAndRotation(0.0F, -2.85F, 0.3F, -0.2967F, -0.6109F, 0.4992F));
 
         PartDefinition Hair = Head.addOrReplaceChild("Hair", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.2F))
                 .texOffs(24, 8).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 6.0F, 8.0F, new CubeDeformation(0.3F)), PartPose.offset(0.0F, 0.0F, 0.0F));
