@@ -1,37 +1,11 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "category": "misc",
+  "type": "changed:crafting_container_fill",
   "ingredients": [
     {
       "item": "minecraft:water_bucket"
-    },
-    {
-      "item": "changed:mug"
-    },
-    {
-      "item": "changed:mug"
-    },
-    {
-      "item": "changed:mug"
-    },
-    {
-      "item": "changed:mug"
-    },
-    {
-      "item": "changed:mug"
-    },
-    {
-      "item": "changed:mug"
-    },
-    {
-      "item": "changed:mug"
-    },
-    {
-      "item": "changed:mug"
     }
   ],
-  "result": {
-    "count": 8,
-    "item": "changed:mug_with_water"
-  }
+  "container": "changed:mug",
+  "containerCountLimit": 8,
+  "result": "changed:mug_with_water"
 }
