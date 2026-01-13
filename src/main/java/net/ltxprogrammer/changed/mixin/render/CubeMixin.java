@@ -3,6 +3,7 @@ package net.ltxprogrammer.changed.mixin.render;
 import com.mojang.datafixers.util.Pair;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.client.CubeExtender;
+import net.ltxprogrammer.changed.util.Cacheable;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.UVPair;
 import net.minecraft.core.Direction;
@@ -20,15 +21,47 @@ import java.util.Set;
 public abstract class CubeMixin implements CubeExtender {
     // TODO: This is no longer guaranteed to have 6 faces
     @Shadow @Final private ModelPart.Polygon[] polygons;
+    @Unique private Cacheable<Vector3f> visualMin = Cacheable.of(() -> {
+        Vector3f min = null;
+        for (var polygon : this.polygons) {
+            for (var vertex : polygon.vertices) {
+                if (min == null) {
+                    min = new Vector3f(vertex.pos);
+                    continue;
+                }
+
+                min.x = Math.min(min.x, vertex.pos.x);
+                min.y = Math.min(min.y, vertex.pos.y);
+                min.z = Math.min(min.z, vertex.pos.z);
+            }
+        }
+        return min;
+    });
+    @Unique private Cacheable<Vector3f> visualMax = Cacheable.of(() -> {
+        Vector3f max = null;
+        for (var polygon : this.polygons) {
+            for (var vertex : polygon.vertices) {
+                if (max == null) {
+                    max = new Vector3f(vertex.pos);
+                    continue;
+                }
+
+                max.x = Math.max(max.x, vertex.pos.x);
+                max.y = Math.max(max.y, vertex.pos.y);
+                max.z = Math.max(max.z, vertex.pos.z);
+            }
+        }
+        return max;
+    });
 
     @Override
     public Vector3f getVisualMin() {
-        return this.polygons[1].vertices[0].pos;
+        return visualMin.get();
     }
 
     @Override
     public Vector3f getVisualMax() {
-        return this.polygons[0].vertices[3].pos;
+        return visualMax.get();
     }
 
     @Override

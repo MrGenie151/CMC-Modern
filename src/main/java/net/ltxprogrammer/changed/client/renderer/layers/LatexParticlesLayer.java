@@ -155,19 +155,19 @@ public class LatexParticlesLayer<T extends ChangedEntity, M extends AdvancedHuma
         // vector is now currently on the surface of a sphere sized as the cube, need to bring one element to the nearest surface
 
         if (Math.abs(spherePoint.x()) > Math.abs(spherePoint.y()) && Math.abs(spherePoint.x()) > Math.abs(spherePoint.z())) {
-            vector.x = Math.signum(vector.x()) * cubeSize.x(); // X is the largest value
-            normal.x = Math.signum(vector.x());
-            cubePoint.x = normal.x();
+            normal.x = Math.signum(vector.x()); // X is the largest value
+            vector.x = normal.x * cubeSize.x();
+            cubePoint.x = normal.x;
             tangent.y = -1.0f;
         } else if (Math.abs(spherePoint.y()) > Math.abs(spherePoint.x()) && Math.abs(spherePoint.y()) > Math.abs(spherePoint.z())) {
-            vector.y = Math.signum(vector.y()) * cubeSize.y(); // Y is the largest value
-            normal.y = Math.signum(vector.y());
-            cubePoint.y = Math.signum(vector.y());
+            normal.y = Math.signum(vector.y()); // Y is the largest value
+            vector.y = normal.y * cubeSize.y();
+            cubePoint.y = normal.y;
             tangent.x = 1.0f;
         } else {
-            vector.z = Math.signum(vector.z()) * cubeSize.z(); // Z is the largest value
-            normal.z = Math.signum(vector.z());
-            cubePoint.z = Math.signum(vector.z());
+            normal.z = Math.signum(vector.z()); // Z is the largest value
+            vector.z = normal.z * cubeSize.z();
+            cubePoint.z = normal.z;
             tangent.x = -1.0f;
         }
 

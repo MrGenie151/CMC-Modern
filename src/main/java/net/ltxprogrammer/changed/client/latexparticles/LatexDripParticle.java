@@ -358,7 +358,8 @@ public class LatexDripParticle extends LatexParticle {
 
     @Override
     public boolean shouldExpire() {
-        return super.shouldExpire() || attachedEntity == null || attachedEntity.isDeadOrDying() || attachedEntity.isRemoved() || attachedEntity.isInvisible();
+        return super.shouldExpire() ||
+                (attached && (attachedEntity == null || attachedEntity.isDeadOrDying() || attachedEntity.isRemoved() || attachedEntity.isInvisible()));
     }
 
     @Override
