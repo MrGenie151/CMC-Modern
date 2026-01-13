@@ -11,6 +11,7 @@ import net.ltxprogrammer.changed.util.EntityUtil;
 import net.ltxprogrammer.changed.util.LevelUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -57,7 +58,7 @@ public class SirenSingAbilityInstance extends AbstractAbilityInstance {
             return;
 
         int seed = target.getId() * 131313 + ((target.getId() + target.tickCount) / 30);
-        Random random = new Random(seed);
+        RandomSource random = RandomSource.create(seed);
         random.nextInt();
         random.nextInt();
         float value = random.nextFloat();

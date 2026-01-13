@@ -409,7 +409,7 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
             return 0.93F;
     }
 
-    public static boolean isDarkEnoughToSpawn(ServerLevelAccessor world, BlockPos pos, Random random) {
+    public static boolean isDarkEnoughToSpawn(ServerLevelAccessor world, BlockPos pos, RandomSource random) {
         if (world.getBrightness(LightLayer.SKY, pos) > random.nextInt(50)) {
             return false;
         } else if (world.getBrightness(LightLayer.BLOCK, pos) > 0) {
