@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.UVPair;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import org.joml.Vector3f;
 
 import java.util.Set;
@@ -17,4 +18,6 @@ public interface CubeExtender {
     ModelPart.Polygon[] getPolygons();
     void copyPolygonsFrom(ModelPart.Cube cube);
     void extendCube(float x, float y, float z);
+
+    ModelPart.Polygon getRandomPolygonWeighted(RandomSource random);
 }

@@ -8,6 +8,7 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.UVPair;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -217,5 +218,56 @@ public abstract class CubeMixin implements CubeExtender {
         extendVertex(this.polygons[5], 1, x, -y, z);
         extendVertex(this.polygons[5], 2, x, y, z);
         extendVertex(this.polygons[5], 3, -x, y, z);
+    }
+
+    @Override
+    public ModelPart.Polygon getRandomPolygonWeighted(RandomSource random) {
+        float[] weights = new float[polygons.length];
+        float totalWeight = 0.0f;
+
+        for (int i = 0; i < polygons.length; ++i) {
+            var polygon = polygons[i];
+            Vector3f min = null, max = null;
+
+            for (var vertex : polygon.vertices) {
+                if (min == null)
+                    min = new Vector3f(vertex.pos);
+                if (max == null)
+                    max = new Vector3f(vertex.pos);
+
+                min.x = Math.min(min.x, vertex.pos.x);
+                min.y = Math.min(min.y, vertex.pos.y);
+                min.z = Math.min(min.z, vertex.pos.z);
+                max.x = Math.max(max.x, vertex.pos.x);
+                max.y = Math.max(max.y, vertex.pos.y);
+                max.z = Math.max(max.z, vertex.pos.z);
+            }
+
+            if (min == null) {
+                weights[i] = 0.0f;
+                continue;
+            }
+
+            if (max.x == min.x)
+                weights[i] = Math.abs((max.y - min.y) * (max.z - min.z));
+            else if (max.y == min.y)
+                weights[i] = Math.abs((max.x - min.x) * (max.z - min.z));
+            else
+                weights[i] = Math.abs((max.x - min.x) * (max.y - min.y));
+            totalWeight += weights[i];
+        }
+
+        ModelPart.Polygon polygon = null;
+        float chosenPolygon = random.nextFloat() * totalWeight;
+        for (int i = 0; i < polygons.length; ++i) {
+            if (weights[i] <= 0.0f)
+                continue;
+            if ((chosenPolygon -= weights[i]) > 0.0f)
+                continue;
+
+            return polygons[i];
+        }
+
+        throw new IndexOutOfBoundsException();
     }
 }
