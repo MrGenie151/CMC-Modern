@@ -7,6 +7,7 @@ import net.ltxprogrammer.changed.init.*;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.util.EntityUtil;
 import net.ltxprogrammer.changed.util.InputWrapper;
+import net.ltxprogrammer.changed.util.UniversalDist;
 import net.ltxprogrammer.changed.world.LatexCoverGetter;
 import net.ltxprogrammer.changed.world.LatexCoverState;
 import net.minecraft.core.BlockPos;
@@ -238,6 +239,17 @@ public class LatexSwimMover extends PlayerMover<LatexSwimMover.MoverInstance> {
         }
 
         @Override
+        public void onAdd(Player player) {
+            super.onAdd(player);
+
+            player.refreshDimensions();
+            player.setInvulnerable(true);
+
+            if (!UniversalDist.isClientRemotePlayer(player))
+                player.playSound(ChangedSounds.ENTITY_ENTER_LATEX.get(), 1.0f, 1.0f);
+        }
+
+        @Override
         public void onRemove(Player player) {
             super.onRemove(player);
 
@@ -245,7 +257,9 @@ public class LatexSwimMover extends PlayerMover<LatexSwimMover.MoverInstance> {
                 return;
 
             player.setInvulnerable(false);
-            player.playSound(ChangedSounds.ENTITY_EXIT_LATEX.get(), 1.0f, 1.0f);
+
+            if (!UniversalDist.isClientRemotePlayer(player))
+                player.playSound(ChangedSounds.ENTITY_EXIT_LATEX.get(), 1.0f, 1.0f);
         }
     }
 }

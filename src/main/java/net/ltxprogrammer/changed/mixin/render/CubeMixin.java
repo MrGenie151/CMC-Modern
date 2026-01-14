@@ -3,10 +3,12 @@ package net.ltxprogrammer.changed.mixin.render;
 import com.mojang.datafixers.util.Pair;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.client.CubeExtender;
+import net.ltxprogrammer.changed.util.Cacheable;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.UVPair;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,15 +22,47 @@ import java.util.Set;
 public abstract class CubeMixin implements CubeExtender {
     // TODO: This is no longer guaranteed to have 6 faces
     @Shadow @Final private ModelPart.Polygon[] polygons;
+    @Unique private Cacheable<Vector3f> visualMin = Cacheable.of(() -> {
+        Vector3f min = null;
+        for (var polygon : this.polygons) {
+            for (var vertex : polygon.vertices) {
+                if (min == null) {
+                    min = new Vector3f(vertex.pos);
+                    continue;
+                }
+
+                min.x = Math.min(min.x, vertex.pos.x);
+                min.y = Math.min(min.y, vertex.pos.y);
+                min.z = Math.min(min.z, vertex.pos.z);
+            }
+        }
+        return min;
+    });
+    @Unique private Cacheable<Vector3f> visualMax = Cacheable.of(() -> {
+        Vector3f max = null;
+        for (var polygon : this.polygons) {
+            for (var vertex : polygon.vertices) {
+                if (max == null) {
+                    max = new Vector3f(vertex.pos);
+                    continue;
+                }
+
+                max.x = Math.max(max.x, vertex.pos.x);
+                max.y = Math.max(max.y, vertex.pos.y);
+                max.z = Math.max(max.z, vertex.pos.z);
+            }
+        }
+        return max;
+    });
 
     @Override
     public Vector3f getVisualMin() {
-        return this.polygons[1].vertices[0].pos;
+        return visualMin.get();
     }
 
     @Override
     public Vector3f getVisualMax() {
-        return this.polygons[0].vertices[3].pos;
+        return visualMax.get();
     }
 
     @Override
@@ -184,5 +218,56 @@ public abstract class CubeMixin implements CubeExtender {
         extendVertex(this.polygons[5], 1, x, -y, z);
         extendVertex(this.polygons[5], 2, x, y, z);
         extendVertex(this.polygons[5], 3, -x, y, z);
+    }
+
+    @Override
+    public ModelPart.Polygon getRandomPolygonWeighted(RandomSource random) {
+        float[] weights = new float[polygons.length];
+        float totalWeight = 0.0f;
+
+        for (int i = 0; i < polygons.length; ++i) {
+            var polygon = polygons[i];
+            Vector3f min = null, max = null;
+
+            for (var vertex : polygon.vertices) {
+                if (min == null)
+                    min = new Vector3f(vertex.pos);
+                if (max == null)
+                    max = new Vector3f(vertex.pos);
+
+                min.x = Math.min(min.x, vertex.pos.x);
+                min.y = Math.min(min.y, vertex.pos.y);
+                min.z = Math.min(min.z, vertex.pos.z);
+                max.x = Math.max(max.x, vertex.pos.x);
+                max.y = Math.max(max.y, vertex.pos.y);
+                max.z = Math.max(max.z, vertex.pos.z);
+            }
+
+            if (min == null) {
+                weights[i] = 0.0f;
+                continue;
+            }
+
+            if (max.x == min.x)
+                weights[i] = Math.abs((max.y - min.y) * (max.z - min.z));
+            else if (max.y == min.y)
+                weights[i] = Math.abs((max.x - min.x) * (max.z - min.z));
+            else
+                weights[i] = Math.abs((max.x - min.x) * (max.y - min.y));
+            totalWeight += weights[i];
+        }
+
+        ModelPart.Polygon polygon = null;
+        float chosenPolygon = random.nextFloat() * totalWeight;
+        for (int i = 0; i < polygons.length; ++i) {
+            if (weights[i] <= 0.0f)
+                continue;
+            if ((chosenPolygon -= weights[i]) > 0.0f)
+                continue;
+
+            return polygons[i];
+        }
+
+        throw new IndexOutOfBoundsException();
     }
 }

@@ -2,15 +2,11 @@ package net.ltxprogrammer.changed.client.renderer.layers;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.ltxprogrammer.changed.client.ChangedClient;
-import net.ltxprogrammer.changed.client.CubeExtender;
-import net.ltxprogrammer.changed.client.PoseStackExtender;
-import net.ltxprogrammer.changed.client.SkinManagerExtender;
+import net.ltxprogrammer.changed.client.*;
 import net.ltxprogrammer.changed.client.latexparticles.LatexDripParticle;
 import net.ltxprogrammer.changed.client.latexparticles.SetupContext;
 import net.ltxprogrammer.changed.client.latexparticles.SurfacePoint;
 import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
-import net.ltxprogrammer.changed.client.tfanimations.TransfurAnimator;
 import net.ltxprogrammer.changed.data.MixedTexture;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.util.Color3;
@@ -22,18 +18,15 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.HumanoidArm;
 import org.joml.Vector3f;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -138,42 +131,30 @@ public class LatexParticlesLayer<T extends ChangedEntity, M extends AdvancedHuma
         return ((SkinManagerExtender)Minecraft.getInstance().getSkinManager()).getSkinImage(name);
     }
 
-    public SurfacePoint findSurface(ModelPart part, ChangedEntity entity) {
-        var cube = part.getRandomCube(entity.level().random);
-        var normal = new Vector3f(0, 0, 0);
-        var tangent = new Vector3f(0, 0, 0);
-        var vector = new Vector3f(entity.level().random.nextFloat(), entity.level().random.nextFloat(), entity.level().random.nextFloat());
-        vector.normalize();
-        var spherePoint = new Vector3f(vector);
-        var cubePoint = new Vector3f(vector);
-        var cubeMin = ((CubeExtender)cube).getVisualMin();
-        var cubeMax = ((CubeExtender)cube).getVisualMax();
-        var cubeSize = new Vector3f(cubeMax);
-        cubeSize.sub(cubeMin);
-        cubeSize.mul(1.0f / 16.0f);
-        vector.mul(cubeSize.x(), cubeSize.y(), cubeSize.z());
-        // vector is now currently on the surface of a sphere sized as the cube, need to bring one element to the nearest surface
+    private static ModelPart.Vertex lerpVertex(ModelPart.Vertex a, ModelPart.Vertex b, float lerp) {
+        return new ModelPart.Vertex(
+                Mth.lerp(lerp, a.pos.x(), b.pos.x()),
+                Mth.lerp(lerp, a.pos.y(), b.pos.y()),
+                Mth.lerp(lerp, a.pos.z(), b.pos.z()),
+                Mth.lerp(lerp, a.u, b.u),
+                Mth.lerp(lerp, a.v, b.v)
+        );
+    }
 
-        if (Math.abs(spherePoint.x()) > Math.abs(spherePoint.y()) && Math.abs(spherePoint.x()) > Math.abs(spherePoint.z())) {
-            vector.x = Math.signum(vector.x()) * cubeSize.x(); // X is the largest value
-            normal.x = Math.signum(vector.x());
-            cubePoint.x = normal.x();
-            tangent.y = -1.0f;
-        } else if (Math.abs(spherePoint.y()) > Math.abs(spherePoint.x()) && Math.abs(spherePoint.y()) > Math.abs(spherePoint.z())) {
-            vector.y = Math.signum(vector.y()) * cubeSize.y(); // Y is the largest value
-            normal.y = Math.signum(vector.y());
-            cubePoint.y = Math.signum(vector.y());
-            tangent.x = 1.0f;
-        } else {
-            vector.z = Math.signum(vector.z()) * cubeSize.z(); // Z is the largest value
-            normal.z = Math.signum(vector.z());
-            cubePoint.z = Math.signum(vector.z());
-            tangent.x = -1.0f;
-        }
+    public static SurfacePoint findRandomSurface(ModelPart part, RandomSource random) {
+        var cube = ((ModelPartExtender)(Object)part).getRandomCubeWeighted(random);
+        var polygon = ((CubeExtender)cube).getRandomPolygonWeighted(random);
 
-        UVPair uv = ((CubeExtender)cube).getUV(cubePoint);
-        vector.add(cubeMin.x() / 16.0f, cubeMin.y() / 16.0f, cubeMin.z() / 16.0f);
-        return new SurfacePoint(normal, tangent, vector, uv);
+        float lerpX = random.nextFloat();
+        float lerpY = random.nextFloat();
+        var vertex = lerpVertex(
+                lerpVertex(polygon.vertices[0], polygon.vertices[1], lerpX),
+                lerpVertex(polygon.vertices[3], polygon.vertices[2], lerpX),
+                lerpY
+        );
+
+        Vector3f scaledPos = new Vector3f();
+        return new SurfacePoint(polygon.normal, vertex.pos.mul(1.0f / 16.0f, scaledPos), new UVPair(vertex.u, vertex.v));
     }
 
     private Optional<AdvancedHumanoidModel<T>> getRandomModel(RandomSource random) {
@@ -197,7 +178,7 @@ public class LatexParticlesLayer<T extends ChangedEntity, M extends AdvancedHuma
             return;
 
         var partToAttach = partsWithCubes.get(entity.level().random.nextInt(partsWithCubes.size()));
-        var surface = findSurface(partToAttach.getLeaf(), entity);
+        var surface = findRandomSurface(partToAttach.getLeaf(), entity.level().random);
 
         Color3 color;
         float alpha;

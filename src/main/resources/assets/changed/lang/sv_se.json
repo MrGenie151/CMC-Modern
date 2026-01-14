@@ -49,7 +49,15 @@
   "ability.changed.grab_entity.how_to_toggle_control": "Tryck [%s] för att växla kontroll",
 
   "attribute.name.changed.transfur_damage": "Förpälsvandlaskada",
+  "attribute.name.changed.transfur_damage.desc": "Hur snabbt du kan förpälsvandla fiender (Gäller endast när förpälsvandlades).",
   "attribute.name.changed.transfur_tolerance": "Förpälsvandla tolerans",
+  "attribute.name.changed.transfur_tolerance.desc": "Hur bra du kan motstå att bli förpälsvandlades.",
+  "attribute.name.changed.sprint_speed": "Spurtfart",
+  "attribute.name.changed.sprint_speed.desc": "Multiplicerar din fart när spurtande (Gäller endast när förpälsvandlades).",
+  "attribute.name.changed.sneak_speed": "Smygfart",
+  "attribute.name.changed.sneak_speed.desc": "Multiplicerar din fart när smygande (Gäller endast när förpälsvandlades).",
+  "attribute.name.changed.air_capacity": "Luftkapacitet",
+  "attribute.name.changed.air_capacity.desc": "Hur mycket luft du kan behållas (Gäller endast när förpälsvandlades).",
 
   "subtitles.changed.block.cardboard_box.close": "Kartonglåda stängs",
   "subtitles.changed.block.cardboard_box.open": "Kartonglåda öppnas",
@@ -153,6 +161,10 @@
   "item.changed.tsc_staff": "TSC stav",
   "item.changed.tsc_baton": "TSC taktpinne",
   "item.changed.tsc_shield": "TSC sköld",
+
+  "item.changed.biped_armor_stand": "Tvåbent rustningsställ",
+  "item.changed.centaur_armor_stand": "Kentaur rustningsställ",
+  "item.changed.legless_armor_stand": "Benlös rustningsställ",
 
   "item.changed.leather_upper_abdomen_armor": "Läder övre bukrustning",
   "item.changed.leather_lower_abdomen_armor": "Läder lägre bukrustning",
@@ -502,6 +514,8 @@
   "entity.changed.behemoth_hand_left": "Vänster gigantisk händ",
   "entity.changed.behemoth_hand_right": "Höger gigantisk händ",
   "entity.changed.beifeng": "Beifeng",
+  "entity.changed.biped_armor_stand": "Tvåbent rustningsställ",
+  "entity.changed.centaur_armor_stand": "Kentaur rustningsställ",
   "entity.changed.crystal_wolf": "Kristallvarg",
   "entity.changed.crystal_wolf_horned": "Behornade kristallvarg",
   "entity.changed.dark_latex_wolf_female": "Kvinnlig mörk latexvarg",
@@ -574,6 +588,7 @@
   "entity.changed.latex_watermelon_cat": "Latex vattenmelon katt",
   "entity.changed.latex_white_tiger": "Latex vit tiger",
   "entity.changed.latex_yuin": "Latex yuin",
+  "entity.changed.legless_armor_stand": "Benlös rustningsställ",
   "entity.changed.milk_pudding": "Mjölkpudding",
   "entity.changed.phage_latex_wolf_female": "Kvinnlig bakteriofag latexvarg",
   "entity.changed.phage_latex_wolf_male": "Manlig bakteriofag latexvarg",
