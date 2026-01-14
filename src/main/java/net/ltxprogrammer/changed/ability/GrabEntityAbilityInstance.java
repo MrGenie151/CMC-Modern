@@ -26,7 +26,6 @@ import net.minecraftforge.network.PacketDistributor;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -373,19 +372,8 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
 
             handleInstructions(level);
 
-            if (this.grabbedEntity instanceof LivingEntityDataExtension ext) {
-                IAbstractChangedEntity grabber = GrabEntityAbility.getGrabber(grabbedEntity);
-                if (grabber != null && !grabber.getEntity().is(entity.getEntity())) {
-                    Optional<GrabEntityAbilityInstance> grabAbilityInstanceSafe = grabber.getAbilityInstanceSafe(ChangedAbilities.GRAB_ENTITY_ABILITY.get());
-                    // moment where a player or entity update the state after other "steal" they grabbed entity
-                    grabAbilityInstanceSafe.ifPresent((instance) -> {
-                        this.grabStrength = instance.grabStrength;   // For Prevent "Grab Trade" making the player full stuck
-                        this.grabStrengthO = instance.grabStrengthO; // Maybe Remove this just for the sake of fun & giggles?
-                        instance.releaseEntity();
-                    });
-                }
+            if (this.grabbedEntity instanceof LivingEntityDataExtension ext)
                 ext.setGrabbedBy(this.entity.getEntity());
-            }
 
             if (!grabbedHasControl) {
                 handleEscape();
