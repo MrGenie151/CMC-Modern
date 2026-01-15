@@ -599,6 +599,21 @@ public class EntityGeometry {
             }
         }
 
+        public void removeFace(Direction normal) {
+            for (int i = 0; i < polygons.length; i++) {
+                if (polygons[i].normal.dot(normal.step()) >= 0.95f) {
+                    var replacement = new Polygon[polygons.length - 1];
+
+                    for (int x = 0; x < replacement.length; x++) {
+                        replacement[x] = polygons[x < i ? x : (x + 1)];
+                    }
+
+                    polygons = replacement;
+                    return;
+                }
+            }
+        }
+
         public Cube clampToFit(Cube clampBy) {
             return clampToFit(clampBy, this);
         }

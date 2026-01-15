@@ -150,6 +150,7 @@
   "item.changed.mug_with_white_latex": "White Latex Filled Mug",
   "item.changed.nitrile_gloves": "Nitrile Gloves",
   "item.changed.orange": "Orange",
+  "item.changed.orange_neck_tie": "Orange Neck Tie",
   "item.changed.pink_shorts": "Pink Shorts",
   "item.changed.roomba": "Roomba",
   "item.changed.sports_bra": "Sports Bra",
@@ -157,6 +158,7 @@
   "item.changed.wetsuit": "Wetsuit",
   "item.changed.white_latex_goo": "White Latex Goo",
   "item.changed.white_latex_bucket": "White Latex Bucket",
+  "item.changed.white_tshirt": "White T-Shirt",
 
   "item.changed.tsc_staff": "TSC Staff",
   "item.changed.tsc_baton": "TSC Baton",
@@ -340,9 +342,6 @@
   "enchantment.changed.latex_protection.desc": "Protects the wearer from being transfurred.",
   "enchantment.changed.form_fitting": "Form Fitting",
   "enchantment.changed.form_fitting.desc": "The armor will conform itself to the wearer's form.",
-
-  "curios.identifier.legs": "Legs",
-  "curios.identifier.lower_body": "Lower Body",
 
   "block.changed.air_conditioner": "Air Conditioner",
   "block.changed.bar_stool": "Bar Stool",

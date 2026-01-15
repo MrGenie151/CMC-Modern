@@ -63,9 +63,11 @@ public class ChangedItems {
     public static final RegistryObject<PinkShorts> PINK_SHORTS = register("pink_shorts", PinkShorts::new);
     public static final RegistryObject<BraItem> SPORTS_BRA = register("sports_bra", BraItem::new);
     public static final RegistryObject<ShirtItem> BLACK_TSHIRT = register("black_tshirt", ShirtItem::new);
+    public static final RegistryObject<ShirtItem> WHITE_TSHIRT = register("white_tshirt", ShirtItem::new);
     public static final RegistryObject<LabCoatItem> LAB_COAT = register("lab_coat", LabCoatItem::new);
     public static final RegistryObject<WetsuitItem> WETSUIT = register("wetsuit", WetsuitItem::new);
     public static final RegistryObject<NitrileGloves> NITRILE_GLOVES = register("nitrile_gloves", NitrileGloves::new);
+    public static final RegistryObject<NeckTieItem> ORANGE_NECK_TIE = register("orange_neck_tie", NeckTieItem::new);
     public static final RegistryObject<GasMaskItem> GAS_MASK = register("gas_mask", GasMaskItem::new);
     public static final RegistryObject<AbstractChangedItem> DARK_LATEX_CRYSTAL_FRAGMENT = register("dark_latex_crystal_fragment", AbstractChangedItem::new);
     public static final RegistryObject<AbstractLatexItem> DARK_LATEX_GOO = register("dark_latex_goo", () -> new AbstractLatexItem(ChangedBlocks.DARK_LATEX_WALL_SPLOTCH.get(), ChangedLatexTypes.DARK_LATEX));
