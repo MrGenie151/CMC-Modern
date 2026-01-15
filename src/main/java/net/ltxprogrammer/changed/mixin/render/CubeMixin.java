@@ -16,12 +16,19 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
 
 @Mixin(ModelPart.Cube.class)
 public abstract class CubeMixin implements CubeExtender {
     // TODO: This is no longer guaranteed to have 6 faces
     @Shadow @Final private ModelPart.Polygon[] polygons;
+    @Shadow @Final public float minX;
+    @Shadow @Final public float minY;
+    @Shadow @Final public float minZ;
+    @Shadow @Final public float maxX;
+    @Shadow @Final public float maxY;
+    @Shadow @Final public float maxZ;
     @Unique private Cacheable<Vector3f> visualMin = Cacheable.of(() -> {
         Vector3f min = null;
         for (var polygon : this.polygons) {
@@ -65,48 +72,6 @@ public abstract class CubeMixin implements CubeExtender {
         return visualMax.get();
     }
 
-    @Override
-    public UVPair getUV(Vector3f cubeSurfaceNormal) {
-        ModelPart.Polygon surface = null;
-        float bestMatch = -1.0f;
-
-        float xLerp = 0.0f;
-        float yLerp = 0.0f;
-
-        for (ModelPart.Polygon polygon : this.polygons) {
-            var polyNormal = polygon.normal;
-
-            float thisMatch = polyNormal.dot(cubeSurfaceNormal);
-            if (thisMatch > bestMatch) {
-                surface = polygon;
-                bestMatch = thisMatch;
-
-                if (Mth.abs(polyNormal.x()) > Mth.abs(polyNormal.y()) && Mth.abs(polyNormal.x()) > Mth.abs(polyNormal.z())) {
-                    xLerp = cubeSurfaceNormal.z() * 0.5f + 0.5f;
-                    yLerp = cubeSurfaceNormal.y() * 0.5f + 0.5f;
-                } else if (Mth.abs(polyNormal.y()) > Mth.abs(polyNormal.x()) && Mth.abs(polyNormal.y()) > Mth.abs(polyNormal.z())) {
-                    xLerp = cubeSurfaceNormal.x() * 0.5f + 0.5f;
-                    yLerp = cubeSurfaceNormal.z() * 0.5f + 0.5f;
-                } else {
-                    xLerp = cubeSurfaceNormal.x() * 0.5f + 0.5f;
-                    yLerp = cubeSurfaceNormal.y() * 0.5f + 0.5f;
-                }
-            }
-        }
-
-        if (surface == null) {
-            Changed.LOGGER.warn("Null surface encountered for given normal {}, with {} polygons", cubeSurfaceNormal, this.polygons.length);
-            return new UVPair(0, 0);
-        }
-
-        float uX = Mth.lerp(xLerp, surface.vertices[0].u, surface.vertices[1].u);
-        float uY = Mth.lerp(xLerp, surface.vertices[3].u, surface.vertices[2].u);
-        float vX = Mth.lerp(xLerp, surface.vertices[0].v, surface.vertices[1].v);
-        float vY = Mth.lerp(xLerp, surface.vertices[3].v, surface.vertices[2].v);
-
-        return new UVPair(Mth.lerp(yLerp, uX, uY), Mth.lerp(yLerp, vX, vY));
-    }
-
     @Unique
     private static final ModelPart.Vertex NULL_VERTEX = new ModelPart.Vertex(0, 0, 0, 0, 0);
 
@@ -120,20 +85,15 @@ public abstract class CubeMixin implements CubeExtender {
         return null;
     }
 
-    @Override
-    public void removeSides(Set<Direction> directions) {
-        for (var dir : directions) {
-            var polygon = getFaceFromDirection(dir);
-            if (polygon != null)
-                Arrays.fill(polygon.vertices, NULL_VERTEX);
-        }
-    }
 
     @Override
     public void copyUVStarts(Set<Pair<Direction, Direction>> directions) {
         for (var copy : directions) {
             Direction fromDir = copy.getFirst();
             Direction toDir = copy.getSecond();
+
+            if (fromDir == toDir)
+                continue;
 
             ModelPart.Polygon from = getFaceFromDirection(fromDir);
             ModelPart.Polygon to = getFaceFromDirection(toDir);
@@ -151,73 +111,41 @@ public abstract class CubeMixin implements CubeExtender {
     }
 
     @Override
+    public void overrideFaceTexOffs(Map<Direction, Pair<Integer, Integer>> overrides, float texWidth, float texHeight) {
+        final float f = 0.0F / texWidth;
+        final float f1 = 0.0F / texHeight;
+
+        overrides.forEach((faceDir, offsets) -> {
+            ModelPart.Polygon face = getFaceFromDirection(faceDir);
+            if (face == null)
+                return;
+
+            int oppositeU = 0, oppositeV = 0;
+            switch (faceDir) {
+                case NORTH, SOUTH -> {
+                    oppositeU = offsets.getFirst() + (int)(this.maxX - this.minX);
+                    oppositeV = offsets.getSecond() + (int)(this.maxY - this.minY);
+                }
+                case EAST, WEST -> {
+                    oppositeU = offsets.getFirst() + (int)(this.maxZ - this.minZ);
+                    oppositeV = offsets.getSecond() + (int)(this.maxY - this.minY);
+                }
+                case UP, DOWN -> {
+                    oppositeU = offsets.getFirst() + (int)(this.maxX - this.minX);
+                    oppositeV = offsets.getSecond() + (int)(this.maxZ - this.minZ);
+                }
+            }
+
+            face.vertices[0] = face.vertices[0].remap(oppositeU / texWidth - f, offsets.getSecond() / texHeight + f1);
+            face.vertices[1] = face.vertices[1].remap(offsets.getFirst() / texWidth + f, offsets.getSecond() / texHeight + f1);
+            face.vertices[2] = face.vertices[2].remap(offsets.getFirst() / texWidth + f, oppositeV / texHeight - f1);
+            face.vertices[3] = face.vertices[3].remap(oppositeU / texWidth - f, oppositeV / texHeight - f1);
+        });
+    }
+
+    @Override
     public ModelPart.Polygon[] getPolygons() {
         return polygons;
-    }
-
-    @Override
-    public void copyPolygonsFrom(ModelPart.Cube cube) {
-        ModelPart.Polygon[] otherPoly = ((CubeExtender)cube).getPolygons();
-        for (int i = 0; i < otherPoly.length; ++i) {
-            ModelPart.Vertex[] nVertices = new ModelPart.Vertex[] {
-                    otherPoly[i].vertices[0],
-                    otherPoly[i].vertices[1],
-                    otherPoly[i].vertices[2],
-                    otherPoly[i].vertices[3]
-            };
-
-            this.polygons[i] = new ModelPart.Polygon(nVertices, 0.0f, 0.0f, 0.0f, 0.0f,
-                    1.0f, 1.0f, false, Direction.getNearest(otherPoly[i].normal.x(), otherPoly[i].normal.y(), otherPoly[i].normal.z()));
-
-            for (int v = 0; v < this.polygons[i].vertices.length; ++v) {
-                final ModelPart.Vertex otherVert = otherPoly[i].vertices[v];
-
-                // Deep copy
-                this.polygons[i].vertices[v] = otherVert.remap(otherVert.u, otherVert.v);
-            }
-        }
-    }
-
-    @Unique
-    private void extendVertex(ModelPart.Polygon poly, int vertex, float x, float y, float z) {
-        poly.vertices[vertex] = new ModelPart.Vertex(
-                poly.vertices[vertex].pos.x() + x,
-                poly.vertices[vertex].pos.y() + y,
-                poly.vertices[vertex].pos.z() + z,
-                poly.vertices[vertex].u, poly.vertices[vertex].v);
-    }
-
-    @Override
-    public void extendCube(float x, float y, float z) {
-        extendVertex(this.polygons[0], 0, x, -y, z);
-        extendVertex(this.polygons[0], 1, x, -y, -z);
-        extendVertex(this.polygons[0], 2, x, y, -z);
-        extendVertex(this.polygons[0], 3, x, y, z);
-        
-        extendVertex(this.polygons[1], 0, -x, -y, -z);
-        extendVertex(this.polygons[1], 1, -x, -y, z);
-        extendVertex(this.polygons[1], 2, -x, y, z);
-        extendVertex(this.polygons[1], 3, -x, y, -z);
-        
-        extendVertex(this.polygons[2], 0, x, -y, z);
-        extendVertex(this.polygons[2], 1, -x, -y, z);
-        extendVertex(this.polygons[2], 2, -x, -y, -z);
-        extendVertex(this.polygons[2], 3, x, -y, -z);
-        
-        extendVertex(this.polygons[3], 0, x, y, -z);
-        extendVertex(this.polygons[3], 1, -x, y, -z);
-        extendVertex(this.polygons[3], 2, -x, y, z);
-        extendVertex(this.polygons[3], 3, x, y, z);
-
-        extendVertex(this.polygons[4], 0, x, -y, -z);
-        extendVertex(this.polygons[4], 1, -x, -y, -z);
-        extendVertex(this.polygons[4], 2, -x, y, -z);
-        extendVertex(this.polygons[4], 3, x, y, -z);
-
-        extendVertex(this.polygons[5], 0, -x, -y, z);
-        extendVertex(this.polygons[5], 1, x, -y, z);
-        extendVertex(this.polygons[5], 2, x, y, z);
-        extendVertex(this.polygons[5], 3, -x, y, z);
     }
 
     @Override
