@@ -20,7 +20,8 @@ public enum DarkLatexTargetType implements BiPredicate<AbstractDarkLatexEntity, 
         if (target == self.getOwner() || self.getOwner() == null)
             return false;
 
-        if (self.getLatexType().isHostileTo(LatexType.getEntityLatexType(target)))
+        var targetLatexType = LatexType.getEntityLatexType(target);
+        if (targetLatexType != null && self.getLatexType().isHostileTo(targetLatexType))
             return true;
         if (!target.getType().is(ChangedTags.EntityTypes.HUMANOIDS) && !(target instanceof ChangedEntity))
             return false;
@@ -30,7 +31,8 @@ public enum DarkLatexTargetType implements BiPredicate<AbstractDarkLatexEntity, 
     MONSTERS("monsters", (self, target) -> {
         if (target == self.getOwner() || self.getOwner() == null)
             return false;
-        if (self.getLatexType().isHostileTo(LatexType.getEntityLatexType(target)))
+        var targetLatexType = LatexType.getEntityLatexType(target);
+        if (targetLatexType != null && self.getLatexType().isHostileTo(LatexType.getEntityLatexType(target)))
             return true;
         return target.getType().getCategory() == MobCategory.MONSTER;
     }),
