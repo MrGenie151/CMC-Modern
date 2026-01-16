@@ -1,5 +1,7 @@
 package net.ltxprogrammer.changed.mixin.render;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.ltxprogrammer.changed.client.CubeExtender;
@@ -89,8 +91,8 @@ public abstract class ModelPartMixin implements ModelPartExtender {
         throw new IndexOutOfBoundsException(); // Match behavior of calling `getRandomCube()` on part with no cubes
     }
 
-    @Inject(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;IIFFFF)V", at = @At("HEAD"), cancellable = true)
-    public void orCaptureForTransfur(PoseStack pose, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha, CallbackInfo ci) {
+    @WrapMethod(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;IIFFFF)V")
+    public void orCapturePartPose(PoseStack pose, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha, Operation<Void> original) {
         if (TransfurAnimator.isCapturing()) {
             pose.pushPose();
 
@@ -102,12 +104,9 @@ public abstract class ModelPartMixin implements ModelPartExtender {
             }
 
             pose.popPose();
-            ci.cancel();
+            return;
         }
-    }
 
-    @Inject(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;IIFFFF)V", at = @At("HEAD"), cancellable = true)
-    public void orCaptureForParticles(PoseStack pose, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha, CallbackInfo ci) {
         if (LatexParticlesLayer.isCapturing()) {
             pose.pushPose();
 
@@ -119,7 +118,9 @@ public abstract class ModelPartMixin implements ModelPartExtender {
             }
 
             pose.popPose();
-            ci.cancel();
+            return;
         }
+
+        original.call(pose, buffer, packedLight, packedOverlay, red, green, blue, alpha);
     }
 }
