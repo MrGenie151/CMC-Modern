@@ -343,9 +343,6 @@
   "enchantment.changed.form_fitting": "Formára simulás",
   "enchantment.changed.form_fitting.desc": "A páncél alkalmazkodni fog a viselőjének formájához.",
 
-  "curios.identifier.legs": "Lábak",
-  "curios.identifier.lower_body": "Alsótest",
-
   "block.changed.air_conditioner": "Légkondicionáló",
   "block.changed.bar_stool": "Bárszék",
   "block.changed.bar_top": "Bárpult",
