@@ -395,6 +395,21 @@
       "changed:paralyze1"
     ]
   },
+  "item.neck_tie.break": {
+    "category": "player",
+    "subtitle": "subtitles.changed.item.neck_tie.break",
+    "sounds": [
+      "changed:slash10"
+    ]
+  },
+  "item.neck_tie.equip": {
+    "category": "player",
+    "subtitle": "subtitles.changed.item.neck_tie.equip",
+    "sounds": [
+      "changed:equip2",
+      "changed:equip3"
+    ]
+  },
   "item.shirt.break": {
     "category": "player",
     "subtitle": "subtitles.changed.item.shirt.break",
