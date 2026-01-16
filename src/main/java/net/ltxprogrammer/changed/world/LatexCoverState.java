@@ -406,21 +406,16 @@ public class LatexCoverState extends StateHolder<LatexType, LatexCoverState> {
         return getType().findClosestSurface(this.asState(), position, axis);
     }
 
-    public static Set<LatexNode> collectConnectedLatex(
-            ServerLevel level,
-            BlockPos source,
-            int maxDepth
-    ) {
+    public static Set<Pair<BlockPos, LatexCoverState>> collectConnectedLatex(LatexCoverGetter level, BlockPos source, int maxDepth) {
+        LatexCoverState sourceState = LatexCoverState.getAt(level, source);
+        if (sourceState.isAir())
+            return (Set<Pair<BlockPos, LatexCoverState>>) Collections.EMPTY_SET;
+
         Set<BlockPos> visited = new HashSet<>();
-        Set<LatexNode> result = new HashSet<>();
+        Set<Pair<BlockPos, LatexCoverState>> result = new HashSet<>();
 
         Queue<Pair<BlockPos, Integer>> queue = new ArrayDeque<>();
         queue.add(Pair.of(source, 0));
-        visited.add(source);
-
-        LatexCoverState sourceState = LatexCoverState.getAt(level, source);
-        if (sourceState.isAir())
-            return result;
 
         while (!queue.isEmpty()) {
             var entry = queue.poll();
@@ -431,13 +426,10 @@ public class LatexCoverState extends StateHolder<LatexType, LatexCoverState> {
                 continue;
 
             LatexCoverState state = LatexCoverState.getAt(level, pos);
-            if (state.isAir() || !state.is(sourceState.getType()))
+            if (!state.is(sourceState.getType()))
                 continue;
 
-            if (!(state.getType() instanceof SpreadingLatexType))
-                continue;
-
-            result.add(new LatexNode(pos, state));
+            result.add(Pair.of(pos, state));
 
             for (Direction dir : Direction.values()) {
                 BlockPos next = pos.relative(dir);

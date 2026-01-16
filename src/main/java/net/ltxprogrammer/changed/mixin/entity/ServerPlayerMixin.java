@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.authlib.GameProfile;
 import net.ltxprogrammer.changed.Changed;
+import net.ltxprogrammer.changed.ability.AbstractAbility;
 import net.ltxprogrammer.changed.data.AccessorySlots;
 import net.ltxprogrammer.changed.entity.PlayerDataExtension;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
@@ -19,12 +20,15 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.network.PacketDistributor;
 import org.spongepowered.asm.mixin.Mixin;
@@ -90,6 +94,24 @@ public abstract class ServerPlayerMixin extends Player implements PlayerDataExte
         }
 
         return result;
+    }
+
+    @WrapMethod(method = "changeDimension", remap = false)
+    public Entity carryPassengers(ServerLevel newLevel, ITeleporter teleporter, Operation<Entity> original) {
+        var entity = original.call(newLevel, teleporter);
+        if (!(entity instanceof LivingEntity livingEntity))
+            return entity;
+
+        AbstractAbility.getAbilityInstanceSafe(livingEntity, ChangedAbilities.GRAB_ENTITY_ABILITY.get()).ifPresent(ability -> {
+            if (ability.grabbedEntity == null)
+                return;
+            ability.grabbedEntity.portalEntrancePos = this.portalEntrancePos;
+            var newEntity = ability.grabbedEntity.changeDimension(newLevel, teleporter);
+            if (ability.grabbedEntity != newEntity && newEntity instanceof LivingEntity newLivingEntity)
+                ability.replaceEntityReference(newLivingEntity);
+        });
+
+        return entity;
     }
 
     @Unique

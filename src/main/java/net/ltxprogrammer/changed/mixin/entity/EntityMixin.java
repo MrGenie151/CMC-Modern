@@ -21,6 +21,7 @@ import net.ltxprogrammer.changed.world.LatexCoverGetter;
 import net.ltxprogrammer.changed.world.LatexCoverState;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -43,6 +44,7 @@ import net.minecraft.world.level.entity.EntityAccess;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.util.ITeleporter;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -180,6 +182,8 @@ public abstract class EntityMixin extends net.minecraftforge.common.capabilities
 
     @Shadow public abstract Vec3 getEyePosition();
 
+    @Shadow protected BlockPos portalEntrancePos;
+
     @Inject(method = "updateInWaterStateAndDoFluidPushing", at = @At("RETURN"), cancellable = true)
     protected void updateInWaterStateAndDoFluidPushing(CallbackInfoReturnable<Boolean> callback) {
         if (this.updateFluidHeightAndDoFluidPushing(ChangedTags.Fluids.LATEX, 0.007D))
@@ -286,5 +290,24 @@ public abstract class EntityMixin extends net.minecraftforge.common.capabilities
             return original.call(instance, reader, blockPos, entity);
         final SoundType coveredSound = coverState.getSoundType(reader, blockPos.above(), entity);
         return coveredSound != null ? coveredSound : original.call(instance, reader, blockPos, entity);
+    }
+
+    @WrapMethod(method = "changeDimension(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraftforge/common/util/ITeleporter;)Lnet/minecraft/world/entity/Entity;",
+            remap = false)
+    public Entity carryPassengers(ServerLevel newLevel, ITeleporter teleporter, Operation<Entity> original) {
+        var entity = original.call(newLevel, teleporter);
+        if (!(entity instanceof LivingEntity livingEntity))
+            return entity;
+
+        AbstractAbility.getAbilityInstanceSafe(livingEntity, ChangedAbilities.GRAB_ENTITY_ABILITY.get()).ifPresent(ability -> {
+            if (ability.grabbedEntity == null)
+                return;
+            ability.grabbedEntity.portalEntrancePos = this.portalEntrancePos;
+            var newEntity = ability.grabbedEntity.changeDimension(newLevel, teleporter);
+            if (ability.grabbedEntity != newEntity && newEntity instanceof LivingEntity newLivingEntity)
+                ability.replaceEntityReference(newLivingEntity);
+        });
+
+        return entity;
     }
 }

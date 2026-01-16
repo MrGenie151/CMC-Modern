@@ -29,7 +29,7 @@ public class LatexHeldEntityLayer<T extends ChangedEntity, M extends AdvancedHum
         if (ability.grabbedEntity == null) return;
         if (ability.suited) return;
 
-        TransfurVariantInstance.syncEntityPosRotWithEntity(ability.grabbedEntity, entity);
+        //TransfurVariantInstance.syncEntityPosRotWithEntity(ability.grabbedEntity, entity);
         pose.pushPose();
         torso.translateAndRotate(pose);
 

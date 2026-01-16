@@ -24,7 +24,7 @@ public abstract class LightingBoltMixin extends Entity {
         super(entityType, level);
     }
 
-    @Inject(method = "spawnFire", at = @At("HEAD"), cancellable = true) // This trigger is better
+    @Inject(method = "spawnFire", at = @At("HEAD"), cancellable = true)
     private void latexCoverIsStruckByLighting(CallbackInfo ci) {
         BlockPos strikePosition = this.getStrikePosition();
         Level level = level();

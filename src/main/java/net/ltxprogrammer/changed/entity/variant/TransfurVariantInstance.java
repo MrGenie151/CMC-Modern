@@ -2,10 +2,7 @@ package net.ltxprogrammer.changed.entity.variant;
 
 import com.google.common.collect.ImmutableMap;
 import net.ltxprogrammer.changed.Changed;
-import net.ltxprogrammer.changed.ability.AbstractAbility;
-import net.ltxprogrammer.changed.ability.AbstractAbilityInstance;
-import net.ltxprogrammer.changed.ability.GrabEntityAbility;
-import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
+import net.ltxprogrammer.changed.ability.*;
 import net.ltxprogrammer.changed.data.AccessorySlots;
 import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.entity.latex.LatexType;
@@ -44,6 +41,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
@@ -61,6 +59,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(modid = Changed.MODID)
@@ -451,15 +450,11 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
                 return;
             }
 
-            try {
-                instance.tick();
-                if (!event.player.isSpectator()) {
-                    if (!instance.entity.level().isClientSide)
-                        instance.entity.tickLeash();
-                    instance.getChangedEntity().variantTick(event.player.level());
-                }
-            } catch (Exception x) {
-                x.printStackTrace();
+            instance.tick();
+            if (!event.player.isSpectator()) {
+                if (!instance.entity.level().isClientSide)
+                    instance.entity.tickLeash();
+                instance.getChangedEntity().variantTick(event.player.level());
             }
         });
     }
@@ -540,12 +535,22 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
         return Math.max(Math.min(x, max), min);
     }
 
-    public static void syncEntityPosRotWithEntity(LivingEntity set, LivingEntity get) {
-        if (get.level() instanceof ServerLevel getServerLevel) {
-            Level setLevel = set.level();
-            if (getServerLevel != setLevel) set.changeDimension(getServerLevel);
-        }
+    protected static class EntitySyncTeleporter implements ITeleporter {
+        public static EntitySyncTeleporter INSTANCE = new EntitySyncTeleporter();
 
+        @Override
+        public Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
+            Entity newEntity = entity.getType().create(destWorld);
+            if (newEntity != null) {
+                newEntity.restoreFrom(entity);
+                // Position and velocity will be handled after placement
+                destWorld.addDuringTeleport(newEntity);
+            }
+            return newEntity;
+        }
+    }
+
+    public static void syncEntityPosRotWithEntity(LivingEntity set, LivingEntity get) {
         set.setDeltaMovement(get.getDeltaMovement());
         set.setPos(get.getX(), get.getY(), get.getZ());
         set.setXRot(get.getXRot());

@@ -38,7 +38,11 @@ public class GrabEntityPacket implements ChangedPacket {
         /**
          * Target is fully encased by latex entity
          */
-        SUIT
+        SUIT,
+        /**
+         * Used to update target on reference change
+         */
+        REPLACE
     }
 
     public final int sourceEntity;
@@ -81,19 +85,10 @@ public class GrabEntityPacket implements ChangedPacket {
 
                 latexSource.getAbilityInstanceSafe(ChangedAbilities.GRAB_ENTITY_ABILITY.get()).ifPresent(ability -> {
                     switch (type) {
+                        case REPLACE -> ability.replaceEntityReference(livingTarget);
                         case RELEASE -> ability.releaseEntity();
-                        case SUIT -> {
-                            if (livingTarget instanceof Player && !Changed.config.server.isGrabEnabled.get())
-                                return;
-
-                            ability.suitEntity(livingTarget);
-                        }
-                        case ARMS -> {
-                            if (livingTarget instanceof Player && !Changed.config.server.isGrabEnabled.get())
-                                return;
-
-                            ability.grabEntity(livingTarget);
-                        }
+                        case SUIT -> ability.suitEntity(livingTarget);
+                        case ARMS -> ability.grabEntity(livingTarget);
                     }
                 });
             });
@@ -101,6 +96,9 @@ public class GrabEntityPacket implements ChangedPacket {
 
         else {
             context.setPacketHandled(true);
+            if (type == GrabType.REPLACE)
+                return CompletableFuture.failedFuture(new IllegalArgumentException("GrabType.REPLACE invalid on client-to-server"));
+
             return levelFuture.thenAccept(level -> {
                 var sender = context.getSender();
                 var target = level.getEntity(targetEntity);

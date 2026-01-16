@@ -869,6 +869,9 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
     }
     
     public void mirrorLiving(LivingEntity player) {
+        if (player.level() != this.level())
+            this.setLevel(player.level());
+
         TransfurVariantInstance.syncEntityPosRotWithEntity(this, player);
         
         this.swingingArm = player.swingingArm;
