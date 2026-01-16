@@ -94,6 +94,10 @@ public abstract class AbstractAbility<Instance extends AbstractAbilityInstance> 
                 coolDownTicksRemaining--;
         }
 
+        public void forceCooldown(int ticks) {
+            coolDownTicksRemaining = ticks;
+        }
+
         public boolean exchangeKeyState(boolean keyState) {
             boolean oState = keyStateO;
             keyStateO = keyState;
@@ -141,9 +145,9 @@ public abstract class AbstractAbility<Instance extends AbstractAbilityInstance> 
          */
         INSTANT((keyState, oldState, controller) -> {
             if (!oldState && keyState) {
+                controller.applyCoolDown();
                 controller.activateAbility();
                 controller.deactivateAbility();
-                controller.applyCoolDown();
             }
         }, (keyState, controller) -> keyState ? 1.0F : 0.0F),
         /**
@@ -154,11 +158,11 @@ public abstract class AbstractAbility<Instance extends AbstractAbilityInstance> 
                 if (!controller.chargeAbility())
                     return;
 
+                controller.applyCoolDown();
                 controller.activateAbility();
                 controller.deactivateAbility();
 
                 controller.resetCharge();
-                controller.applyCoolDown();
             }
 
             else {
@@ -174,9 +178,9 @@ public abstract class AbstractAbility<Instance extends AbstractAbilityInstance> 
             }
 
             if (!keyState && oldState) {
+                controller.applyCoolDown();
                 controller.activateAbility();
                 controller.deactivateAbility();
-                controller.applyCoolDown();
             }
         }, (keyState, controller) -> keyState ? 1.0F : 0.0F),
         /**
