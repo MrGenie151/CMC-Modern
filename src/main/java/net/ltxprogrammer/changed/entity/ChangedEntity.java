@@ -896,11 +896,11 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
         this.attackAnim = player.attackAnim;
         this.oAttackAnim = player.oAttackAnim;
         this.flyDist = player.flyDist;
-        //this.flyingSpeed = player.flyingSpeed; // TODO mixin
 
         this.wasTouchingWater = player.wasTouchingWater;
         this.swimAmount = player.swimAmount;
         this.swimAmountO = player.swimAmountO;
+        this.forgeFluidTypeOnEyes = player.forgeFluidTypeOnEyes;
 
         this.fallFlyTicks = player.fallFlyTicks;
 

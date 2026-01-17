@@ -26,6 +26,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.ForgeMod;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -122,7 +123,7 @@ public abstract class AdvancedHumanoidRenderer<T extends ChangedEntity, M extend
             }
         } else if (upright && swimAmount > 0.0F) {
             super.setupRotations(entity, poseStack, bob, bodyYRot, partialTicks);
-            float f3 = entity.isInWater() ? -90.0F - entity.getXRot() : -90.0F;
+            float f3 = (entity.isInWater() || entity.canSwimInFluidType(ForgeMod.EMPTY_TYPE.get())) ? -90.0F - entity.getXRot() : -90.0F;
             float f4 = Mth.lerp(swimAmount, 0.0F, f3);
             poseStack.mulPose(Axis.XP.rotationDegrees(f4));
             if (entity.isVisuallySwimming()) {

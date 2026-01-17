@@ -45,6 +45,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.ITeleporter;
+import net.minecraftforge.fluids.FluidType;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -54,6 +55,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Optional;
+import java.util.function.BiPredicate;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin extends net.minecraftforge.common.capabilities.CapabilityProvider<Entity> implements Nameable, EntityAccess, CommandSource, net.minecraftforge.common.extensions.IForgeEntity {
@@ -309,5 +311,26 @@ public abstract class EntityMixin extends net.minecraftforge.common.capabilities
         });
 
         return entity;
+    }
+
+    @WrapMethod(method = "getFluidTypeHeight", remap = false)
+    public double orGetTransfurFluidHeight(FluidType type, Operation<Double> original) {
+        var variant = ProcessTransfur.getPlayerTransfurVariant(EntityUtil.playerOrNull(asEntity()));
+        if (variant == null)
+            return original.call(type);
+        else
+            return Math.max(variant.getChangedEntity().getFluidTypeHeight(type), original.call(type));
+    }
+
+    @WrapMethod(method = "isInFluidType(Ljava/util/function/BiPredicate;Z)Z", remap = false)
+    public boolean orIsTransfurInFluidType(BiPredicate<FluidType, Double> predicate, boolean forAllTypes, Operation<Boolean> original) {
+        var variant = ProcessTransfur.getPlayerTransfurVariant(EntityUtil.playerOrNull(asEntity()));
+        if (variant == null)
+            return original.call(predicate, forAllTypes);
+
+        if (forAllTypes)
+            return variant.getChangedEntity().isInFluidType(predicate, true) && original.call(predicate, true);
+        else
+            return variant.getChangedEntity().isInFluidType(predicate, false) || original.call(predicate, false);
     }
 }
