@@ -11,6 +11,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import org.jetbrains.annotations.NotNull;
 
 public class PurifierScreen extends AbstractContainerScreen<PurifierMenu> {
     private final PurifierMenu menu;
@@ -25,7 +26,7 @@ public class PurifierScreen extends AbstractContainerScreen<PurifierMenu> {
     private static final ResourceLocation texture = Changed.modResource("textures/gui/purifier.png");
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(graphics);
         super.render(graphics, mouseX, mouseY, partialTicks);
         this.renderTooltip(graphics, mouseX, mouseY);
@@ -42,7 +43,7 @@ public class PurifierScreen extends AbstractContainerScreen<PurifierMenu> {
         graphics.blit(Changed.modResource("textures/gui/progress_bar_back.png"), this.leftPos + 63, this.topPos + 62, 0, 0, 48, 12, 48, 12);
 
         var slot = menu.slots.get(0);
-        float progress = (float)menu.data.get(0) / (float) PurifierBlockEntity.getTotalProgress(this.minecraft.level.getRecipeManager(), slot.getItem());
+        float progress = (float)menu.data.get(0) / PurifierBlockEntity.getTotalProgress(this.minecraft.level.getRecipeManager(), slot.getItem());
         graphics.blit(Changed.modResource("textures/gui/progress_bar_front.png"), this.leftPos + 63, this.topPos + 62, 0, 0, (int)(48 * progress), 12, 48, 12);
 
         RenderSystem.disableBlend();

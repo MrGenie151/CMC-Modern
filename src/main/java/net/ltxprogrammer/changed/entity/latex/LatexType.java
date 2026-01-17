@@ -1,11 +1,17 @@
 package net.ltxprogrammer.changed.entity.latex;
 
+import net.ltxprogrammer.changed.block.WhiteLatexTransportInterface;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.TransfurCause;
+import net.ltxprogrammer.changed.entity.animation.StunAnimationParameters;
+import net.ltxprogrammer.changed.entity.beast.PureWhiteLatexWolf;
+import net.ltxprogrammer.changed.entity.beast.WhiteLatexEntity;
+import net.ltxprogrammer.changed.entity.beast.boss.Behemoth;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
-import net.ltxprogrammer.changed.init.ChangedLootContextParamSets;
-import net.ltxprogrammer.changed.init.ChangedRegistry;
+import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
+import net.ltxprogrammer.changed.init.*;
 import net.ltxprogrammer.changed.item.AbstractLatexBucket;
+import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.util.EntityUtil;
 import net.ltxprogrammer.changed.world.LatexCoverGetter;
 import net.ltxprogrammer.changed.world.LatexCoverState;
@@ -19,8 +25,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -37,6 +45,7 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -46,6 +55,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public abstract class LatexType {
@@ -94,6 +104,8 @@ public abstract class LatexType {
     public void onPlace(LatexCoverState state, Level level, BlockPos blockPos, LatexCoverState oldState, boolean flag) {}
 
     public void onRemove(LatexCoverState state, Level level, BlockPos blockPos, LatexCoverState oldState, boolean flag) {}
+
+    public void onStruckByLighting(LatexCoverState state, Level level, BlockPos strikePosition, LightningBolt lightningBolt) {}
 
     public void animateTick(LatexCoverState state, Level level, BlockPos pos, RandomSource random) {}
 
@@ -201,11 +213,11 @@ public abstract class LatexType {
     public void initializeClient(Consumer<IClientLatexTypeExtensions> consumer) {}
 
     public void randomTick(LatexCoverState state, ServerLevel level, BlockPos blockPos, RandomSource random) {}
-    
+
     public void entityInside(LatexCoverState state, Level level, BlockPos blockPos, Entity entity) {}
 
     public void spawnAfterBreak(LatexCoverState state, ServerLevel level, BlockPos blockPos, ItemStack itemStack, boolean dropXp) {}
-    
+
     public List<ItemStack> getDrops(LatexCoverState coverState, LootParams.Builder builder) {
         ResourceLocation resourcelocation = this.getLootTable();
         if (resourcelocation == BuiltInLootTables.EMPTY) {

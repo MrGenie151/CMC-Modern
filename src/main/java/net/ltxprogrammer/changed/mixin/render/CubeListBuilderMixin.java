@@ -22,12 +22,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Mixin(CubeListBuilder.class)
 public abstract class CubeListBuilderMixin implements CubeListBuilderExtender {
     @Shadow @Final private List<CubeDefinition> cubes;
-
-    @Shadow public abstract CubeListBuilder texOffs(int p_171515_, int p_171516_);
 
     @Unique private List<Triangle.Definition> triangles = null;
 
@@ -44,12 +43,23 @@ public abstract class CubeListBuilderMixin implements CubeListBuilderExtender {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public CubeListBuilderExtender copyLastFaceUVStart(Direction from, Direction to) {
         if (this.lastCubeWasHidden)
             return this;
 
         CubeDefinitionExtender cube = (CubeDefinitionExtender)(Object)this.cubes.get(this.cubes.size() - 1);
         cube.copyFaceUVStart(from, to);
+        return this;
+    }
+
+    @Override
+    public CubeListBuilderExtender overrideLastFaceTexOffs(Direction face, int xOffset, int yOffset) {
+        if (this.lastCubeWasHidden)
+            return this;
+
+        CubeDefinitionExtender cube = (CubeDefinitionExtender)(Object)this.cubes.get(this.cubes.size() - 1);
+        cube.overrideFaceTexOffs(face, xOffset, yOffset);
         return this;
     }
 
@@ -116,5 +126,65 @@ public abstract class CubeListBuilderMixin implements CubeListBuilderExtender {
         }
 
         return original.call(x, y, z, width, height, depth, deformation);
+    }
+
+    @Override
+    public CubeListBuilderExtender texOffs(int xTexOffs, int yTexOffs) {
+        return (CubeListBuilderExtender)((CubeListBuilder)(Object)this).texOffs(xTexOffs, yTexOffs);
+    }
+
+    @Override
+    public CubeListBuilderExtender mirror() {
+        return (CubeListBuilderExtender)((CubeListBuilder)(Object)this).mirror();
+    }
+
+    @Override
+    public CubeListBuilderExtender mirror(boolean mirror) {
+        return (CubeListBuilderExtender)((CubeListBuilder)(Object)this).mirror(mirror);
+    }
+
+    @Override
+    public CubeListBuilderExtender addBox(String comment, float x, float y, float z, int width, int height, int depth, CubeDeformation deformation, int xTexOffs, int yTexOffs) {
+        return (CubeListBuilderExtender)((CubeListBuilder)(Object)this).addBox(comment, x, y, z, width, height, depth, deformation, xTexOffs, yTexOffs);
+    }
+
+    @Override
+    public CubeListBuilderExtender addBox(String comment, float x, float y, float z, int width, int height, int depth, int xTexOffs, int yTexOffs) {
+        return (CubeListBuilderExtender)((CubeListBuilder)(Object)this).addBox(comment, x, y, z, width, height, depth, xTexOffs, yTexOffs);
+    }
+
+    @Override
+    public CubeListBuilderExtender addBox(float x, float y, float z, float width, float height, float depth) {
+        return (CubeListBuilderExtender)((CubeListBuilder)(Object)this).addBox(x, y, z, width, height, depth);
+    }
+
+    @Override
+    public CubeListBuilderExtender addBox(float x, float y, float z, float width, float height, float depth, Set<Direction> visibleFaces) {
+        return (CubeListBuilderExtender)((CubeListBuilder)(Object)this).addBox(x, y, z, width, height, depth, visibleFaces);
+    }
+
+    @Override
+    public CubeListBuilderExtender addBox(String comment, float x, float y, float z, float width, float height, float depth) {
+        return (CubeListBuilderExtender)((CubeListBuilder)(Object)this).addBox(comment, x, y, z, width, height, depth);
+    }
+
+    @Override
+    public CubeListBuilderExtender addBox(String comment, float x, float y, float z, float width, float height, float depth, CubeDeformation deformation) {
+        return (CubeListBuilderExtender)((CubeListBuilder)(Object)this).addBox(comment, x, y, z, width, height, depth, deformation);
+    }
+
+    @Override
+    public CubeListBuilderExtender addBox(float x, float y, float z, float width, float height, float depth, boolean mirror) {
+        return (CubeListBuilderExtender)((CubeListBuilder)(Object)this).addBox(x, y, z, width, height, depth, mirror);
+    }
+
+    @Override
+    public CubeListBuilderExtender addBox(float x, float y, float z, float width, float height, float depth, CubeDeformation deformation, float texScaleX, float texScaleY) {
+        return (CubeListBuilderExtender)((CubeListBuilder)(Object)this).addBox(x, y, z, width, height, depth, deformation, texScaleX, texScaleY);
+    }
+
+    @Override
+    public CubeListBuilderExtender addBox(float x, float y, float z, float width, float height, float depth, CubeDeformation deformation) {
+        return (CubeListBuilderExtender)((CubeListBuilder)(Object)this).addBox(x, y, z, width, height, depth, deformation);
     }
 }

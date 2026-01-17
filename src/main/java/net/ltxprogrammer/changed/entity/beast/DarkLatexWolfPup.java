@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.entity.beast;
 
 import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.entity.ai.DarkLatexFavor;
+import net.ltxprogrammer.changed.entity.ai.DarkLatexInventory;
 import net.ltxprogrammer.changed.entity.variant.EntityShape;
 import net.ltxprogrammer.changed.init.ChangedLatexTypes;
 import net.ltxprogrammer.changed.init.ChangedSounds;
@@ -9,6 +10,7 @@ import net.ltxprogrammer.changed.init.ChangedTransfurVariants;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -181,6 +183,15 @@ public class DarkLatexWolfPup extends AbstractDarkLatexEntity {
         aged.setCustomName(this.getCustomName());
         aged.getBasicPlayerInfo().copyFrom(this.getBasicPlayerInfo());
         aged.setUnderlyingPlayer(this.getUnderlyingPlayer());
+        if (this.inventory != null) {
+            aged.inventory = aged.createInventory();
+            aged.grabEntityAbilityInstance = aged.createGrabAbility();
+
+            var items = new ListTag();
+            this.inventory.save(items);
+            aged.inventory.load(items);
+            this.inventory.clearContent();
+        }
     }
 
     public boolean canBeLeashed(Player player) {

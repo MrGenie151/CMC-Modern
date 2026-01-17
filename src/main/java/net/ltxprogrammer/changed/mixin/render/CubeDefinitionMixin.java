@@ -1,54 +1,80 @@
 package net.ltxprogrammer.changed.mixin.render;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.datafixers.util.Pair;
 import net.ltxprogrammer.changed.client.CubeDefinitionExtender;
 import net.ltxprogrammer.changed.client.CubeExtender;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.CubeDefinition;
+import net.minecraft.client.model.geom.builders.UVPair;
 import net.minecraft.core.Direction;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.*;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Mixin(CubeDefinition.class)
 public abstract class CubeDefinitionMixin implements CubeDefinitionExtender {
     @Unique
     private Set<Pair<Direction, Direction>> copyUVStarts = null;
     @Unique
-    private Set<Direction> removedDirections = null;
+    private Map<Direction, Pair<Integer, Integer>> overrideFaceTexOffs = null;
+    @Mutable
+    @Shadow @Final private Set<Direction> visibleFaces;
+
+    @Shadow @Final private UVPair texScale;
 
     @Override
     public void removeFaces(Direction... directions) {
-        if (removedDirections == null)
-            removedDirections = new HashSet<>();
+        HashSet<Direction> newFaceSet = new HashSet<>(this.visibleFaces);
 
-        removedDirections.addAll(Arrays.asList(directions));
+        for (var face : directions) {
+            // Flip Y-Axis cause models are upside down
+            newFaceSet.remove(face.getAxis() == Direction.Axis.Y ? face.getOpposite() : face);
+        }
+
+        this.visibleFaces = newFaceSet;
     }
 
     @Override
     public void copyFaceUVStart(Direction from, Direction to) {
+        if (from == to)
+            return;
         if (copyUVStarts == null)
             copyUVStarts = new HashSet<>();
 
         copyUVStarts.add(Pair.of(from, to));
     }
 
-    @Inject(method = "bake", at = @At("RETURN"))
-    public void bakeWithExtra(int u, int v, CallbackInfoReturnable<ModelPart.Cube> cubeCallback) {
+    @Override
+    public void overrideFaceTexOffs(Direction face, int xOffset, int yOffset) {
+        if (overrideFaceTexOffs == null)
+            overrideFaceTexOffs = new HashMap<>();
+
+        overrideFaceTexOffs.put(face, Pair.of(xOffset, yOffset));
+    }
+
+    @Override
+    public @Nullable Map<Direction, Pair<Integer, Integer>> getOverrideFaceTexOffs() {
+        return overrideFaceTexOffs;
+    }
+
+    @WrapMethod(method = "bake")
+    @SuppressWarnings("deprecation")
+    public ModelPart.Cube bakeWithExtra(int texWidth, int texHeight, Operation<ModelPart.Cube> original) {
+        var cube = original.call(texWidth, texHeight);
+
         if (copyUVStarts != null) {
-            CubeExtender cubeExtender = (CubeExtender) cubeCallback.getReturnValue();
+            CubeExtender cubeExtender = (CubeExtender) cube;
             cubeExtender.copyUVStarts(copyUVStarts);
         }
 
-        if (removedDirections != null) {
-            CubeExtender cubeExtender = (CubeExtender) cubeCallback.getReturnValue();
-            cubeExtender.removeSides(removedDirections);
+        if (overrideFaceTexOffs != null) {
+            CubeExtender cubeExtender = (CubeExtender) cube;
+            cubeExtender.overrideFaceTexOffs(overrideFaceTexOffs, texWidth * this.texScale.u(), texHeight * this.texScale.v());
         }
+
+        return cube;
     }
 }

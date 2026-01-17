@@ -1,11 +1,16 @@
 package net.ltxprogrammer.changed.entity.latex;
 
+import com.mojang.datafixers.util.Pair;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.block.*;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.TransfurCause;
+import net.ltxprogrammer.changed.entity.animation.StunAnimationParameters;
+import net.ltxprogrammer.changed.entity.beast.PureWhiteLatexWolf;
 import net.ltxprogrammer.changed.entity.beast.WhiteLatexEntity;
+import net.ltxprogrammer.changed.entity.beast.boss.Behemoth;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
+import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
 import net.ltxprogrammer.changed.init.*;
 import net.ltxprogrammer.changed.item.AbstractLatexBucket;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
@@ -27,10 +32,8 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -229,6 +232,48 @@ public abstract class SpreadingLatexType extends LatexType {
             LatexCoverState.setAtAndUpdate(level, checkPos, event.plannedCoverState);
 
             event.getPostProcess().accept(level, checkPos);
+        }
+    }
+
+    @Override
+    public void onStruckByLighting(LatexCoverState state, Level level, BlockPos strikePosition, LightningBolt lightningBolt) {
+        super.onStruckByLighting(state, level, strikePosition, lightningBolt);
+
+        if (level.isClientSide)
+            return;
+
+        var latexNodes = LatexCoverState.collectConnectedLatex(LatexCoverGetter.wrap(level), strikePosition, 16);
+
+        List<LivingEntity> entities = level.getEntitiesOfClass(
+                LivingEntity.class,
+                new AABB(strikePosition).inflate(24),
+                entity -> {
+                    if (EntityUtil.maybeGetOverlaying(entity) instanceof ChangedEntity changedEntity)
+                        return changedEntity.getLatexType() == ChangedLatexTypes.WHITE_LATEX.get();
+                    return false;
+                }
+        );
+        for (LivingEntity living : entities) {
+            boolean entityInWhiteLatex = WhiteLatexTransportInterface.isEntityInWhiteLatex(living);
+            if (entityInWhiteLatex || latexNodes.stream().map(Pair::getFirst).anyMatch((pos -> living.blockPosition().equals(pos)))) {
+                if (living.addEffect(
+                        new MobEffectInstance(
+                                ChangedEffects.SHOCK.get(),
+                                20 * 4, // 4 seconds
+                                0,
+                                true, // can be considered "ambient" in this context
+                                true // can bee seen by the player
+                        )
+                )) {
+                    ChangedAnimationEvents.broadcastEntityAnimation(living, ChangedAnimationEvents.SHOCK_STUN.get(), StunAnimationParameters.INSTANCE);
+                }
+            }
+        }
+
+        // Latex is Weak to Shock, and a LightingBolt is a very powerful shock soo it die when struck by it
+        LatexCoverState.setAtAndUpdate(level, strikePosition, ChangedLatexTypes.NONE.get().defaultCoverState());
+        for (Direction value : Direction.values()) {
+            LatexCoverState.setAtAndUpdate(level, strikePosition.relative(value), ChangedLatexTypes.NONE.get().defaultCoverState()); // Cross like removal
         }
     }
 

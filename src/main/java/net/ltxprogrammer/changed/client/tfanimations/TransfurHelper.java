@@ -145,12 +145,12 @@ public class TransfurHelper {
 
             PartDefinition Plantoids = Torso.addOrReplaceChild("Plantoids", CubeListBuilder.create(), PartPose.offset(0.0F, 1.8F, -1.0F));
 
-            final var plantoidCubes = ((CubeListBuilderExtender)((CubeListBuilderExtender)CubeListBuilder.create()
-                    .texOffs(18, 19).mirror().addBox(-4.0F, -2.3F, -0.9F, 8.0F, 2.0F, 2.0F, armor.dualDeformation).mirror(false))
-                    .removeLastFaces(Direction.DOWN).finish()
-                    .texOffs(18, 22).mirror().addBox(-4.0F, -0.3F, -0.9F, 8.0F, 1.0F, 2.0F, armor.dualDeformation).mirror(false))
-                    .copyLastFaceUVStart(Direction.NORTH, Direction.DOWN)
-                    .removeLastFaces(Direction.UP);
+            final var plantoidCubes = ((CubeListBuilderExtender)CubeListBuilder.create())
+                    .texOffs(18, 19).mirror().addBox(-4.0F, -2.3F, -0.9F, 8.0F, 2.0F, 2.0F, armor.dualDeformation).mirror(false)
+                        .removeLastFaces(Direction.DOWN)
+                    .texOffs(18, 22).mirror().addBox(-4.0F, -0.3F, -0.9F, 8.0F, 1.0F, 2.0F, armor.dualDeformation).mirror(false)
+                        .overrideLastFaceTexOffs(Direction.DOWN, 20, 24)
+                        .removeLastFaces(Direction.UP);
 
             PartDefinition Plantoid_r1 = Plantoids.addOrReplaceChild("Plantoid_r1", plantoidCubes.finish(), PartPose.offset(0.0F, 2.5F, 0.0F));
         }

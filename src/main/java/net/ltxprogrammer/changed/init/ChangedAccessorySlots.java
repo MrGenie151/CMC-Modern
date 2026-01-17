@@ -9,9 +9,12 @@ import net.minecraftforge.registries.RegistryObject;
 public class ChangedAccessorySlots {
     public static final DeferredRegister<AccessorySlotType> REGISTRY = ChangedRegistry.ACCESSORY_SLOTS.createDeferred(Changed.MODID);
     public static final RegistryObject<AccessorySlotType> BODY = REGISTRY.register("body", () -> new AccessorySlotType(EquipmentSlot.CHEST));
+    public static final RegistryObject<AccessorySlotType> FACE = REGISTRY.register("face", () -> new AccessorySlotType(EquipmentSlot.HEAD));
     public static final RegistryObject<AccessorySlotType> FULL_BODY = REGISTRY.register("full_body", () -> new AccessorySlotType(EquipmentSlot.CHEST));
+    public static final RegistryObject<AccessorySlotType> HANDS = REGISTRY.register("hands", () -> new AccessorySlotType(EquipmentSlot.CHEST));
+    public static final RegistryObject<AccessorySlotType> HEAD = REGISTRY.register("head", () -> new AccessorySlotType(EquipmentSlot.HEAD));
     public static final RegistryObject<AccessorySlotType> LEGS = REGISTRY.register("legs", () -> new AccessorySlotType(EquipmentSlot.LEGS));
     public static final RegistryObject<AccessorySlotType> LOWER_BODY = REGISTRY.register("lower_body", () -> new AccessorySlotType(EquipmentSlot.CHEST));
     public static final RegistryObject<AccessorySlotType> LOWER_BODY_SIDE = REGISTRY.register("lower_body_side", () -> new AccessorySlotType(EquipmentSlot.CHEST));
-    public static final RegistryObject<AccessorySlotType> HANDS = REGISTRY.register("hands", () -> new AccessorySlotType(EquipmentSlot.CHEST));
+    public static final RegistryObject<AccessorySlotType> NECK = REGISTRY.register("neck", () -> new AccessorySlotType(EquipmentSlot.CHEST));
 }

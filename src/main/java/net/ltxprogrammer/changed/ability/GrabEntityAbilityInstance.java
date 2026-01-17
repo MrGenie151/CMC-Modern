@@ -152,6 +152,22 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
         this.grabCooldown = 40;
     }
 
+    public void replaceEntityReference(LivingEntity newEntity) {
+        if (newEntity == grabbedEntity)
+            return;
+
+        if (grabbedEntity instanceof LivingEntityDataExtension ext)
+            ext.setGrabbedBy(null);
+        if (newEntity instanceof LivingEntityDataExtension ext)
+            ext.setGrabbedBy(entity.getEntity());
+
+        this.grabbedEntity = newEntity;
+
+        if (!entity.getLevel().isClientSide)
+            Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(entity::getEntity),
+                    new GrabEntityPacket(entity.getEntity(), newEntity, GrabEntityPacket.GrabType.REPLACE));
+    }
+
     public boolean suitEntity(LivingEntity entity) {
         var prevGrabber = GrabEntityAbility.getGrabberSafe(entity)
                 .flatMap(current -> current.getAbilityInstanceSafe(ChangedAbilities.GRAB_ENTITY_ABILITY.get()))

@@ -281,7 +281,7 @@ public abstract class TransfurAnimator {
     private static final float GOOP_CUBE_WIDTH = 16.0f;
     private static final float GOOP_CUBE_HEIGHT = 16.0f;
 
-    private static EntityGeometry.Polygon lerpPolygon(EntityGeometry.Polygon a, EntityGeometry.Polygon b, float lerp, boolean remapUV) {
+    private static EntityGeometry.Polygon lerpPolygon(@NotNull EntityGeometry.Polygon a, @NotNull EntityGeometry.Polygon b, float lerp, boolean remapUV) {
         EntityGeometry.Polygon ret = new EntityGeometry.Polygon(a);
 
         for (int i = 0; i < ret.vertices.length; ++i) {
@@ -319,7 +319,14 @@ public abstract class TransfurAnimator {
         EntityGeometry.Cube ret = new EntityGeometry.Cube(a);
 
         for (var normal : Direction.values()) {
-            ret.putFace(lerpPolygon(a.getFace(normal), b.getFace(normal), lerp, remapUV));
+            var faceA = a.getFace(normal);
+            var faceB = b.getFace(normal);
+            if (faceA == null || faceB == null) {
+                ret.removeFace(normal);
+                continue;
+            }
+
+            ret.putFace(lerpPolygon(faceA, faceB, lerp, remapUV));
         }
 
         return ret;
