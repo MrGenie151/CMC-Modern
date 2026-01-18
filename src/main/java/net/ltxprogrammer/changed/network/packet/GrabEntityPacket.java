@@ -4,15 +4,13 @@ import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.ability.AbstractAbility;
 import net.ltxprogrammer.changed.ability.AbstractAbilityInstance;
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
-import net.ltxprogrammer.changed.data.AccessorySlots;
 import net.ltxprogrammer.changed.entity.LivingEntityDataExtension;
 import net.ltxprogrammer.changed.init.ChangedAbilities;
 import net.ltxprogrammer.changed.init.ChangedSounds;
 import net.ltxprogrammer.changed.init.ChangedTags;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
-import net.ltxprogrammer.changed.util.EntityUtil;
-import net.ltxprogrammer.changed.util.UniversalDist;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -23,7 +21,6 @@ import net.minecraftforge.network.PacketDistributor;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.Supplier;
 
 public class GrabEntityPacket implements ChangedPacket {
     public enum GrabType {
@@ -217,25 +214,25 @@ public class GrabEntityPacket implements ChangedPacket {
         }
     }
 
-    public static class AnnounceEscapeKey implements ChangedPacket {
+    public static class AnnounceEscapeSeed implements ChangedPacket {
         /** Escapee's UUID */
         private final UUID uuid;
-        private final AbstractAbilityInstance.KeyReference keyReference;
+        private final long seed;
 
-        public AnnounceEscapeKey(Player player, AbstractAbilityInstance.KeyReference keyReference) {
+        public AnnounceEscapeSeed(Player player, long seed) {
             this.uuid = player.getUUID();
-            this.keyReference = keyReference;
+            this.seed = seed;
         }
 
-        public AnnounceEscapeKey(FriendlyByteBuf buffer) {
+        public AnnounceEscapeSeed(FriendlyByteBuf buffer) {
             this.uuid = buffer.readUUID();
-            this.keyReference = buffer.readEnum(AbstractAbilityInstance.KeyReference.class);
+            this.seed = buffer.readLong();
         }
 
         @Override
         public void write(FriendlyByteBuf buffer) {
             buffer.writeUUID(this.uuid);
-            buffer.writeEnum(this.keyReference);
+            buffer.writeLong(this.seed);
         }
 
         @Override
@@ -249,7 +246,7 @@ public class GrabEntityPacket implements ChangedPacket {
 
                     var ability = AbstractAbility.getAbilityInstance(ext.getGrabbedBy(), ChangedAbilities.GRAB_ENTITY_ABILITY.get());
                     if (ability != null)
-                        ability.currentEscapeKey = this.keyReference;
+                        ability.initializeEscape(this.seed);
                     else
                         throw new IllegalStateException("Grabber does not have grab ability");
                 });
@@ -266,13 +263,15 @@ public class GrabEntityPacket implements ChangedPacket {
         private final boolean keyBackward;
         private final boolean keyLeft;
         private final boolean keyRight;
+        private final int ticksUnpressed;
 
-        public EscapeKeyState(Player player, boolean keyForward, boolean keyBackward, boolean keyLeft, boolean keyRight) {
+        public EscapeKeyState(Player player, boolean keyForward, boolean keyBackward, boolean keyLeft, boolean keyRight, int ticksUnpressed) {
             this.uuid = player.getUUID();
             this.keyForward = keyForward;
             this.keyBackward = keyBackward;
             this.keyLeft = keyLeft;
             this.keyRight = keyRight;
+            this.ticksUnpressed = ticksUnpressed;
         }
 
         public EscapeKeyState(FriendlyByteBuf buffer) {
@@ -281,6 +280,7 @@ public class GrabEntityPacket implements ChangedPacket {
             this.keyBackward = buffer.readBoolean();
             this.keyLeft = buffer.readBoolean();
             this.keyRight = buffer.readBoolean();
+            this.ticksUnpressed = buffer.readVarInt();
         }
 
         @Override
@@ -290,6 +290,7 @@ public class GrabEntityPacket implements ChangedPacket {
             buffer.writeBoolean(this.keyBackward);
             buffer.writeBoolean(this.keyLeft);
             buffer.writeBoolean(this.keyRight);
+            buffer.writeVarInt(this.ticksUnpressed);
         }
 
         @Override
@@ -306,6 +307,7 @@ public class GrabEntityPacket implements ChangedPacket {
                         ability.escapeKeyBackward = this.keyBackward;
                         ability.escapeKeyLeft = this.keyLeft;
                         ability.escapeKeyRight = this.keyRight;
+                        ability.ticksUnpressed = this.ticksUnpressed;
                     }
 
                     else
@@ -326,6 +328,7 @@ public class GrabEntityPacket implements ChangedPacket {
                         ability.escapeKeyBackward = this.keyBackward;
                         ability.escapeKeyLeft = this.keyLeft;
                         ability.escapeKeyRight = this.keyRight;
+                        ability.ticksUnpressed = this.ticksUnpressed;
                         Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), this);
                     }
 

@@ -1,6 +1,5 @@
 package net.ltxprogrammer.changed.network;
 
-import com.mojang.datafixers.util.Pair;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.block.CustomFallable;
 import net.ltxprogrammer.changed.entity.AccessoryEntities;
@@ -8,14 +7,10 @@ import net.ltxprogrammer.changed.network.packet.*;
 import net.ltxprogrammer.changed.util.UniversalDist;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.common.util.LogicalSidedProvider;
-import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.simple.SimpleChannel;
 
-import java.util.ArrayDeque;
-import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -32,7 +27,7 @@ public class ChangedPackets {
         addNetworkMessage(GrabEntityPacket.class, GrabEntityPacket::new);
         addNetworkMessage(GrabEntityPacket.GrabKeyState.class, GrabEntityPacket.GrabKeyState::new);
         addNetworkMessage(GrabEntityPacket.EscapeKeyState.class, GrabEntityPacket.EscapeKeyState::new);
-        addNetworkMessage(GrabEntityPacket.AnnounceEscapeKey.class, GrabEntityPacket.AnnounceEscapeKey::new);
+        addNetworkMessage(GrabEntityPacket.AnnounceEscapeSeed.class, GrabEntityPacket.AnnounceEscapeSeed::new);
         addNetworkMessage(MountTransfurPacket.class, MountTransfurPacket::new);
         addNetworkMessage(SyncSwitchPacket.class, SyncSwitchPacket::new);
         addNetworkMessage(SyncTransfurPacket.class, SyncTransfurPacket::new);
