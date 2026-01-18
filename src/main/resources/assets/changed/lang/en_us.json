@@ -52,6 +52,8 @@
   "attribute.name.changed.transfur_damage.desc": "How capable you are of transfurring enemies (Only applies while transfurred).",
   "attribute.name.changed.transfur_tolerance": "Transfur Tolerance",
   "attribute.name.changed.transfur_tolerance.desc": "How well you can resist being transfurred.",
+  "attribute.name.changed.grab_struggle_strength": "Grab Struggle Strength",
+  "attribute.name.changed.grab_struggle_strength.desc": "How Easily an entity will break free from a grab",
   "attribute.name.changed.sprint_speed": "Sprint Speed",
   "attribute.name.changed.sprint_speed.desc": "Multiplies your speed while sprinting (Only applies while transfurred).",
   "attribute.name.changed.sneak_speed": "Sneak Speed",

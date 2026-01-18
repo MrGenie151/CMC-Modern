@@ -19,7 +19,7 @@ public class ChangedAttributes {
      *  How Easily an entity will break free from a grab
      */
     public static final RegistryObject<Attribute> GRAB_STRUGGLE_STRENGTH = REGISTRY.register("grab_struggle_strength",
-            () -> new RangedAttribute("attribute.name.changed.transfur_damage", 0.005f, 0.0D, 2048.0D).setSyncable(true));
+            () -> new RangedAttribute("attribute.name.changed.grab_struggle_strength", 0.005f, 0.0D, 2048.0D).setSyncable(true));
 
     /**
      *  Multiplies the player's speed difference sprinting vs not. One is vanilla. Zero disables sprint. ONLY APPLIES WITH A TRANSFUR VARIANT.
