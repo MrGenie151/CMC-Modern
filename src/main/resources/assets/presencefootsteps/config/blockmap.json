@@ -39,7 +39,6 @@
   "changed:lab_light": "hardmetal",
   "changed:lab_light_small": "hardmetal",
   "changed:lab_table": "hardmetal",
-  "changed:laser_beam": "NOT_EMITTER",
   "changed:laser_emitter": "hardmetal",
   "changed:latex_container": "hardmetal",
   "changed:latex_crystal": "chimes",
