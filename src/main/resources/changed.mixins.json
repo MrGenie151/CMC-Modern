@@ -23,7 +23,7 @@
     "block.SpreadingSnowyDirtBlockMixin",
     "entity.ArrowMixin",
     "entity.EntityMixin",
-    "entity.IronGolemMixin",
+    "entity.VillagerMixin",
     "entity.LightingBoltMixin",
     "entity.LivingEntityMixin",
     "entity.MobMixin",

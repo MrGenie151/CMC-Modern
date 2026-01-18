@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -40,6 +41,10 @@ public class TransfurVariant<T extends ChangedEntity> {
 
     public static Stream<TransfurVariant<?>> getPublicTransfurVariants() {
         return ChangedRegistry.TRANSFUR_VARIANT.get().getValues().stream().filter(variant -> !SPECIAL_LATEX_FORMS.contains(ChangedRegistry.TRANSFUR_VARIANT.get().getKey(variant)));
+    }
+
+    public static boolean shouldScareVillager(ChangedEntity entity, AbstractVillager villager) {
+        return entity.getType().is(ChangedTags.EntityTypes.LATEX);
     }
 
     @Deprecated
@@ -164,7 +169,7 @@ public class TransfurVariant<T extends ChangedEntity> {
     public final VisionType visionType;
     public final MiningStrength miningStrength;
     public final UseItemMode itemUseMode;
-    public final List<Class<? extends PathfinderMob>> scares;
+    public final @Nullable BiPredicate<T, PathfinderMob> scares;
     public final TransfurMode transfurMode;
     public final ImmutableList<Function<EntityType<?>, ? extends AbstractAbility<?>>> abilities;
     public final float cameraZOffset;
@@ -173,7 +178,7 @@ public class TransfurVariant<T extends ChangedEntity> {
     public TransfurVariant(Supplier<EntityType<T>> ctor,
                            float jumpStrength, BreatheMode breatheMode, boolean canGlide, int extraJumpCharges,
                            boolean reducedFall, boolean canClimb,
-                           VisionType visionType, MiningStrength miningStrength, UseItemMode itemUseMode, List<Class<? extends PathfinderMob>> scares, TransfurMode transfurMode,
+                           VisionType visionType, MiningStrength miningStrength, UseItemMode itemUseMode, @Nullable BiPredicate<T, PathfinderMob> scares, TransfurMode transfurMode,
                            List<Function<EntityType<?>, ? extends AbstractAbility<?>>> abilities, float cameraZOffset, ResourceLocation sound) {
         this.ctor = ctor;
         this.jumpStrength = jumpStrength;
@@ -334,10 +339,8 @@ public class TransfurVariant<T extends ChangedEntity> {
 
     public static class Builder<T extends ChangedEntity> {
         final Supplier<EntityType<T>> entityType;
-        LatexTypeOld type = LatexTypeOld.NEUTRAL;
         float jumpStrength = 1.0F;
         BreatheMode breatheMode = BreatheMode.NORMAL;
-        float stepSize = 0.6F;
         boolean canGlide = false;
         int extraJumpCharges = 0;
         boolean reducedFall = false;
@@ -346,7 +349,7 @@ public class TransfurVariant<T extends ChangedEntity> {
         MiningStrength miningStrength = MiningStrength.NORMAL;
         int legCount = 2;
         UseItemMode itemUseMode = UseItemMode.NORMAL;
-        List<Class<? extends PathfinderMob>> scares = new ArrayList<>(ImmutableList.of(AbstractVillager.class));
+        @Nullable BiPredicate<T, PathfinderMob> scares = null;
         TransfurMode transfurMode = TransfurMode.REPLICATION;
         List<Function<EntityType<?>, ? extends AbstractAbility<?>>> abilities = new ArrayList<>();
         float cameraZOffset = 0.0F;
@@ -363,6 +366,8 @@ public class TransfurVariant<T extends ChangedEntity> {
                     .and(event.isNotOfTag(ChangedTags.EntityTypes.PARTIAL_LATEX)), ChangedAbilities.GRAB_ENTITY_ABILITY);
 
             Changed.postModLoadingEvent(event);
+
+            this.scares(AbstractVillager.class, TransfurVariant::shouldScareVillager);
         }
 
         public void ignored() {}
@@ -412,11 +417,30 @@ public class TransfurVariant<T extends ChangedEntity> {
         }
 
         public <E extends PathfinderMob> Builder<T> scares(Class<E> type) {
-            scares.add(type); return this;
+            final BiPredicate<T, PathfinderMob> predicate = (aggressor, target) -> {
+                return type.isInstance(target);
+            };
+            scares = scares == null ? predicate : scares.or(predicate);
+            return this;
+        }
+
+        public <E extends PathfinderMob> Builder<T> scares(Class<E> type, BiPredicate<T, E> predicate) {
+            final BiPredicate<T, PathfinderMob> wrappingPredicate = (aggressor, target) -> {
+                return type.isInstance(target) && predicate.test(aggressor, (E)target);
+            };
+            scares = scares == null ? wrappingPredicate : scares.or(wrappingPredicate);
+            return this;
         }
 
         public Builder<T> scares(List<Class<? extends PathfinderMob>> v) {
-            scares = v; return this;
+            scares = scares.or((aggressor, target) -> {
+                for (var clazz : v) {
+                    if (clazz.isInstance(target))
+                        return true;
+                }
+                return false;
+            });
+            return this;
         }
 
         public Builder<T> glide() {

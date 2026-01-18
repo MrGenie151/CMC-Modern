@@ -1,6 +1,7 @@
 package net.ltxprogrammer.changed.entity.variant;
 
 import com.google.common.collect.ImmutableMap;
+import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.ability.*;
 import net.ltxprogrammer.changed.data.AccessorySlots;
@@ -80,7 +81,6 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
     public MiningStrength miningStrength;
     public UseItemMode itemUseMode;
     public float jumpStrength;
-    public float stepSize;
     public int ageAsVariant = 0;
     protected int air = -100;
     protected int jumpCharges = 0;
@@ -243,9 +243,10 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
         this.jumpStrength = parent.jumpStrength;
 
         var builder = new ImmutableMap.Builder<AbstractAbility<?>, AbstractAbilityInstance>();
+        var abilityExclusivity = new ReferenceArraySet<AbstractAbility<?>>();
         parent.abilities.forEach(abilityFunction -> {
             var ability = abilityFunction.apply(this.parent.getEntityType());
-            if (ability != null)
+            if (ability != null && abilityExclusivity.add(ability))
                 builder.put(ability, ability.makeInstance(IAbstractChangedEntity.forPlayer(host)));
         });
         abilityInstances = builder.build();
