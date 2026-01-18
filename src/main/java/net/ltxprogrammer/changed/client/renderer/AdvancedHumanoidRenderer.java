@@ -172,6 +172,14 @@ public abstract class AdvancedHumanoidRenderer<T extends ChangedEntity, M extend
                 if (useanim == UseAnim.SPYGLASS) {
                     return HumanoidModel.ArmPose.SPYGLASS;
                 }
+
+                if (useanim == UseAnim.TOOT_HORN) {
+                    return HumanoidModel.ArmPose.TOOT_HORN;
+                }
+
+                if (useanim == UseAnim.BRUSH) {
+                    return HumanoidModel.ArmPose.BRUSH;
+                }
             } else if (!p_117795_.swinging && itemstack.is(Items.CROSSBOW) && CrossbowItem.isCharged(itemstack)) {
                 return HumanoidModel.ArmPose.CROSSBOW_HOLD;
             }

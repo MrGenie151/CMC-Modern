@@ -59,9 +59,17 @@ public abstract class AbstractUpperBodyAnimator<T extends ChangedEntity, M exten
             case CROSSBOW_HOLD:
                 AnimationUtils.animateCrossbowHold(rightArm, leftArm, head, true);
                 break;
+            case BRUSH:
+                rightArm.xRot = rightArm.xRot * 0.5F - ((float)Math.PI / 5F);
+                rightArm.yRot = 0.0F;
+                break;
             case SPYGLASS:
                 rightArm.xRot = Mth.clamp(head.xRot - 1.9198622F - (entity.isCrouching() ? 0.2617994F : 0.0F), -2.4F, 3.3F);
                 rightArm.yRot = head.yRot - 0.2617994F;
+                break;
+            case TOOT_HORN:
+                rightArm.xRot = Mth.clamp(head.xRot, -1.2F, 1.2F) - 1.4835298F;
+                rightArm.yRot = head.yRot - ((float)Math.PI / 6F);
         }
 
     }
