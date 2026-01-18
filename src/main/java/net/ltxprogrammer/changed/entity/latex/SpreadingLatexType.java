@@ -248,6 +248,7 @@ public abstract class SpreadingLatexType extends LatexType {
                 LivingEntity.class,
                 new AABB(strikePosition).inflate(24),
                 entity -> {
+                    if (!EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(entity)) return false;
                     if (EntityUtil.maybeGetOverlaying(entity) instanceof ChangedEntity changedEntity)
                         return changedEntity.getLatexType() == ChangedLatexTypes.WHITE_LATEX.get();
                     return false;

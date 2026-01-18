@@ -16,6 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -306,8 +307,23 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
     public void handleEscape() {
         ticksGrabbed++;
 
+        float entityGrabStrengthDecay = this.suited ? GRAB_STRENGTH_DECAY_SUITED : GRAB_STRENGTH_DECAY;
+
+        if (grabbedEntity != null) {
+            AttributeInstance grabbedEntityAttribute = grabbedEntity.getAttribute(ChangedAttributes.GRAB_STRUGGLE_STRENGTH.get());
+            if (grabbedEntityAttribute != null) {
+                if (grabbedEntity instanceof Player) {
+                    // Suited reduces grab strength decay by ~43% for players (100% - 43% = 57.14%)
+                    entityGrabStrengthDecay = ((float) grabbedEntityAttribute.getValue()) * (this.suited ? 0.5714f : 1);
+                } else {
+                    // Suited reduces grab strength decay by 90% for entities (100% - 90% = 10%)
+                    entityGrabStrengthDecay = ((float) grabbedEntityAttribute.getValue()) * (this.suited ? 0.1f : 1);
+                }
+            }
+        }
+
         if (!(this.grabbedEntity instanceof Player player)) {
-            this.grabStrength -= this.suited ? GRAB_STRENGTH_DECAY_SUITED : GRAB_STRENGTH_DECAY;
+            this.grabStrength -= entityGrabStrengthDecay;
         }
 
         else {
@@ -341,7 +357,7 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
                 if (keyRef.getFirst().getFirst().get() && !keyRef.getSecond().getFirst().get()) { // Key was just pressed
                     // This is to reduce the strength of cheating (pressing the key too fast)
                     float trustStrength = Mth.clamp((float)ticksUnpressed / (float)GRAB_ESCAPE_TRUST, 0.0f, 1.0f);
-                    float keyStrength = (this.suited ? GRAB_STRENGTH_DECAY_PLAYER_SUITED : GRAB_STRENGTH_DECAY_PLAYER) * trustStrength;
+                    float keyStrength = entityGrabStrengthDecay * trustStrength;
                     this.grabStrength -= keyStrength;
                     this.suitTransition = Mth.clamp(this.suitTransition - (keyStrength * 0.5f), 0.0f, SUIT_TRANSITION_MAX);
                     lastEscapeKey = currentEscapeKey;

@@ -1,7 +1,6 @@
 package net.ltxprogrammer.changed.init;
 
 import net.ltxprogrammer.changed.Changed;
-import net.minecraft.core.Registry;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraftforge.registries.DeferredRegister;
@@ -15,6 +14,12 @@ public class ChangedAttributes {
             () -> new RangedAttribute("attribute.name.changed.transfur_tolerance", 20.0D, 1.0D, 1024.0D).setSyncable(true));
     public static final RegistryObject<Attribute> TRANSFUR_DAMAGE = REGISTRY.register("transfur_damage",
             () -> new RangedAttribute("attribute.name.changed.transfur_damage", 3.0D, 0.0D, 2048.0D));
+
+    /**
+     *  How Easily an entity will break free from a grab
+     */
+    public static final RegistryObject<Attribute> GRAB_STRUGGLE_STRENGTH = REGISTRY.register("grab_struggle_strength",
+            () -> new RangedAttribute("attribute.name.changed.transfur_damage", 0.005f, 0.0D, 2048.0D).setSyncable(true));
 
     /**
      *  Multiplies the player's speed difference sprinting vs not. One is vanilla. Zero disables sprint. ONLY APPLIES WITH A TRANSFUR VARIANT.
