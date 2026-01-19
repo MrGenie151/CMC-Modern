@@ -52,6 +52,8 @@
   "attribute.name.changed.transfur_damage.desc": "Mennyire vagy képes transzfurálni az ellenségeidet (Csak transzfurált állapotban érvényes).",
   "attribute.name.changed.transfur_tolerance": "Transzfur-tűrés",
   "attribute.name.changed.transfur_tolerance.desc": "Milyen jól tudsz ellenállni a transzfurálásnak.",
+  "attribute.name.changed.grab_struggle_strength": "Megragadás elleni küzdelem ereje",
+  "attribute.name.changed.grab_struggle_strength.desc": "Milyen gyorsan tudsz kiszabadulni a megragadástól",
   "attribute.name.changed.sprint_speed": "Futás sebessége",
   "attribute.name.changed.sprint_speed.desc": "Megsokszorozza a sebességedet futás közben (Csak transzfurált állapotban érvényes).",
   "attribute.name.changed.sneak_speed": "Lopakodás sebessége",
