@@ -35,6 +35,8 @@ public class ChangedAccessoryRenderers {
             )));
             AccessoryLayer.registerRenderer(ChangedItems.NITRILE_GLOVES.get(), SimpleClothingRenderer.of(ArmorModel.CLOTHING_OUTER, EquipmentSlot.CHEST));
             AccessoryLayer.registerRenderer(ChangedItems.ORANGE_NECK_TIE.get(), SimpleClothingRenderer.of(ArmorModel.CLOTHING_INNER, EquipmentSlot.CHEST));
+            AccessoryLayer.registerRenderer(ChangedItems.RED_NECK_TIE.get(), SimpleClothingRenderer.of(ArmorModel.CLOTHING_INNER, EquipmentSlot.CHEST));
+            AccessoryLayer.registerRenderer(ChangedItems.BLUE_NECK_TIE.get(), SimpleClothingRenderer.of(ArmorModel.CLOTHING_INNER, EquipmentSlot.CHEST));
 
             AccessoryLayer.registerRenderer(ChangedItems.EXOSKELETON.get(), () ->
                     new WornExoskeletonRenderer(modelSet, ExoskeletonModel.LAYER_LOCATION_SUIT, ExoskeletonModel.LAYER_LOCATION_VISOR, ExoskeletonModel.LAYER_LOCATION_HUMAN));
@@ -46,7 +48,7 @@ public class ChangedAccessoryRenderers {
                     Set.of(ChangedItems.WHITE_TSHIRT.get(), ChangedItems.WETSUIT.get()),
                     AccessoryLayer.RenderOrder.SAME, ChangedItems.BLACK_TSHIRT.get());
             AccessoryLayer.registerItemRenderOrder(
-                    Set.of(ChangedItems.ORANGE_NECK_TIE.get()),
+                    Set.of(ChangedItems.ORANGE_NECK_TIE.get(), ChangedItems.RED_NECK_TIE.get(), ChangedItems.BLUE_NECK_TIE.get()),
                     AccessoryLayer.RenderOrder.ABOVE, ChangedItems.BLACK_TSHIRT.get());
             AccessoryLayer.registerItemRenderOrder(
                     Set.of(ChangedItems.LAB_COAT.get()),

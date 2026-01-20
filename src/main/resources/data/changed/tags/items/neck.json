@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
-    "changed:orange_neck_tie"
+    "changed:blue_neck_tie",
+    "changed:orange_neck_tie",
+    "changed:red_neck_tie"
   ]
 }

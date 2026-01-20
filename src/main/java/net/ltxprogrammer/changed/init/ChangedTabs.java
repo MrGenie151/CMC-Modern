@@ -298,6 +298,8 @@ public class ChangedTabs {
                         output.accept(ChangedItems.WETSUIT.get());
                         output.accept(ChangedItems.NITRILE_GLOVES.get());
                         output.accept(ChangedItems.ORANGE_NECK_TIE.get());
+                        output.accept(ChangedItems.RED_NECK_TIE.get());
+                        output.accept(ChangedItems.BLUE_NECK_TIE.get());
                     })
                     .build());
 
