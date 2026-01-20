@@ -676,6 +676,8 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
             return original * 0.1;
         if (attribute == ForgeMod.SWIM_SPEED.get())
             return original * Mth.map(original, 1.0, 5.0, 1.0, 0.75);
+        if (attribute == ChangedAttributes.GRAB_STRUGGLE_STRENGTH.get())
+            return original * (GrabEntityAbilityInstance.GRAB_STRENGTH_DECAY_PLAYER / GrabEntityAbilityInstance.GRAB_STRENGTH_DECAY);
         return ChangedCompatibility.correctAttributeScaling(attribute, original);
     }
 
