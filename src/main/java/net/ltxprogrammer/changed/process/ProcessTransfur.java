@@ -443,12 +443,12 @@ public class ProcessTransfur {
 
         var oldVariant = playerDataExtension.getTransfurVariant();
         if (variant != null && oldVariant != null && variant == oldVariant.getParent()) {
-            Changed.LOGGER.info("Ignoring setPlayerTransfurVariant() call on {} side since the player is already {}",
+            LOGGER.info("Ignoring setPlayerTransfurVariant() call on {} side since the player is already {}",
                     player.level().isClientSide ? "client" : "server", oldVariant.getParent().getFormId());
             return oldVariant;
         }
         if (variant == null && oldVariant == null) {
-            Changed.LOGGER.info("Ignoring setPlayerTransfurVariant() call on {} side since the player is already not transfurred",
+            LOGGER.info("Ignoring setPlayerTransfurVariant() call on {} side since the player is already not transfurred",
                     player.level().isClientSide ? "client" : "server");
             return null;
         }
