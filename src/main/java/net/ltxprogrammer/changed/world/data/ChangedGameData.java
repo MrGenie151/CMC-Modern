@@ -120,7 +120,7 @@ public class ChangedGameData {
                 facility.setHeader(pair.getSecond());
                 return facility;
             } catch (Exception e) {
-                Changed.LOGGER.error("Failed to load facility from disk ", e);
+                Changed.LOGGER.error("Failed to load facility from disk", e);
                 badFiles.add(pair.getFirst());
             }
             return null;

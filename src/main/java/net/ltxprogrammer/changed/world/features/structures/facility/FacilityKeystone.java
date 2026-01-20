@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.world.features.structures.facility;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
+import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.init.ChangedRegistry;
 import net.ltxprogrammer.changed.init.ChangedStructurePieceTypes;
 import net.ltxprogrammer.changed.world.data.ActiveFacilityInstance;
@@ -78,17 +79,22 @@ public class FacilityKeystone extends StructurePiece {
     }
 
     public ActiveFacilityInstance createActiveFacilityInstance() {
-        var zoneInfoBuilder = ImmutableMap.<Zone, ActiveFacilityInstance.ZoneInfo>builder();
+        try {
+            var zoneInfoBuilder = ImmutableMap.<Zone, ActiveFacilityInstance.ZoneInfo>builder();
 
-        piecesByZone.forEach((zone, boundingBox) -> {
-            zoneInfoBuilder.put(zone, new ActiveFacilityInstance.ZoneInfo(
-                    FacilityZoneEntities.INSTANCE.getSpawns(zone).stream().map(ActiveFacilityInstance.SpawnInfo::new).toList(),
-                    boundingBox.stream().map(ActiveFacilityInstance.PieceInfo::new).toList(), Optional.empty()));
-        });
+            piecesByZone.forEach((zone, boundingBox) -> {
+                zoneInfoBuilder.put(zone, new ActiveFacilityInstance.ZoneInfo(
+                        FacilityZoneEntities.INSTANCE.getSpawns(zone).stream().map(ActiveFacilityInstance.SpawnInfo::new).toList(),
+                        boundingBox.stream().map(ActiveFacilityInstance.PieceInfo::new).toList(), Optional.empty()));
+            });
 
-        var facilityInstance = new ActiveFacilityInstance(zoneInfoBuilder.build(), Optional.empty());
-        facilityInstance.setHeader(header);
-        return facilityInstance;
+            var facilityInstance = new ActiveFacilityInstance(zoneInfoBuilder.build(), Optional.empty());
+            facilityInstance.setHeader(header);
+            return facilityInstance;
+        } catch (Exception e) {
+            Changed.LOGGER.error("Exception while creating ActiveFacilityInstance", e);
+            throw e;
+        }
     }
 
     @Override

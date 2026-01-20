@@ -259,7 +259,7 @@ public class ActiveFacilityInstance {
         }
 
         public PieceInfo(BoundingBox region) {
-            this(region, getAvailableSpawns(region), 0, null);
+            this(region, getAvailableSpawns(region), 0, Optional.empty());
         }
 
         public boolean isInside(Vec3i position) {
