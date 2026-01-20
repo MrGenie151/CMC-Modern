@@ -1,8 +1,6 @@
 package net.ltxprogrammer.changed.client.gui;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.ability.AbstractAbility;
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
@@ -15,12 +13,7 @@ import net.ltxprogrammer.changed.util.SingleRunnable;
 import net.ltxprogrammer.changed.world.inventory.AbilityRadialMenu;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.core.Registry;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 
 import javax.annotation.Nullable;
@@ -118,7 +111,7 @@ public class AbilityRadialScreen extends VariantRadialScreen<AbilityRadialMenu> 
         close.run();
         var ability = abilities.get(section);
         variant.setSelectedAbility(ability);
-        Changed.PACKET_HANDLER.sendToServer(new VariantAbilityActivate(this.menu.player, variant.abilityKeyState, ability));
+        Changed.PACKET_HANDLER.sendToServer(new VariantAbilityActivate(this.menu.player, variant.isAbilityKeyEffectivelyDown(), ability));
         return false;
     }
 

@@ -37,7 +37,6 @@ import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
@@ -50,7 +49,6 @@ import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -74,7 +72,8 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
 
     public AbstractAbility<?> selectedAbility = null;
     public AbstractAbility<?> menuAbility = null;
-    public boolean abilityKeyState = false;
+    private boolean abilityKeyDown = false;
+    public int abilityKeyStateFlips = 0;
     public TransfurMode transfurMode;
     public TransfurVariant.BreatheMode breatheMode;
     public VisionType visionType;
@@ -878,6 +877,10 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
         }
     }
 
+    public boolean isAbilityKeyEffectivelyDown() {
+        return (abilityKeyStateFlips + (abilityKeyDown ? 1 : 0)) % 2 == 1;
+    }
+
     protected void tickAbilities() {
         for (var instance : abilityInstances.values()) {
             instance.getController().tickCoolDown();
@@ -892,11 +895,21 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
                 var instance = abilityInstances.get(selectedAbility);
                 if (instance != null) {
                     var controller = instance.getController();
-                    boolean oldState = controller.exchangeKeyState(abilityKeyState);
-                    if (abilityKeyState || instance.getController().isCoolingDown())
-                        this.resetTicksSinceLastAbilityActivity();
-                    if (host.containerMenu == host.inventoryMenu && !host.isUsingItem() && !instance.getController().isCoolingDown())
-                        instance.getUseType().check(abilityKeyState, oldState, controller);
+                    boolean uniqueTick = true;
+                    do {
+                        if (abilityKeyStateFlips > 0) {
+                            abilityKeyStateFlips--;
+                            abilityKeyDown = !abilityKeyDown;
+                        }
+
+                        boolean oldState = controller.exchangeKeyState(abilityKeyDown);
+                        if (abilityKeyDown || instance.getController().isCoolingDown())
+                            this.resetTicksSinceLastAbilityActivity();
+                        if (host.containerMenu == host.inventoryMenu && !host.isUsingItem() && !instance.getController().isCoolingDown())
+                            instance.getUseType().check(abilityKeyDown, oldState, uniqueTick, controller);
+
+                        uniqueTick = false;
+                    } while (abilityKeyStateFlips > 0);
                 }
             }
 

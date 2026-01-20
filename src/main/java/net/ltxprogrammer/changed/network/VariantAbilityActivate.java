@@ -7,7 +7,6 @@ import net.ltxprogrammer.changed.init.ChangedAbilities;
 import net.ltxprogrammer.changed.init.ChangedRegistry;
 import net.ltxprogrammer.changed.network.packet.ChangedPacket;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
-import net.ltxprogrammer.changed.util.UniversalDist;
 import net.ltxprogrammer.changed.world.inventory.AbilityRadialMenu;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.InteractionHand;
@@ -21,39 +20,38 @@ import net.minecraftforge.network.PacketDistributor;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.Supplier;
 
 public class VariantAbilityActivate implements ChangedPacket {
     final UUID uuid;
-    final boolean keyState;
+    final boolean keyDown;
     final AbstractAbility<?> ability;
 
     public static VariantAbilityActivate openRadial(Player player) {
         return new VariantAbilityActivate(player, false);
     }
 
-    public VariantAbilityActivate(Player player, boolean keyState, AbstractAbility<?> ability) {
+    public VariantAbilityActivate(Player player, boolean keyDown, AbstractAbility<?> ability) {
         this.uuid = player.getUUID();
-        this.keyState = keyState;
+        this.keyDown = keyDown;
         this.ability = ability;
     }
 
-    public VariantAbilityActivate(Player player, boolean keyState) {
+    public VariantAbilityActivate(Player player, boolean keyDown) {
         this.uuid = player.getUUID();
-        this.keyState = keyState;
+        this.keyDown = keyDown;
         this.ability = null;
     }
 
     public VariantAbilityActivate(FriendlyByteBuf buffer) {
         this.uuid = buffer.readUUID();
-        this.keyState = buffer.readBoolean();
+        this.keyDown = buffer.readBoolean();
         this.ability = ChangedRegistry.ABILITY.readRegistryObject(buffer);
     }
 
     @Override
     public void write(FriendlyByteBuf buffer) {
         buffer.writeUUID(uuid);
-        buffer.writeBoolean(keyState);
+        buffer.writeBoolean(keyDown);
         ChangedRegistry.ABILITY.writeRegistryObject(buffer, ability);
     }
 
@@ -70,8 +68,9 @@ public class VariantAbilityActivate implements ChangedPacket {
                     if (ability != null)
                         variant.setSelectedAbility(ability);
 
-                    if (keyState || ability != null) {
-                        variant.abilityKeyState = this.keyState;
+                    if ((keyDown || ability != null) && variant.abilityKeyStateFlips < 6) { // Prevent DoS by limiting flip count / tick
+                        if (variant.isAbilityKeyEffectivelyDown() != keyDown)
+                            variant.abilityKeyStateFlips++; // Only queue flip if keyDown is opposite to what the keyState is
                     }
                 });
             });
@@ -98,13 +97,15 @@ public class VariantAbilityActivate implements ChangedPacket {
                 if (ability != null)
                     variant.setSelectedAbility(ability);
 
-                if (!keyState && ability == null) {
+                if (!keyDown && ability == null) {
                     if (!sender.isUsingItem())
                         sender.openMenu(new SimpleMenuProvider((id, inventory, givenPlayer) ->
                                 new AbilityRadialMenu(id, inventory, null), AbilityRadialMenu.CONTAINER_TITLE));
                 }
-                else
-                    variant.abilityKeyState = this.keyState;
+                else if (variant.abilityKeyStateFlips < 6) { // Prevent DoS by limiting flip count / tick
+                    if (variant.isAbilityKeyEffectivelyDown() != keyDown)
+                        variant.abilityKeyStateFlips++; // Only queue flip if keyDown is opposite to what the keyState is
+                }
 
                 Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY.with(() -> sender), this);
             });

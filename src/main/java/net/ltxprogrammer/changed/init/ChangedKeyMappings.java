@@ -10,9 +10,6 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.protocol.game.ServerboundInteractPacket;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Mob;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -49,9 +46,9 @@ public class ChangedKeyMappings {
                             return;
 
                         var newState = event.getAction() != GLFW.GLFW_RELEASE;
-                        if (newState != variant.abilityKeyState) {
+                        if (newState != variant.isAbilityKeyEffectivelyDown()) {
                             ChangedTutorial.triggerOnUseAbility(variant.getSelectedAbility());
-                            variant.abilityKeyState = newState;
+                            variant.abilityKeyStateFlips++;
                             Changed.PACKET_HANDLER.sendToServer(new VariantAbilityActivate(local, newState, variant.selectedAbility));
                         }
                     });

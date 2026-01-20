@@ -65,9 +65,9 @@ public abstract class AbstractAbility<Instance extends AbstractAbilityInstance> 
             return abilityInstance.canKeepUsing();
         }
 
-        public void tickAbility() {
+        public void tickAbility(boolean uniqueTick) {
             if (startedUsing) {
-                holdTicks++;
+                holdTicks += uniqueTick ? 1 : 0;
                 abilityInstance.tick();
             }
         }
@@ -104,8 +104,8 @@ public abstract class AbstractAbility<Instance extends AbstractAbilityInstance> 
             return oState;
         }
 
-        public boolean chargeAbility() {
-            chargeTicks++;
+        public boolean chargeAbility(boolean uniqueTick) {
+            chargeTicks += uniqueTick ? 1 : 0;
             return chargeTicks >= abilityInstance.ability.getChargeTime(abilityInstance.entity);
         }
 
@@ -132,7 +132,7 @@ public abstract class AbstractAbility<Instance extends AbstractAbilityInstance> 
     }
 
     public interface UseActivate {
-        void check(boolean currentKeyState, boolean oldKeyState, Controller controller);
+        void check(boolean currentKeyState, boolean oldKeyState, boolean uniqueTick, Controller controller);
     }
 
     public interface UseProgressActive {
@@ -143,7 +143,7 @@ public abstract class AbstractAbility<Instance extends AbstractAbilityInstance> 
         /**
          * Indicates the ability should activate upon keypress
          */
-        INSTANT((keyState, oldState, controller) -> {
+        INSTANT((keyState, oldState, uniqueTick, controller) -> {
             if (!oldState && keyState) {
                 controller.applyCoolDown();
                 controller.activateAbility();
@@ -153,9 +153,9 @@ public abstract class AbstractAbility<Instance extends AbstractAbilityInstance> 
         /**
          * Indicates the ability needs to charge while key is pressed for some time, then activates
          */
-        CHARGE_TIME((keyState, oldState, controller) -> {
+        CHARGE_TIME((keyState, oldState, uniqueTick, controller) -> {
             if (keyState) {
-                if (!controller.chargeAbility())
+                if (!controller.chargeAbility(uniqueTick))
                     return;
 
                 controller.applyCoolDown();
@@ -172,7 +172,7 @@ public abstract class AbstractAbility<Instance extends AbstractAbilityInstance> 
         /**
          * Indicates the ability activates when the key is released
          */
-        CHARGE_RELEASE((keyState, oldState, controller) -> {
+        CHARGE_RELEASE((keyState, oldState, uniqueTick, controller) -> {
             if (keyState) {
                 controller.tickCharge();
             }
@@ -186,11 +186,11 @@ public abstract class AbstractAbility<Instance extends AbstractAbilityInstance> 
         /**
          * Indicates the ability activates upon keypress, and continues to fire per tick while key is down
          */
-        HOLD((keyState, oldState, controller) -> {
+        HOLD((keyState, oldState, uniqueTick, controller) -> {
             if (keyState && !oldState)
                 controller.activateAbility();
             else if (keyState && controller.canKeepUsing())
-                controller.tickAbility();
+                controller.tickAbility(uniqueTick);
             else if (oldState) {
                 controller.deactivateAbility();
                 controller.applyCoolDown();
@@ -210,8 +210,8 @@ public abstract class AbstractAbility<Instance extends AbstractAbilityInstance> 
         }
 
         @Override
-        public void check(boolean keyState, boolean oldKeyState, Controller controller) {
-            activate.check(keyState, oldKeyState, controller);
+        public void check(boolean keyState, boolean oldKeyState, boolean uniqueTick, Controller controller) {
+            activate.check(keyState, oldKeyState, uniqueTick, controller);
         }
 
         @Override
