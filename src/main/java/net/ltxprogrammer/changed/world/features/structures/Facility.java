@@ -34,6 +34,8 @@ public class Facility extends Structure {
         }));
     }
 
+    private static final int REROLL_FOR_SIZE_COUNT = 1;
+
     private void generatePieces(StructurePiecesBuilder builder, GenerationContext context, BlockPos blockPos, Rotation rotation) {
         ChunkPos center = context.chunkPos();
         ChunkPos min = new ChunkPos(center.x - GENERATION_CHUNK_RADIUS, center.z - GENERATION_CHUNK_RADIUS);
@@ -43,11 +45,11 @@ public class Facility extends Structure {
 
         BoundingBox generationRegion = BoundingBox.fromCorners(minPos, maxPos);
 
-        List<Integer> sizes = new ArrayList<>();
+        List<Integer> sizes = new ArrayList<>(REROLL_FOR_SIZE_COUNT);
         List<StructurePiece> largestSet = List.of();
         FacilityKeystone largestKeystone = null;
 
-        for (int reroll = 0; reroll < 1; reroll++) {
+        for (int reroll = 0; reroll < REROLL_FOR_SIZE_COUNT; reroll++) {
             builder.clear();
 
             FacilityKeystone keystone = FacilityPieces.generateFacility(builder, context, 5, 25, generationRegion);
@@ -56,11 +58,12 @@ public class Facility extends Structure {
             int size = ((StructurePiecesBuilderExtender)builder).pieceCount();
             sizes.add(size);
             if (((StructurePiecesBuilderExtender)builder).pieceCount() > largestSet.size()) {
-                largestSet = ((StructurePiecesBuilderExtender)builder).getPieces();
+                largestSet = new ArrayList<>(((StructurePiecesBuilderExtender)builder).getPieces());
                 largestKeystone = keystone;
             }
         }
 
+        builder.clear();
         largestSet.forEach(builder::addPiece);
 
         Changed.LOGGER.info("Generated facility \"{}\" with {} pieces (best of {}), at ChunkPos {}",
