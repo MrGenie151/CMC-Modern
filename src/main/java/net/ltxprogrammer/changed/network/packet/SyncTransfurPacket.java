@@ -74,11 +74,16 @@ public class SyncTransfurPacket implements ChangedPacket {
                 changedForms.forEach((uuid, listing) -> {
                     Player player = level.getPlayerByUUID(uuid);
                     if (player != null) {
+                        final var listingVariant = ChangedRegistry.TRANSFUR_VARIANT.getValue(listing.form);
                         final var variant = ProcessTransfur.setPlayerTransfurVariant(player,
-                                ChangedRegistry.TRANSFUR_VARIANT.getValue(listing.form),
+                                listingVariant,
                                 TransfurContext.hazard(listing.cause),
                                 listing.progress,
                                 listing.temporaryFromSuit);
+
+                        Changed.LOGGER.info("Attempted to set transfur variant for {} to {} (id: {}), result is {}",
+                                player.getScoreboardName(), listingVariant == null ? "null" : listingVariant.getFormId(),
+                                listing.form, variant == null ? "null" : variant.getFormId());
                         if (variant != null)
                             variant.load(listing.data);
                     } else {
