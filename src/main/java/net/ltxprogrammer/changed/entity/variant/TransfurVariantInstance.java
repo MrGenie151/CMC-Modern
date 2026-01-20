@@ -275,7 +275,6 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
             if (ability == null || ability.grabbedEntity != this.host)
                 return false;
 
-            isTemporaryFromSuit = true;
             return false;
         }
 

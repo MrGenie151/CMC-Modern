@@ -442,16 +442,10 @@ public class ProcessTransfur {
             variant = null;
 
         var oldVariant = playerDataExtension.getTransfurVariant();
-        if (variant != null && oldVariant != null && variant == oldVariant.getParent()) {
-            LOGGER.info("Ignoring setPlayerTransfurVariant() call on {} side since the player is already {}",
-                    player.level().isClientSide ? "client" : "server", oldVariant.getParent().getFormId());
+        if (variant != null && oldVariant != null && variant == oldVariant.getParent())
             return oldVariant;
-        }
-        if (variant == null && oldVariant == null) {
-            LOGGER.info("Ignoring setPlayerTransfurVariant() call on {} side since the player is already not transfurred",
-                    player.level().isClientSide ? "client" : "server");
+        if (variant == null && oldVariant == null)
             return null;
-        }
         if (oldVariant != null && oldVariant.getChangedEntity() != null)
             oldVariant.getChangedEntity().discard();
         TransfurVariantInstance<?> instance = TransfurVariantInstance.variantFor(variant, player);
