@@ -3,6 +3,8 @@ package net.ltxprogrammer.changed.mixin.render;
 import com.google.common.collect.Queues;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -173,25 +175,22 @@ public abstract class LevelRendererMixin {
         }
     }*/
 
-    @Inject(method = "playStreamingMusic(Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/item/RecordItem;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/sounds/SimpleSoundInstance;forRecord(Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/client/resources/sounds/SimpleSoundInstance;"), cancellable = true)
-    public void orPlayLoopedTrack(SoundEvent event, BlockPos pos, RecordItem musicDiscItem, CallbackInfo callback) {
+    @WrapOperation(method = "playStreamingMusic(Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/item/RecordItem;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/sounds/SimpleSoundInstance;forRecord(Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/client/resources/sounds/SimpleSoundInstance;"))
+    public SimpleSoundInstance orPlayLoopedTrack(SoundEvent event, Vec3 position, Operation<SimpleSoundInstance> original,
+                                                 @Local(argsOnly = true) RecordItem musicDiscItem) {
         if (musicDiscItem instanceof LoopedRecordItem) {
-            callback.cancel();
-
-            SoundInstance simplesoundinstance = new SimpleSoundInstance(
-                    event.getLocation(),
+            return new SimpleSoundInstance(event.getLocation(),
                     SoundSource.RECORDS,
                     4.0F,
                     1.0F,
-                    this.level.getRandom(),
+                    SoundInstance.createUnseededRandom(),
                     true,
                     0,
-                    SoundInstance.Attenuation.LINEAR, pos.getX(), pos.getY(), pos.getZ(), false);
-            this.playingRecords.put(pos, simplesoundinstance);
-            this.minecraft.getSoundManager().play(simplesoundinstance);
-
-            this.notifyNearbyEntities(this.level, pos, event != null);
+                    SoundInstance.Attenuation.LINEAR, position.x, position.y, position.z, false);
         }
+
+        return original.call(event, position);
     }
 
     @Inject(method = "prepareCullFrustum", at = @At("TAIL"))

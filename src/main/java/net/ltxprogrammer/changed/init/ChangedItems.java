@@ -204,25 +204,25 @@ public class ChangedItems {
     public static final RegistryObject<ExoskeletonItem<Exoskeleton>> EXOSKELETON = register("exoskeleton",
             () -> new ExoskeletonItem<>(new Item.Properties().stacksTo(1), ChangedEntities.EXOSKELETON));
 
-    public static final RegistryObject<LatexRecordItem> BLACK_GOO_ZONE_RECORD = registerLatexRecord("black_goo_zone_record", ChangedSounds.MUSIC_BLACK_GOO_ZONE, 0);
-    public static final RegistryObject<LatexRecordItem> CRYSTAL_ZONE_RECORD = registerLatexRecord("crystal_zone_record", ChangedSounds.MUSIC_CRYSTAL_ZONE, 0);
-    public static final RegistryObject<LatexRecordItem> GAS_ROOM_RECORD = registerLatexRecord("gas_room_record", ChangedSounds.MUSIC_GAS_ROOM, 0);
-    public static final RegistryObject<LatexRecordItem> LABORATORY_RECORD = registerLatexRecord("laboratory_record", ChangedSounds.MUSIC_LABORATORY, 0);
-    public static final RegistryObject<LatexRecordItem> OUTSIDE_THE_TOWER_RECORD = registerLatexRecord("outside_the_tower_record", ChangedSounds.MUSIC_OUTSIDE_THE_TOWER, 0);
-    public static final RegistryObject<LatexRecordItem> PURO_THE_BLACK_GOO_RECORD = registerLatexRecord("puro_the_black_goo_record", ChangedSounds.MUSIC_PURO_THE_BLACK_GOO, 0);
-    public static final RegistryObject<LatexRecordItem> PUROS_HOME_RECORD = registerLatexRecord("puros_home_record", ChangedSounds.MUSIC_PUROS_HOME, 0);
-    public static final RegistryObject<LatexRecordItem> THE_LIBRARY_RECORD = registerLatexRecord("the_library_record", ChangedSounds.MUSIC_THE_LIBRARY, 0);
-    public static final RegistryObject<LatexRecordItem> THE_LION_CHASE_RECORD = registerLatexRecord("the_lion_chase_record", ChangedSounds.MUSIC_THE_LION_CHASE, 0);
-    public static final RegistryObject<LatexRecordItem> THE_SCARLET_CRYSTAL_MINE_RECORD = registerLatexRecord("the_scarlet_crystal_mine_record", ChangedSounds.MUSIC_THE_SCARLET_CRYSTAL_MINE, 0);
-    public static final RegistryObject<LatexRecordItem> THE_SHARK_RECORD = registerLatexRecord("the_shark_record", ChangedSounds.MUSIC_THE_SHARK, 0);
-    public static final RegistryObject<LatexRecordItem> THE_SQUID_DOG_RECORD = registerLatexRecord("the_squid_dog_record", ChangedSounds.MUSIC_THE_SQUID_DOG, 0);
-    public static final RegistryObject<LatexRecordItem> THE_WHITE_GOO_JUNGLE_RECORD = registerLatexRecord("the_white_goo_jungle_record", ChangedSounds.MUSIC_THE_WHITE_GOO_JUNGLE, 0);
-    public static final RegistryObject<LatexRecordItem> THE_WHITE_TAIL_CHASE_PART_1 = registerLatexRecord("the_white_tail_chase_part_1_record", ChangedSounds.MUSIC_THE_WHITE_TAIL_CHASE_PART_1, 0);
-    public static final RegistryObject<LatexRecordItem> THE_WHITE_TAIL_CHASE_PART_2 = registerLatexRecord("the_white_tail_chase_part_2_record", ChangedSounds.MUSIC_THE_WHITE_TAIL_CHASE_PART_2, 0);
-    public static final RegistryObject<LatexRecordItem> VENT_PIPE_RECORD = registerLatexRecord("vent_pipe_record", ChangedSounds.MUSIC_VENT_PIPE, 0);
+    public static final RegistryObject<LatexRecordItem> BLACK_GOO_ZONE_RECORD = registerLatexRecord("black_goo_zone_record", ChangedSounds.MUSIC_BLACK_GOO_ZONE);
+    public static final RegistryObject<LatexRecordItem> CRYSTAL_ZONE_RECORD = registerLatexRecord("crystal_zone_record", ChangedSounds.MUSIC_CRYSTAL_ZONE);
+    public static final RegistryObject<LatexRecordItem> GAS_ROOM_RECORD = registerLatexRecord("gas_room_record", ChangedSounds.MUSIC_GAS_ROOM);
+    public static final RegistryObject<LatexRecordItem> LABORATORY_RECORD = registerLatexRecord("laboratory_record", ChangedSounds.MUSIC_LABORATORY);
+    public static final RegistryObject<LatexRecordItem> OUTSIDE_THE_TOWER_RECORD = registerLatexRecord("outside_the_tower_record", ChangedSounds.MUSIC_OUTSIDE_THE_TOWER);
+    public static final RegistryObject<LatexRecordItem> PURO_THE_BLACK_GOO_RECORD = registerLatexRecord("puro_the_black_goo_record", ChangedSounds.MUSIC_PURO_THE_BLACK_GOO);
+    public static final RegistryObject<LatexRecordItem> PUROS_HOME_RECORD = registerLatexRecord("puros_home_record", ChangedSounds.MUSIC_PUROS_HOME);
+    public static final RegistryObject<LatexRecordItem> THE_LIBRARY_RECORD = registerLatexRecord("the_library_record", ChangedSounds.MUSIC_THE_LIBRARY);
+    public static final RegistryObject<LatexRecordItem> THE_LION_CHASE_RECORD = registerLatexRecord("the_lion_chase_record", ChangedSounds.MUSIC_THE_LION_CHASE);
+    public static final RegistryObject<LatexRecordItem> THE_SCARLET_CRYSTAL_MINE_RECORD = registerLatexRecord("the_scarlet_crystal_mine_record", ChangedSounds.MUSIC_THE_SCARLET_CRYSTAL_MINE);
+    public static final RegistryObject<LatexRecordItem> THE_SHARK_RECORD = registerLatexRecord("the_shark_record", ChangedSounds.MUSIC_THE_SHARK);
+    public static final RegistryObject<LatexRecordItem> THE_SQUID_DOG_RECORD = registerLatexRecord("the_squid_dog_record", ChangedSounds.MUSIC_THE_SQUID_DOG);
+    public static final RegistryObject<LatexRecordItem> THE_WHITE_GOO_JUNGLE_RECORD = registerLatexRecord("the_white_goo_jungle_record", ChangedSounds.MUSIC_THE_WHITE_GOO_JUNGLE);
+    public static final RegistryObject<LatexRecordItem> THE_WHITE_TAIL_CHASE_PART_1 = registerLatexRecord("the_white_tail_chase_part_1_record", ChangedSounds.MUSIC_THE_WHITE_TAIL_CHASE_PART_1);
+    public static final RegistryObject<LatexRecordItem> THE_WHITE_TAIL_CHASE_PART_2 = registerLatexRecord("the_white_tail_chase_part_2_record", ChangedSounds.MUSIC_THE_WHITE_TAIL_CHASE_PART_2);
+    public static final RegistryObject<LatexRecordItem> VENT_PIPE_RECORD = registerLatexRecord("vent_pipe_record", ChangedSounds.MUSIC_VENT_PIPE);
 
-    private static RegistryObject<LatexRecordItem> registerLatexRecord(String name, Supplier<SoundEvent> soundEventSupplier, int lengthInTicks) {
-        return register(name, () -> new LatexRecordItem(8, soundEventSupplier, (new Item.Properties()).stacksTo(1).rarity(Rarity.RARE), lengthInTicks));
+    private static RegistryObject<LatexRecordItem> registerLatexRecord(String name, Supplier<SoundEvent> soundEventSupplier) {
+        return register(name, () -> new LatexRecordItem(8, soundEventSupplier, (new Item.Properties()).stacksTo(1).rarity(Rarity.RARE)));
     }
 
     private static <T extends Item> RegistryObject<T> register(String name, Supplier<T> item) {

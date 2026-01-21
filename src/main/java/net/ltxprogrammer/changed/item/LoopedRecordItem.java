@@ -6,7 +6,12 @@ import net.minecraft.world.item.RecordItem;
 import java.util.function.Supplier;
 
 public class LoopedRecordItem extends RecordItem {
-    public LoopedRecordItem(int comparatorValue, Supplier<SoundEvent> soundSupplier, Properties builder, int lengthInTicks) {
-        super(comparatorValue, soundSupplier, builder, lengthInTicks);
+    public LoopedRecordItem(int comparatorValue, Supplier<SoundEvent> soundSupplier, Properties builder) {
+        super(comparatorValue, soundSupplier, builder, 0);
+    }
+
+    @Override
+    public int getLengthInTicks() {
+        return Integer.MAX_VALUE;
     }
 }
