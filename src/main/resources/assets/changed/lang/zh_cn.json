@@ -60,6 +60,10 @@
   "attribute.name.changed.sneak_speed.desc": "潜行时提升你的移动速度（仅在兽化状态下生效）。",
   "attribute.name.changed.air_capacity": "肺活量",
   "attribute.name.changed.air_capacity.desc": "你肺部能容纳的最大空气容量（仅在兽化状态下生效）。",
+  "attribute.name.changed.jump_strength": "跳跃力量",
+  "attribute.name.changed.jump_strength.desc": "提升你的跳跃能力。",
+  "attribute.name.changed.fall_resistance": "摔落抗性",
+  "attribute.name.changed.fall_resistance.desc": "摔落时减少你受到的伤害。",
 
   "subtitles.changed.block.cardboard_box.close": "纸箱关闭",
   "subtitles.changed.block.cardboard_box.open": "纸箱打开",
