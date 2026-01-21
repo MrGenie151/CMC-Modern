@@ -16,7 +16,7 @@ public class ProcessEmote {
 
     public static void playerEmote(Player player, Emote emote) {
         if (!player.level().isClientSide) {
-            Changed.PACKET_HANDLER.send(PacketDistributor.ALL.noArg(), new EmotePacket(player.getUUID(), emote));
+            Changed.PACKET_HANDLER.send(PacketDistributor.ALL.noArg(), new EmotePacket(player.getId(), emote));
         } else {
             ProcessTransfur.ifPlayerTransfurred(player, variant -> {
                 ProcessEmote.rawEmote(variant.getChangedEntity(), emote);

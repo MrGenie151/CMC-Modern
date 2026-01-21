@@ -14,22 +14,22 @@ import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 public class MountTransfurPacket implements ChangedPacket {
-    private final UUID entity;
-    private final UUID mount;
+    private final int entity;
+    private final int mount;
 
-    public MountTransfurPacket(UUID entity, UUID mount) {
+    public MountTransfurPacket(int entity, int mount) {
         this.entity = entity;
         this.mount = mount;
     }
 
     public MountTransfurPacket(FriendlyByteBuf buffer) {
-        this.entity = buffer.readUUID();
-        this.mount = buffer.readUUID();
+        this.entity = buffer.readVarInt();
+        this.mount = buffer.readVarInt();
     }
 
     public void write(FriendlyByteBuf buffer) {
-        buffer.writeUUID(entity);
-        buffer.writeUUID(mount);
+        buffer.writeVarInt(entity);
+        buffer.writeVarInt(mount);
     }
 
     @Override
@@ -37,10 +37,10 @@ public class MountTransfurPacket implements ChangedPacket {
         if (context.getDirection().getReceptionSide() == LogicalSide.CLIENT) {
             context.setPacketHandled(true);
             return levelFuture.thenAccept(level -> {
-                if (entity.equals(mount))
-                    level.getPlayerByUUID(entity).stopRiding();
+                if (entity == mount)
+                    level.getEntity(entity).stopRiding();
                 else
-                    level.getPlayerByUUID(entity).startRiding(level.getPlayerByUUID(mount));
+                    level.getEntity(entity).startRiding(level.getEntity(mount));
             });
         }
 

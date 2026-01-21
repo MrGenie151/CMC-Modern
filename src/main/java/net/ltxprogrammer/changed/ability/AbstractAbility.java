@@ -271,7 +271,7 @@ public abstract class AbstractAbility<Instance extends AbstractAbilityInstance> 
         if (entity.getLevel().isClientSide)
             Changed.PACKET_HANDLER.sendToServer(new SyncVariantAbilityPacket(this, data));
         else
-            Changed.PACKET_HANDLER.send(PacketDistributor.ALL.noArg(), new SyncVariantAbilityPacket(this, data, entity.getUUID()));
+            Changed.PACKET_HANDLER.send(PacketDistributor.ALL.noArg(), new SyncVariantAbilityPacket(this, data, entity.getId()));
     }
 
     @Nullable

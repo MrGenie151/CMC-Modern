@@ -5,6 +5,7 @@ import net.ltxprogrammer.changed.process.ProcessEmote;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.network.NetworkEvent;
@@ -16,21 +17,21 @@ import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 public class EmotePacket implements ChangedPacket {
-    private final UUID entity;
+    private final int entity;
     private final Emote emote;
 
-    public EmotePacket(UUID entity, Emote emote) {
+    public EmotePacket(int entity, Emote emote) {
         this.entity = entity;
         this.emote = emote;
     }
 
     public EmotePacket(FriendlyByteBuf buffer) {
-        this.entity = buffer.readUUID();
+        this.entity = buffer.readVarInt();
         this.emote = Emote.values()[buffer.readInt()];
     }
 
     public void write(FriendlyByteBuf buffer) {
-        buffer.writeUUID(entity);
+        buffer.writeVarInt(entity);
         buffer.writeInt(emote.ordinal());
     }
 
@@ -39,7 +40,8 @@ public class EmotePacket implements ChangedPacket {
         if (context.getDirection().getReceptionSide() == LogicalSide.CLIENT) {
             context.setPacketHandled(true);
             return levelFuture.thenAccept(level -> {
-                ProcessEmote.playerEmote(level.getPlayerByUUID(entity), emote);
+                if (level.getEntity(entity) instanceof Player player)
+                    ProcessEmote.playerEmote(player, emote);
             });
         }
 

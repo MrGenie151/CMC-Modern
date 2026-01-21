@@ -18,19 +18,19 @@ import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 public class QueryTransfurPacket implements ChangedPacket {
-    private final List<UUID> changedForms;
+    private final List<Integer> changedForms;
     private static final ResourceLocation NO_FORM = Changed.modResource("no_form");
 
-    public QueryTransfurPacket(List<UUID> changedForms) {
+    public QueryTransfurPacket(List<Integer> changedForms) {
         this.changedForms = changedForms;
     }
 
     public QueryTransfurPacket(FriendlyByteBuf buffer) {
-        this.changedForms = buffer.readList(FriendlyByteBuf::readUUID);
+        this.changedForms = buffer.readList(FriendlyByteBuf::readVarInt);
     }
 
     public void write(FriendlyByteBuf buffer) {
-        buffer.writeCollection(changedForms, FriendlyByteBuf::writeUUID);
+        buffer.writeCollection(changedForms, FriendlyByteBuf::writeVarInt);
     }
 
     @Override
@@ -41,9 +41,9 @@ public class QueryTransfurPacket implements ChangedPacket {
                 ServerPlayer sender = context.getSender();
                 if (sender != null) {
                     SyncTransfurPacket.Builder builder = new SyncTransfurPacket.Builder();
-                    changedForms.forEach(uuid -> {
-                        Player player = sender.level().getPlayerByUUID(uuid);
-                        if (player != null)
+                    changedForms.forEach(id -> {
+                        var entity = sender.level().getEntity(id);
+                        if (entity instanceof Player player)
                             builder.addPlayer(player, false);
                     });
                     if (builder.worthSending()) Changed.PACKET_HANDLER.send(PacketDistributor.PLAYER.with(context::getSender), builder.build());
@@ -55,10 +55,10 @@ public class QueryTransfurPacket implements ChangedPacket {
     }
 
     public static class Builder {
-        private final List<UUID> changedForms = new ArrayList<>();
+        private final List<Integer> changedForms = new ArrayList<>();
 
         public void addPlayer(Player player) {
-            changedForms.add(player.getUUID());
+            changedForms.add(player.getId());
         }
 
         public QueryTransfurPacket build() {

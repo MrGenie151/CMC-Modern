@@ -92,7 +92,7 @@ public class ProcessTransfur {
             return;
         ext.setTransfurProgress(progress);
         if (!player.level().isClientSide)
-            Changed.PACKET_HANDLER.send(PacketDistributor.ALL.noArg(), new SyncTransfurProgressPacket(player.getUUID(), progress));
+            Changed.PACKET_HANDLER.send(PacketDistributor.ALL.noArg(), new SyncTransfurProgressPacket(player.getId(), progress));
     }
 
     public static float getPlayerTransfurProgress(Player player) {
