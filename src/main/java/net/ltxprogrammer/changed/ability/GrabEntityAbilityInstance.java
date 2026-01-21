@@ -1,6 +1,5 @@
 package net.ltxprogrammer.changed.ability;
 
-import com.mojang.datafixers.util.Pair;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
@@ -9,6 +8,7 @@ import net.ltxprogrammer.changed.init.ChangedAttributes;
 import net.ltxprogrammer.changed.init.ChangedTags;
 import net.ltxprogrammer.changed.network.packet.GrabEntityPacket;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
+import net.ltxprogrammer.changed.util.KeyStatesTracker;
 import net.ltxprogrammer.changed.util.UniversalDist;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
@@ -26,13 +26,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
     @Nullable
@@ -131,10 +126,7 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
         this.escapeKeyRandom = null;
         this.lastEscapeKey = null;
 
-        ESCAPE_KEYS.forEach((key, value) -> {
-            value.getFirst().getSecond().accept(false);
-            value.getSecond().getSecond().accept(false);
-        });
+        this.escapeKeys.reset(false);
 
         if (this.grabbedEntity == null) return;
 
@@ -227,14 +219,7 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
         // Copy escape state
         this.grabStrength = other.grabStrength;
         this.grabStrengthO = other.grabStrengthO;
-        this.escapeKeyForwardO = other.escapeKeyForwardO;
-        this.escapeKeyBackwardO = other.escapeKeyBackwardO;
-        this.escapeKeyLeftO = other.escapeKeyLeftO;
-        this.escapeKeyRightO = other.escapeKeyRightO;
-        this.escapeKeyForward = other.escapeKeyForward;
-        this.escapeKeyBackward = other.escapeKeyBackward;
-        this.escapeKeyLeft = other.escapeKeyLeft;
-        this.escapeKeyRight = other.escapeKeyRight;
+        this.escapeKeys.copyFrom(other.escapeKeys);
         this.ticksUnpressed = other.ticksUnpressed;
         this.lastEscapeKey = other.lastEscapeKey;
         this.currentEscapeKey = other.currentEscapeKey;
@@ -273,40 +258,13 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
     public boolean attackDown = false;
     public boolean useDown = false;
 
-    public boolean escapeKeyForwardO = false;
-    public boolean escapeKeyBackwardO = false;
-    public boolean escapeKeyLeftO = false;
-    public boolean escapeKeyRightO = false;
-    public boolean escapeKeyForward = false;
-    public boolean escapeKeyBackward = false;
-    public boolean escapeKeyLeft = false;
-    public boolean escapeKeyRight = false;
+    public final KeyStatesTracker<KeyReference> escapeKeys = new KeyStatesTracker<>(
+            Set.of(KeyReference.MOVE_FORWARD, KeyReference.MOVE_BACKWARD, KeyReference.MOVE_LEFT, KeyReference.MOVE_RIGHT));
     public int ticksUnpressed = 0;
     public KeyReference lastEscapeKey = null;
     public KeyReference currentEscapeKey = null;
     public RandomSource escapeKeyRandom = null;
     public int ticksGrabbed = 0;
-    private final Map<KeyReference, Pair<
-            Pair<Supplier<Boolean>, Consumer<Boolean>>,
-            Pair<Supplier<Boolean>, Consumer<Boolean>>
-            >> ESCAPE_KEYS = Util.make(new HashMap<>(), map -> {
-                map.put(KeyReference.MOVE_FORWARD, Pair.of(
-                        Pair.of(() -> escapeKeyForward, (v) -> escapeKeyForward = v),
-                        Pair.of(() -> escapeKeyForwardO, (v) -> escapeKeyForwardO = v)
-                ));
-                map.put(KeyReference.MOVE_BACKWARD, Pair.of(
-                        Pair.of(() -> escapeKeyBackward, (v) -> escapeKeyBackward = v),
-                        Pair.of(() -> escapeKeyBackwardO, (v) -> escapeKeyBackwardO = v)
-                ));
-                map.put(KeyReference.MOVE_LEFT, Pair.of(
-                        Pair.of(() -> escapeKeyLeft, (v) -> escapeKeyLeft = v),
-                        Pair.of(() -> escapeKeyLeftO, (v) -> escapeKeyLeftO = v)
-                ));
-                map.put(KeyReference.MOVE_RIGHT, Pair.of(
-                        Pair.of(() -> escapeKeyRight, (v) -> escapeKeyRight = v),
-                        Pair.of(() -> escapeKeyRightO, (v) -> escapeKeyRightO = v)
-                ));
-    });
     private static final List<KeyReference> ORDERED_KEYS = List.of(KeyReference.MOVE_FORWARD, KeyReference.MOVE_BACKWARD, KeyReference.MOVE_LEFT, KeyReference.MOVE_RIGHT);
 
     protected KeyReference getNextEscapeKey() {
@@ -345,20 +303,23 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
             if (ticksGrabbed < 10) return;
 
             if (player == UniversalDist.getLocalPlayer()) { // Client-side code of the grabbed player
-                AtomicBoolean stateChanged = new AtomicBoolean(false);
+                boolean stateChanged = false;
 
-                ESCAPE_KEYS.forEach((key, value) -> {
-                    boolean isDown = key.isDown(player.level());
-                    boolean oldState = value.getFirst().getFirst().get();
-                    if (isDown != oldState) { // Key does not match old state, send update packet
-                        value.getFirst().getSecond().accept(isDown);
-                        stateChanged.set(true);
-                    }
-                });
+                if (escapeKeys.queueKeyState(KeyReference.MOVE_FORWARD, KeyReference.MOVE_FORWARD.isDown(player.level())))
+                    stateChanged = true;
+                if (escapeKeys.queueKeyState(KeyReference.MOVE_BACKWARD, KeyReference.MOVE_BACKWARD.isDown(player.level())))
+                    stateChanged = true;
+                if (escapeKeys.queueKeyState(KeyReference.MOVE_LEFT, KeyReference.MOVE_LEFT.isDown(player.level())))
+                    stateChanged = true;
+                if (escapeKeys.queueKeyState(KeyReference.MOVE_RIGHT, KeyReference.MOVE_RIGHT.isDown(player.level())))
+                    stateChanged = true;
 
-                if (stateChanged.getAcquire()) {
+                if (stateChanged) {
                     Changed.PACKET_HANDLER.sendToServer(new GrabEntityPacket.EscapeKeyState(player,
-                            escapeKeyForward, escapeKeyBackward, escapeKeyLeft, escapeKeyRight, ticksUnpressed));
+                            escapeKeys.isEffectivelyDown(KeyReference.MOVE_FORWARD),
+                            escapeKeys.isEffectivelyDown(KeyReference.MOVE_BACKWARD),
+                            escapeKeys.isEffectivelyDown(KeyReference.MOVE_LEFT),
+                            escapeKeys.isEffectivelyDown(KeyReference.MOVE_RIGHT)));
                 }
             }
 
@@ -368,12 +329,21 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
                 Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player), new GrabEntityPacket.AnnounceEscapeSeed(player, seed));
             }
 
-            if (currentEscapeKey != null) {
-                final var keyRef = ESCAPE_KEYS.get(currentEscapeKey);
-                if (keyRef.getFirst().getFirst().get() && !keyRef.getSecond().getFirst().get()) { // Key was just pressed
+            final float resolvedDecay = entityGrabStrengthDecay;
+            AtomicBoolean keysUnpressed = new AtomicBoolean(true);
+            escapeKeys.handleStateUpdates((keyRef, isDown, wasDown, unique) -> {
+                if (currentEscapeKey == null)
+                    return;
+                if (!(isDown && !wasDown))
+                    return;
+
+                keysUnpressed.set(false);
+
+                // Key was just pressed
+                if (keyRef == currentEscapeKey) {
                     // This is to reduce the strength of cheating (pressing the key too fast)
                     float trustStrength = Mth.clamp((float)ticksUnpressed / (float)GRAB_ESCAPE_TRUST, 0.0f, 1.0f);
-                    float keyStrength = entityGrabStrengthDecay * trustStrength;
+                    float keyStrength = resolvedDecay * trustStrength;
                     if (!player.level().isClientSide) {
                         this.grabStrength -= keyStrength;
                         this.suitTransition = Mth.clamp(this.suitTransition - (keyStrength * 0.5f), 0.0f, SUIT_TRANSITION_MAX);
@@ -384,38 +354,25 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
                                         this.suitTransition,
                                         this.suitTransitionO));
                     }
-                    lastEscapeKey = currentEscapeKey;
-                    currentEscapeKey = this.getNextEscapeKey();
-                    ticksUnpressed = 0;
                 } else {
-                    ticksUnpressed++;
-
-                    boolean badKey = ESCAPE_KEYS.entrySet().stream().filter((entry) -> entry.getKey() != currentEscapeKey).anyMatch((entry) -> {
-                        return entry.getValue().getFirst().getFirst().get() && !entry.getValue().getSecond().getFirst().get();
-                    });
-
-                    if (badKey) {
-                        if (!player.level().isClientSide) {
-                            this.grabStrength = Mth.clamp(this.grabStrength + GRAB_STRENGTH_DECAY_PENALTY, 0.0f, 1.0f);
-                            Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(this.entity::getEntity),
-                                    new GrabEntityPacket.SyncGrabStrength(this.entity.getEntity(),
-                                            this.grabStrength,
-                                            this.grabStrengthO,
-                                            this.suitTransition,
-                                            this.suitTransitionO));
-                        }
-
-                        lastEscapeKey = currentEscapeKey;
-                        currentEscapeKey = this.getNextEscapeKey();
-                        ticksUnpressed = 0;
+                    if (!player.level().isClientSide) {
+                        this.grabStrength = Mth.clamp(this.grabStrength + GRAB_STRENGTH_DECAY_PENALTY, 0.0f, 1.0f);
+                        Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(this.entity::getEntity),
+                                new GrabEntityPacket.SyncGrabStrength(this.entity.getEntity(),
+                                        this.grabStrength,
+                                        this.grabStrengthO,
+                                        this.suitTransition,
+                                        this.suitTransitionO));
                     }
                 }
-            }
 
-            ESCAPE_KEYS.forEach((ref, pair) -> {
-                // Copy current state to old state
-                pair.getSecond().getSecond().accept(pair.getFirst().getFirst().get());
+                lastEscapeKey = currentEscapeKey;
+                currentEscapeKey = this.getNextEscapeKey();
+                ticksUnpressed = 0;
             });
+
+            if (keysUnpressed.getAcquire())
+                ticksUnpressed++;
         }
     }
 

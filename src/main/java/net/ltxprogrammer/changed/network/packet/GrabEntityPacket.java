@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.network.packet;
 
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.ability.AbstractAbility;
+import net.ltxprogrammer.changed.ability.AbstractAbilityInstance;
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.entity.LivingEntityDataExtension;
 import net.ltxprogrammer.changed.init.ChangedAbilities;
@@ -313,15 +314,13 @@ public class GrabEntityPacket implements ChangedPacket {
         private final boolean keyBackward;
         private final boolean keyLeft;
         private final boolean keyRight;
-        private final int ticksUnpressed;
 
-        public EscapeKeyState(Player player, boolean keyForward, boolean keyBackward, boolean keyLeft, boolean keyRight, int ticksUnpressed) {
+        public EscapeKeyState(Player player, boolean keyForward, boolean keyBackward, boolean keyLeft, boolean keyRight) {
             this.id = player.getId();
             this.keyForward = keyForward;
             this.keyBackward = keyBackward;
             this.keyLeft = keyLeft;
             this.keyRight = keyRight;
-            this.ticksUnpressed = ticksUnpressed;
         }
 
         public EscapeKeyState(FriendlyByteBuf buffer) {
@@ -330,7 +329,6 @@ public class GrabEntityPacket implements ChangedPacket {
             this.keyBackward = buffer.readBoolean();
             this.keyLeft = buffer.readBoolean();
             this.keyRight = buffer.readBoolean();
-            this.ticksUnpressed = buffer.readVarInt();
         }
 
         @Override
@@ -340,7 +338,6 @@ public class GrabEntityPacket implements ChangedPacket {
             buffer.writeBoolean(this.keyBackward);
             buffer.writeBoolean(this.keyLeft);
             buffer.writeBoolean(this.keyRight);
-            buffer.writeVarInt(this.ticksUnpressed);
         }
 
         @Override
@@ -353,11 +350,10 @@ public class GrabEntityPacket implements ChangedPacket {
 
                     var ability = AbstractAbility.getAbilityInstance(ext.getGrabbedBy(), ChangedAbilities.GRAB_ENTITY_ABILITY.get());
                     if (ability != null) {
-                        ability.escapeKeyForward = this.keyForward;
-                        ability.escapeKeyBackward = this.keyBackward;
-                        ability.escapeKeyLeft = this.keyLeft;
-                        ability.escapeKeyRight = this.keyRight;
-                        ability.ticksUnpressed = this.ticksUnpressed;
+                        ability.escapeKeys.queueKeyState(AbstractAbilityInstance.KeyReference.MOVE_FORWARD, this.keyForward);
+                        ability.escapeKeys.queueKeyState(AbstractAbilityInstance.KeyReference.MOVE_BACKWARD, this.keyBackward);
+                        ability.escapeKeys.queueKeyState(AbstractAbilityInstance.KeyReference.MOVE_LEFT, this.keyLeft);
+                        ability.escapeKeys.queueKeyState(AbstractAbilityInstance.KeyReference.MOVE_RIGHT, this.keyRight);
                     }
 
                     else
@@ -374,13 +370,12 @@ public class GrabEntityPacket implements ChangedPacket {
 
                     var ability = AbstractAbility.getAbilityInstance(ext.getGrabbedBy(), ChangedAbilities.GRAB_ENTITY_ABILITY.get());
                     if (ability != null) {
-                        ability.escapeKeyForward = this.keyForward;
-                        ability.escapeKeyBackward = this.keyBackward;
-                        ability.escapeKeyLeft = this.keyLeft;
-                        ability.escapeKeyRight = this.keyRight;
-                        ability.ticksUnpressed = this.ticksUnpressed;
+                        ability.escapeKeys.queueKeyState(AbstractAbilityInstance.KeyReference.MOVE_FORWARD, this.keyForward);
+                        ability.escapeKeys.queueKeyState(AbstractAbilityInstance.KeyReference.MOVE_BACKWARD, this.keyBackward);
+                        ability.escapeKeys.queueKeyState(AbstractAbilityInstance.KeyReference.MOVE_LEFT, this.keyLeft);
+                        ability.escapeKeys.queueKeyState(AbstractAbilityInstance.KeyReference.MOVE_RIGHT, this.keyRight);
                         Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity),
-                                new EscapeKeyState(entity, keyForward, keyBackward, keyLeft, keyRight, ticksUnpressed));
+                                new EscapeKeyState(entity, keyForward, keyBackward, keyLeft, keyRight));
                     }
 
                     else

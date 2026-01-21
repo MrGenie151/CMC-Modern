@@ -111,7 +111,7 @@ public class AbilityRadialScreen extends VariantRadialScreen<AbilityRadialMenu> 
         close.run();
         var ability = abilities.get(section);
         variant.setSelectedAbility(ability);
-        Changed.PACKET_HANDLER.sendToServer(new VariantAbilityActivate(this.menu.player, variant.isAbilityKeyEffectivelyDown(), ability));
+        Changed.PACKET_HANDLER.sendToServer(new VariantAbilityActivate(this.menu.player, variant.abilityKey.isEffectivelyDown(), ability));
         return false;
     }
 
