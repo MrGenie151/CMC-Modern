@@ -2,6 +2,6 @@
   "type": "forge:add_spawns",
   "biomes": "#forge:is_swamp",
   "spawners": [
-    { "type": "changed:latex_crocodile", "weight": 100, "minCount": 1, "maxCount": 3 }
+    { "type": "changed:latex_crocodile", "weight": 10, "minCount": 1, "maxCount": 3 }
   ]
 }

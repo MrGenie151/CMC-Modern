@@ -3,7 +3,7 @@
   "biomes": "#changed:has_structure/beehives",
   "step": "surface_structures",
   "spawn_overrides": {
-    "changed:changed": {
+    "monster": {
       "bounding_box": "piece",
       "spawns": [
         {
