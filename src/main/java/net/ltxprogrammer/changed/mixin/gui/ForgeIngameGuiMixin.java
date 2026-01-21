@@ -35,7 +35,10 @@ public abstract class ForgeIngameGuiMixin extends Gui {
         original.call(width, height, guiGraphics);
     }
 
-    @WrapOperation(method = "renderAir", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getAirSupply()I"))
+    @WrapOperation(method = "renderAir", at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/player/Player;getAirSupply()I",
+            remap = true))
     public int getScaledAirSupply(Player player, Operation<Integer> original) {
         var variant = ProcessTransfur.getPlayerTransfurVariant(EntityUtil.playerOrNull(Minecraft.getInstance().getCameraEntity()));
         if (variant == null)
