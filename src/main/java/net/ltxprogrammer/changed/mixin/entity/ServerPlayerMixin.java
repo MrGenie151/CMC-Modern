@@ -216,7 +216,7 @@ public abstract class ServerPlayerMixin extends Player implements PlayerDataExte
     @Inject(method = "stopRiding", at = @At("HEAD"))
     public void stopRiding(CallbackInfo callbackInfo) {
         if (this.getVehicle() instanceof Player)
-            Changed.PACKET_HANDLER.send(PacketDistributor.ALL.noArg(), new MountTransfurPacket(getUUID(), getUUID()));
+            Changed.PACKET_HANDLER.send(PacketDistributor.ALL.noArg(), new MountTransfurPacket(getId(), getId()));
     }
 
     @Override

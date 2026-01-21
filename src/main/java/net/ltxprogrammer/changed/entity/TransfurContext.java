@@ -70,7 +70,7 @@ public class TransfurContext {
     public CompoundTag toTag() {
         CompoundTag tag = new CompoundTag();
         tag.putString("cause", cause.name());
-        tag.putInt("source", source == null ? -1 : source.getEntity().getId());
+        tag.putInt("source", source == null ? -1 : source.getId());
         return tag;
     }
 }

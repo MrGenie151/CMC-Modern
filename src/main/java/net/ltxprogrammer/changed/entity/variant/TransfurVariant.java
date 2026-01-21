@@ -47,32 +47,8 @@ public class TransfurVariant<T extends ChangedEntity> {
         return entity.getType().is(ChangedTags.EntityTypes.LATEX);
     }
 
-    @Deprecated
-    public static List<TransfurVariant<?>> getFusionCompatible(TransfurVariant<?> source, TransfurVariant<?> other) {
-        List<TransfurVariant<?>> list = new ArrayList<>();
-        ChangedRegistry.TRANSFUR_VARIANT.get().forEach(variant -> {
-            if (variant.isFusionOf(source, other))
-                list.add(variant);
-        });
-        return list;
-    }
-
-    @Deprecated
-    public static List<TransfurVariant<?>> getFusionCompatible(TransfurVariant<?> source, Class<? extends LivingEntity> clazz) {
-        List<TransfurVariant<?>> list = new ArrayList<>();
-        ChangedRegistry.TRANSFUR_VARIANT.get().forEach(variant -> {
-            if (variant.isFusionOf(source, clazz))
-                list.add(variant);
-        });
-        return list;
-    }
-
     public ResourceLocation getFormId() {
         return ChangedRegistry.TRANSFUR_VARIANT.get().getKey(this);
-    }
-
-    public boolean isReducedFall() {
-        return reducedFall;
     }
 
     public TransfurMode transfurMode() { return transfurMode; }
@@ -129,10 +105,6 @@ public class TransfurVariant<T extends ChangedEntity> {
 
     public enum BreatheMode {
         NORMAL,
-        @Deprecated
-        WEAK,
-        @Deprecated
-        STRONG,
         WATER,
         ANY,
         NONE;
@@ -142,7 +114,7 @@ public class TransfurVariant<T extends ChangedEntity> {
         }
 
         public boolean canBreatheAir() {
-            return this == NORMAL || this == ANY || this == WEAK || this == STRONG;
+            return this == NORMAL || this == ANY;
         }
 
         public boolean hasAquaAffinity() { return canBreatheWater(); }
@@ -160,11 +132,9 @@ public class TransfurVariant<T extends ChangedEntity> {
 
     // Variant properties
     public final Supplier<EntityType<T>> ctor;
-    public final float jumpStrength;
     public final BreatheMode breatheMode;
     public final boolean canGlide;
     public final int extraJumpCharges;
-    public final boolean reducedFall;
     public final boolean canClimb;
     public final VisionType visionType;
     public final MiningStrength miningStrength;
@@ -176,12 +146,10 @@ public class TransfurVariant<T extends ChangedEntity> {
     public final ResourceLocation sound;
 
     public TransfurVariant(Supplier<EntityType<T>> ctor,
-                           float jumpStrength, BreatheMode breatheMode, boolean canGlide, int extraJumpCharges,
-                           boolean reducedFall, boolean canClimb,
+                           BreatheMode breatheMode, boolean canGlide, int extraJumpCharges, boolean canClimb,
                            VisionType visionType, MiningStrength miningStrength, UseItemMode itemUseMode, @Nullable BiPredicate<T, PathfinderMob> scares, TransfurMode transfurMode,
                            List<Function<EntityType<?>, ? extends AbstractAbility<?>>> abilities, float cameraZOffset, ResourceLocation sound) {
         this.ctor = ctor;
-        this.jumpStrength = jumpStrength;
         this.breatheMode = breatheMode;
         this.miningStrength = miningStrength;
         this.visionType = visionType;
@@ -189,7 +157,6 @@ public class TransfurVariant<T extends ChangedEntity> {
         this.extraJumpCharges = extraJumpCharges;
         this.itemUseMode = itemUseMode;
         this.abilities = ImmutableList.<Function<EntityType<?>, ? extends AbstractAbility<?>>>builder().addAll(abilities).build();
-        this.reducedFall = reducedFall;
         this.canClimb = canClimb;
         this.scares = scares;
         this.transfurMode = transfurMode;
@@ -339,7 +306,6 @@ public class TransfurVariant<T extends ChangedEntity> {
 
     public static class Builder<T extends ChangedEntity> {
         final Supplier<EntityType<T>> entityType;
-        float jumpStrength = 1.0F;
         BreatheMode breatheMode = BreatheMode.NORMAL;
         boolean canGlide = false;
         int extraJumpCharges = 0;
@@ -376,10 +342,6 @@ public class TransfurVariant<T extends ChangedEntity> {
             return new Builder<T>(entityType);
         }
 
-        public Builder<T> jumpStrength(float factor) {
-            this.jumpStrength = factor; return this;
-        }
-
         public Builder<T> gills() {
             return gills(false);
         }
@@ -390,10 +352,6 @@ public class TransfurVariant<T extends ChangedEntity> {
 
         public Builder<T> breatheMode(BreatheMode mode) {
             this.breatheMode = mode; return this;
-        }
-
-        public Builder<T> reducedFall() {
-            this.reducedFall = true; return this;
         }
 
         public Builder<T> noVision() {
@@ -558,8 +516,8 @@ public class TransfurVariant<T extends ChangedEntity> {
         }
 
         public TransfurVariant<T> build() {
-            return new TransfurVariant<>(entityType, jumpStrength, breatheMode, canGlide, extraJumpCharges,
-                    reducedFall, canClimb, visionType, miningStrength, itemUseMode, scares, transfurMode, abilities, cameraZOffset, sound);
+            return new TransfurVariant<>(entityType, breatheMode, canGlide, extraJumpCharges,
+                    canClimb, visionType, miningStrength, itemUseMode, scares, transfurMode, abilities, cameraZOffset, sound);
         }
     }
 

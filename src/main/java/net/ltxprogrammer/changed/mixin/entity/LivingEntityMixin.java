@@ -146,21 +146,14 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDa
         });
     }
 
-    @Inject(method = "getJumpPower", at = @At("RETURN"), cancellable = true)
-    public void getJumpPower(CallbackInfoReturnable<Float> callback) {
-        var instance = IAbstractChangedEntity.forEitherSafe((LivingEntity)(Object)this).map(IAbstractChangedEntity::getTransfurVariantInstance).orElse(null);
-        if (instance != null) {
-            callback.setReturnValue(callback.getReturnValue() * instance.jumpStrength);
+    @WrapMethod(method = "getJumpPower")
+    public float getJumpPower(Operation<Float> original) {
+        var attributes = this.getAttributes();
+        if (attributes.hasAttribute(ChangedAttributes.JUMP_STRENGTH.get())) {
+            return original.call() * (float) attributes.getValue(ChangedAttributes.JUMP_STRENGTH.get());
+        } else {
+            return original.call();
         }
-
-        else {
-            ProcessTransfur.getEntityVariant((LivingEntity)(Object)this).map(variant -> callback.getReturnValue() * variant.jumpStrength).ifPresent(callback::setReturnValue);
-        }
-
-        Exoskeleton.getEntityExoskeleton((LivingEntity)(Object)this)
-                        .ifPresent(pair -> {
-                            callback.setReturnValue(callback.getReturnValue() * pair.getSecond().getJumpStrengthMultiplier(pair.getFirst()));
-                        });
     }
 
     @Inject(method = "hasEffect", at = @At("HEAD"), cancellable = true)

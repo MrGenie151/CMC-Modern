@@ -16,24 +16,34 @@ public class ChangedAttributes {
             () -> new RangedAttribute("attribute.name.changed.transfur_damage", 3.0D, 0.0D, 2048.0D));
 
     /**
-     *  How Easily an entity will break free from a grab
+     * How Easily an entity will break free from a grab
      */
     public static final RegistryObject<Attribute> GRAB_STRUGGLE_STRENGTH = REGISTRY.register("grab_struggle_strength",
             () -> new RangedAttribute("attribute.name.changed.grab_struggle_strength", 0.005f, 0.0D, 2048.0D).setSyncable(true));
 
     /**
-     *  Multiplies the player's speed difference sprinting vs not. One is vanilla. Zero disables sprint. ONLY APPLIES WITH A TRANSFUR VARIANT.
+     * Multiplies the player's speed difference sprinting vs not. One is vanilla. Zero disables sprint. ONLY APPLIES WITH A TRANSFUR VARIANT.
      */
     public static final RegistryObject<Attribute> SPRINT_SPEED = REGISTRY.register("sprint_speed",
             () -> new RangedAttribute("attribute.name.changed.sprint_speed", 1.0D, 0.0D, 512.0D).setSyncable(true));
     /**
-     *  Multiplies the player's speed when sneaking. A higher value is faster. One is vanilla. ONLY APPLIES WITH A TRANSFUR VARIANT.
+     * Multiplies the player's speed when sneaking. A higher value is faster. One is vanilla. ONLY APPLIES WITH A TRANSFUR VARIANT.
      */
     public static final RegistryObject<Attribute> SNEAK_SPEED = REGISTRY.register("sneak_speed",
             () -> new RangedAttribute("attribute.name.changed.sneak_speed", 1.0D, 0.0D, 512.0D).setSyncable(true));
     /**
-     *  Replaces player's base air capacity. Rounds to nearest tick. ONLY APPLIES WITH A TRANSFUR VARIANT.
+     * Replaces player's base air capacity. In seconds. ONLY APPLIES WITH A TRANSFUR VARIANT.
      */
     public static final RegistryObject<Attribute> AIR_CAPACITY = REGISTRY.register("air_capacity",
-            () -> new RangedAttribute("attribute.name.changed.air_capacity", 300.0D, 0.0D, 16384.0D).setSyncable(true));
+            () -> new RangedAttribute("attribute.name.changed.air_capacity", 15.0D, 0.0D, 1024.0D).setSyncable(true));
+    /**
+     * Multiplies the entity's jump height.
+     */
+    public static final RegistryObject<Attribute> JUMP_STRENGTH = REGISTRY.register("jump_strength",
+            () -> new RangedAttribute("attribute.name.changed.jump_strength", 1.0D, 0.0D, 256.0D).setSyncable(true));
+    /**
+     * Divides the entity's fall distance.
+     */
+    public static final RegistryObject<Attribute> FALL_RESISTANCE = REGISTRY.register("fall_resistance",
+            () -> new RangedAttribute("attribute.name.changed.fall_resistance", 1.0D, 0.5D, 1024.0D).setSyncable(true));
 }

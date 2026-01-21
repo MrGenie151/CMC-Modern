@@ -374,8 +374,16 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
                     // This is to reduce the strength of cheating (pressing the key too fast)
                     float trustStrength = Mth.clamp((float)ticksUnpressed / (float)GRAB_ESCAPE_TRUST, 0.0f, 1.0f);
                     float keyStrength = entityGrabStrengthDecay * trustStrength;
-                    this.grabStrength -= keyStrength;
-                    this.suitTransition = Mth.clamp(this.suitTransition - (keyStrength * 0.5f), 0.0f, SUIT_TRANSITION_MAX);
+                    if (!player.level().isClientSide) {
+                        this.grabStrength -= keyStrength;
+                        this.suitTransition = Mth.clamp(this.suitTransition - (keyStrength * 0.5f), 0.0f, SUIT_TRANSITION_MAX);
+                        Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(this.entity::getEntity),
+                                new GrabEntityPacket.SyncGrabStrength(this.entity.getEntity(),
+                                        this.grabStrength,
+                                        this.grabStrengthO,
+                                        this.suitTransition,
+                                        this.suitTransitionO));
+                    }
                     lastEscapeKey = currentEscapeKey;
                     currentEscapeKey = this.getNextEscapeKey();
                     ticksUnpressed = 0;
@@ -387,7 +395,16 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
                     });
 
                     if (badKey) {
-                        this.grabStrength = Mth.clamp(this.grabStrength + GRAB_STRENGTH_DECAY_PENALTY, 0.0f, 1.0f);
+                        if (!player.level().isClientSide) {
+                            this.grabStrength = Mth.clamp(this.grabStrength + GRAB_STRENGTH_DECAY_PENALTY, 0.0f, 1.0f);
+                            Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(this.entity::getEntity),
+                                    new GrabEntityPacket.SyncGrabStrength(this.entity.getEntity(),
+                                            this.grabStrength,
+                                            this.grabStrengthO,
+                                            this.suitTransition,
+                                            this.suitTransitionO));
+                        }
+
                         lastEscapeKey = currentEscapeKey;
                         currentEscapeKey = this.getNextEscapeKey();
                         ticksUnpressed = 0;

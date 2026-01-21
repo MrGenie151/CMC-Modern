@@ -3,6 +3,7 @@ package net.ltxprogrammer.changed.entity.beast;
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.entity.robot.Exoskeleton;
+import net.ltxprogrammer.changed.init.ChangedAttributes;
 import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
@@ -23,6 +24,7 @@ public class LatexBenignOrca extends AbstractAquaticEntity {
         attributes.getInstance(Attributes.FOLLOW_RANGE).setBaseValue(4.0);
         attributes.getInstance(Attributes.MOVEMENT_SPEED).setBaseValue(0.12);
         attributes.getInstance(ForgeMod.SWIM_SPEED.get()).setBaseValue(0.5);
+        attributes.getInstance(ChangedAttributes.JUMP_STRENGTH.get()).setBaseValue(0.5);
     }
 
     @Override
@@ -36,11 +38,13 @@ public class LatexBenignOrca extends AbstractAquaticEntity {
             if (hasExo) {
                 attributes.getInstance(Attributes.MOVEMENT_SPEED).setBaseValue(1.075);
                 attributes.getInstance(ForgeMod.SWIM_SPEED.get()).setBaseValue(0.95);
+                attributes.getInstance(ChangedAttributes.JUMP_STRENGTH.get()).setBaseValue(1.0);
             }
 
             else {
                 attributes.getInstance(Attributes.MOVEMENT_SPEED).setBaseValue(0.15);
                 attributes.getInstance(ForgeMod.SWIM_SPEED.get()).setBaseValue(0.2);
+                attributes.getInstance(ChangedAttributes.JUMP_STRENGTH.get()).setBaseValue(0.5);
             }
 
             hasExoLast = hasExo;
@@ -49,7 +53,6 @@ public class LatexBenignOrca extends AbstractAquaticEntity {
             if (instance != null) {
                 instance.visionType = hasExo ? VisionType.NORMAL : VisionType.BLIND;
                 instance.itemUseMode = hasExo ? UseItemMode.NORMAL : UseItemMode.NONE;
-                instance.jumpStrength = hasExo ? 1.0f : 0.5f;
                 instance.miningStrength = hasExo ? MiningStrength.NORMAL : MiningStrength.WEAK;
 
                 instance.refreshAttributes();

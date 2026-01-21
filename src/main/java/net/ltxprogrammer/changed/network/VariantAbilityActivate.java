@@ -7,6 +7,7 @@ import net.ltxprogrammer.changed.init.ChangedAbilities;
 import net.ltxprogrammer.changed.init.ChangedRegistry;
 import net.ltxprogrammer.changed.network.packet.ChangedPacket;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
+import net.ltxprogrammer.changed.util.EntityUtil;
 import net.ltxprogrammer.changed.world.inventory.AbilityRadialMenu;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.InteractionHand;
@@ -22,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 public class VariantAbilityActivate implements ChangedPacket {
-    final UUID uuid;
+    final int id;
     final boolean keyDown;
     final AbstractAbility<?> ability;
 
@@ -31,26 +32,26 @@ public class VariantAbilityActivate implements ChangedPacket {
     }
 
     public VariantAbilityActivate(Player player, boolean keyDown, AbstractAbility<?> ability) {
-        this.uuid = player.getUUID();
+        this.id = player.getId();
         this.keyDown = keyDown;
         this.ability = ability;
     }
 
     public VariantAbilityActivate(Player player, boolean keyDown) {
-        this.uuid = player.getUUID();
+        this.id = player.getId();
         this.keyDown = keyDown;
         this.ability = null;
     }
 
     public VariantAbilityActivate(FriendlyByteBuf buffer) {
-        this.uuid = buffer.readUUID();
+        this.id = buffer.readVarInt();
         this.keyDown = buffer.readBoolean();
         this.ability = ChangedRegistry.ABILITY.readRegistryObject(buffer);
     }
 
     @Override
     public void write(FriendlyByteBuf buffer) {
-        buffer.writeUUID(uuid);
+        buffer.writeVarInt(id);
         buffer.writeBoolean(keyDown);
         ChangedRegistry.ABILITY.writeRegistryObject(buffer, ability);
     }
@@ -60,7 +61,7 @@ public class VariantAbilityActivate implements ChangedPacket {
         if (context.getDirection().getReceptionSide() == LogicalSide.CLIENT) {
             context.setPacketHandled(true);
             return levelFuture.thenAccept(level -> {
-                ProcessTransfur.ifPlayerTransfurred(level.getPlayerByUUID(this.uuid), (player, variant) -> {
+                ProcessTransfur.ifPlayerTransfurred(EntityUtil.playerOrNull(level.getEntity(this.id)), (player, variant) -> {
                     context.setPacketHandled(true);
                     if (variant.isTemporaryFromSuit())
                         return;
@@ -78,7 +79,7 @@ public class VariantAbilityActivate implements ChangedPacket {
 
         else {
             final var sender = context.getSender();
-            if (!sender.getUUID().equals(this.uuid))
+            if (sender.getId() != this.id)
                 return CompletableFuture.failedFuture(new IllegalArgumentException("Incorrect UUID for sending player"));
 
             ProcessTransfur.ifPlayerTransfurred(sender, (variant) -> {

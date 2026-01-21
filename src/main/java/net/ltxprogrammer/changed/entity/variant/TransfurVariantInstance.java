@@ -7,7 +7,6 @@ import net.ltxprogrammer.changed.ability.*;
 import net.ltxprogrammer.changed.data.AccessorySlots;
 import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.entity.latex.LatexType;
-import net.ltxprogrammer.changed.entity.robot.Exoskeleton;
 import net.ltxprogrammer.changed.extension.ChangedCompatibility;
 import net.ltxprogrammer.changed.entity.AccessoryEntities;
 import net.ltxprogrammer.changed.init.*;
@@ -79,7 +78,6 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
     public VisionType visionType;
     public MiningStrength miningStrength;
     public UseItemMode itemUseMode;
-    public float jumpStrength;
     public int ageAsVariant = 0;
     protected int air = -100;
     protected int jumpCharges = 0;
@@ -117,7 +115,6 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
     public CompoundTag save() {
         CompoundTag tag = new CompoundTag();
         tag.putInt("ageAsVariant", ageAsVariant);
-        tag.putInt("air", air);
         tag.putInt("jumpCharges", jumpCharges);
         tag.putBoolean("dead", dead);
         tag.putInt("ticksBreathingUnderwater", ticksBreathingUnderwater);
@@ -147,7 +144,6 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
 
     public void load(CompoundTag tag) {
         ageAsVariant = tag.getInt("ageAsVariant");
-        air = tag.getInt("air");
         jumpCharges = tag.getInt("jumpCharges");
         dead = tag.getBoolean("dead");
         ticksBreathingUnderwater = tag.getInt("ticksBreathingUnderwater");
@@ -239,7 +235,6 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
         this.visionType = parent.visionType;
         this.miningStrength = parent.miningStrength;
         this.itemUseMode = parent.itemUseMode;
-        this.jumpStrength = parent.jumpStrength;
 
         var builder = new ImmutableMap.Builder<AbstractAbility<?>, AbstractAbilityInstance>();
         var abilityExclusivity = new ReferenceArraySet<AbstractAbility<?>>();
@@ -385,14 +380,10 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
 
     @SubscribeEvent
     public static void onLivingFallEvent(LivingFallEvent event) {
-        TransfurVariant<?> variant = TransfurVariant.getEntityVariant(event.getEntity());
-        if (variant != null && variant.isReducedFall()) {
-            event.setDistance(0.4f * event.getDistance());
+        var attributes = event.getEntity().getAttributes();
+        if (attributes.hasAttribute(ChangedAttributes.FALL_RESISTANCE.get())) {
+            event.setDistance(event.getDistance() / (float) attributes.getValue(ChangedAttributes.FALL_RESISTANCE.get()));
         }
-        Exoskeleton.getEntityExoskeleton(event.getEntity())
-                .ifPresent(pair -> {
-                    event.setDistance(event.getDistance() * pair.getSecond().getFallDamageMultiplier(pair.getFirst()));
-                });
     }
 
     public EntityDimensions getTransfurDimensions(Pose pose) {
@@ -799,83 +790,37 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
             if (!variant.shouldApplyAbilities())
                 return;
 
-            // Let TransfurVariantInstance.tickBreathing() handle breathing
-            event.setCanBreathe(true);
-            event.setCanRefillAir(false);
+            variant.tickBreathing(event);
         });
     }
 
-    protected void tickBreathing() {
+    protected void tickBreathing(LivingBreatheEvent event) {
         if (!shouldApplyAbilities())
             return;
 
-        var airSupplyMax = (int)host.getAttributeValue(ChangedAttributes.AIR_CAPACITY.get());
-        var airSupplyScale = host.getAttributeValue(ChangedAttributes.AIR_CAPACITY.get()) / host.getMaxAirSupply();
-
-        int airDelta;
         if (breatheMode == TransfurVariant.BreatheMode.NONE) {
-            airDelta = 0;
             this.ticksBreathingUnderwater = 0;
+
+            event.setCanBreathe(true);
+            event.setCanRefillAir(false);
         } else if (host.isEyeInFluidType(Fluids.WATER.getFluidType())) {
             if (breatheMode.canBreatheWater()) {
-                airDelta = 4;
                 this.ticksBreathingUnderwater++;
-            }
-            
-            else if (host.hasEffect(MobEffects.WATER_BREATHING) || !host.canDrownInFluidType(ForgeMod.WATER_TYPE.get())) {
-                airDelta = 0;
-                this.ticksBreathingUnderwater = 0;
+
+                event.setCanBreathe(true);
+                event.setCanRefillAir(true);
             }
 
             else {
-                int i = EnchantmentHelper.getRespiration(host);
-                airDelta = i > 0 && host.getRandom().nextInt(i + 1) > 0 ? 0 : -1;
                 this.ticksBreathingUnderwater = 0;
             }
         } else {
-            if (breatheMode.canBreatheAir()) {
-                airDelta = 4;
-            }
-
-            else {
-                int i = EnchantmentHelper.getRespiration(host);
-                airDelta = i > 0 && host.getRandom().nextInt(i + 1) > 0 ? 0 : -1;
+            if (!breatheMode.canBreatheAir()) {
+                event.setCanBreathe(false);
+                event.setCanRefillAir(false);
             }
 
             this.ticksBreathingUnderwater = 0;
-        }
-
-        if (air == -100) {
-            air = (int)(host.getAirSupply() * airSupplyScale);
-        }
-
-        air += airDelta;
-        air = Mth.clamp(air, -20, airSupplyMax);
-
-        if (air <= 0) {
-            LivingDrownEvent drownEvent = new LivingDrownEvent(host, air <= -20, 2.0F, 8);
-            if (!MinecraftForge.EVENT_BUS.post(drownEvent) && drownEvent.isDrowning()) {
-                air = 0;
-                Vec3 vec3 = entity.getDeltaMovement();
-
-                if (host.isEyeInFluidType(Fluids.WATER.getFluidType())) {
-                    for (int i = 0; i < drownEvent.getBubbleCount(); ++i) {
-                        double d2 = host.getRandom().nextDouble() - host.getRandom().nextDouble();
-                        double d3 = host.getRandom().nextDouble() - host.getRandom().nextDouble();
-                        double d4 = host.getRandom().nextDouble() - host.getRandom().nextDouble();
-                        host.level().addParticle(ParticleTypes.BUBBLE, host.getX() + d2, host.getY() + d3, host.getZ() + d4, vec3.x, vec3.y, vec3.z);
-                    }
-                }
-
-                if (drownEvent.getDamageAmount() > 0) host.hurt(entity.damageSources().drown(), drownEvent.getDamageAmount());
-            }
-        }
-
-        if (!host.level().isClientSide) {
-            host.setAirSupply(Mth.clamp(
-                    (int) Math.round((float) air / airSupplyScale),
-                    0,
-                    host.getMaxAirSupply()));
         }
     }
 
@@ -972,8 +917,6 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
                             host.drop(copy, false);
                     }
                 });
-
-        this.tickBreathing();
 
         if (getEntityShape().isLegless() && host.isEyeInFluid(FluidTags.WATER) && shouldApplyAbilities())
             host.setPose(Pose.SWIMMING);

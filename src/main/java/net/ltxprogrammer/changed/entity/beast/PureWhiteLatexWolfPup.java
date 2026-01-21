@@ -3,6 +3,7 @@ package net.ltxprogrammer.changed.entity.beast;
 import net.ltxprogrammer.changed.entity.TransfurMode;
 import net.ltxprogrammer.changed.entity.variant.EntityShape;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
+import net.ltxprogrammer.changed.init.ChangedAttributes;
 import net.ltxprogrammer.changed.init.ChangedTransfurVariants;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
@@ -26,6 +27,7 @@ public class PureWhiteLatexWolfPup extends PureWhiteLatexWolf {
         attributes.getInstance(Attributes.ATTACK_DAMAGE).setBaseValue(2.0D);
         attributes.getInstance(Attributes.FOLLOW_RANGE).setBaseValue(16.0);
         attributes.getInstance(Attributes.MAX_HEALTH).setBaseValue(12.0);
+        attributes.getInstance(ChangedAttributes.FALL_RESISTANCE.get()).setBaseValue(2.5);
     }
 
     @Override

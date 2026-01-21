@@ -37,7 +37,9 @@ public interface IAbstractChangedEntity {
     @Nullable TransfurVariant<?> getTransfurVariant();
     @Nullable TransfurVariantInstance<?> getTransfurVariantInstance();
     @NotNull Level getLevel();
+    @Deprecated
     @NotNull UUID getUUID();
+    int getId();
     @NotNull TransfurMode getTransfurMode();
     @Nullable <T extends AbstractAbilityInstance> T getAbilityInstance(AbstractAbility<T> ability);
     @Nullable AbstractContainerMenu getContainerMenu();
@@ -148,6 +150,11 @@ public interface IAbstractChangedEntity {
             @Override
             public @NotNull UUID getUUID() {
                 return player.getUUID();
+            }
+
+            @Override
+            public int getId() {
+                return player.getId();
             }
 
             @Override
@@ -329,6 +336,11 @@ public interface IAbstractChangedEntity {
             @Override
             public @NotNull UUID getUUID() {
                 return cached.get().getUUID();
+            }
+
+            @Override
+            public int getId() {
+                return cached.get().getId();
             }
 
             @Override

@@ -40,23 +40,23 @@ public class SyncMoversPacket implements ChangedPacket {
         }
     }
 
-    private final Map<UUID, Listing> movers;
+    private final Map<Integer, Listing> movers;
     private static final int NO_FORM = -1;
 
-    public SyncMoversPacket(@NotNull Map<UUID, Listing> movers) {
+    public SyncMoversPacket(@NotNull Map<Integer, Listing> movers) {
         this.movers = movers;
     }
 
     public SyncMoversPacket(FriendlyByteBuf buffer) {
         this.movers = new HashMap<>();
         buffer.readList(next ->
-                new Pair<>(next.readUUID(), Listing.fromStream(next))).forEach(pair ->
+                new Pair<>(next.readVarInt(), Listing.fromStream(next))).forEach(pair ->
                 movers.put(pair.getFirst(), pair.getSecond()));
     }
 
     @Override
     public void write(FriendlyByteBuf buffer) {
-        buffer.writeCollection(movers.entrySet(), (next, form) -> { next.writeUUID(form.getKey()); form.getValue().toStream(next); });
+        buffer.writeCollection(movers.entrySet(), (next, form) -> { next.writeVarInt(form.getKey()); form.getValue().toStream(next); });
     }
 
     @Override
@@ -64,8 +64,8 @@ public class SyncMoversPacket implements ChangedPacket {
         if (context.getDirection().getReceptionSide() == LogicalSide.CLIENT) {
             context.setPacketHandled(true);
             return levelFuture.thenAccept(level -> {
-                movers.forEach((uuid, listing) -> {
-                    if (level.getPlayerByUUID(uuid) instanceof PlayerDataExtension ext) {
+                movers.forEach((id, listing) -> {
+                    if (level.getEntity(id) instanceof PlayerDataExtension ext) {
                         ext.setPlayerMoverType(listing.mover == NO_FORM ? null : ChangedRegistry.PLAYER_MOVER.getValue(listing.mover));
                         var mover = ext.getPlayerMover();
                         if (mover != null)
@@ -86,16 +86,16 @@ public class SyncMoversPacket implements ChangedPacket {
     }
 
     public static class Builder {
-        private final Map<UUID, Listing> movers = new HashMap<>();
+        private final Map<Integer, Listing> movers = new HashMap<>();
 
         public void addPlayer(Player player, boolean excludeNormal) {
             if (player instanceof PlayerDataExtension ext && ext.getPlayerMover() != null) {
                 CompoundTag tag = new CompoundTag();
                 ext.getPlayerMover().saveTo(tag);
-                movers.put(player.getUUID(),
+                movers.put(player.getId(),
                         new Listing(ChangedRegistry.PLAYER_MOVER.getID(ext.getPlayerMover().parent), tag));
             } else if (!excludeNormal) {
-                movers.put(player.getUUID(),
+                movers.put(player.getId(),
                         new Listing(-1, new CompoundTag()));
             }
         }

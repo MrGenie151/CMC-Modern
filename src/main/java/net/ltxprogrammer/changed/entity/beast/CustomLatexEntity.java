@@ -5,6 +5,7 @@ import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.entity.latex.LatexType;
 import net.ltxprogrammer.changed.entity.variant.EntityShape;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
+import net.ltxprogrammer.changed.init.ChangedAttributes;
 import net.ltxprogrammer.changed.init.ChangedEntities;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.util.Color3;
@@ -207,9 +208,7 @@ public class CustomLatexEntity extends ChangedEntity implements LatexTaur<Custom
         this.refreshDimensions();
 
         ProcessTransfur.ifPlayerTransfurred(this.getUnderlyingPlayer(), variant -> {
-            variant.jumpStrength = (this.getLegType() == LegType.CENTAUR || this.getTailType() == TailType.CAT) ? 1.25f : 1.0f;
             variant.breatheMode = switch (this.getTailType()) {
-                case CAT -> TransfurVariant.BreatheMode.WEAK;
                 case SHARK -> TransfurVariant.BreatheMode.ANY;
                 default -> TransfurVariant.BreatheMode.NORMAL;
             };
@@ -457,6 +456,7 @@ public class CustomLatexEntity extends ChangedEntity implements LatexTaur<Custom
                 attributes.getInstance(ForgeMod.SWIM_SPEED.get()).setBaseValue(0.9);
                 attributes.getInstance(Attributes.MAX_HEALTH).setBaseValue(30);
                 attributes.getInstance(ForgeMod.STEP_HEIGHT_ADDITION.get()).setBaseValue(computeStepHeightOffset(1.1));
+                attributes.getInstance(ChangedAttributes.JUMP_STRENGTH.get()).setBaseValue(1.25);
             }
             case MERMAID -> {
                 attributes.getInstance(Attributes.MOVEMENT_SPEED).setBaseValue(0.34);

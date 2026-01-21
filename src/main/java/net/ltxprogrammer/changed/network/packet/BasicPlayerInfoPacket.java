@@ -25,21 +25,21 @@ import java.util.function.Supplier;
 public class BasicPlayerInfoPacket implements ChangedPacket {
     public static final BasicPlayerInfoPacket EMPTY = new BasicPlayerInfoPacket(Map.of());
 
-    private final Map<UUID, BasicPlayerInfo> playerInfos;
-    public BasicPlayerInfoPacket(Map<UUID, BasicPlayerInfo> playerInfos) {
+    private final Map<Integer, BasicPlayerInfo> playerInfos;
+    public BasicPlayerInfoPacket(Map<Integer, BasicPlayerInfo> playerInfos) {
         this.playerInfos = playerInfos;
     }
 
     public BasicPlayerInfoPacket(FriendlyByteBuf buffer) {
         this.playerInfos = new HashMap<>();
         buffer.readList(next ->
-                new Pair<>(next.readUUID(), new BasicPlayerInfo(next.readNbt()))).forEach(pair ->
+                new Pair<>(next.readVarInt(), new BasicPlayerInfo(next.readNbt()))).forEach(pair ->
                 playerInfos.put(pair.getFirst(), pair.getSecond()));
     }
 
     public void write(FriendlyByteBuf buffer) {
         buffer.writeCollection(playerInfos.entrySet(), (next, form) -> {
-            next.writeUUID(form.getKey());
+            next.writeVarInt(form.getKey());
             CompoundTag bpiTag = new CompoundTag();
             form.getValue().save(bpiTag);
             next.writeNbt(bpiTag);
@@ -55,9 +55,9 @@ public class BasicPlayerInfoPacket implements ChangedPacket {
 
                 if (!playerInfos.isEmpty()) {
                     Objects.requireNonNull(level);
-                    playerInfos.forEach((uuid, listing) -> {
-                        var player = level.getPlayerByUUID(uuid);
-                        if (player instanceof PlayerDataExtension ext && player != localPlayer) {
+                    playerInfos.forEach((id, listing) -> {
+                        var entity = level.getEntity(id);
+                        if (entity instanceof PlayerDataExtension ext && entity != localPlayer) {
                             ext.getBasicPlayerInfo().copyFrom(listing);
                         }
                     });
@@ -72,12 +72,12 @@ public class BasicPlayerInfoPacket implements ChangedPacket {
         else { // Mirror packet
             ServerPlayer sender = context.getSender();
             if (sender != null) {
-                if (sender instanceof PlayerDataExtension ext && playerInfos.containsKey(sender.getUUID())) {
-                    BasicPlayerInfo received = playerInfos.get(sender.getUUID());
+                if (sender instanceof PlayerDataExtension ext && playerInfos.containsKey(sender.getId())) {
+                    BasicPlayerInfo received = playerInfos.get(sender.getId());
                     ext.getBasicPlayerInfo().copyFrom(received); // Keep player info state
 
                     Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY.with(() -> sender),
-                            new BasicPlayerInfoPacket(Map.of(sender.getUUID(), received)));
+                            new BasicPlayerInfoPacket(Map.of(sender.getId(), received)));
                 }
             }
             context.setPacketHandled(true);
@@ -86,11 +86,11 @@ public class BasicPlayerInfoPacket implements ChangedPacket {
     }
 
     public static class Builder {
-        private final Map<UUID, BasicPlayerInfo> playerInfos = new HashMap<>();
+        private final Map<Integer, BasicPlayerInfo> playerInfos = new HashMap<>();
 
         public void addPlayer(Player player) {
             if (player instanceof PlayerDataExtension ext) {
-                playerInfos.put(player.getUUID(), ext.getBasicPlayerInfo());
+                playerInfos.put(player.getId(), ext.getBasicPlayerInfo());
             }
         }
 

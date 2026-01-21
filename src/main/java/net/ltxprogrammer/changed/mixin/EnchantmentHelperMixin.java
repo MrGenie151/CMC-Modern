@@ -52,14 +52,6 @@ public abstract class EnchantmentHelperMixin {
         });
     }
 
-    @Inject(method = "getRespiration", at = @At("RETURN"), cancellable = true)
-    private static void getRespirationOrIfStrong(LivingEntity le, CallbackInfoReturnable<Integer> callback) {
-        ProcessTransfur.ifPlayerTransfurred(EntityUtil.playerOrNull(le), variant -> {
-            if (variant.breatheMode == TransfurVariant.BreatheMode.STRONG)
-                callback.setReturnValue(Math.max(callback.getReturnValue(), 4));
-        });
-    }
-
     @WrapOperation(method = "getRandomItemWith(Lnet/minecraft/world/item/enchantment/Enchantment;Lnet/minecraft/world/entity/LivingEntity;Ljava/util/function/Predicate;)Ljava/util/Map$Entry;",
             at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayList()Ljava/util/ArrayList;"))
     @SuppressWarnings("deprecation")

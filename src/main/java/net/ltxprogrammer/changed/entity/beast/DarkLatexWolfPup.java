@@ -4,6 +4,7 @@ import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.entity.ai.DarkLatexFavor;
 import net.ltxprogrammer.changed.entity.ai.DarkLatexInventory;
 import net.ltxprogrammer.changed.entity.variant.EntityShape;
+import net.ltxprogrammer.changed.init.ChangedAttributes;
 import net.ltxprogrammer.changed.init.ChangedLatexTypes;
 import net.ltxprogrammer.changed.init.ChangedSounds;
 import net.ltxprogrammer.changed.init.ChangedTransfurVariants;
@@ -265,6 +266,7 @@ public class DarkLatexWolfPup extends AbstractDarkLatexEntity {
         attributes.getInstance(Attributes.MOVEMENT_SPEED).setBaseValue(1.25);
         attributes.getInstance(ForgeMod.SWIM_SPEED.get()).setBaseValue(0.975);
         attributes.getInstance(Attributes.MAX_HEALTH).setBaseValue(12.0);
+        attributes.getInstance(ChangedAttributes.FALL_RESISTANCE.get()).setBaseValue(2.5);
     }
 
     @Override

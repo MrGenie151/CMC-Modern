@@ -27,6 +27,7 @@ public class ChangedPackets {
         addNetworkMessage(GrabEntityPacket.class, GrabEntityPacket::new);
         addNetworkMessage(GrabEntityPacket.GrabKeyState.class, GrabEntityPacket.GrabKeyState::new);
         addNetworkMessage(GrabEntityPacket.EscapeKeyState.class, GrabEntityPacket.EscapeKeyState::new);
+        addNetworkMessage(GrabEntityPacket.SyncGrabStrength.class, GrabEntityPacket.SyncGrabStrength::new);
         addNetworkMessage(GrabEntityPacket.AnnounceEscapeSeed.class, GrabEntityPacket.AnnounceEscapeSeed::new);
         addNetworkMessage(MountTransfurPacket.class, MountTransfurPacket::new);
         addNetworkMessage(SyncSwitchPacket.class, SyncSwitchPacket::new);

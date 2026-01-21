@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.entity.beast;
 
 import net.ltxprogrammer.changed.entity.TransfurMode;
 import net.ltxprogrammer.changed.entity.variant.EntityShape;
+import net.ltxprogrammer.changed.init.ChangedAttributes;
 import net.ltxprogrammer.changed.init.ChangedSounds;
 import net.ltxprogrammer.changed.init.ChangedTransfurVariants;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
@@ -30,6 +31,7 @@ public class GasWolfPup extends GasWolfMale {
         attributes.getInstance(ForgeMod.SWIM_SPEED.get()).setBaseValue(0.975);
         attributes.getInstance(Attributes.ATTACK_DAMAGE).setBaseValue(2.0D);
         attributes.getInstance(Attributes.MAX_HEALTH).setBaseValue(12.0);
+        attributes.getInstance(ChangedAttributes.FALL_RESISTANCE.get()).setBaseValue(2.5);
     }
 
     @Override

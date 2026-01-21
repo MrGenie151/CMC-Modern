@@ -43,7 +43,7 @@ public interface LatexTaur<T extends ChangedEntity> extends Saddleable {
                 player.startRiding(self);
             else {
                 player.startRiding(underlying);
-                Changed.PACKET_HANDLER.send(PacketDistributor.ALL.noArg(), new MountTransfurPacket(player.getUUID(), underlying.getUUID()));
+                Changed.PACKET_HANDLER.send(PacketDistributor.ALL.noArg(), new MountTransfurPacket(player.getId(), underlying.getId()));
             }
         }
     }

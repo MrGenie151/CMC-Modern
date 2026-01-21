@@ -97,17 +97,17 @@ public abstract class AbstractAbilityInstance {
     public void sendPayload(CompoundTag tag) {
         if (this.entity.getLevel().isClientSide) {
             Changed.PACKET_HANDLER.sendToServer(
-                    new AbilityPayloadPacket(this.entity.getEntity().getId(), this.ability, tag));
+                    new AbilityPayloadPacket(this.entity.getId(), this.ability, tag));
         } else {
             Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(this.entity::getEntity),
-                    new AbilityPayloadPacket(this.entity.getEntity().getId(), this.ability, tag));
+                    new AbilityPayloadPacket(this.entity.getId(), this.ability, tag));
         }
     }
 
     public void sendPayload(CompoundTag tag, Player destination) {
         if (destination instanceof ServerPlayer serverPlayer) {
             Changed.PACKET_HANDLER.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
-                    new AbilityPayloadPacket(this.entity.getEntity().getId(), this.ability, tag));
+                    new AbilityPayloadPacket(this.entity.getId(), this.ability, tag));
         }
     }
 

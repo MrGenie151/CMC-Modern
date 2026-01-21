@@ -120,7 +120,9 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerDataExte
                 .add(ChangedAttributes.GRAB_STRUGGLE_STRENGTH.get(), GrabEntityAbilityInstance.GRAB_STRENGTH_DECAY_PLAYER)
                 .add(ChangedAttributes.SPRINT_SPEED.get(), 1.0D)
                 .add(ChangedAttributes.SNEAK_SPEED.get(), 1.0D)
-                .add(ChangedAttributes.AIR_CAPACITY.get(), 300.0);
+                .add(ChangedAttributes.AIR_CAPACITY.get(), 15.0)
+                .add(ChangedAttributes.JUMP_STRENGTH.get(), 1.0D)
+                .add(ChangedAttributes.FALL_RESISTANCE.get(), 1.0D);
     }
 
     @Inject(method = "attack", at = @At("HEAD"), cancellable = true)

@@ -8,10 +8,7 @@ import net.ltxprogrammer.changed.data.AccessorySlotType;
 import net.ltxprogrammer.changed.data.AccessorySlots;
 import net.ltxprogrammer.changed.entity.robot.AbstractRobot;
 import net.ltxprogrammer.changed.entity.robot.ChargerType;
-import net.ltxprogrammer.changed.init.ChangedAccessorySlots;
-import net.ltxprogrammer.changed.init.ChangedDamageSources;
-import net.ltxprogrammer.changed.init.ChangedSounds;
-import net.ltxprogrammer.changed.init.ChangedTags;
+import net.ltxprogrammer.changed.init.*;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.util.Cacheable;
 import net.ltxprogrammer.changed.util.EntityUtil;
@@ -55,6 +52,8 @@ public class ExoskeletonItem<T extends AbstractRobot> extends PlaceableEntity<T>
     protected static final UUID MECH_MOVEMENT_SPEED_UUID = UUID.fromString("97790787-d3fe-47bd-90eb-86c63164f131");
     protected static final UUID MECH_ARMOR_UUID = UUID.fromString("40845805-4dde-4c45-8eb7-defe001f9035");
     protected static final UUID MECH_KNOCKBACK_UUID = UUID.fromString("494836c5-32c2-4b38-9ae3-261d295389e3");
+    protected static final UUID MECH_JUMP_UUID = UUID.fromString("72466d40-4966-492b-bf55-159b4270135c");
+    protected static final UUID MECH_FALL_UUID = UUID.fromString("5349a0db-dc55-4ad6-bd4c-ebd20546a81c");
 
     private static final Cacheable<Multimap<Attribute, AttributeModifier>> DEFAULT_MODIFIERS = Cacheable.of(() -> {
         ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
@@ -63,6 +62,9 @@ public class ExoskeletonItem<T extends AbstractRobot> extends PlaceableEntity<T>
         builder.put(Attributes.MOVEMENT_SPEED, new AttributeModifier(MECH_MOVEMENT_SPEED_UUID, "Movement modifier", 0.2, AttributeModifier.Operation.MULTIPLY_TOTAL));
         builder.put(Attributes.ARMOR, new AttributeModifier(MECH_ARMOR_UUID, "Armor modifier", 20, AttributeModifier.Operation.ADDITION));
         builder.put(Attributes.KNOCKBACK_RESISTANCE, new AttributeModifier(MECH_KNOCKBACK_UUID, "Armor modifier", 2, AttributeModifier.Operation.MULTIPLY_BASE));
+
+        builder.put(ChangedAttributes.JUMP_STRENGTH.get(), new AttributeModifier(MECH_JUMP_UUID, "Movement modifier", 0.25, AttributeModifier.Operation.ADDITION));
+        builder.put(ChangedAttributes.FALL_RESISTANCE.get(), new AttributeModifier(MECH_FALL_UUID, "Armor modifier", 2.5, AttributeModifier.Operation.MULTIPLY_TOTAL));
         return builder.build();
     });
 
@@ -119,14 +121,6 @@ public class ExoskeletonItem<T extends AbstractRobot> extends PlaceableEntity<T>
     // TODO: extend functionality to allow custom values
     public Multimap<Attribute, AttributeModifier> getAttributeModifiers(ItemStack stack) {
         return DEFAULT_MODIFIERS.get();
-    }
-
-    public float getJumpStrengthMultiplier(ItemStack stack) {
-        return 1.25f;
-    }
-
-    public float getFallDamageMultiplier(ItemStack stack) {
-        return 0.4f;
     }
 
     @Override
