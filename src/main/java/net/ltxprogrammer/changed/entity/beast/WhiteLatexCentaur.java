@@ -4,6 +4,7 @@ import net.ltxprogrammer.changed.entity.LatexTypeOld;
 import net.ltxprogrammer.changed.entity.TransfurMode;
 import net.ltxprogrammer.changed.entity.latex.LatexType;
 import net.ltxprogrammer.changed.entity.variant.EntityShape;
+import net.ltxprogrammer.changed.init.ChangedAttributes;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -28,6 +29,8 @@ public class WhiteLatexCentaur extends WhiteLatexKnight implements LatexTaur<Whi
         attributes.getInstance(ForgeMod.SWIM_SPEED.get()).setBaseValue(0.9);
         attributes.getInstance(Attributes.MAX_HEALTH).setBaseValue(30);
         attributes.getInstance(ForgeMod.STEP_HEIGHT_ADDITION.get()).setBaseValue(computeStepHeightOffset(1.1));
+        attributes.getInstance(ChangedAttributes.JUMP_STRENGTH.get()).setBaseValue(1.25);
+        attributes.getInstance(ChangedAttributes.FALL_RESISTANCE.get()).setBaseValue(2.5);
     }
 
     @Override

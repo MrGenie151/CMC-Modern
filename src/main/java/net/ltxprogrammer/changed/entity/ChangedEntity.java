@@ -491,7 +491,12 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
     }
 
     public static AttributeSupplier.Builder createLatexAttributes() {
-        return Monster.createMonsterAttributes().add(ChangedAttributes.TRANSFUR_DAMAGE.get(), 3.0D);
+        return Monster.createMonsterAttributes().add(ChangedAttributes.TRANSFUR_DAMAGE.get(), 3.0D)
+                .add(ChangedAttributes.SPRINT_SPEED.get(), 1.0D)
+                .add(ChangedAttributes.SNEAK_SPEED.get(), 1.0D)
+                .add(ChangedAttributes.AIR_CAPACITY.get(), 15.0)
+                .add(ChangedAttributes.JUMP_STRENGTH.get(), 1.0D)
+                .add(ChangedAttributes.FALL_RESISTANCE.get(), 1.0D);
     }
 
     protected void setAttributes(AttributeMap attributes) {
@@ -502,6 +507,11 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
         attributes.getInstance(Attributes.ATTACK_DAMAGE).setBaseValue(3.0);
         attributes.getInstance(Attributes.ARMOR).setBaseValue(4.0);
         attributes.getInstance(ForgeMod.STEP_HEIGHT_ADDITION.get()).setBaseValue(computeStepHeightOffset(0.7));
+        attributes.getInstance(ChangedAttributes.SPRINT_SPEED.get()).setBaseValue(1.0D);
+        attributes.getInstance(ChangedAttributes.SNEAK_SPEED.get()).setBaseValue(1.0D);
+        attributes.getInstance(ChangedAttributes.AIR_CAPACITY.get()).setBaseValue(15.0);
+        attributes.getInstance(ChangedAttributes.JUMP_STRENGTH.get()).setBaseValue(1.0);
+        attributes.getInstance(ChangedAttributes.FALL_RESISTANCE.get()).setBaseValue(1.0);
     }
 
     @Override
@@ -1219,5 +1229,11 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
 
     public boolean isItemAllowedInSlot(ItemStack stack, EquipmentSlot slot) {
         return true;
+    }
+
+    @Override
+    public int getMaxAirSupply() {
+        // This function is called in the ctor of Entity, so attributes aren't ready yet.
+        return this.getAttributes() == null ? 300 : Math.round(20f * (float) this.getAttributes().getValue(ChangedAttributes.AIR_CAPACITY.get()));
     }
 }

@@ -4,6 +4,7 @@ import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.entity.latex.LatexType;
 import net.ltxprogrammer.changed.entity.variant.EntityShape;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
+import net.ltxprogrammer.changed.init.ChangedAttributes;
 import net.ltxprogrammer.changed.init.ChangedTransfurVariants;
 import net.ltxprogrammer.changed.util.Color3;
 import net.minecraft.sounds.SoundSource;
@@ -31,6 +32,8 @@ public class LatexGnollTaur extends WhiteLatexKnight implements LatexTaur<LatexG
         attributes.getInstance(ForgeMod.SWIM_SPEED.get()).setBaseValue(0.9);
         attributes.getInstance(Attributes.MAX_HEALTH).setBaseValue(30);
         attributes.getInstance(ForgeMod.STEP_HEIGHT_ADDITION.get()).setBaseValue(computeStepHeightOffset(1.1));
+        attributes.getInstance(ChangedAttributes.JUMP_STRENGTH.get()).setBaseValue(1.25);
+        attributes.getInstance(ChangedAttributes.FALL_RESISTANCE.get()).setBaseValue(2.5);
     }
 
     @Override

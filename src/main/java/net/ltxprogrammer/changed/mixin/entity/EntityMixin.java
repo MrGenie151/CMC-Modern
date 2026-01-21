@@ -5,7 +5,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.ltxprogrammer.changed.ability.AbstractAbility;
 import net.ltxprogrammer.changed.ability.GrabEntityAbility;
-import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.block.StasisChamber;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.LivingEntityDataExtension;
@@ -14,6 +13,7 @@ import net.ltxprogrammer.changed.entity.latex.SpreadingLatexType;
 import net.ltxprogrammer.changed.entity.variant.EntityShape;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
 import net.ltxprogrammer.changed.init.ChangedAbilities;
+import net.ltxprogrammer.changed.init.ChangedAttributes;
 import net.ltxprogrammer.changed.init.ChangedTags;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.util.EntityUtil;
@@ -332,5 +332,13 @@ public abstract class EntityMixin extends net.minecraftforge.common.capabilities
             return variant.getChangedEntity().isInFluidType(predicate, true) && original.call(predicate, true);
         else
             return variant.getChangedEntity().isInFluidType(predicate, false) || original.call(predicate, false);
+    }
+
+    @WrapMethod(method = "getMaxAirSupply")
+    public int getTransfurMaxAirSupply(Operation<Integer> original) {
+        var variant = ProcessTransfur.getPlayerTransfurVariant(EntityUtil.playerOrNull(asEntity()));
+        if (variant == null)
+            return original.call();
+        return Math.round(20f * (float) variant.getHost().getAttributes().getValue(ChangedAttributes.AIR_CAPACITY.get()));
     }
 }

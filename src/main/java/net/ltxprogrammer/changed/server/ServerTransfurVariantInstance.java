@@ -23,6 +23,7 @@ import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.entity.living.LivingBreatheEvent;
 
 import java.util.HashMap;
 import java.util.List;
@@ -88,8 +89,8 @@ public class ServerTransfurVariantInstance<T extends ChangedEntity> extends Tran
     }
 
     @Override
-    protected void tickBreathing() {
-        super.tickBreathing();
+    protected void tickBreathing(LivingBreatheEvent event) {
+        super.tickBreathing(event);
 
         if (host.isAlive() && breatheMode.canBreatheWater() && shouldApplyAbilities() && host.isEyeInFluid(FluidTags.WATER)) {
             ChangedCriteriaTriggers.AQUATIC_BREATHE.trigger(host, this.ticksBreathingUnderwater);
