@@ -156,13 +156,16 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
         int reroll = 25;
         while (reroll > 0) {
             PieceType<?> pieceType;
-            BoundingBox allowedRegionForPiece;
-            if (parent.type == ChangedFacilityPieceTypes.SPLIT.get() && reroll == 1) { // Split pieces will dead-end if it's too close to the gen region
-                pieceType = ChangedFacilityPieceTypes.SEAL.get();
-                allowedRegionForPiece = BoundingBox.infinite();
-            } else if (span == 0) {
+            if (parent.type == ChangedFacilityPieceTypes.SPLIT.get() && reroll < 10) { // Split is struggling to generate neighbor, put a room/seal instead.
+                if (reroll > 2)
+                    pieceType = ChangedFacilityPieceTypes.ROOM.get();
+                else
+                    pieceType = ChangedFacilityPieceTypes.SEAL.get();
+            } else if ((parent.type == ChangedFacilityPieceTypes.STAIRCASE_START.get() ||
+                    parent.type == ChangedFacilityPieceTypes.STAIRCASE_SECTION.get()) && reroll < 10) { // Stairs are struggling to generate neighbor
+                pieceType = ChangedFacilityPieceTypes.STAIRCASE_END.get();
+            } else if (span <= 0) {
                 pieceType = ChangedFacilityPieceTypes.ROOM.get();
-                allowedRegionForPiece = allowedRegion;
             } else {
                 var type = start.validTypes().getRandom(facilityContext.structureContext.random());
                 if (type.isEmpty())
@@ -191,7 +194,6 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
                 }
 
                 pieceType = type.get().getPieceType();
-                allowedRegionForPiece = allowedRegion;
 
                 if (zoneProtection > 0 && pieceType == ChangedFacilityPieceTypes.TRANSITION.get()) {
                     pieceType = ChangedFacilityPieceTypes.CORRIDOR.get();
@@ -210,14 +212,11 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
                     .filter(pieceConnectsToZones(zone, wantedZone)).map(nextConfiguredPiece -> {
                         var nextPiece = nextConfiguredPiece.facilityPiece();
                         var nextStructure = nextPiece.createStructurePiece(facilityContext.structureContext.structureTemplateManager(), genDepth);
-                        if (!nextStructure.setupBoundingBox(facilityContext.builder, start.blockInfo(), facilityContext.structureContext.random(), allowedRegionForPiece))
+                        if (!nextStructure.setupBoundingBox(facilityContext.builder, start.blockInfo(), facilityContext.structureContext.random(), allowedRegion))
                             return null;
 
                         var startPos = gluNeighbor(start.blockInfo().pos(), start.blockInfo().state());
                                 facilityContext.builder.addPiece(nextStructure);
-
-                        if (span <= 0)
-                            return null;
 
                         int nextSpan = resolvedPieceType.shouldConsumeSpan() ? span - 1 : span;
                         stack.push(nextConfiguredPiece);
