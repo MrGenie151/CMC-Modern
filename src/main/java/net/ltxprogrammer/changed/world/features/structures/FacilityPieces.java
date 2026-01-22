@@ -1,6 +1,9 @@
 package net.ltxprogrammer.changed.world.features.structures;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.gson.JsonObject;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.ltxprogrammer.changed.Changed;
@@ -14,6 +17,7 @@ import net.ltxprogrammer.changed.world.features.structures.facility.types.PieceT
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.Mth;
@@ -29,6 +33,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -48,7 +53,7 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
     @NotNull
     public Set<ConfiguredFacilityPiece> prepare(ResourceManager resources, @Nonnull ProfilerFiller profiler) {
         return ResourceUtil.processJSONResources(new HashSet<>(), resources, "worldgen/changed/facility", (list, filename, id, json) -> {
-            list.add(processJSONFile(json));
+            list.add(processJSONFile(json).setName(id));
         }, (exception, filename) -> Changed.LOGGER.error("Failed to load facility piece configuration from \"{}\" : {}", filename, exception));
     }
 
@@ -59,13 +64,13 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
 
         for (var pieceType : ChangedRegistry.FACILITY_PIECE_TYPES.get().getValues()) {
             FacilityPieceCollectionBuilder builder = new FacilityPieceCollectionBuilder();
-            output.stream().filter(piece -> piece.facilityPiece().getType() == pieceType).forEach(builder::register);
+            output.stream().filter(piece -> piece.getFacilityPiece().getType() == pieceType).forEach(builder::register);
 
             Changed.postModLoadingEvent(new GatherFacilityPiecesEvent(pieceType, builder));
 
             facilityPieceCollections.put(pieceType, builder.build());
             facilityPieceCollections.get(pieceType).stream()
-                    .map(ConfiguredFacilityPiece::connectsTo)
+                    .map(ConfiguredFacilityPiece::getConnectsTo)
                     .flatMap(Set::stream)
                     .forEach(zonesWithDefinedPieces::add);
         }
@@ -86,7 +91,7 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
 
     private static Predicate<ConfiguredFacilityPiece> pieceConnectsToZone(Zone zone) {
         return configuredFacilityPiece -> {
-            return configuredFacilityPiece.connectsTo().isEmpty() || configuredFacilityPiece.connectsTo().contains(zone);
+            return configuredFacilityPiece.getConnectsTo().isEmpty() || configuredFacilityPiece.getConnectsTo().contains(zone);
         };
     }
 
@@ -95,8 +100,8 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
             return pieceConnectsToZone(zone);
 
         return configuredFacilityPiece -> {
-            return configuredFacilityPiece.connectsTo().isEmpty() || (
-                    configuredFacilityPiece.connectsTo().contains(zone) && configuredFacilityPiece.connectsTo().contains(wantedZone));
+            return configuredFacilityPiece.getConnectsTo().isEmpty() || (
+                    configuredFacilityPiece.getConnectsTo().contains(zone) && configuredFacilityPiece.getConnectsTo().contains(wantedZone));
         };
     }
 
@@ -104,7 +109,8 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
         public final StructurePiecesBuilder builder;
         public final Structure.GenerationContext structureContext;
         public final Map<ConfiguredFacilityPiece, Integer> configuredPieceCounts = new HashMap<>();
-        public final Map<Zone, List<StructurePiece>> piecesByZone = new HashMap<>();
+        public final Map<Zone, List<Pair<ConfiguredFacilityPiece, FacilityPieceInstance>>> piecesByZone = new HashMap<>();
+        public final Multimap<FacilityPieceInstance, FacilityPieceInstance> pieceDependents = HashMultimap.create();
 
         public FacilityGenerationContext(StructurePiecesBuilder builder, Structure.GenerationContext structureContext) {
             this.builder = builder;
@@ -130,7 +136,7 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
         int nonSpan = 0;
         for (int i = stack.size() - 1; i >= 0; --i) {
             var element = stack.elementAt(i);
-            if (!includingNonSpan && !element.facilityPiece().getType().shouldConsumeSpan()) {
+            if (!includingNonSpan && !element.getFacilityPiece().getType().shouldConsumeSpan()) {
                 nonSpan++;
                 continue;
             }
@@ -142,15 +148,15 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
     }
 
     private static void treeGenerate(FacilityGenerationContext facilityContext,
-                                     Stack<ConfiguredFacilityPiece> stack, StructurePiece parentStructure,
+                                     Stack<ConfiguredFacilityPiece> stack, FacilityPieceInstance parentStructure,
                                      GenStep start, int genDepth, int span, BoundingBox allowedRegion, int zoneProtection) {
         var configuredParent = stack.peek();
-        var parent = configuredParent.facilityPiece();
+        var parent = configuredParent.getFacilityPiece();
         var zone = start.getZone();
         var wantedZone = zone;
 
         int zoneLength = sequentialMatch(stack, configuredPiece -> {
-            return configuredPiece.connectsTo().isEmpty() || configuredPiece.connectsTo().contains(zone);
+            return configuredPiece.getConnectsTo().isEmpty() || configuredPiece.getConnectsTo().contains(zone);
         }, false);
 
         int reroll = 25;
@@ -208,9 +214,9 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
             final PieceType<?> resolvedPieceType = pieceType;
 
             var placedPiece = INSTANCE.facilityPieceCollections.get(pieceType).shuffledStream(facilityContext.structureContext.random())
-                    .filter(nextConfiguredPiece -> facilityContext.configuredPieceCounts.getOrDefault(nextConfiguredPiece, 0) < nextConfiguredPiece.maximum())
+                    .filter(nextConfiguredPiece -> facilityContext.configuredPieceCounts.getOrDefault(nextConfiguredPiece, 0) < nextConfiguredPiece.getMaximum())
                     .filter(pieceConnectsToZones(zone, wantedZone)).map(nextConfiguredPiece -> {
-                        var nextPiece = nextConfiguredPiece.facilityPiece();
+                        var nextPiece = nextConfiguredPiece.getFacilityPiece();
                         var nextStructure = nextPiece.createStructurePiece(facilityContext.structureContext.structureTemplateManager(), genDepth);
                         if (!nextStructure.setupBoundingBox(facilityContext.builder, start.blockInfo(), facilityContext.structureContext.random(), allowedRegion))
                             return null;
@@ -227,9 +233,13 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
                         Util.shuffle(starts, facilityContext.structureContext.random());
 
                         int piecesStart = ((StructurePiecesBuilderExtender)facilityContext.builder).pieceCount();
-                        AtomicBoolean firstStart = new AtomicBoolean(true);
-                        starts.stream().filter(next -> !next.blockInfo().pos().equals(startPos)).forEach(next -> {
-                            boolean isFirstStart = firstStart.getAndSet(false);
+                        boolean firstStart = true;
+                        for (var next : starts) {
+                            if (next.blockInfo().pos().equals(startPos))
+                                continue;
+
+                            boolean isFirstStart = firstStart;
+                            firstStart = false;
                             boolean isMinorBranch = zoneProtection <= 0 && !isFirstStart;
                             int piecesBefore = ((StructurePiecesBuilderExtender)facilityContext.builder).pieceCount();
                             treeGenerate(facilityContext, stack, nextStructure, next, genDepth,
@@ -238,9 +248,10 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
                                     isFirstStart ? Math.max(zoneProtection - 1, 0) : 5);
                             int piecesAfter = ((StructurePiecesBuilderExtender)facilityContext.builder).pieceCount();
                             if (piecesAfter <= piecesStart) { // Start failed to generate sufficient pieces, allow new branch to assume zone generation
-                                firstStart.set(true);
+                                firstStart = true;
                             }
-                        });
+                        }
+
                         int piecesAfter = ((StructurePiecesBuilderExtender)facilityContext.builder).pieceCount();
 
                         stack.pop();
@@ -248,36 +259,46 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
                         if (resolvedPieceType.connectionsMeetExpectations((piecesAfter - piecesStart) + 1)) {
                             if (resolvedPieceType != ChangedFacilityPieceTypes.SEAL.get())
                                 facilityContext.addPieceToCount(nextConfiguredPiece);
-                            return nextStructure;
+                            return Pair.of(nextConfiguredPiece, nextStructure);
                         }
 
                         // Attempt to regenerate this piece as a room, to prevent a dead end
                         ((StructurePiecesBuilderExtender)facilityContext.builder).removePiece(nextStructure);
 
-                        StructurePiece pieceToPut = Stream.concat(
+                        var pieceToPut = Stream.concat(
                                 INSTANCE.facilityPieceCollections.get(ChangedFacilityPieceTypes.ROOM.get()).shuffledStream(facilityContext.structureContext.random()),
                                 INSTANCE.facilityPieceCollections.get(ChangedFacilityPieceTypes.SEAL.get()).shuffledStream(facilityContext.structureContext.random())
-                        ).filter(pieceConnectsToZone(zone)).map(ConfiguredFacilityPiece::facilityPiece).map(nextRoom -> {
-                            var nextRoomStructure = nextRoom.createStructurePiece(facilityContext.structureContext.structureTemplateManager(), genDepth);
+                        ).filter(pieceConnectsToZone(zone)).map(nextRoom -> {
+                            var nextRoomStructure = nextRoom.getFacilityPiece().createStructurePiece(facilityContext.structureContext.structureTemplateManager(), genDepth);
                             if (!nextRoomStructure.setupBoundingBox(facilityContext.builder, start.blockInfo(), facilityContext.structureContext.random(), allowedRegion))
                                 return null;
 
                             // Success
-                            return nextRoomStructure;
-                        }).filter(Objects::nonNull).findFirst().orElse(nextStructure);
+                            return Pair.of(nextRoom, nextRoomStructure);
+                        }).filter(Objects::nonNull).findFirst().orElse(Pair.of(nextConfiguredPiece, nextStructure));
 
-                        if (pieceToPut == nextStructure)
+                        if (pieceToPut.getSecond() == nextStructure)
                             Changed.LOGGER.debug("Failed to seal dead end in facility, startPos {}", startPos);
                         else
                             Changed.LOGGER.debug("Sealed dead end in facility, startPos {}", startPos);
-                        facilityContext.builder.addPiece(pieceToPut);
+                        facilityContext.builder.addPiece(pieceToPut.getSecond());
 
                         return pieceToPut;
                     }).filter(Objects::nonNull).findFirst();
 
 
             if (placedPiece.isPresent()) {
-                facilityContext.piecesByZone.computeIfAbsent(wantedZone, toMap -> new ArrayList<>()).add(placedPiece.get());
+                final var resolvedPlacedPiece = placedPiece.get();
+                facilityContext.piecesByZone.computeIfAbsent(wantedZone, toMap -> new ArrayList<>()).add(resolvedPlacedPiece);
+
+                // Find pieces that depend on this piece, and reference this parent
+                final var dependents = facilityContext.pieceDependents.entries().stream()
+                        .filter(entry -> entry.getKey() == resolvedPlacedPiece.getSecond())
+                        .map(Map.Entry::getValue)
+                        .toList();
+                dependents.forEach(dependent -> facilityContext.pieceDependents.put(parentStructure, dependent));
+                // Put a reference to this piece and its parent
+                facilityContext.pieceDependents.put(parentStructure, resolvedPlacedPiece.getSecond());
                 break;
             }
 
@@ -298,7 +319,7 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
         List<GenStep> starts = new ArrayList<>();
         ConfiguredFacilityPiece entranceNew = INSTANCE.facilityPieceCollections.get(ChangedFacilityPieceTypes.ENTRANCE.get()).findNextPiece(context.random())
                 .orElseThrow();
-        FacilityPieceInstance entrancePiece = entranceNew.facilityPiece().createStructurePiece(context.structureTemplateManager(), genDepth);
+        FacilityPieceInstance entrancePiece = entranceNew.getFacilityPiece().createStructurePiece(context.structureTemplateManager(), genDepth);
 
         var directions = new ArrayList<>(Direction.Plane.HORIZONTAL.stream().toList());
         CollectionUtil.shuffle(directions, context.random());
@@ -342,9 +363,21 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
 
         stack.pop();
 
-        Map<Zone, List<BoundingBox>> zoneBoundingBoxes = new HashMap<>();
+        var requiredMap = INSTANCE.facilityPieceCollections.values().stream().flatMap(collection -> collection.shuffledStream(context.random()))
+                .filter(piece -> piece.getFacilityPiece().getType() == ChangedFacilityPieceTypes.ROOM.get()) // Rooms only, for now
+                .filter(piece -> piece.getMinimum() > facilityGenerationContext.configuredPieceCounts.getOrDefault(piece, 0))
+                .collect(Collectors.toMap(Function.identity(),
+                        piece -> piece.getMinimum() - facilityGenerationContext.configuredPieceCounts.getOrDefault(piece, 0)));
+
+        requiredMap.forEach((requiredPiece, count) -> {
+            // TODO try to insert required rooms
+            Changed.LOGGER.debug("Attempting to put {} count of {} in generating facility", count, requiredPiece.getName());
+        });
+
+        Map<Zone, List<Pair<ResourceLocation, BoundingBox>>> zoneBoundingBoxes = new HashMap<>();
         facilityGenerationContext.piecesByZone.forEach((zone, pieces) -> {
-            zoneBoundingBoxes.put(zone, pieces.stream().map(StructurePiece::getBoundingBox).toList());
+            zoneBoundingBoxes.put(zone, pieces.stream().map(pair ->
+                    Pair.of(pair.getFirst().getName(), pair.getSecond().getBoundingBox())).toList());
         });
 
         return new FacilityKeystone(genDepth, zoneBoundingBoxes, entrancePiece.getBoundingBox(), context.random());

@@ -1,6 +1,7 @@
 package net.ltxprogrammer.changed.world.features.structures.facility;
 
 import net.ltxprogrammer.changed.world.features.structures.facility.types.PieceType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.fml.event.IModBusEvent;
 
@@ -13,13 +14,18 @@ public class GatherFacilityPiecesEvent extends Event implements IModBusEvent {
         this.builder = builder;
     }
 
-    public GatherFacilityPiecesEvent register(FacilityPiece piece) {
+    public GatherFacilityPiecesEvent register(ConfiguredFacilityPiece piece) {
         builder.register(piece);
         return this;
     }
 
-    public GatherFacilityPiecesEvent register(int weight, FacilityPiece piece) {
-        builder.register(weight, piece);
+    public GatherFacilityPiecesEvent register(ResourceLocation pieceName, FacilityPiece piece) {
+        builder.register(pieceName, piece);
+        return this;
+    }
+
+    public GatherFacilityPiecesEvent register(ResourceLocation pieceName, int weight, FacilityPiece piece) {
+        builder.register(pieceName, weight, piece);
         return this;
     }
 

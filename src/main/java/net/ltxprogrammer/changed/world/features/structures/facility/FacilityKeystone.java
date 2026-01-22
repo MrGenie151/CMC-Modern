@@ -1,6 +1,7 @@
 package net.ltxprogrammer.changed.world.features.structures.facility;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.init.ChangedRegistry;
@@ -10,6 +11,7 @@ import net.ltxprogrammer.changed.world.data.ChangedGameDataAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
@@ -32,19 +34,19 @@ import java.util.concurrent.CompletableFuture;
  */
 public class FacilityKeystone extends StructurePiece {
     private ActiveFacilityInstance.Header header;
-    private Map<Zone, List<BoundingBox>> piecesByZone;
+    private Map<Zone, List<Pair<ResourceLocation, BoundingBox>>> piecesByZone;
 
-    private static final Codec<Map<Zone, List<BoundingBox>>> PIECES_BY_ZONE_CODEC = Codec.unboundedMap(
+    private static final Codec<Map<Zone, List<Pair<ResourceLocation, BoundingBox>>>> PIECES_BY_ZONE_CODEC = Codec.unboundedMap(
             ChangedRegistry.FACILITY_ZONES.get().getCodec(),
-            Codec.list(BoundingBox.CODEC)
+            Codec.compoundList(ResourceLocation.CODEC, BoundingBox.CODEC)
     );
 
-    public FacilityKeystone(int genDepth, Map<Zone, List<BoundingBox>> piecesByZone, BoundingBox entrance, RandomSource random) {
+    public FacilityKeystone(int genDepth, Map<Zone, List<Pair<ResourceLocation, BoundingBox>>> piecesByZone, BoundingBox entrance, RandomSource random) {
         super(ChangedStructurePieceTypes.FACILITY_KEYSTONE.get(), genDepth, entrance);
 
         this.piecesByZone = piecesByZone;
         header = new ActiveFacilityInstance.Header();
-        header.initialize(BoundingBox.encapsulatingBoxes(piecesByZone.values().stream().flatMap(List::stream)::iterator).orElseThrow(() -> {
+        header.initialize(BoundingBox.encapsulatingBoxes(piecesByZone.values().stream().flatMap(List::stream).map(Pair::getSecond)::iterator).orElseThrow(() -> {
             return new IllegalStateException("Unable to calculate boundingbox without pieces");
         }), random);
     }
@@ -85,7 +87,8 @@ public class FacilityKeystone extends StructurePiece {
             piecesByZone.forEach((zone, boundingBox) -> {
                 zoneInfoBuilder.put(zone, new ActiveFacilityInstance.ZoneInfo(
                         FacilityZoneEntities.INSTANCE.getSpawns(zone).stream().map(ActiveFacilityInstance.SpawnInfo::new).toList(),
-                        boundingBox.stream().map(ActiveFacilityInstance.PieceInfo::new).toList(), Optional.empty()));
+                        boundingBox.stream().map(pair -> new ActiveFacilityInstance.PieceInfo(pair.getFirst(), pair.getSecond())).toList(),
+                        Optional.empty()));
             });
 
             var facilityInstance = new ActiveFacilityInstance(zoneInfoBuilder.build(), Optional.empty());

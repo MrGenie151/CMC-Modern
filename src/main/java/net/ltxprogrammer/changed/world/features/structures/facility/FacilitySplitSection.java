@@ -38,7 +38,7 @@ public class FacilitySplitSection extends FacilitySinglePiece {
 
     @Override
     public WeightedRandomList<WeightedPieceNeighborSupplier> getValidNeighbors(FacilityGenerationStack stack) {
-        int corridors = stack.sequentialMatch(piece -> piece.facilityPiece().type == ChangedFacilityPieceTypes.CORRIDOR.get());
+        int corridors = stack.sequentialMatch(piece -> piece.getFacilityPiece().type == ChangedFacilityPieceTypes.CORRIDOR.get());
         if (stack.getDepthRemaining() > 4) {
             if (corridors < 5)
                 return VALID_NEIGHBORS_MIN_HIGH_SPAN;

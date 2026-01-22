@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
@@ -17,6 +18,8 @@ import java.util.List;
 import java.util.Random;
 
 public abstract class FacilityPieceInstance extends StructurePiece {
+    protected static final WeightedRandomList<WeightedPieceNeighborSupplier> NO_NEIGHBORS = WeightedRandomList.create();
+
     private Rotation rotation;
 
     protected FacilityPieceInstance(StructurePieceType type, int genDepth, BoundingBox boundingBox) {
@@ -35,7 +38,7 @@ public abstract class FacilityPieceInstance extends StructurePiece {
         tag.putInt("R", rotation.ordinal());
     }
 
-    public abstract void addSteps(FacilityGenerationStack stack, List<GenStep> steps);
+    public abstract void addSteps(@Nullable FacilityGenerationStack stack, List<GenStep> steps);
 
     public abstract boolean setupBoundingBox(StructurePiecesBuilder builder, StructureTemplate.StructureBlockInfo exitGlu, RandomSource random, BoundingBox allowedRegion);
     public abstract void setupBoundingBox(BlockPos minimum);

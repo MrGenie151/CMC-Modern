@@ -14,6 +14,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -225,12 +226,14 @@ public class ActiveFacilityInstance {
     }
 
     public static class PieceInfo {
+        public final ResourceLocation pieceName;
         public final BoundingBox region;
         public final int availableSpawns;
         public int spawnedEntities;
         @Nullable private CompoundTag persistentData;
 
         public static final Codec<PieceInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                ResourceLocation.CODEC.fieldOf("pieceName").forGetter(info -> info.pieceName),
                 BoundingBox.CODEC.fieldOf("region").forGetter(info -> info.region),
                 Codec.INT.fieldOf("availableSpawns").forGetter(info -> info.availableSpawns),
                 Codec.INT.fieldOf("spawnedEntities").forGetter(info -> info.spawnedEntities),
@@ -245,7 +248,8 @@ public class ActiveFacilityInstance {
                 })
         ).apply(instance, PieceInfo::new));
 
-        public PieceInfo(BoundingBox region, int availableSpawns, int spawnedEntities, Optional<CompoundTag> persistentData) {
+        public PieceInfo(ResourceLocation pieceName, BoundingBox region, int availableSpawns, int spawnedEntities, Optional<CompoundTag> persistentData) {
+            this.pieceName = pieceName;
             this.region = region;
             this.availableSpawns = availableSpawns;
             this.spawnedEntities = spawnedEntities;
@@ -258,8 +262,8 @@ public class ActiveFacilityInstance {
             });
         }
 
-        public PieceInfo(BoundingBox region) {
-            this(region, getAvailableSpawns(region), 0, Optional.empty());
+        public PieceInfo(ResourceLocation pieceName, BoundingBox region) {
+            this(pieceName, region, getAvailableSpawns(region), 0, Optional.empty());
         }
 
         public boolean isInside(Vec3i position) {
@@ -300,6 +304,11 @@ public class ActiveFacilityInstance {
          */
         public void readAdditionalData(@NotNull CompoundTag tag) {
 
+        }
+
+        @Override
+        public String toString() {
+            return pieceName.toString();
         }
     }
 

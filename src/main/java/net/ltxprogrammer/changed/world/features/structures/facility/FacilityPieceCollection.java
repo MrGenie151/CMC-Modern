@@ -24,7 +24,7 @@ public class FacilityPieceCollection {
     }
 
     boolean contains(FacilityPiece facilityPiece) {
-        return pieces.stream().map(ConfiguredFacilityPiece::facilityPiece).anyMatch(facilityPiece::equals);
+        return pieces.stream().map(ConfiguredFacilityPiece::getFacilityPiece).anyMatch(facilityPiece::equals);
     }
 
     boolean contains(ConfiguredFacilityPiece facilityPiece) {
