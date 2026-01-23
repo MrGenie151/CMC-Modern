@@ -9,8 +9,8 @@ import java.util.function.Supplier;
 public class LatexRecordItem extends LoopedRecordItem {
     private static final Component NAME = Component.translatable("item.changed.latex_music_disc");
 
-    public LatexRecordItem(int comparatorValue, Supplier<SoundEvent> soundSupplier, Properties builder, int lengthInTicks) {
-        super(comparatorValue, soundSupplier, builder, lengthInTicks);
+    public LatexRecordItem(int comparatorValue, Supplier<SoundEvent> soundSupplier, Properties builder) {
+        super(comparatorValue, soundSupplier, builder);
     }
 
     @Override

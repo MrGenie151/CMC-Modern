@@ -71,8 +71,7 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
 
     public AbstractAbility<?> selectedAbility = null;
     public AbstractAbility<?> menuAbility = null;
-    private boolean abilityKeyDown = false;
-    public int abilityKeyStateFlips = 0;
+    public KeyStateTracker abilityKey = new KeyStateTracker();
     public TransfurMode transfurMode;
     public TransfurVariant.BreatheMode breatheMode;
     public VisionType visionType;
@@ -824,10 +823,6 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
         }
     }
 
-    public boolean isAbilityKeyEffectivelyDown() {
-        return (abilityKeyStateFlips + (abilityKeyDown ? 1 : 0)) % 2 == 1;
-    }
-
     protected void tickAbilities() {
         for (var instance : abilityInstances.values()) {
             instance.getController().tickCoolDown();
@@ -842,21 +837,13 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
                 var instance = abilityInstances.get(selectedAbility);
                 if (instance != null) {
                     var controller = instance.getController();
-                    boolean uniqueTick = true;
-                    do {
-                        if (abilityKeyStateFlips > 0) {
-                            abilityKeyStateFlips--;
-                            abilityKeyDown = !abilityKeyDown;
-                        }
-
-                        boolean oldState = controller.exchangeKeyState(abilityKeyDown);
-                        if (abilityKeyDown || instance.getController().isCoolingDown())
+                    this.abilityKey.handleStateUpdates((isDown, wasDown, unique) -> {
+                        boolean oldState = controller.exchangeKeyState(isDown);
+                        if (isDown || instance.getController().isCoolingDown())
                             this.resetTicksSinceLastAbilityActivity();
                         if (host.containerMenu == host.inventoryMenu && !host.isUsingItem() && !instance.getController().isCoolingDown())
-                            instance.getUseType().check(abilityKeyDown, oldState, uniqueTick, controller);
-
-                        uniqueTick = false;
-                    } while (abilityKeyStateFlips > 0);
+                            instance.getUseType().check(isDown, oldState, unique, controller);
+                    });
                 }
             }
 

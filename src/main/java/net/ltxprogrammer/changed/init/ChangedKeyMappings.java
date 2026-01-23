@@ -46,9 +46,8 @@ public class ChangedKeyMappings {
                             return;
 
                         var newState = event.getAction() != GLFW.GLFW_RELEASE;
-                        if (newState != variant.isAbilityKeyEffectivelyDown()) {
+                        if (variant.abilityKey.queueKeyState(newState)) {
                             ChangedTutorial.triggerOnUseAbility(variant.getSelectedAbility());
-                            variant.abilityKeyStateFlips++;
                             Changed.PACKET_HANDLER.sendToServer(new VariantAbilityActivate(local, newState, variant.selectedAbility));
                         }
                     });

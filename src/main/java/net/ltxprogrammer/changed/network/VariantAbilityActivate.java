@@ -69,9 +69,8 @@ public class VariantAbilityActivate implements ChangedPacket {
                     if (ability != null)
                         variant.setSelectedAbility(ability);
 
-                    if ((keyDown || ability != null) && variant.abilityKeyStateFlips < 6) { // Prevent DoS by limiting flip count / tick
-                        if (variant.isAbilityKeyEffectivelyDown() != keyDown)
-                            variant.abilityKeyStateFlips++; // Only queue flip if keyDown is opposite to what the keyState is
+                    if ((keyDown || ability != null) && variant.abilityKey.getFlipCount() < 6) { // Prevent DoS by limiting flip count / tick
+                        variant.abilityKey.queueKeyState(keyDown);
                     }
                 });
             });
@@ -103,9 +102,8 @@ public class VariantAbilityActivate implements ChangedPacket {
                         sender.openMenu(new SimpleMenuProvider((id, inventory, givenPlayer) ->
                                 new AbilityRadialMenu(id, inventory, null), AbilityRadialMenu.CONTAINER_TITLE));
                 }
-                else if (variant.abilityKeyStateFlips < 6) { // Prevent DoS by limiting flip count / tick
-                    if (variant.isAbilityKeyEffectivelyDown() != keyDown)
-                        variant.abilityKeyStateFlips++; // Only queue flip if keyDown is opposite to what the keyState is
+                else if (variant.abilityKey.getFlipCount() < 6) { // Prevent DoS by limiting flip count / tick
+                    variant.abilityKey.queueKeyState(keyDown);
                 }
 
                 Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY.with(() -> sender), this);

@@ -409,16 +409,6 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
             return 0.93F;
     }
 
-    public static boolean isDarkEnoughToSpawn(ServerLevelAccessor world, BlockPos pos, RandomSource random) {
-        if (world.getBrightness(LightLayer.SKY, pos) > random.nextInt(50)) {
-            return false;
-        } else if (world.getBrightness(LightLayer.BLOCK, pos) > 0) {
-            return false;
-        } else {
-            return getLevelBrightnessAt(world.getLevel(), pos) <= random.nextInt(10);
-        }
-    }
-
     protected static boolean checkSpawnBlock(ServerLevelAccessor world, MobSpawnType reason, BlockPos pos) {
         if (reason != MobSpawnType.NATURAL)
             return true;
@@ -439,8 +429,6 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
 
     public static <T extends ChangedEntity> boolean checkEntitySpawnRules(EntityType<T> entityType, ServerLevelAccessor world, MobSpawnType reason, BlockPos pos, RandomSource random) {
         if (pos.getY() < world.getSeaLevel() - 10)
-            return false;
-        if (random.nextFloat() > 0.5f)
             return false;
         if (!checkSpawnBlock(world, reason, pos))
             return false;
