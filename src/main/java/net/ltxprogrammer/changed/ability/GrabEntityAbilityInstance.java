@@ -135,8 +135,15 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
 
         if (this.entity.getEntity() instanceof Player player && player == UniversalDist.getLocalPlayer())
             Changed.PACKET_HANDLER.sendToServer(GrabEntityPacket.release(player, this.grabbedEntity));
-        if (entity instanceof Player) {
+        if (this.entity.getEntity() instanceof Player player) {
             this.grabbedEntity.setDeltaMovement(Vec3.ZERO);
+
+            if (ProcessTransfur.isPlayerTransfurred(player)) {
+                ProcessTransfur.ifPlayerTransfurred(player, variant -> {
+                    if (variant.isTemporaryFromSuit())
+                        ProcessTransfur.removePlayerTransfurVariant(player);
+                });
+            }
         }
         this.grabbedEntity.noPhysics = false;
         this.grabbedEntity.resetFallDistance();
@@ -183,6 +190,13 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
         this.suited = true;
         this.grabStrength = 1.0f;
 
+        if (entity instanceof Player player && !ProcessTransfur.isPlayerTransfurred(player)) {
+            ProcessTransfur.setPlayerTransfurVariant(player, this.entity.getSelfVariant(), TransfurContext.latexHazard(this.entity, TransfurCause.GRAB_REPLICATE), 1.0f, true,
+                    preBroadcastVariant -> {
+                        this.entity.getChangedEntity().onSuitOther(IAbstractChangedEntity.forPlayer(player), preBroadcastVariant.getParent());
+                    });
+        }
+
         prevGrabber.ifPresent(this::stealGrabFrom);
         return true;
     }
@@ -207,6 +221,13 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
         this.releaseEntity();
         this.grabbedEntity = entity;
         this.grabStrength = 1.0f;
+
+        if (entity instanceof Player player && ProcessTransfur.isPlayerTransfurred(player)) {
+            ProcessTransfur.ifPlayerTransfurred(player, variant -> {
+                if (variant.isTemporaryFromSuit())
+                    ProcessTransfur.removePlayerTransfurVariant(player);
+            });
+        }
 
         prevGrabber.ifPresent(this::stealGrabFrom);
         return true;
@@ -376,6 +397,32 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
         }
     }
 
+    public boolean wantsToRelease() {
+        if (this.grabbedEntity == null)
+            return false;
+
+        if (this.entity.getEntity() instanceof Player player && (player.isDeadOrDying() || player.isRemoved() || player.isSpectator())) {
+            return true;
+        }
+
+        if (this.grabbedEntity instanceof Player player && player.isSpectator()) {
+            return true;
+        }
+
+        if (this.grabbedEntity instanceof Player player && ProcessTransfur.isPlayerTransfurred(player)) {
+            var variant = ProcessTransfur.getPlayerTransfurVariant(player);
+            if (!variant.isTemporaryFromSuit()) {
+                return true;
+            }
+        }
+
+        if (this.grabbedEntity.isDeadOrDying() || this.grabbedEntity.isRemoved() || this.grabStrength <= 0.0f) {
+            return true;
+        }
+
+        return false;
+    }
+
     public void tickIdle() { // Called every tick of LatexVariantInstance, for variants that have this ability
         this.grabStrengthO = this.grabStrength;
         this.suitTransitionO = this.suitTransition;
@@ -417,38 +464,7 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
                 this.grabbedEntity.resetFallDistance();
             }
 
-            if (this.entity.getEntity() instanceof Player player && (player.isDeadOrDying() || player.isRemoved() || player.isSpectator())) {
-                this.releaseEntity();
-                return;
-            }
-
-            if (this.grabbedEntity instanceof Player player && player.isSpectator()) {
-                this.releaseEntity();
-                return;
-            }
-
-            if (this.suited && this.grabbedEntity instanceof Player player && !ProcessTransfur.isPlayerTransfurred(player)) {
-                var suitVariant = ProcessTransfur.setPlayerTransfurVariant(player, this.entity.getSelfVariant(), TransfurContext.latexHazard(this.entity, TransfurCause.GRAB_REPLICATE), 1.0f, true);
-                if (suitVariant != null)
-                    this.entity.getChangedEntity().onSuitOther(IAbstractChangedEntity.forPlayer(player), suitVariant.getParent());
-            }
-
-            else if (!this.suited && this.grabbedEntity instanceof Player player && ProcessTransfur.isPlayerTransfurred(player)) {
-                ProcessTransfur.ifPlayerTransfurred(player, variant -> {
-                    if (variant.isTemporaryFromSuit())
-                        ProcessTransfur.removePlayerTransfurVariant(player);
-                });
-            }
-
-            if (this.grabbedEntity instanceof Player player && ProcessTransfur.isPlayerTransfurred(player)) {
-                var variant = ProcessTransfur.getPlayerTransfurVariant(player);
-                if (!variant.isTemporaryFromSuit()) {
-                    this.releaseEntity();
-                    return;
-                }
-            }
-
-            if (this.grabbedEntity.isDeadOrDying() || this.grabbedEntity.isRemoved() || this.grabStrength <= 0.0f) {
+            if (this.wantsToRelease()) {
                 this.releaseEntity();
                 return;
             }

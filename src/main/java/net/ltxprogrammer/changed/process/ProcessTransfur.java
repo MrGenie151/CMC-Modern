@@ -425,14 +425,14 @@ public class ProcessTransfur {
                                                         @Nullable TransfurContext context,
                                                         float progress,
                                                         boolean temporaryFromSuit) {
-        return setPlayerTransfurVariant(player, ogVariant, context, progress, temporaryFromSuit, entity -> {});
+        return setPlayerTransfurVariant(player, ogVariant, context, progress, temporaryFromSuit, variant -> {});
     }
 
     public static @Nullable
     TransfurVariantInstance<?> setPlayerTransfurVariant(Player player, @Nullable TransfurVariant<?> ogVariant,
                                                         @Nullable TransfurContext context,
                                                         float progress,
-                                                        boolean temporaryFromSuit, Consumer<? super ChangedEntity> postProcess) {
+                                                        boolean temporaryFromSuit, Consumer<TransfurVariantInstance<?>> postProcess) {
         PlayerDataExtension playerDataExtension = (PlayerDataExtension)player;
         EntityVariantAssigned event = new EntityVariantAssigned(player, ogVariant, context == null ? null : context.cause);
         Changed.postModEvent(event);
@@ -450,7 +450,7 @@ public class ProcessTransfur {
             oldVariant.getChangedEntity().discard();
         TransfurVariantInstance<?> instance = TransfurVariantInstance.variantFor(variant, player);
         if (instance != null)
-            postProcess.accept(instance.getChangedEntity());
+            postProcess.accept(instance);
         playerDataExtension.setTransfurVariant(instance);
 
         if (instance != null) {
