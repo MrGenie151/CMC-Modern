@@ -38,7 +38,6 @@ import java.util.function.BiConsumer;
 public abstract class FacilitySinglePiece extends FacilityPiece {
     public final ResourceLocation templateName;
     public final Optional<ResourceLocation> lootTable;
-    private StructureTemplate template = null;
 
     protected FacilitySinglePiece(PieceType<?> type, ResourceLocation templateName) {
         super(type);
@@ -46,10 +45,10 @@ public abstract class FacilitySinglePiece extends FacilityPiece {
         this.lootTable = Optional.empty();
     }
 
-    protected FacilitySinglePiece(PieceType<?> type, ResourceLocation templateName, @Nullable ResourceLocation lootTable) {
+    protected FacilitySinglePiece(PieceType<?> type, ResourceLocation templateName, Optional<ResourceLocation> lootTable) {
         super(type);
         this.templateName = templateName;
-        this.lootTable = Optional.ofNullable(lootTable);
+        this.lootTable = lootTable;
     }
 
     public static class StructureInstance extends FacilityPieceInstance {

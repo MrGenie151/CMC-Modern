@@ -9,15 +9,10 @@ public class EntranceType extends PieceType<FacilityEntrance> {
     public static final Codec<FacilityEntrance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("template").forGetter(entrance -> entrance.templateName),
             Codec.optionalField("loot_table", ResourceLocation.CODEC).forGetter(entrance -> entrance.lootTable)
-    ).apply(instance, (template, lootTable) -> new FacilityEntrance(template, lootTable.orElse(null))));
+    ).apply(instance, FacilityEntrance::new));
 
     @Override
     public Codec<FacilityEntrance> getCodec() {
         return CODEC;
-    }
-
-    @Override
-    public boolean connectionsMeetExpectations(int connections) {
-        return connections >= 1;
     }
 }

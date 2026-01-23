@@ -9,7 +9,7 @@ public class StaircaseEndType extends PieceType<FacilityStaircaseEnd> {
     public static final Codec<FacilityStaircaseEnd> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("template").forGetter(entrance -> entrance.templateName),
             Codec.optionalField("loot_table", ResourceLocation.CODEC).forGetter(entrance -> entrance.lootTable)
-    ).apply(instance, (template, lootTable) -> new FacilityStaircaseEnd(template, lootTable.orElse(null))));
+    ).apply(instance, FacilityStaircaseEnd::new));
 
     @Override
     public Codec<FacilityStaircaseEnd> getCodec() {

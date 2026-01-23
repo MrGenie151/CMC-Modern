@@ -3,9 +3,11 @@ package net.ltxprogrammer.changed.world.data;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.ltxprogrammer.changed.Changed;
+import net.ltxprogrammer.changed.network.packet.debugger.FacilityAddPiecesPayload;
 import net.minecraft.nbt.*;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.io.*;
 import java.util.HashSet;
@@ -95,8 +97,21 @@ public class ChangedGameData {
         }
     }
 
-    public void trackNewFacility(ActiveFacilityInstance facilityInstance) {
+    protected void trackFacility(ActiveFacilityInstance facilityInstance) {
         facilities.add(facilityInstance);
+
+        if (Changed.config.server.debugFacilitiesEnabled.get()) {
+            broadcastFacilityDebug(facilityInstance);
+        }
+    }
+
+    private void broadcastFacilityDebug(ActiveFacilityInstance facilityInstance) {
+        Changed.PACKET_HANDLER.send(PacketDistributor.ALL.noArg(),
+                new FacilityAddPiecesPayload(attachedLevel, facilityInstance.getPieceGenerationInfos()).wrap());
+    }
+
+    public void trackNewFacility(ActiveFacilityInstance facilityInstance) {
+        this.trackFacility(facilityInstance);
         facilityInstance.saveToFile(attachedLevel.getDataStorage(), ChangedGameData::saveTagToDisk);
     }
 
@@ -124,10 +139,18 @@ public class ChangedGameData {
                 badFiles.add(pair.getFirst());
             }
             return null;
-        }).filter(Objects::nonNull).forEach(facilities::add);
+        }).filter(Objects::nonNull).forEach(this::trackFacility);
     }
 
+    boolean debugFacilitiesEnabledO = false;
     public void tick(BooleanSupplier hasTimeSupplier) {
+        if (!debugFacilitiesEnabledO && Changed.config.server.debugFacilitiesEnabled.get()) {
+            // Catch up on facilities not yet sent to clients
+            this.facilities.forEach(this::broadcastFacilityDebug);
+        }
+
+        debugFacilitiesEnabledO = Changed.config.server.debugFacilitiesEnabled.get();
+
         // These functions may be too expensive to run each tick
         this.saveOrUnloadFeatures();
         this.loadFeatures();

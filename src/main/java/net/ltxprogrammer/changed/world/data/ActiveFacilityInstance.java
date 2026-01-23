@@ -530,4 +530,19 @@ public class ActiveFacilityInstance {
     public void readAdditionalData(@NotNull CompoundTag tag) {
 
     }
+
+
+    public record PieceGenerationInfo(ResourceLocation pieceName, BoundingBox region, Zone zone) {}
+
+    public List<PieceGenerationInfo> getPieceGenerationInfos() {
+        List<PieceGenerationInfo> gathered = new ArrayList<>();
+
+        zoneInfos.forEach((zone, zoneInfo) -> {
+            zoneInfo.pieceRegions.forEach(pieceInfo -> {
+                gathered.add(new PieceGenerationInfo(pieceInfo.pieceName, pieceInfo.region, zone));
+            });
+        });
+
+        return gathered;
+    }
 }

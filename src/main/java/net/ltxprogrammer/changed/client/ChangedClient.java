@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.client.animations.AnimationAssociations;
 import net.ltxprogrammer.changed.client.animations.AnimationDefinitions;
+import net.ltxprogrammer.changed.client.debug.ChangedDebugRenderer;
 import net.ltxprogrammer.changed.client.latexparticles.LatexParticleEngine;
 import net.ltxprogrammer.changed.client.latexparticles.SetupContext;
 import net.ltxprogrammer.changed.client.renderer.ChangedEntityWithOutLevelRenderer;
@@ -60,6 +61,7 @@ public class ChangedClient {
     public static final Cacheable<AbilityRenderer> abilityRenderer = Cacheable.of(() -> new AbilityRenderer(Minecraft.getInstance().textureManager, Minecraft.getInstance().getModelManager(), abilityColors.getOrThrow()));
     public static final Cacheable<LatexCoveredBlocksRenderer> latexCoveredBlocksRenderer = Cacheable.of(() -> new LatexCoveredBlocksRenderer(Minecraft.getInstance()));
     public static final Cacheable<WallSignTextureManager> wallSigns = Cacheable.of(() -> new WallSignTextureManager(Minecraft.getInstance().getTextureManager()));
+    public static final Cacheable<ChangedDebugRenderer> debugRenderer = Cacheable.of(() -> new ChangedDebugRenderer(Minecraft.getInstance()));
 
     private static final ThreadLocal<Function<RenderType, RenderType>> CHUNK_RENDER_TYPE_SET_OVERRIDE = ThreadLocal.withInitial(() -> null);
 

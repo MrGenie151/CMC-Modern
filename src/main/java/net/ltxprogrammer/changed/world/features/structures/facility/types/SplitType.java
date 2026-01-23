@@ -7,17 +7,13 @@ import net.minecraft.resources.ResourceLocation;
 
 public class SplitType extends PieceType<FacilitySplitSection> {
     public static final Codec<FacilitySplitSection> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.fieldOf("template").forGetter(entrance -> entrance.templateName),
-            Codec.optionalField("loot_table", ResourceLocation.CODEC).forGetter(entrance -> entrance.lootTable)
-    ).apply(instance, (template, lootTable) -> new FacilitySplitSection(template, lootTable.orElse(null))));
+            ResourceLocation.CODEC.fieldOf("template").forGetter(piece -> piece.templateName),
+            Codec.INT.fieldOf("expected_dependents").orElse(2).forGetter(piece -> piece.expectedDependents),
+            Codec.optionalField("loot_table", ResourceLocation.CODEC).forGetter(piece -> piece.lootTable)
+    ).apply(instance, FacilitySplitSection::new));
 
     @Override
     public Codec<FacilitySplitSection> getCodec() {
         return CODEC;
-    }
-
-    @Override
-    public boolean connectionsMeetExpectations(int connections) {
-        return connections >= 2;
     }
 }

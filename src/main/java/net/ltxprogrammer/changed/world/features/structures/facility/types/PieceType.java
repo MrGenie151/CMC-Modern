@@ -10,10 +10,6 @@ public abstract class PieceType<T extends FacilityPiece> {
         return true;
     }
 
-    public boolean connectionsMeetExpectations(int connections) {
-        return connections > 1;
-    }
-
     public boolean canBeReplacedBy(PieceType<?> other) {
         return false;
     }

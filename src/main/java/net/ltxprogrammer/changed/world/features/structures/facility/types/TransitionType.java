@@ -9,10 +9,15 @@ public class TransitionType extends PieceType<FacilityTransitionSection> {
     public static final Codec<FacilityTransitionSection> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("template").forGetter(entrance -> entrance.templateName),
             Codec.optionalField("loot_table", ResourceLocation.CODEC).forGetter(entrance -> entrance.lootTable)
-    ).apply(instance, (template, lootTable) -> new FacilityTransitionSection(template, lootTable.orElse(null))));
+    ).apply(instance, FacilityTransitionSection::new));
 
     @Override
     public Codec<FacilityTransitionSection> getCodec() {
         return CODEC;
+    }
+
+    @Override
+    public boolean canBeReplacedBy(PieceType<?> other) {
+        return other == this;
     }
 }

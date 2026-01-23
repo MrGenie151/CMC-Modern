@@ -10,7 +10,7 @@ public class CorridorType extends PieceType<FacilityCorridorSection> {
     public static final Codec<FacilityCorridorSection> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("template").forGetter(entrance -> entrance.templateName),
             Codec.optionalField("loot_table", ResourceLocation.CODEC).forGetter(entrance -> entrance.lootTable)
-    ).apply(instance, (template, lootTable) -> new FacilityCorridorSection(template, lootTable.orElse(null))));
+    ).apply(instance, FacilityCorridorSection::new));
 
     @Override
     public Codec<FacilityCorridorSection> getCodec() {

@@ -1,9 +1,12 @@
 package net.ltxprogrammer.changed.world.features.structures.facility;
 
+import net.ltxprogrammer.changed.world.features.structures.FacilityPieces;
 import net.ltxprogrammer.changed.world.features.structures.facility.types.PieceType;
 import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
+
+import java.util.Set;
 
 public abstract class FacilityPiece {
     public final PieceType<?> type;
@@ -18,4 +21,6 @@ public abstract class FacilityPiece {
 
     public abstract WeightedRandomList<WeightedPieceNeighborSupplier> getValidNeighbors(FacilityGenerationStack stack);
     public abstract FacilityPieceInstance createStructurePiece(StructureTemplateManager structures, int genDepth);
+
+    public abstract boolean isValidGeneration(FacilityPieces.PlacedFacilityPiece parent, Set<FacilityPieces.PlacedFacilityPiece> directDependents);
 }

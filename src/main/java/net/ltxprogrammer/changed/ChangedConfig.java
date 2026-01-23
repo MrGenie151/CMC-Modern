@@ -118,6 +118,7 @@ public class ChangedConfig {
         public final ForgeConfigSpec.ConfigValue<Double> bpiSizeMaximum;
         public final ForgeConfigSpec.ConfigValue<Double> bpiSizeMinimumNPC;
         public final ForgeConfigSpec.ConfigValue<Double> bpiSizeMaximumNPC;
+        public final ForgeConfigSpec.ConfigValue<Boolean> debugFacilitiesEnabled;
 
         public Server(ForgeConfigSpec.Builder builder) {
             builder.comment("Should transfurred players have a nametag");
@@ -138,6 +139,8 @@ public class ChangedConfig {
             bpiSizeMinimumNPC = builder.defineInRange("bpiSizeMinimumNPC", 0.95, 0.05, 1024.0);
             builder.comment("Acceptable model scaling through BPI when an NPC is spawned, maximum value (Default: +5%)");
             bpiSizeMaximumNPC = builder.defineInRange("bpiSizeMaximumNPC", 1.05, 0.05, 1024.0);
+            builder.comment("Should the server broadcast facility debug info.");
+            debugFacilitiesEnabled = builder.define("debugFacilitiesEnabled", false);
         }
 
         public Stream<RegistryElementPredicate<Block>> getBlacklistedCoverBlocks() {

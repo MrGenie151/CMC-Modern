@@ -3,6 +3,7 @@ package net.ltxprogrammer.changed.world.features.structures.facility;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.init.ChangedRegistry;
 import net.ltxprogrammer.changed.init.ChangedStructurePieceTypes;
@@ -12,6 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
@@ -36,9 +38,14 @@ public class FacilityKeystone extends StructurePiece {
     private ActiveFacilityInstance.Header header;
     private Map<Zone, List<Pair<ResourceLocation, BoundingBox>>> piecesByZone;
 
+    private static final Codec<Pair<ResourceLocation, BoundingBox>> PIECE_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            ResourceLocation.CODEC.fieldOf("name").forGetter(Pair::getFirst),
+            BoundingBox.CODEC.fieldOf("region").forGetter(Pair::getSecond)
+    ).apply(instance, Pair::of));
+
     private static final Codec<Map<Zone, List<Pair<ResourceLocation, BoundingBox>>>> PIECES_BY_ZONE_CODEC = Codec.unboundedMap(
             ChangedRegistry.FACILITY_ZONES.get().getCodec(),
-            Codec.compoundList(ResourceLocation.CODEC, BoundingBox.CODEC)
+            Codec.list(PIECE_CODEC)
     );
 
     public FacilityKeystone(int genDepth, Map<Zone, List<Pair<ResourceLocation, BoundingBox>>> piecesByZone, BoundingBox entrance, RandomSource random) {

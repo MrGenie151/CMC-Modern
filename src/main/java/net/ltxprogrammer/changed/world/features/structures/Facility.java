@@ -52,7 +52,7 @@ public class Facility extends Structure {
         for (int reroll = 0; reroll < REROLL_FOR_SIZE_COUNT; reroll++) {
             builder.clear();
 
-            FacilityKeystone keystone = FacilityPieces.generateFacility(builder, context, 5, 25, generationRegion);
+            FacilityKeystone keystone = FacilityPieces.generateFacility(builder, context, 5, 20, generationRegion);
             builder.addPiece(keystone);
 
             int size = ((StructurePiecesBuilderExtender)builder).pieceCount();

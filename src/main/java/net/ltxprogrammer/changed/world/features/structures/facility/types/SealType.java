@@ -14,9 +14,4 @@ public class SealType extends PieceType<FacilitySealPiece> {
     public Codec<FacilitySealPiece> getCodec() {
         return CODEC;
     }
-
-    @Override
-    public boolean connectionsMeetExpectations(int connections) {
-        return connections == 1;
-    }
 }
