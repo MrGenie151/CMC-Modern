@@ -254,12 +254,12 @@ public class GasWolfPupModel extends AdvancedHumanoidModel<GasWolfPup> implement
 
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-        RightLegBack.render(poseStack, buffer, packedLight, packedOverlay);
-        LeftLegBack.render(poseStack, buffer, packedLight, packedOverlay);
-        Head.render(poseStack, buffer, packedLight, packedOverlay);
-        Body.render(poseStack, buffer, packedLight, packedOverlay);
-        RightFrontLeg.render(poseStack, buffer, packedLight, packedOverlay);
-        LeftFrontLeg.render(poseStack, buffer, packedLight, packedOverlay);
+        RightLegBack.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+        LeftLegBack.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+        Head.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+        Body.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+        RightFrontLeg.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+        LeftFrontLeg.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
     }
 
     @Nullable
