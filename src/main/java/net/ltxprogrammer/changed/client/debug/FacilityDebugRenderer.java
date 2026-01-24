@@ -42,13 +42,12 @@ public class FacilityDebugRenderer implements DebugRenderer.SimpleDebugRenderer 
         LevelAccessor level = this.minecraft.level;
         DimensionType dimensiontype = level.dimensionType();
         BlockPos blockpos = BlockPos.containing(camera.getPosition().x, 0.0D, camera.getPosition().z);
-        VertexConsumer vertexconsumer = bufferSource.getBuffer(RenderType.lines());
         if (this.genInfos.containsKey(dimensiontype)) {
-            for(ActiveFacilityInstance.PieceGenerationInfo genInfo : this.genInfos.get(dimensiontype).values()) {
+            for (ActiveFacilityInstance.PieceGenerationInfo genInfo : this.genInfos.get(dimensiontype).values()) {
                 BoundingBox boundingBox = genInfo.region();
                 var center = boundingBox.getCenter();
                 if (blockpos.closerThan(center, 500.0D)) {
-                    LevelRenderer.renderLineBox(poseStack, vertexconsumer,
+                    LevelRenderer.renderLineBox(poseStack, bufferSource.getBuffer(RenderType.lines()),
                             (double)boundingBox.minX() - camX,
                             (double)boundingBox.minY() - camY,
                             (double)boundingBox.minZ() - camZ,
