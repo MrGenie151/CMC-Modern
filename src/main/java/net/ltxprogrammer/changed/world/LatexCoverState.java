@@ -13,8 +13,11 @@ import net.ltxprogrammer.changed.util.Cacheable;
 import net.ltxprogrammer.changed.util.UniversalDist;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -25,14 +28,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.*;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateHolder;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.*;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.lighting.LightEngine;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.phys.BlockHitResult;
@@ -46,7 +49,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 public class LatexCoverState extends StateHolder<LatexType, LatexCoverState> {
-    protected static final Direction[] UPDATE_SHAPE_ORDER = new Direction[]{Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.DOWN, Direction.UP};
+    public static final Direction[] UPDATE_SHAPE_ORDER = new Direction[]{Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.DOWN, Direction.UP};
 
     public static final LootContextParam<LatexCoverState> LOOT_CONTEXT_PARAM = new LootContextParam<>(Changed.modResource("latex_cover_state"));
 
@@ -57,7 +60,7 @@ public class LatexCoverState extends StateHolder<LatexType, LatexCoverState> {
     }
 
     public boolean canOcclude(BlockGetter level, BlockPos pos, LatexCoverState other, BlockPos otherPos) {
-        return getType().canOcclude(this, level, pos, other, otherPos);
+        return this.getType().canOcclude(this.asState(), level, pos, other, otherPos);
     }
 
     public boolean isPresent() {
@@ -140,7 +143,44 @@ public class LatexCoverState extends StateHolder<LatexType, LatexCoverState> {
     public static boolean setAt(LevelWriter level, BlockPos blockPos, LatexCoverState state, int flags, int timeToLive) {
         if (level instanceof Level casted)
             return setAt(casted, blockPos, state, flags, timeToLive);
+        if (level instanceof WorldGenRegion casted)
+            return setAt(casted, blockPos, state, flags, timeToLive);
         return false;
+    }
+
+    public static boolean setAt(LevelWriter level, BlockPos blockPos, LatexCoverState state, int flags) {
+        return setAt(level, blockPos, state, flags, 512);
+    }
+
+    public static boolean setAtAndUpdate(LevelWriter level, BlockPos blockPos, LatexCoverState state) {
+        return setAt(level, blockPos, state, 3);
+    }
+
+    @Nullable
+    public static LatexCoverState setAt(ChunkAccess chunk, BlockPos blockPos, LatexCoverState state, boolean unknown) {
+        if (chunk instanceof EmptyLevelChunk)
+            return null;
+        if (chunk instanceof ImposterProtoChunk wrapper) // Mock vanilla behavior
+            return wrapper.allowWrites ? setAt(wrapper.getWrapped(), blockPos, state, unknown) : null;
+        if (chunk instanceof LevelChunk levelChunk)
+            return setAt(levelChunk, blockPos, state, unknown);
+        if (chunk instanceof ProtoChunk protoChunk)
+            return setAt(protoChunk, blockPos, state, unknown);
+        return null;
+    }
+
+    public static boolean setAt(WorldGenRegion level, BlockPos blockPos, LatexCoverState state, int flags, int timeToLive) {
+        if (!level.ensureCanWrite(blockPos)) {
+            return false;
+        } else {
+            ChunkAccess chunkaccess = level.getChunk(blockPos);
+            LatexCoverState prevState = setAt(chunkaccess, blockPos, state, false);
+            if (prevState != null) {
+                UniversalDist.getLevelExtension(level.getLevel()).onLatexCoverStateChange(level.getLevel(), blockPos, prevState, state);
+            }
+
+            return true;
+        }
     }
 
     public static boolean setAt(Level level, BlockPos blockPos, LatexCoverState state, int flags, int timeToLive) {
@@ -172,14 +212,7 @@ public class LatexCoverState extends StateHolder<LatexType, LatexCoverState> {
         }
     }
 
-    public static boolean setAt(Level level, BlockPos blockPos, LatexCoverState state, int flags) {
-        return setAt(level, blockPos, state, flags, 512);
-    }
-
-    public static boolean setAtAndUpdate(Level level, BlockPos blockPos, LatexCoverState state) {
-        return setAt(level, blockPos, state, 3);
-    }
-
+    @Nullable
     public static LatexCoverState setAt(LevelChunk chunk, BlockPos blockPos, LatexCoverState state, boolean unknown) {
         int i = blockPos.getY();
         LevelChunkSection section = chunk.getSection(chunk.getSectionIndex(i));
@@ -214,6 +247,30 @@ public class LatexCoverState extends StateHolder<LatexType, LatexCoverState> {
                     return oldState;
                 }
             }
+        }
+    }
+
+    @Nullable
+    public static LatexCoverState setAt(ProtoChunk chunk, BlockPos blockPos, LatexCoverState state, boolean unknown) {
+        int i = blockPos.getX();
+        int j = blockPos.getY();
+        int k = blockPos.getZ();
+        if (j >= chunk.getMinBuildHeight() && j < chunk.getMaxBuildHeight()) {
+            int l = chunk.getSectionIndex(j);
+            LevelChunkSection levelchunksection = chunk.getSection(l);
+            boolean flag = levelchunksection.hasOnlyAir();
+            if (flag && state.is(ChangedLatexTypes.NONE.get())) {
+                return state;
+            } else {
+                int i1 = SectionPos.sectionRelative(i);
+                int j1 = SectionPos.sectionRelative(j);
+                int k1 = SectionPos.sectionRelative(k);
+                LatexCoverState prevState = setAt(levelchunksection, i1, j1, k1, state);
+
+                return prevState;
+            }
+        } else {
+            return ChangedLatexTypes.NONE.get().defaultCoverState();
         }
     }
 
@@ -296,11 +353,11 @@ public class LatexCoverState extends StateHolder<LatexType, LatexCoverState> {
     }
 
     public void onStruckByLighting(Level level, BlockPos blockPos, LightningBolt lightningBolt) {
-        this.getType().onStruckByLighting(this, level, blockPos, lightningBolt);
+        this.getType().onStruckByLighting(this.asState(), level, blockPos, lightningBolt);
     }
 
     public void onLatexCoverStateChange(Level level, BlockPos blockPos, LatexCoverState oldState) {
-
+        this.getType().onLatexCoverStateChange(this.asState(), level, blockPos, oldState);
     }
 
     public static LatexCoverState setAt(LevelChunkSection section, BlockPos blockPos, LatexCoverState state) {
@@ -440,6 +497,14 @@ public class LatexCoverState extends StateHolder<LatexType, LatexCoverState> {
         }
 
         return result;
+    }
+
+    public LatexCoverState mirror(Mirror mirror) {
+        return this.getType().mirror(this, mirror);
+    }
+
+    public LatexCoverState rotate(Rotation rotation) {
+        return this.getType().rotate(this, rotation);
     }
 
     public record LatexNode(BlockPos pos, LatexCoverState state) {};

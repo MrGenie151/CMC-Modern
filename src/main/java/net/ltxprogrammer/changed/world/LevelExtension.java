@@ -20,19 +20,19 @@ import javax.annotation.Nullable;
 public class LevelExtension {
     public static final LevelExtension INSTANCE = new LevelExtension();
 
-    public void setCoversDirty(Level level, BlockPos blockPos, LatexCoverState oldState, LatexCoverState recordedState) {
+    public void setCoversDirty(LevelAccessor level, BlockPos blockPos, LatexCoverState oldState, LatexCoverState recordedState) {
 
     }
 
-    public void sendCoverUpdated(Level level, BlockPos blockPos, LatexCoverState oldState, LatexCoverState newState, int flags) {
+    public void sendCoverUpdated(LevelAccessor level, BlockPos blockPos, LatexCoverState oldState, LatexCoverState newState, int flags) {
 
     }
 
-    public void coverUpdated(Level level, BlockPos blockPos, LatexType latexType) {
+    public void coverUpdated(LevelAccessor level, BlockPos blockPos, LatexType latexType) {
 
     }
 
-    public void onLatexCoverStateChange(Level level, BlockPos blockPos, LatexCoverState oldState, LatexCoverState newState) {
+    public void onLatexCoverStateChange(LevelAccessor level, BlockPos blockPos, LatexCoverState oldState, LatexCoverState newState) {
 
     }
 

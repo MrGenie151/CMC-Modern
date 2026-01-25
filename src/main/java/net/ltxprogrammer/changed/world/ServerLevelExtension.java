@@ -15,7 +15,7 @@ public class ServerLevelExtension extends LevelExtension {
     public static final ServerLevelExtension INSTANCE = new ServerLevelExtension();
 
     @Override
-    public void sendCoverUpdated(Level level, BlockPos blockPos, LatexCoverState oldState, LatexCoverState newState, int flags) {
+    public void sendCoverUpdated(LevelAccessor level, BlockPos blockPos, LatexCoverState oldState, LatexCoverState newState, int flags) {
         ((ServerLevel)level).getChunkSource().blockChanged(blockPos);
     }
 

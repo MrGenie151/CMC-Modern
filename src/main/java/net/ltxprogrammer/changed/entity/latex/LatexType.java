@@ -1,23 +1,21 @@
 package net.ltxprogrammer.changed.entity.latex;
 
-import net.ltxprogrammer.changed.block.WhiteLatexTransportInterface;
+import com.google.common.collect.ImmutableMap;
+import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.TransfurCause;
-import net.ltxprogrammer.changed.entity.animation.StunAnimationParameters;
-import net.ltxprogrammer.changed.entity.beast.PureWhiteLatexWolf;
-import net.ltxprogrammer.changed.entity.beast.WhiteLatexEntity;
-import net.ltxprogrammer.changed.entity.beast.boss.Behemoth;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
-import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
 import net.ltxprogrammer.changed.init.*;
 import net.ltxprogrammer.changed.item.AbstractLatexBucket;
-import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.util.EntityUtil;
 import net.ltxprogrammer.changed.world.LatexCoverGetter;
 import net.ltxprogrammer.changed.world.LatexCoverState;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
@@ -25,7 +23,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
@@ -37,15 +34,15 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.StateHolder;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -53,9 +50,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 
 public abstract class LatexType {
@@ -97,6 +92,14 @@ public abstract class LatexType {
 
     public LatexCoverState sourceCoverState() {
         return defaultCoverState();
+    }
+
+    public LatexCoverState mirror(LatexCoverState state, Mirror mirror) {
+        return state;
+    }
+
+    public LatexCoverState rotate(LatexCoverState state, Rotation rotation) {
+        return state;
     }
 
     public void updateIndirectNeighbourShapes(LatexCoverState state, LevelAccessor level, BlockPos blockPos, int flags, int timeToLive) {}
@@ -314,6 +317,10 @@ public abstract class LatexType {
         return false;
     }
 
+    public void onLatexCoverStateChange(LatexCoverState state, Level level, BlockPos blockPos, LatexCoverState oldState) {
+
+    }
+
     public static class None extends LatexType {
         @Override
         public ResourceLocation getLootTable() {
@@ -334,5 +341,73 @@ public abstract class LatexType {
         public boolean isAir() {
             return true;
         }
+    }
+
+    public static CompoundTag writeLatexCoverState(LatexCoverState latexCoverState) {
+        CompoundTag compoundtag = new CompoundTag();
+        compoundtag.putString("Name", ChangedRegistry.LATEX_TYPE.get().getKey(latexCoverState.getType()).toString());
+        ImmutableMap<Property<?>, Comparable<?>> immutablemap = latexCoverState.getValues();
+        if (!immutablemap.isEmpty()) {
+            CompoundTag properties = new CompoundTag();
+
+            for(Map.Entry<Property<?>, Comparable<?>> entry : immutablemap.entrySet()) {
+                Property<?> property = entry.getKey();
+                properties.putString(property.getName(), ((Property)property).getName(entry.getValue()));
+            }
+
+            compoundtag.put("Properties", properties);
+        }
+
+        return compoundtag;
+    }
+
+    public static LatexCoverState readLatexCoverState(HolderGetter<LatexType> registry, CompoundTag tag) {
+        if (!tag.contains("Name", 8)) {
+            return ChangedLatexTypes.NONE.get().defaultCoverState();
+        } else {
+            ResourceLocation resourcelocation = ResourceLocation.parse(tag.getString("Name"));
+            Optional<? extends Holder<LatexType>> optional = registry.get(ChangedRegistry.LATEX_TYPE.createResourceKey(resourcelocation));
+            if (optional.isEmpty()) {
+                return ChangedLatexTypes.NONE.get().defaultCoverState();
+            } else {
+                LatexType cover = optional.get().value();
+                LatexCoverState coverState = cover.defaultCoverState();
+                if (tag.contains("Properties", 10)) {
+                    CompoundTag compoundtag = tag.getCompound("Properties");
+                    StateDefinition<LatexType, LatexCoverState> statedefinition = cover.getStateDefinition();
+
+                    for(String s : compoundtag.getAllKeys()) {
+                        Property<?> property = statedefinition.getProperty(s);
+                        if (property != null) {
+                            coverState = setValueHelper(coverState, property, s, compoundtag, tag);
+                        }
+                    }
+                }
+
+                return coverState;
+            }
+        }
+    }
+
+    private static <S extends StateHolder<?, S>, T extends Comparable<T>> S setValueHelper(S state, Property<T> property, String propertyName, CompoundTag properties, CompoundTag fullTag) {
+        Optional<T> optional = property.getValue(properties.getString(propertyName));
+        if (optional.isPresent()) {
+            return state.setValue(property, optional.get());
+        } else {
+            Changed.LOGGER.warn("Unable to read property: {} with value: {} for coverstate: {}", propertyName, properties.getString(propertyName), fullTag.toString());
+            return state;
+        }
+    }
+
+    public static LatexCoverState updateFromNeighbourShapes(LatexCoverState coverState, LevelAccessor level, BlockPos blockPos) {
+        LatexCoverState nextCoverState = coverState;
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+
+        for(Direction direction : LatexCoverState.UPDATE_SHAPE_ORDER) {
+            blockpos$mutableblockpos.setWithOffset(blockPos, direction);
+            nextCoverState = nextCoverState.updateShape(direction, level.getBlockState(blockpos$mutableblockpos), level, blockPos, blockpos$mutableblockpos);
+        }
+
+        return nextCoverState;
     }
 }

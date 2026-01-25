@@ -1,6 +1,7 @@
 package net.ltxprogrammer.changed.init;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.Lifecycle;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.ability.AbstractAbility;
 import net.ltxprogrammer.changed.ability.tree.AbilityTree;
@@ -16,13 +17,11 @@ import net.ltxprogrammer.changed.entity.animation.AnimationEvent;
 import net.ltxprogrammer.changed.world.LatexCoverState;
 import net.ltxprogrammer.changed.world.features.structures.facility.types.PieceType;
 import net.ltxprogrammer.changed.world.features.structures.facility.Zone;
-import net.minecraft.core.Holder;
-import net.minecraft.core.IdMap;
-import net.minecraft.core.IdMapper;
-import net.minecraft.core.Registry;
+import net.minecraft.core.*;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -35,6 +34,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public abstract class ChangedRegistry<T> implements Registry<T> {
@@ -45,6 +45,70 @@ public abstract class ChangedRegistry<T> implements Registry<T> {
 
     public static class RegistryHolder<T> implements Supplier<IForgeRegistry<T>> {
         protected final ResourceKey<Registry<T>> key;
+        protected final IdMap<T> idMap = new IdMap<>() {
+            @Override
+            public int getId(T value) {
+                return RegistryHolder.this.getID(value);
+            }
+
+            @Override
+            public @org.jetbrains.annotations.Nullable T byId(int id) {
+                return RegistryHolder.this.getValue(id);
+            }
+
+            @Override
+            public int size() {
+                return RegistryHolder.this.get().getValues().size();
+            }
+
+            @Override
+            public @NotNull Iterator<T> iterator() {
+                return RegistryHolder.this.get().getValues().iterator();
+            }
+        };
+        protected final HolderLookup.RegistryLookup<T> lookup = new HolderLookup.RegistryLookup<>() {
+            @Override
+            public ResourceKey<? extends Registry<? extends T>> key() {
+                return RegistryHolder.this.key;
+            }
+
+            @Override
+            public Lifecycle registryLifecycle() {
+                return Lifecycle.stable();
+            }
+
+            @Override
+            public Stream<Holder.Reference<T>> listElements() {
+                final var raw = getRaw();
+                return raw.getKeys().stream().map(raw::getHolder).map(holder -> (Holder.Reference<T>)holder.get());
+            }
+
+            @Override
+            public Stream<HolderSet.Named<T>> listTags() {
+                final var raw = getRaw();
+                final var tags = raw.tags();
+                return tags.getTagNames().map(tagKey -> {
+                    var tag = tags.getTag(tagKey);
+                    var set = HolderSet.emptyNamed(this, tagKey);
+                    set.bind(tag.stream().map(raw::getHolder).filter(Optional::isPresent).map(Optional::get).toList());
+                    return set;
+                });
+            }
+
+            @Override
+            public Optional<Holder.Reference<T>> get(ResourceKey<T> resourceKey) {
+                return (Optional<Holder.Reference<T>>)(Object)getRaw().getHolder(resourceKey);
+            }
+
+            @Override
+            public Optional<HolderSet.Named<T>> get(TagKey<T> tagKey) {
+                final var raw = getRaw();
+                var tag = raw.tags().getTag(tagKey);
+                var set = HolderSet.emptyNamed(this, tagKey);
+                set.bind(tag.stream().map(raw::getHolder).filter(Optional::isPresent).map(Optional::get).toList());
+                return Optional.of(set);
+            }
+        };
 
         public RegistryHolder(ResourceKey<Registry<T>> key) {
             this.key = key;
@@ -111,28 +175,16 @@ public abstract class ChangedRegistry<T> implements Registry<T> {
             return DeferredRegister.create(key, modId);
         }
 
+        public ResourceKey<T> createResourceKey(ResourceLocation resourceLocation) {
+            return ResourceKey.create(key, resourceLocation);
+        }
+
         public IdMap<T> asIdMap() {
-            return new IdMap<T>() {
-                @Override
-                public int getId(T value) {
-                    return RegistryHolder.this.getID(value);
-                }
+            return idMap;
+        }
 
-                @Override
-                public @org.jetbrains.annotations.Nullable T byId(int id) {
-                    return RegistryHolder.this.getValue(id);
-                }
-
-                @Override
-                public int size() {
-                    return RegistryHolder.this.get().getValues().size();
-                }
-
-                @Override
-                public @NotNull Iterator<T> iterator() {
-                    return RegistryHolder.this.get().getValues().iterator();
-                }
-            };
+        public HolderLookup<T> asLookup() {
+            return lookup;
         }
     }
 
