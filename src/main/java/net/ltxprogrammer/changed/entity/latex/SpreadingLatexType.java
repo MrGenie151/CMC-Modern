@@ -656,10 +656,12 @@ public abstract class SpreadingLatexType extends LatexType {
         public void randomTick(@NotNull LatexCoverState state, @NotNull ServerLevel level, @NotNull BlockPos position, @NotNull RandomSource random) {
             super.randomTick(state, level, position, random);
 
-            if (level.getGameRules().getInt(ChangedGameRules.RULE_LATEX_GROWTH_RATE) == 0 ||
-                    random.nextInt(1000) > level.getGameRules().getInt(ChangedGameRules.RULE_LATEX_GROWTH_RATE))
+            if (!level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING))
                 return;
             if (level.getDifficulty() == Difficulty.PEACEFUL)
+                return;
+            if (level.getGameRules().getInt(ChangedGameRules.RULE_LATEX_GROWTH_RATE) == 0 ||
+                    random.nextInt(1000) > level.getGameRules().getInt(ChangedGameRules.RULE_LATEX_GROWTH_RATE))
                 return;
             if (!WhiteLatexBlock.targetNearby(level, position))
                 return;
