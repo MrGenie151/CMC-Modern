@@ -6,11 +6,8 @@ import net.ltxprogrammer.changed.block.*;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.TransfurCause;
 import net.ltxprogrammer.changed.entity.animation.StunAnimationParameters;
-import net.ltxprogrammer.changed.entity.beast.PureWhiteLatexWolf;
 import net.ltxprogrammer.changed.entity.beast.WhiteLatexEntity;
-import net.ltxprogrammer.changed.entity.beast.boss.Behemoth;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
-import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
 import net.ltxprogrammer.changed.init.*;
 import net.ltxprogrammer.changed.item.AbstractLatexBucket;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
@@ -529,7 +526,7 @@ public abstract class SpreadingLatexType extends LatexType {
 
             if (event.originalState.getProperties().contains(BlockStateProperties.DOUBLE_BLOCK_HALF) &&
                     (event.originalState.is(Blocks.TALL_GRASS) || event.originalState.is(Blocks.LARGE_FERN) || event.originalState.is(BlockTags.TALL_FLOWERS))) {
-                var crystal = Util.getRandom(DarkLatexBlock.CRYSTALS, event.level.getRandom()).get().defaultBlockState();
+                var crystal = Util.getRandom(DarkLatexBlock.LARGE_CRYSTALS, event.level.getRandom()).get().defaultBlockState();
                 switch (event.originalState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF)) {
                     case UPPER -> {
                         event.setPlannedState(crystal.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER), (level, where) -> {
@@ -570,7 +567,7 @@ public abstract class SpreadingLatexType extends LatexType {
                 if (random.nextFloat() < 0.75f || !isAboveAir) {
                     level.setBlockAndUpdate(blockPos, Util.getRandom(DarkLatexBlock.SMALL_CRYSTALS, random).get().defaultBlockState());
                 } else {
-                    final var newBlockState = Util.getRandom(DarkLatexBlock.CRYSTALS, random).get().defaultBlockState();
+                    final var newBlockState = Util.getRandom(DarkLatexBlock.LARGE_CRYSTALS, random).get().defaultBlockState();
                     level.setBlockAndUpdate(blockPos, newBlockState.setValue(AbstractDoubleTransfurCrystal.HALF, DoubleBlockHalf.LOWER));
                     level.setBlockAndUpdate(above, newBlockState.setValue(AbstractDoubleTransfurCrystal.HALF, DoubleBlockHalf.UPPER));
                 }
