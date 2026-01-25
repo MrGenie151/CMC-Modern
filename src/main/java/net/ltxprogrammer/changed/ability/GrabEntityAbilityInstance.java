@@ -192,8 +192,9 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
 
         if (entity instanceof Player player && !ProcessTransfur.isPlayerTransfurred(player)) {
             ProcessTransfur.setPlayerTransfurVariant(player, this.entity.getSelfVariant(), TransfurContext.latexHazard(this.entity, TransfurCause.GRAB_REPLICATE), 1.0f, true,
-                    preBroadcastVariant -> {
-                        this.entity.getChangedEntity().onSuitOther(IAbstractChangedEntity.forPlayer(player), preBroadcastVariant.getParent());
+                    preApplyVariant -> {
+                        this.entity.getChangedEntity().onSuitOther(
+                                IAbstractChangedEntity.forPlayerWithVariant(player, preApplyVariant));
                     });
         }
 

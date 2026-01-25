@@ -12,7 +12,6 @@ import net.ltxprogrammer.changed.entity.AccessoryEntities;
 import net.ltxprogrammer.changed.init.*;
 import net.ltxprogrammer.changed.network.packet.*;
 import net.ltxprogrammer.changed.util.EntityUtil;
-import net.ltxprogrammer.changed.util.PatreonBenefits;
 import net.ltxprogrammer.changed.world.enchantments.LatexProtectionEnchantment;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
@@ -29,13 +28,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.Foods;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.server.ServerLifecycleHooks;
@@ -432,7 +429,7 @@ public class ProcessTransfur {
     TransfurVariantInstance<?> setPlayerTransfurVariant(Player player, @Nullable TransfurVariant<?> ogVariant,
                                                         @Nullable TransfurContext context,
                                                         float progress,
-                                                        boolean temporaryFromSuit, Consumer<TransfurVariantInstance<?>> postProcess) {
+                                                        boolean temporaryFromSuit, Consumer<TransfurVariantInstance<?>> preProcess) {
         PlayerDataExtension playerDataExtension = (PlayerDataExtension)player;
         EntityVariantAssigned event = new EntityVariantAssigned(player, ogVariant, context == null ? null : context.cause);
         Changed.postModEvent(event);
@@ -450,7 +447,7 @@ public class ProcessTransfur {
             oldVariant.getChangedEntity().discard();
         TransfurVariantInstance<?> instance = TransfurVariantInstance.variantFor(variant, player);
         if (instance != null)
-            postProcess.accept(instance);
+            preProcess.accept(instance);
         playerDataExtension.setTransfurVariant(instance);
 
         if (instance != null) {
@@ -738,7 +735,7 @@ public class ProcessTransfur {
         final BiConsumer<IAbstractChangedEntity, TransfurVariant<?>> onReplicate = (iAbstractLatex, variant1) -> {
             if (context.source != null) {
                 onReplicateEntity(context.source);
-                context.source.getChangedEntity().onReplicateOther(iAbstractLatex, variant1);
+                context.source.getChangedEntity().onReplicateOther(iAbstractLatex);
             }
         };
 
@@ -748,15 +745,16 @@ public class ProcessTransfur {
                 var instance = setPlayerTransfurVariant(player, variant, context, doAnimation ? 0.0f : 1.0f);
                 if (instance == null)
                     return; // Event canceled
+                IAbstractChangedEntity iAbstractChanged = IAbstractChangedEntity.forPlayerWithVariant(player, instance);
 
                 ChangedAnimationEvents.broadcastTransfurAnimation(player, instance.getParent(), context);
 
                 instance.willSurviveTransfur = keepConscious;
                 instance.transfurContext = context;
 
-                onNewlyTransfurred(IAbstractChangedEntity.forPlayer(player));
+                onNewlyTransfurred(iAbstractChanged);
 
-                onReplicate.accept(IAbstractChangedEntity.forPlayer(player), variant);
+                onReplicate.accept(iAbstractChanged, variant);
             }
 
             else if (!entity.level().isClientSide) {

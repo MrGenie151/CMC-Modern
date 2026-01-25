@@ -4,8 +4,6 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.entity.*;
-import net.ltxprogrammer.changed.entity.latex.LatexType;
-import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.init.ChangedTransfurVariants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -140,24 +138,20 @@ public class LatexHuman extends ChangedEntity implements ComplexRenderer {
     }
 
     @Override
-    public void onReplicateOther(IAbstractChangedEntity other, TransfurVariant<?> variant) {
-        super.onReplicateOther(other, variant);
+    public void onReplicateOther(IAbstractChangedEntity other) {
+        super.onReplicateOther(other);
 
-        if (variant.is(ChangedTransfurVariants.LATEX_HUMAN)) {
-            if (other.getChangedEntity() instanceof LatexHuman human) {
-                human.setRepresentPlayer(this.getRepresentUUID());
-            }
+        if (other.getChangedEntity() instanceof LatexHuman human) {
+            human.setRepresentPlayer(this.getRepresentUUID());
         }
     }
 
     @Override
-    public void onSuitOther(IAbstractChangedEntity other, TransfurVariant<?> variant) {
-        super.onSuitOther(other, variant);
+    public void onSuitOther(IAbstractChangedEntity other) {
+        super.onSuitOther(other);
 
-        if (variant.is(ChangedTransfurVariants.LATEX_HUMAN)) {
-            if (other.getChangedEntity() instanceof LatexHuman human) {
-                human.setRepresentPlayer(this.getRepresentUUID());
-            }
+        if (other.getChangedEntity() instanceof LatexHuman human) {
+            human.setRepresentPlayer(this.getRepresentUUID());
         }
     }
 

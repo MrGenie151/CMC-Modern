@@ -107,8 +107,15 @@ public interface IAbstractChangedEntity {
     }
 
     static IAbstractChangedEntity forPlayer(Player player) {
+        return forPlayerWithVariant(player, null);
+    }
+
+    static IAbstractChangedEntity forPlayerWithVariant(Player player, @Nullable TransfurVariantInstance<?> variant) {
         Cacheable<TransfurVariantInstance<?>> instance = Cacheable.of(() -> ProcessTransfur.getPlayerTransfurVariant(player));
         Cacheable<ChangedEntity> latex = Cacheable.of(() -> instance.get().getChangedEntity());
+
+        if (variant != null)
+            instance.forceValue(variant);
 
         return new IAbstractChangedEntity() {
             @Override

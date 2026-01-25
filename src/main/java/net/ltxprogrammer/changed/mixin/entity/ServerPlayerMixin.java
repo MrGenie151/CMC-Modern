@@ -124,9 +124,9 @@ public abstract class ServerPlayerMixin extends Player implements PlayerDataExte
                 variant = ChangedTransfurVariants.FALLBACK_VARIANT.get();
             }
             final TransfurVariantInstance<?> variantInstance = ProcessTransfur.setPlayerTransfurVariant(this, variant, null, 1.0f, false,
-                    preBroadcastVariant -> {
+                    preApplyVariant -> {
                         if (tag.contains("Leash", 10))
-                            preBroadcastVariant.getChangedEntity().setLeashInfoTag(tag.getCompound("Leash"));
+                            preApplyVariant.getChangedEntity().setLeashInfoTag(tag.getCompound("Leash"));
                     });
 
             if (variantInstance == null) {
