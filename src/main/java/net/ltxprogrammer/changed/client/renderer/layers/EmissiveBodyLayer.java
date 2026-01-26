@@ -33,13 +33,13 @@ public class EmissiveBodyLayer<M extends EntityModel<T>, T extends LivingEntity>
     }
 
     @Override
-    public void renderFirstPersonOnArms(PoseStack stack, MultiBufferSource bufferSource, int packedLight, T entity, HumanoidArm arm, PartPose armPose, PoseStack stackCorrector, float partialTick) {
+    public void renderFirstPersonOnArms(PoseStack stack, MultiBufferSource bufferSource, int packedLight, T entity, HumanoidArm arm, PartPose armPose, float partialTick) {
         stack.pushPose();
         stack.scale(ZFIGHT_OFFSET, ZFIGHT_OFFSET, ZFIGHT_OFFSET);
         if (this.getParentModel() instanceof AdvancedHumanoidModel<?> armedModel) {
             var armPart = armedModel.getArm(arm);
             armPart.loadPose(armPose);
-            FormRenderHandler.renderModelPartWithTexture(armedModel.getArm(arm), stackCorrector, stack, bufferSource.getBuffer(this.renderType()), LightTexture.FULL_BRIGHT, 1F);
+            FormRenderHandler.renderModelPartWithTexture(armedModel.getArm(arm), stack, bufferSource.getBuffer(this.renderType()), LightTexture.FULL_BRIGHT, 1F);
         }
         stack.popPose();
     }

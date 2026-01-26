@@ -1,6 +1,5 @@
 package net.ltxprogrammer.changed.client.animations;
 
-import net.ltxprogrammer.changed.client.ClientLivingEntityExtender;
 import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
 import net.ltxprogrammer.changed.client.tfanimations.TransfurAnimator;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
@@ -17,18 +16,14 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AnimationInstance {
-    private final AnimationDefinition animation;
-    private final Map<ModelPartIdentifier, PartPose> baselineH = new HashMap<>();
-    private final Map<ModelPartIdentifier, PartPose> baselineAH = new HashMap<>();
+    protected final AnimationDefinition animation;
     private final Map<LivingEntity, AnimationInstance> entities = new HashMap<>(0);
     private float time = 0.0f;
     private float timeO = 0.0f;
@@ -53,47 +48,6 @@ public class AnimationInstance {
         this.parentEntity = parentEntity;
     }
 
-    public void resetToBaseline(EntityModel<?> model, LivingEntity entity, Predicate<ModelPartIdentifier> predicate) {
-        if (model instanceof AdvancedHumanoidModel<?> advancedHumanoid && entity instanceof ChangedEntity changedEntity)
-            this.resetToBaseline(advancedHumanoid, changedEntity, predicate);
-        else if (model instanceof HumanoidModel<?> humanoid)
-            this.resetToBaseline(humanoid, entity, predicate);
-    }
-
-    public void captureBaseline(HumanoidModel<?> model) {
-        /* Capture model position baseline */
-        animation.channels.keySet().stream().filter(ModelPartIdentifier::isVanillaPart).forEach(limb -> {
-            baselineH.put(limb, limb.getModelPartSafe(model).map(ModelPart::storePose).orElse(null));
-        });
-    }
-
-    public void resetToBaseline(HumanoidModel<?> model, LivingEntity entity, Predicate<ModelPartIdentifier> predicate) {
-        animation.channels.keySet().stream().filter(ModelPartIdentifier::isVanillaPart).filter(baselineH::containsKey).filter(predicate).forEach(limb -> {
-            limb.getModelPartSafe(model).ifPresent(part -> {
-                final var baseline = baselineH.get(limb);
-                if (baseline != null)
-                    part.loadPose(baseline);
-            });
-        });
-    }
-
-    public void captureBaseline(AdvancedHumanoidModel<?> model, ChangedEntity entity) {
-        /* Capture model position baseline */
-        animation.channels.forEach((limb, either) -> {
-            baselineAH.put(limb, limb.getModelPartSafe(model, entity).map(ModelPart::storePose).orElse(null));
-        });
-    }
-
-    public void resetToBaseline(AdvancedHumanoidModel<?> model, ChangedEntity entity, Predicate<ModelPartIdentifier> predicate) {
-        animation.channels.keySet().stream().filter(baselineAH::containsKey).filter(predicate).forEach(limb -> {
-            limb.getModelPartSafe(model, entity).ifPresent(part -> {
-                final var baseline = baselineAH.get(limb);
-                if (baseline != null)
-                    part.loadPose(baselineAH.get(limb));
-            });
-        });
-    }
-
     /**
      * Adds reference entity to use in animation. Does nothing if entity is already referenced, or if definition doesn't have a slot.
      * Adds new animation to the entity's prop animation category, if the animation is defined.
@@ -112,7 +66,7 @@ public class AnimationInstance {
         final ResourceLocation id = animation.entityProps.get(entities.size());
         final AnimationInstance instance = new AnimationInstance(AnimationDefinitions.getAnimation(id), livingEntity, null, hostEntity);
         entities.put(livingEntity, instance);
-        ((ClientLivingEntityExtender)livingEntity).addAnimation(AnimationCategory.PROP, instance);
+        AnimationContainer.getForEntityOrCreate(livingEntity).addAnimation(AnimationCategory.PROP, instance);
     }
 
     public void addItem(ItemStack item) {
@@ -188,26 +142,29 @@ public class AnimationInstance {
         return parentEntity;
     }
 
-    public void animate(HumanoidModel<?> model, float partialTicks) {
-        captureBaseline(model);
-
+    protected void animate(HumanoidModel<?> model, Map<ModelPartIdentifier, PartPose> baseline, float partialTicks) {
         final float time = computeTime(partialTicks);
         final float transition = computeTransition(partialTicks);
 
         animation.channels.keySet().stream().filter(ModelPartIdentifier::isVanillaPart).forEach(limb -> {
-            animateLimb(animation.channels.get(limb), limb.getModelPart(model), baselineH.get(limb), time, transition);
+            animateLimb(animation.channels.get(limb), limb.getModelPart(model), baseline.get(limb), time, transition);
         });
     }
 
-    public void animate(AdvancedHumanoidModel<?> model, ChangedEntity entity, float partialTicks) {
-        captureBaseline(model, entity);
-
+    protected void animate(AdvancedHumanoidModel<?> model, ChangedEntity entity, Map<ModelPartIdentifier, PartPose> baseline, float partialTicks) {
         final float time = computeTime(partialTicks);
         final float transition = computeTransition(partialTicks);
 
         animation.channels.forEach((limb, either) -> {
-            animateLimb(animation.channels.get(limb), limb.getModelPart(model, entity), baselineAH.get(limb), time, transition);
+            animateLimb(animation.channels.get(limb), limb.getModelPart(model, entity), baseline.get(limb), time, transition);
         });
+    }
+
+    protected void animate(EntityModel<?> model, LivingEntity renderEntity, Map<ModelPartIdentifier, PartPose> baseline, float partialTicks) {
+        if (model instanceof AdvancedHumanoidModel<?> advancedHumanoid && renderEntity instanceof ChangedEntity changedEntity)
+            this.animate(advancedHumanoid, changedEntity, baseline, partialTicks);
+        else if (model instanceof HumanoidModel<?> humanoid)
+            this.animate(humanoid, baseline, partialTicks);
     }
 
     public PartPose animatePartAs(Limb limb, PartPose modelPart, float partialTicks) {
@@ -258,12 +215,15 @@ public class AnimationInstance {
 
         return animation.channels.values().stream().flatMap(List::stream).allMatch(channel -> channel.isDone(time)) &&
                 entities.keySet().stream()
-                        .map(entity -> ((ClientLivingEntityExtender)entity).getAnimationSafe(AnimationCategory.PROP))
+                        .map(AnimationContainer::getForEntity).filter(Optional::isPresent).map(Optional::get)
+                        .map(container -> container.getAnimationSafe(AnimationCategory.PROP))
                         .filter(Optional::isPresent).map(Optional::get).allMatch(AnimationInstance::isDone);
     }
 
     public void clear() {
-        entities.forEach((entity, instance) -> ((ClientLivingEntityExtender)entity).clearAnimation(AnimationCategory.PROP));
+        entities.forEach(
+                (entity, instance) -> AnimationContainer.getForEntity(entity).ifPresent(
+                        container -> container.clearAnimation(AnimationCategory.PROP)));
     }
 
     public AnimationDefinition getDefinition() {

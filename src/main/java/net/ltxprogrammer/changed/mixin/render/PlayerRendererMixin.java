@@ -5,7 +5,6 @@ import net.ltxprogrammer.changed.client.FormRenderHandler;
 import net.ltxprogrammer.changed.client.renderer.layers.AccessoryLayer;
 import net.ltxprogrammer.changed.client.renderer.layers.FirstPersonLayer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -46,7 +45,7 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
             if (layer instanceof FirstPersonLayer firstPersonLayer)
                 firstPersonLayer.renderFirstPersonOnArms(
                         stack, buffer, light, player, getModel().rightArm != arm ? HumanoidArm.LEFT : HumanoidArm.RIGHT,
-                        arm.storePose(), new PoseStack(), Minecraft.getInstance().getDeltaFrameTime());
+                        arm.storePose(), Minecraft.getInstance().getDeltaFrameTime());
         }
     }
 }

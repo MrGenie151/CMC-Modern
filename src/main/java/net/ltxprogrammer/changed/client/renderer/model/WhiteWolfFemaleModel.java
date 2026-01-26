@@ -10,11 +10,10 @@ import net.ltxprogrammer.changed.client.tfanimations.TransfurHelper;
 import net.ltxprogrammer.changed.entity.beast.WhiteWolfFemale;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.HumanoidArm;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class WhiteWolfFemaleModel extends AdvancedHumanoidModel<WhiteWolfFemale> implements AdvancedHumanoidModelInterface<WhiteWolfFemale, WhiteWolfFemaleModel> {
+public class WhiteWolfFemaleModel extends AdvancedHumanoidModel<WhiteWolfFemale> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     private final ModelPart RightLeg;
     private final ModelPart LeftLeg;
@@ -57,21 +56,6 @@ public class WhiteWolfFemaleModel extends AdvancedHumanoidModel<WhiteWolfFemale>
         if (limb == Limb.TORSO)
             return TransfurHelper.getFeminineTorsoAlt();
         return super.getTransfurHelperModel(limb);
-    }
-
-    @Override
-    public void prepareMobModel(WhiteWolfFemale p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-        this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
-    }
-
-    public void setupHand(WhiteWolfFemale entity) {
-        animator.setupHand();
-    }
-
-    @Override
-    public void setupAnim(@NotNull WhiteWolfFemale entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
     }
 
     public ModelPart getArm(HumanoidArm p_102852_) {

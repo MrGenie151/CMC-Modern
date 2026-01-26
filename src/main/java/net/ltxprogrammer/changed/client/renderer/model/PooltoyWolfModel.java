@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class PooltoyWolfModel extends AdvancedHumanoidModel<PooltoyWolf> implements AdvancedHumanoidModelInterface<PooltoyWolf, PooltoyWolfModel> {
+public class PooltoyWolfModel extends AdvancedHumanoidModel<PooltoyWolf> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("pooltoy_wolf"), "main");
     private final ModelPart RightLeg;
@@ -151,21 +151,6 @@ public class PooltoyWolfModel extends AdvancedHumanoidModel<PooltoyWolf> impleme
         PartDefinition LeftArm = partdefinition.addOrReplaceChild("LeftArm", CubeListBuilder.create().texOffs(40, 38).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, CubeDeformation.NONE), PartPose.offset(4.5F, 3.5F, 0.0F));
 
         return LayerDefinition.create(meshdefinition, 96, 96);
-    }
-
-    @Override
-    public void prepareMobModel(PooltoyWolf p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-        this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
-    }
-
-    public void setupHand(PooltoyWolf entity) {
-        animator.setupHand();
-    }
-
-    @Override
-    public void setupAnim(PooltoyWolf entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
     }
 
     public ModelPart getArm(HumanoidArm p_102852_) {

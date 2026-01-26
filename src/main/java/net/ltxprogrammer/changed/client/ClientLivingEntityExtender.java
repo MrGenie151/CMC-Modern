@@ -1,5 +1,6 @@
 package net.ltxprogrammer.changed.client;
 
+import net.ltxprogrammer.changed.client.animations.AnimationContainer;
 import net.ltxprogrammer.changed.entity.animation.AnimationCategory;
 import net.ltxprogrammer.changed.client.animations.AnimationDefinition;
 import net.ltxprogrammer.changed.client.animations.AnimationInstance;
@@ -10,21 +11,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public interface ClientLivingEntityExtender {
-    Stream<AnimationInstance> getOrderedAnimations();
+    Optional<AnimationContainer> getAnimations();
 
-    void addAnimation(AnimationCategory category, AnimationInstance animationInstance);
-
-    @Nullable
-    AnimationInstance getAnimation(AnimationCategory category);
-
-    @Nullable
-    AnimationInstance getAnimation(AnimationCategory category, Supplier<AnimationDefinition> definition);
-
-    default Optional<AnimationInstance> getAnimationSafe(AnimationCategory category) {
-        return Optional.ofNullable(getAnimation(category));
-    }
-
-    void clearAnimation(AnimationCategory category);
-
-    void clearAnimation(AnimationCategory category, Supplier<AnimationDefinition> definition);
+    AnimationContainer getAnimationsOrCreate(Supplier<AnimationContainer> factory);
 }

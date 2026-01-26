@@ -8,11 +8,9 @@ import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.block.SeatableBlock;
 import net.ltxprogrammer.changed.client.CameraExtender;
 import net.ltxprogrammer.changed.client.renderer.AdvancedHumanoidRenderer;
-import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModelInterface;
+import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
-import net.ltxprogrammer.changed.entity.LivingEntityDataExtension;
 import net.ltxprogrammer.changed.entity.SeatEntity;
-import net.ltxprogrammer.changed.extension.ChangedCompatibility;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.util.CameraUtil;
 import net.ltxprogrammer.changed.util.EntityUtil;
@@ -55,8 +53,7 @@ public abstract class CameraMixin implements CameraExtender {
 
     @Unique
     private <T extends ChangedEntity> void adjustAnimForEntity(T changedEntity, float partialTicks) {
-        if (Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(changedEntity) instanceof AdvancedHumanoidRenderer<?,?> latexHumanoid &&
-                latexHumanoid.getModel(changedEntity) instanceof AdvancedHumanoidModelInterface AdvancedHumanoidModel) {
+        if (Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(changedEntity) instanceof AdvancedHumanoidRenderer<?,?> latexHumanoid) {
             boolean shouldSit = changedEntity.isPassenger() && (changedEntity.getVehicle() != null && changedEntity.getVehicle().shouldRiderSit());
             float f = Mth.rotLerp(partialTicks, changedEntity.yBodyRotO, changedEntity.yBodyRot);
             float f1 = Mth.rotLerp(partialTicks, changedEntity.yHeadRotO, changedEntity.yHeadRot);
@@ -101,7 +98,7 @@ public abstract class CameraMixin implements CameraExtender {
                 }
             }
 
-            var animator = AdvancedHumanoidModel.getAnimator(changedEntity);
+            var animator = ((AdvancedHumanoidModel)latexHumanoid.getModel(changedEntity)).getAnimator(changedEntity);
             animator.setupVariables(changedEntity, partialTicks);
             animator.setupCameraAnim(this, changedEntity,
                     limbSwing,

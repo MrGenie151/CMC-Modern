@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class HeadlessKnightModel extends AdvancedHumanoidModel<HeadlessKnight> implements AdvancedHumanoidModelInterface<HeadlessKnight, HeadlessKnightModel>, LowerTorsoedModel {
+public class HeadlessKnightModel extends AdvancedHumanoidModel<HeadlessKnight> implements LowerTorsoedModel {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("headless_knight"), "main");
     private final ModelPart FrontRightLeg;
@@ -125,28 +125,6 @@ public class HeadlessKnightModel extends AdvancedHumanoidModel<HeadlessKnight> i
         PartDefinition Base_r3 = TailTertiary.addOrReplaceChild("Base_r3", CubeListBuilder.create().texOffs(55, 0).addBox(-2.0F, -1.2F, -1.95F, 4.0F, 4.0F, 4.0F, new CubeDeformation(-0.15F)), PartPose.offsetAndRotation(0.0F, 0.0F, 4.0F, 1.8326F, 0.0F, 0.0F));
 
         return LayerDefinition.create(meshdefinition, 96, 96);
-    }
-
-    @Override
-    public void prepareMobModel(HeadlessKnight p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-        this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
-    }
-
-    public void setupHand(HeadlessKnight entity) {
-        animator.setupHand();
-    }
-
-    @Override
-    public void setupAnim(@NotNull HeadlessKnight entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-    }
-
-    public PoseStack getPlacementCorrectors(CorrectorType type) {
-        PoseStack corrector = AdvancedHumanoidModelInterface.super.getPlacementCorrectors(type);
-        if (type.isArm())
-            corrector.translate(0.0f, 4.0f / 18.0f, 0.1f);
-        return corrector;
     }
 
     public ModelPart getArm(HumanoidArm p_102852_) {

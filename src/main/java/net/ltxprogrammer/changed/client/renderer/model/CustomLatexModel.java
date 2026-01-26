@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 @OnlyIn(Dist.CLIENT)
-public class CustomLatexModel extends AdvancedHumanoidModel<CustomLatexEntity> implements AdvancedHumanoidModelInterface<CustomLatexEntity, CustomLatexModel>, LowerTorsoedModel, LeglessModel {
+public class CustomLatexModel extends AdvancedHumanoidModel<CustomLatexEntity> implements LowerTorsoedModel, LeglessModel {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("custom_latex"), "main");
     private final ModelPart RightLeg;
@@ -884,19 +884,9 @@ public class CustomLatexModel extends AdvancedHumanoidModel<CustomLatexEntity> i
     }
 
     @Override
-    public void prepareMobModel(CustomLatexEntity p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-        this.prepareMobModel(getAnimator(p_102861_), p_102861_, p_102862_, p_102863_, p_102864_);
-        this.prepareVisibility(p_102861_);
-    }
-
-    public void setupHand(CustomLatexEntity entity) {
-        getAnimator(entity).setupHand();
-    }
-
-    @Override
-    public void setupAnim(@NotNull CustomLatexEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        getAnimator(entity).setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+    public void prepareMobModel(CustomLatexEntity entity, float limbSwing, float limbSwingAmount, float partialTicks) {
+        super.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTicks);
+        this.prepareVisibility(entity);
     }
 
     public ModelPart getArm(HumanoidArm arm) {

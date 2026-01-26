@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class GasWolfPupModel extends AdvancedHumanoidModel<GasWolfPup> implements AdvancedHumanoidModelInterface<GasWolfPup, GasWolfPupModel> {
+public class GasWolfPupModel extends AdvancedHumanoidModel<GasWolfPup> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("gas_wolf_pup"), "main");
     private final ModelPart RightLegBack;
@@ -132,7 +132,7 @@ public class GasWolfPupModel extends AdvancedHumanoidModel<GasWolfPup> implement
 
     @Override
     public void prepareMobModel(GasWolfPup entity, float limbSwing, float limbSwingAmount, float partialTicks) {
-        this.prepareMobModel(animator, entity, limbSwing, limbSwingAmount, partialTicks);
+        super.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTicks);
         
         this.Body.xRot = 0.0F;
         this.Tail.xRot = -0.05235988F;
@@ -205,10 +205,6 @@ public class GasWolfPupModel extends AdvancedHumanoidModel<GasWolfPup> implement
         }*/
     }
 
-    public void setupHand(GasWolfPup entity) {
-        animator.setupHand();
-    }
-
     @Override
     public void setupAnim(@NotNull GasWolfPup entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         if (!entity.isSleeping()) {
@@ -232,7 +228,6 @@ public class GasWolfPupModel extends AdvancedHumanoidModel<GasWolfPup> implement
             this.LeftFrontLeg.zRot = f / 2.0F;
         }
 
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
         super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
     }
 

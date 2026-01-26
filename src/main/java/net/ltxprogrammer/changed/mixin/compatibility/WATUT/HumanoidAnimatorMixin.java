@@ -1,8 +1,8 @@
 package net.ltxprogrammer.changed.mixin.compatibility.WATUT;
 
 import com.corosus.watut.WatutMod;
+import net.ltxprogrammer.changed.client.renderer.animate.HumanoidAnimator;
 import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
-import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModelInterface;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.extension.RequiredMods;
 import net.minecraft.client.model.PlayerModel;
@@ -22,15 +22,16 @@ public abstract class HumanoidAnimatorMixin<T extends ChangedEntity> extends Pla
     }
 
     @Shadow public abstract void syncPropertyModel(T entity);
+    @Shadow public abstract HumanoidAnimator<T, ?> getAnimator(T entity);
 
     @Inject(method = "setupAnim", at = @At("TAIL"))
     public void setupAnim(T pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch, CallbackInfo ci) {
         Player player = pEntity.getUnderlyingPlayer();
         if (player == null) return;
-        if (!(this instanceof AdvancedHumanoidModelInterface modelInterface)) return;
 
         this.syncPropertyModel(pEntity);
         WatutMod.getPlayerStatusManagerClient().setupRotationsHook(this, player, pLimbSwing, pLimbSwingAmount, pAgeInTicks, pNetHeadYaw, pHeadPitch);
-        modelInterface.getAnimator(pEntity).applyPropertyModel(this);
+
+        this.getAnimator(pEntity).applyPropertyModel(this);
     }
 }

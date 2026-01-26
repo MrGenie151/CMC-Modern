@@ -16,12 +16,11 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
-public class LatexRedDragonModel extends AdvancedHumanoidModel<LatexRedDragon> implements AdvancedHumanoidModelInterface<LatexRedDragon, LatexRedDragonModel> {
+public class LatexRedDragonModel extends AdvancedHumanoidModel<LatexRedDragon> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("latex_red_dragon"), "main");
     private final ModelPart RightLeg;
@@ -211,29 +210,9 @@ public class LatexRedDragonModel extends AdvancedHumanoidModel<LatexRedDragon> i
         return LayerDefinition.create(meshdefinition, 96, 96);
     }
 
-    @Override
-    public void prepareMobModel(LatexRedDragon p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-        this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
-    }
-
-
-    public void setupHand(LatexRedDragon entity) {
-        animator.setupHand();
-    }
-
-
-    @Override
-    public void setupAnim(@NotNull LatexRedDragon entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-    }
-
-
-
     public ModelPart getArm(HumanoidArm p_102852_) {
         return p_102852_ == HumanoidArm.LEFT ? this.LeftArm : this.RightArm;
     }
-
 
     public ModelPart getLeg(HumanoidArm p_102852_) {
         return p_102852_ == HumanoidArm.LEFT ? this.LeftLeg : this.RightLeg;
@@ -256,7 +235,6 @@ public class LatexRedDragonModel extends AdvancedHumanoidModel<LatexRedDragon> i
         RightArm.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
         LeftArm.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
     }
-
 
     @Override
     public HumanoidAnimator<LatexRedDragon, LatexRedDragonModel> getAnimator(LatexRedDragon entity) {

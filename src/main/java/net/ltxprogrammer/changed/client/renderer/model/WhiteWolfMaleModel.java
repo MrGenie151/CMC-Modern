@@ -7,11 +7,10 @@ import net.ltxprogrammer.changed.client.renderer.animate.HumanoidAnimator;
 import net.ltxprogrammer.changed.entity.beast.WhiteWolfMale;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.HumanoidArm;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class WhiteWolfMaleModel extends AdvancedHumanoidModel<WhiteWolfMale> implements AdvancedHumanoidModelInterface<WhiteWolfMale, WhiteWolfMaleModel> {
+public class WhiteWolfMaleModel extends AdvancedHumanoidModel<WhiteWolfMale> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     private final ModelPart RightLeg;
     private final ModelPart LeftLeg;
@@ -47,21 +46,6 @@ public class WhiteWolfMaleModel extends AdvancedHumanoidModel<WhiteWolfMale> imp
                         Torso, LeftArm, RightArm,
                         Tail, List.of(tailPrimary, tailSecondary, tailTertiary),
                         LeftLeg, leftLowerLeg, leftFoot, leftFoot.getChild("LeftPad"), RightLeg, rightLowerLeg, rightFoot, rightFoot.getChild("RightPad")));
-    }
-
-    @Override
-    public void prepareMobModel(WhiteWolfMale p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-        this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
-    }
-
-    public void setupHand(WhiteWolfMale entity) {
-        animator.setupHand();
-    }
-
-    @Override
-    public void setupAnim(@NotNull WhiteWolfMale entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
     }
 
     public ModelPart getArm(HumanoidArm p_102852_) {

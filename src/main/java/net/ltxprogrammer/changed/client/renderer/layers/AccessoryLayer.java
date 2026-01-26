@@ -1,6 +1,5 @@
 package net.ltxprogrammer.changed.client.renderer.layers;
 
-import com.google.common.collect.Comparators;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.ltxprogrammer.changed.client.renderer.accessory.AccessoryRenderer;
 import net.ltxprogrammer.changed.data.AccessorySlotContext;
@@ -15,14 +14,12 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public class AccessoryLayer<T extends LivingEntity, M extends EntityModel<T>> extends RenderLayer<T, M> implements FirstPersonLayer<T> {
     private static final Map<ItemLike, Cacheable<AccessoryRenderer>> RENDERERS = new HashMap<>();
@@ -129,7 +126,7 @@ public class AccessoryLayer<T extends LivingEntity, M extends EntityModel<T>> ex
     }
 
     @Override
-    public void renderFirstPersonOnArms(PoseStack poseStack, MultiBufferSource buffers, int packedLight, T entity, HumanoidArm arm, PartPose armPose, PoseStack stackCorrector, float partialTick) {
+    public void renderFirstPersonOnArms(PoseStack poseStack, MultiBufferSource buffers, int packedLight, T entity, HumanoidArm arm, PartPose armPose, float partialTick) {
         final var slotTypePredicate = AccessoryEntities.INSTANCE.canEntityTypeUseSlot(AccessoryEntities.getApparentEntityType(entity));
         AccessorySlots.getForEntity(entity).ifPresent(slots -> {
             slots.getSlotTypes().map(slotType -> {
@@ -147,7 +144,7 @@ public class AccessoryLayer<T extends LivingEntity, M extends EntityModel<T>> ex
                 return Integer.compare(slotLeft, slotRight);
             }).forEach(slotContext -> {
                 RENDERERS.get(slotContext.stack().getItem()).get()
-                        .renderFirstPersonOnArms(slotContext, poseStack, this.parent, buffers, packedLight, arm, armPose, stackCorrector, partialTick);
+                        .renderFirstPersonOnArms(slotContext, poseStack, this.parent, buffers, packedLight, arm, armPose, partialTick);
             });
         });
     }

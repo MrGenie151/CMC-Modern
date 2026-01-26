@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.ltxprogrammer.changed.client.FormRenderHandler;
 import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
-import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModelInterface;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.extension.ChangedCompatibility;
 import net.minecraft.client.Minecraft;
@@ -18,7 +17,7 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.HumanoidArm;
 
-public class LatexPartialLayer<T extends ChangedEntity, M extends AdvancedHumanoidModel<T> & AdvancedHumanoidModelInterface<T, M>> extends RenderLayer<T, M> implements FirstPersonLayer<T> {
+public class LatexPartialLayer<T extends ChangedEntity, M extends AdvancedHumanoidModel<T>> extends RenderLayer<T, M> implements FirstPersonLayer<T> {
     private final M model;
     private final ResourceLocation texture;
 
@@ -75,14 +74,14 @@ public class LatexPartialLayer<T extends ChangedEntity, M extends AdvancedHumano
     }
 
     @Override
-    public void renderFirstPersonOnArms(PoseStack stack, MultiBufferSource bufferSource, int packedLight, T entity, HumanoidArm arm, PartPose armPose, PoseStack stackCorrector, float partialTick) {
+    public void renderFirstPersonOnArms(PoseStack stack, MultiBufferSource bufferSource, int packedLight, T entity, HumanoidArm arm, PartPose armPose, float partialTick) {
         this.getModel().setupAnim(entity, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
         model.setupHand(entity);
         stack.pushPose();
         stack.scale(ZFIGHT_OFFSET, ZFIGHT_OFFSET, ZFIGHT_OFFSET);
         var armPart = model.getArm(arm);
         armPart.loadPose(armPose);
-        FormRenderHandler.renderModelPartWithTexture(armPart, stackCorrector, stack, bufferSource.getBuffer(this.renderType()), packedLight, 1F);
+        FormRenderHandler.renderModelPartWithTexture(armPart, stack, bufferSource.getBuffer(this.renderType()), packedLight, 1F);
         stack.popPose();
     }
 }

@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.client.renderer.animate.AnimatorPresets;
 import net.ltxprogrammer.changed.client.renderer.animate.HumanoidAnimator;
-import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.beast.LatexBee;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -14,12 +13,11 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
-public class LatexBeeModel extends AdvancedHumanoidModel<LatexBee> implements AdvancedHumanoidModelInterface<LatexBee, LatexBeeModel>, DoubleArmedModel<LatexBee> {
+public class LatexBeeModel extends AdvancedHumanoidModel<LatexBee> implements DoubleArmedModel<LatexBee> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("latex_bee"), "main");
     private final ModelPart RightLeg;
@@ -183,26 +181,6 @@ public class LatexBeeModel extends AdvancedHumanoidModel<LatexBee> implements Ad
                 .texOffs(48, 26).addBox(-1.0F, 3.5F, -2.0F, 4.0F, 2.0F, 4.0F, new CubeDeformation(-0.3F)), PartPose.offset(5.0F, 1.5F, 0.0F));
 
         return LayerDefinition.create(meshdefinition, 96, 96);
-    }
-
-    @Override
-    public void prepareMobModel(LatexBee p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-        this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
-    }
-
-    public void setupHand(LatexBee entity) {
-        animator.setupHand();
-    }
-
-    @Override
-    public void setupAnim(@NotNull LatexBee entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-    }
-
-    public PoseStack getPlacementCorrectors(CorrectorType type) {
-        PoseStack corrector = AdvancedHumanoidModelInterface.super.getPlacementCorrectors(type);
-        return corrector;
     }
 
     @Override

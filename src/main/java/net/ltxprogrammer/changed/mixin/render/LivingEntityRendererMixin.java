@@ -3,6 +3,8 @@ package net.ltxprogrammer.changed.mixin.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.ltxprogrammer.changed.client.ClientLivingEntityExtender;
 import net.ltxprogrammer.changed.client.LivingEntityRendererExtender;
+import net.ltxprogrammer.changed.client.animations.AnimationContainer;
+import net.ltxprogrammer.changed.client.animations.Limb;
 import net.ltxprogrammer.changed.client.renderer.accessory.WornExoskeletonRenderer;
 import net.ltxprogrammer.changed.client.renderer.layers.AccessoryLayer;
 import net.ltxprogrammer.changed.client.tfanimations.TransfurAnimator;
@@ -62,10 +64,6 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
     @Unique
     private void unprepareLayers(T entity) {
-        ((ClientLivingEntityExtender)EntityUtil.maybeGetUnderlying(entity)).getOrderedAnimations().forEach(instance -> {
-            instance.resetToBaseline(this.model, entity, identifier -> true);
-        });
-
         if (!TransfurAnimator.isCapturing())
             return;
 

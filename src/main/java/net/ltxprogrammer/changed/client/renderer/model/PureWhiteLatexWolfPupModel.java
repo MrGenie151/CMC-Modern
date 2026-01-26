@@ -8,7 +8,6 @@ import net.ltxprogrammer.changed.client.renderer.animate.AnimatorPresets;
 import net.ltxprogrammer.changed.client.renderer.animate.HumanoidAnimator;
 import net.ltxprogrammer.changed.client.tfanimations.HelperModel;
 import net.ltxprogrammer.changed.client.tfanimations.TransfurHelper;
-import net.ltxprogrammer.changed.entity.beast.DarkLatexWolfPup;
 import net.ltxprogrammer.changed.entity.beast.PureWhiteLatexWolfPup;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -21,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class PureWhiteLatexWolfPupModel extends AdvancedHumanoidModel<PureWhiteLatexWolfPup> implements AdvancedHumanoidModelInterface<PureWhiteLatexWolfPup, PureWhiteLatexWolfPupModel> {
+public class PureWhiteLatexWolfPupModel extends AdvancedHumanoidModel<PureWhiteLatexWolfPup> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("pure_white_latex_wolf_pup"), "main");
     private final ModelPart RightLegBack;
@@ -128,7 +127,7 @@ public class PureWhiteLatexWolfPupModel extends AdvancedHumanoidModel<PureWhiteL
 
     @Override
     public void prepareMobModel(PureWhiteLatexWolfPup entity, float limbSwing, float limbSwingAmount, float partialTicks) {
-        this.prepareMobModel(animator, entity, limbSwing, limbSwingAmount, partialTicks);
+        super.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTicks);
         
         this.Body.xRot = 0.0F;
         this.Tail.xRot = -0.05235988F;
@@ -201,10 +200,6 @@ public class PureWhiteLatexWolfPupModel extends AdvancedHumanoidModel<PureWhiteL
         }*/
     }
 
-    public void setupHand(PureWhiteLatexWolfPup entity) {
-        animator.setupHand();
-    }
-
     @Override
     public void setupAnim(@NotNull PureWhiteLatexWolfPup entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         if (!entity.isSleeping()) {
@@ -228,7 +223,6 @@ public class PureWhiteLatexWolfPupModel extends AdvancedHumanoidModel<PureWhiteL
             this.LeftFrontLeg.zRot = f / 2.0F;
         }
 
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
         super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
     }
 

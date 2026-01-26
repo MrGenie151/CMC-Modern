@@ -6,6 +6,7 @@ import net.ltxprogrammer.changed.ability.AbstractAbility;
 import net.ltxprogrammer.changed.client.ChangedClient;
 import net.ltxprogrammer.changed.client.ClientLivingEntityExtender;
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
+import net.ltxprogrammer.changed.client.animations.AnimationContainer;
 import net.ltxprogrammer.changed.entity.animation.AnimationCategory;
 import net.ltxprogrammer.changed.client.renderer.AdvancedHumanoidRenderer;
 import net.ltxprogrammer.changed.client.renderer.layers.PlayerLayerWrapper;
@@ -64,7 +65,7 @@ public abstract class EntityRenderDispatcherMixin {
         if (!(entity instanceof LivingEntity livingEntity))
             return;
 
-        ((ClientLivingEntityExtender)entity).getAnimationSafe(AnimationCategory.PROP)
+        AnimationContainer.getForEntity(livingEntity).flatMap(container -> container.getAnimationSafe(AnimationCategory.PROP))
                 .ifPresent(instance -> {
                     if (instance.isDone())
                         return;

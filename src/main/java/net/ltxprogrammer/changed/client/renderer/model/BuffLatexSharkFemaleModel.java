@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
-public class BuffLatexSharkFemaleModel extends AdvancedHumanoidModel<BuffLatexSharkFemale> implements AdvancedHumanoidModelInterface<BuffLatexSharkFemale, BuffLatexSharkFemaleModel> {
+public class BuffLatexSharkFemaleModel extends AdvancedHumanoidModel<BuffLatexSharkFemale> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("latex_shark_buff_female"), "main");
 	private final ModelPart RightLeg;
@@ -173,25 +173,9 @@ public class BuffLatexSharkFemaleModel extends AdvancedHumanoidModel<BuffLatexSh
 		return LayerDefinition.create(meshdefinition, 96, 96);
 	}
 
-
-	@Override
-	public void prepareMobModel(BuffLatexSharkFemale p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-		this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
-	}
-
-	public void setupHand(BuffLatexSharkFemale entity) {
-		animator.setupHand();
-	}
-
 	@Override
 	public HumanoidAnimator<BuffLatexSharkFemale, BuffLatexSharkFemaleModel> getAnimator(BuffLatexSharkFemale entity) {
 		return animator;
-	}
-
-	@Override
-	public void setupAnim(BuffLatexSharkFemale entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-		animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-		super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
 	}
 
 	public ModelPart getArm(HumanoidArm p_102852_) {

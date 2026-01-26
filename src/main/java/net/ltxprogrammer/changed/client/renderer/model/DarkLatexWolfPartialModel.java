@@ -20,13 +20,12 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
 
 @OnlyIn(Dist.CLIENT)
-public class DarkLatexWolfPartialModel extends AdvancedHumanoidModel<DarkLatexWolfPartial> implements AdvancedHumanoidModelInterface<DarkLatexWolfPartial, DarkLatexWolfPartialModel> {
+public class DarkLatexWolfPartialModel extends AdvancedHumanoidModel<DarkLatexWolfPartial> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     public static final ModelLayerLocation LAYER_LOCATION_HUMAN = new ModelLayerLocation(Changed.modResource("dark_latex_wolf_partial"), "main");
     public static final ModelLayerLocation LAYER_LOCATION_HUMAN_SLIM = new ModelLayerLocation(Changed.modResource("dark_latex_wolf_partial"), "main_slim");
@@ -310,8 +309,8 @@ public class DarkLatexWolfPartialModel extends AdvancedHumanoidModel<DarkLatexWo
     }
 
     @Override
-    public void prepareMobModel(DarkLatexWolfPartial p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-        this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
+    public void prepareMobModel(DarkLatexWolfPartial entity, float limbSwing, float limbSwingAmount, float partialTicks) {
+        super.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTicks);
 
         if (!this.latexLayer) {
             Tail.visible = false;
@@ -320,16 +319,6 @@ public class DarkLatexWolfPartialModel extends AdvancedHumanoidModel<DarkLatexWo
             LeftEar.visible = false;
             RightEar.visible = false;
         }
-    }
-
-    public void setupHand(DarkLatexWolfPartial entity) {
-        animator.setupHand();
-    }
-
-    @Override
-    public void setupAnim(@NotNull DarkLatexWolfPartial entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
     }
 
     public ModelPart getArm(HumanoidArm arm) {

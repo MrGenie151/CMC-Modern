@@ -5,7 +5,6 @@ import net.ltxprogrammer.changed.client.FormRenderHandler;
 import net.ltxprogrammer.changed.client.renderer.AdvancedHumanoidRenderer;
 import net.ltxprogrammer.changed.client.renderer.layers.LatexHumanoidArmorLayer;
 import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
-import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModelInterface;
 import net.ltxprogrammer.changed.client.renderer.model.armor.ArmorHumanModel;
 import net.ltxprogrammer.changed.client.renderer.model.armor.ArmorModel;
 import net.ltxprogrammer.changed.client.renderer.model.armor.LatexHumanoidArmorModel;
@@ -17,7 +16,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.PartPose;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -85,8 +83,7 @@ public class SimpleClothingRenderer implements AccessoryRenderer, TransitionalAc
                     final LatexHumanoidArmorModel model = (LatexHumanoidArmorModel<?, ?>) layer.modelPicker.getModelSetForSlot(changedEntity, component.renderAs)
                             .get(component.armorModel);
 
-                    if (advancedHumanoidRenderer.getModel(changedEntity) instanceof AdvancedHumanoidModelInterface advancedModel)
-                        model.getAnimator(changedEntity).copyProperties(advancedModel.getAnimator(changedEntity));
+                    model.getAnimator(changedEntity).copyProperties(advancedHumanoidRenderer.getModel(changedEntity).getAnimator(changedEntity));
                     model.prepareMobModel(changedEntity, limbSwing, limbSwingAmount, partialTicks);
                     model.setupAnim(changedEntity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
                     model.prepareVisibility(component.renderAs, stack);
@@ -105,7 +102,7 @@ public class SimpleClothingRenderer implements AccessoryRenderer, TransitionalAc
     }
 
     @Override
-    public <T extends LivingEntity, M extends EntityModel<T>> void renderFirstPersonOnArms(AccessorySlotContext<T> slotContext, PoseStack matrixStack, RenderLayerParent<T, M> renderLayerParent, MultiBufferSource renderTypeBuffer, int light, HumanoidArm arm, PartPose armPose, PoseStack stackCorrector, float partialTicks) {
+    public <T extends LivingEntity, M extends EntityModel<T>> void renderFirstPersonOnArms(AccessorySlotContext<T> slotContext, PoseStack matrixStack, RenderLayerParent<T, M> renderLayerParent, MultiBufferSource renderTypeBuffer, int light, HumanoidArm arm, PartPose armPose, float partialTicks) {
         ItemStack stack = slotContext.stack();
         if (stack.getItem() instanceof Clothing clothing) {
             final T entity = slotContext.wearer();
@@ -127,7 +124,7 @@ public class SimpleClothingRenderer implements AccessoryRenderer, TransitionalAc
                     var armPart = model.getArm(arm);
                     armPart.loadPose(armPose);
                     FormRenderHandler.renderModelPartWithTexture(model.getArm(arm),
-                            stackCorrector, matrixStack, ItemRenderer.getArmorFoilBuffer(renderTypeBuffer, RenderType.armorCutoutNoCull(texture), false, stack.hasFoil()),
+                            matrixStack, ItemRenderer.getArmorFoilBuffer(renderTypeBuffer, RenderType.armorCutoutNoCull(texture), false, stack.hasFoil()),
                             light, 1F);
                     model.unprepareVisibility(component.renderAs, stack);
                 }
@@ -136,7 +133,7 @@ public class SimpleClothingRenderer implements AccessoryRenderer, TransitionalAc
                 var armPart = arm == HumanoidArm.RIGHT ? clothingModel.rightArm : clothingModel.leftArm;
                 armPart.loadPose(armPose);
                 FormRenderHandler.renderVanillaModelPartWithTexture(armPart,
-                        stackCorrector, matrixStack, ItemRenderer.getArmorFoilBuffer(renderTypeBuffer, RenderType.armorCutoutNoCull(texture), false, stack.hasFoil()),
+                        matrixStack, ItemRenderer.getArmorFoilBuffer(renderTypeBuffer, RenderType.armorCutoutNoCull(texture), false, stack.hasFoil()),
                         light, 1F);
             }
         }

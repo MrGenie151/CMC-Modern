@@ -44,14 +44,14 @@ public class CustomCoatLayer<M extends AdvancedHumanoidModel<T>, T extends Chang
     }
 
     @Override
-    public void renderFirstPersonOnArms(PoseStack stack, MultiBufferSource bufferSource, int packedLight, T entity, HumanoidArm arm, PartPose armPose, PoseStack stackCorrector, float partialTick) {
+    public void renderFirstPersonOnArms(PoseStack stack, MultiBufferSource bufferSource, int packedLight, T entity, HumanoidArm arm, PartPose armPose, float partialTick) {
         var info = entity.getBasicPlayerInfo();
         var coatColor = info.getHairColor();
         stack.pushPose();
         stack.scale(ZFIGHT_OFFSET, ZFIGHT_OFFSET, ZFIGHT_OFFSET);
         var armPart = model.getArm(arm);
         armPart.loadPose(armPose);
-        FormRenderHandler.renderModelPartWithTexture(armPart, stackCorrector, stack, bufferSource.getBuffer(this.getRenderTypeForColor(coatColor)), packedLight,
+        FormRenderHandler.renderModelPartWithTexture(armPart, stack, bufferSource.getBuffer(this.getRenderTypeForColor(coatColor)), packedLight,
                 coatColor.red(), coatColor.green(), coatColor.blue(), 1F);
         stack.popPose();
     }

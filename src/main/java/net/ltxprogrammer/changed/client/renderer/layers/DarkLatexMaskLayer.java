@@ -2,7 +2,7 @@ package net.ltxprogrammer.changed.client.renderer.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.ltxprogrammer.changed.Changed;
-import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModelInterface;
+import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
 import net.ltxprogrammer.changed.client.renderer.model.DarkLatexMaskModel;
 import net.ltxprogrammer.changed.init.ChangedItems;
 import net.ltxprogrammer.changed.util.Cacheable;
@@ -41,8 +41,8 @@ public class DarkLatexMaskLayer<T extends LivingEntity, M extends EntityModel<T>
 
         pose.pushPose();
         ModelPart modelpart = this.getParentModel().getHead();
-        if (this.getParentModel() instanceof AdvancedHumanoidModelInterface<?,?> modelInterface)
-            modelInterface.scaleForHead(pose);
+        if (this.getParentModel() instanceof AdvancedHumanoidModel<?> model)
+            model.scaleForHead(pose);
 
         modelpart.translateAndRotate(pose);
         pose.translate(0.0D, -25.0D / 16.0D, -4.0D / 16.0D);

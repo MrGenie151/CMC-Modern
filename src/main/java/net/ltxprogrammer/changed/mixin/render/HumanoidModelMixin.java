@@ -1,14 +1,12 @@
 package net.ltxprogrammer.changed.mixin.render;
 
-import net.ltxprogrammer.changed.client.ClientLivingEntityExtender;
-import net.ltxprogrammer.changed.client.renderer.AdvancedHumanoidRenderer;
+import net.ltxprogrammer.changed.client.animations.AnimationContainer;
 import net.ltxprogrammer.changed.client.animations.Limb;
-import net.ltxprogrammer.changed.client.renderer.ExoskeletonRenderer;
+import net.ltxprogrammer.changed.client.renderer.AdvancedHumanoidRenderer;
 import net.ltxprogrammer.changed.client.renderer.accessory.WornExoskeletonRenderer;
 import net.ltxprogrammer.changed.client.renderer.layers.AccessoryLayer;
 import net.ltxprogrammer.changed.client.tfanimations.TransfurAnimator;
 import net.ltxprogrammer.changed.entity.robot.Exoskeleton;
-import net.ltxprogrammer.changed.init.ChangedAccessoryRenderers;
 import net.ltxprogrammer.changed.item.SpecializedAnimations;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.util.EntityUtil;
@@ -30,8 +28,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 @Mixin(HumanoidModel.class)
@@ -86,22 +82,31 @@ public abstract class HumanoidModelMixin<T extends LivingEntity> extends Ageable
         }
     }
 
-    @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/geom/ModelPart;copyFrom(Lnet/minecraft/client/model/geom/ModelPart;)V"))
-    public void setupAnimAndForceAnimation(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo ci) {
-        if (!TransfurAnimator.isCapturing()) {
-            ((ClientLivingEntityExtender) entity).getOrderedAnimations().forEach(instance -> {
-                instance.animate((HumanoidModel<?>) (Object) this, Mth.positiveModulo(ageInTicks, 1.0f));
-            });
-        }
+    @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At("HEAD"))
+    public void resetModel(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo ci) {
+        AnimationContainer.resetModel(this);
+    }
 
-        if (limbSwing == 0.0f && limbSwingAmount == 0.0f && ageInTicks == 0.0f && netHeadYaw == 0.0f && headPitch == 0.0f) {
-            // Exception case when rendering hand, ignore positioning other limbs
-            ((ClientLivingEntityExtender)entity).getOrderedAnimations().forEach(instance -> {
-                instance.resetToBaseline((HumanoidModel<?>)(Object) this, entity, identifier -> {
-                    return identifier.limb() != Limb.LEFT_ARM && identifier.limb() != Limb.RIGHT_ARM;
-                });
+    @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/geom/ModelPart;copyFrom(Lnet/minecraft/client/model/geom/ModelPart;)V"))
+    public void applyAdditionalAnimations(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo ci) {
+        AnimationContainer.getForEntity(entity).ifPresent(
+                animationContainer -> animationContainer.animateModel(this, entity, Mth.positiveModulo(ageInTicks, 1.0f))
+        );
+
+        Exoskeleton.getEntityExoskeleton(entity).ifPresent(pair -> {
+            this.leftLeg.visible = false;
+            this.rightLeg.visible = false;
+            if ((Object)this instanceof PlayerModel<?> playerModel) {
+                playerModel.leftPants.visible = false;
+                playerModel.rightPants.visible = false;
+            }
+
+            AccessoryLayer.getRenderer(pair.getSecond()).ifPresent(renderer -> {
+                if (renderer instanceof WornExoskeletonRenderer exoRenderer) {
+                    exoRenderer.getModel().animateWearerLimbs(this, pair.getFirst());
+                }
             });
-        }
+        });
 
         ProcessTransfur.ifPlayerTransfurred(EntityUtil.playerOrNull(entity), variant -> {
             if (variant.transfurProgression < 1f) {
@@ -117,21 +122,6 @@ public abstract class HumanoidModelMixin<T extends LivingEntity> extends Ageable
                     helper.transitionOriginal((HumanoidModel<?>)(Object)this, TransfurAnimator.getPreMorphProgression(variant.getTransfurProgression(ageInTicks)));
                 });
             }
-        });
-
-        Exoskeleton.getEntityExoskeleton(entity).ifPresent(pair -> {
-            this.leftLeg.visible = false;
-            this.rightLeg.visible = false;
-            if ((Object)this instanceof PlayerModel<?> playerModel) {
-                playerModel.leftPants.visible = false;
-                playerModel.rightPants.visible = false;
-            }
-
-            AccessoryLayer.getRenderer(pair.getSecond()).ifPresent(renderer -> {
-                if (renderer instanceof WornExoskeletonRenderer exoRenderer) {
-                    exoRenderer.getModel().animateWearerLimbs(this, pair.getFirst());
-                }
-            });
         });
     }
 }

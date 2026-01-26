@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
-import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModelInterface;
 import net.ltxprogrammer.changed.entity.BasicPlayerInfo;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.EyeStyle;
@@ -260,8 +259,7 @@ public class CustomEyesLayer<M extends AdvancedHumanoidModel<T>, T extends Chang
         float zFightOffset = getZFightingOffset(entity);
 
         pose.pushPose();
-        if (this.getParentModel() instanceof AdvancedHumanoidModelInterface<?,?> modelInterface)
-            modelInterface.scaleForHead(pose);
+        this.getParentModel().scaleForHead(pose);
 
         pose.scale(zFightOffset + 1.0f, zFightOffset + 1.0f, zFightOffset + 1.0f);
 

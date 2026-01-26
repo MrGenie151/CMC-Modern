@@ -14,5 +14,5 @@ public interface AccessoryRenderer {
                                                                    int light, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch);
 
     default <T extends LivingEntity, M extends EntityModel<T>> void renderFirstPersonOnArms(AccessorySlotContext<T> slotContext, PoseStack matrixStack, RenderLayerParent<T, M> renderLayerParent, MultiBufferSource renderTypeBuffer,
-                                                                                            int light, HumanoidArm arm, PartPose armPose, PoseStack stackCorrector, float partialTick) {}
+                                                                                            int light, HumanoidArm arm, PartPose armPose, float partialTick) {}
 }

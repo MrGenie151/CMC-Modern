@@ -14,7 +14,7 @@ import net.minecraft.world.entity.HumanoidArm;
 
 import java.util.List;
 
-public class LatexCrystalWolfModel extends AdvancedHumanoidModel<CrystalWolf> implements AdvancedHumanoidModelInterface<CrystalWolf, LatexCrystalWolfModel> {
+public class LatexCrystalWolfModel extends AdvancedHumanoidModel<CrystalWolf> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("crystal_wolf"), "main");
     private final ModelPart RightLeg;
     private final ModelPart LeftLeg;
@@ -144,21 +144,6 @@ public class LatexCrystalWolfModel extends AdvancedHumanoidModel<CrystalWolf> im
         PartDefinition LeftArm = partdefinition.addOrReplaceChild("LeftArm", CubeListBuilder.create().texOffs(0, 44).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, CubeDeformation.NONE), PartPose.offset(5.0F, 1.5F, 0.0F));
 
         return LayerDefinition.create(meshdefinition, 96, 96);
-    }
-
-    @Override
-    public void prepareMobModel(CrystalWolf p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-        this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
-    }
-
-    public void setupHand(CrystalWolf entity) {
-        animator.setupHand();
-    }
-
-    @Override
-    public void setupAnim(CrystalWolf entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
     }
 
     public ModelPart getArm(HumanoidArm p_102852_) {

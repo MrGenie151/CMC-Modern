@@ -14,11 +14,10 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.world.entity.HumanoidArm;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class LatexBlueWolfModel extends AdvancedHumanoidModel<LatexBlueWolf> implements AdvancedHumanoidModelInterface<LatexBlueWolf, LatexBlueWolfModel> {
+public class LatexBlueWolfModel extends AdvancedHumanoidModel<LatexBlueWolf> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("latex_blue_wolf"), "main");
     private final ModelPart RightLeg;
@@ -151,30 +150,6 @@ public class LatexBlueWolfModel extends AdvancedHumanoidModel<LatexBlueWolf> imp
         PartDefinition LeftArm = partdefinition.addOrReplaceChild("LeftArm", CubeListBuilder.create().texOffs(36, 36).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, CubeDeformation.NONE), PartPose.offset(5.0F, 2.0F, 0.0F));
 
         return LayerDefinition.create(meshdefinition, 96, 96);
-    }
-
-    @Override
-    public void prepareMobModel(LatexBlueWolf p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-        this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
-    }
-
-    public void setupHand(LatexBlueWolf entity) {
-        animator.setupHand();
-    }
-
-    @Override
-    public void setupAnim(@NotNull LatexBlueWolf entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-    }
-
-    public PoseStack getPlacementCorrectors(CorrectorType type) {
-        PoseStack corrector = AdvancedHumanoidModelInterface.super.getPlacementCorrectors(type);
-        if (type == CorrectorType.HAIR)
-            corrector.translate(0.0f, 0.5f / 15.0f, 0.0f);
-        else if (type == CorrectorType.LOWER_HAIR)
-            corrector.translate(0.0f, -0.5f / 16.0f, -0.025f);
-        return corrector;
     }
 
     public ModelPart getArm(HumanoidArm p_102852_) {

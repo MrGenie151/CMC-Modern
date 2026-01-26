@@ -8,7 +8,6 @@ import net.ltxprogrammer.changed.client.renderer.animate.HumanoidAnimator;
 import net.ltxprogrammer.changed.client.tfanimations.HelperModel;
 import net.ltxprogrammer.changed.client.animations.Limb;
 import net.ltxprogrammer.changed.client.tfanimations.TransfurHelper;
-import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.beast.LatexSquidDogFemale;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -19,7 +18,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LatexSquidDogFemaleModel extends AdvancedHumanoidModel<LatexSquidDogFemale> implements AdvancedHumanoidModelInterface<LatexSquidDogFemale, LatexSquidDogFemaleModel>, DoubleArmedModel<LatexSquidDogFemale> {
+public class LatexSquidDogFemaleModel extends AdvancedHumanoidModel<LatexSquidDogFemale> implements DoubleArmedModel<LatexSquidDogFemale> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("latex_squid_dog_female"), "main");
     private final ModelPart Head;
     private final ModelPart Torso;
@@ -281,24 +280,6 @@ public class LatexSquidDogFemaleModel extends AdvancedHumanoidModel<LatexSquidDo
     }
 
     @Override
-    public void prepareMobModel(LatexSquidDogFemale p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-        this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
-    }
-
-    @Override
-    public void setupAnim(LatexSquidDogFemale entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-    }
-
-    public PoseStack getPlacementCorrectors(CorrectorType type) {
-        PoseStack corrector = AdvancedHumanoidModelInterface.super.getPlacementCorrectors(type);
-        /*if (type.isArm())
-            corrector.translate(0.0f, -6f / 16.0f, 0.0f);*/
-        return corrector;
-    }
-
-    @Override
     public ModelPart getArm(HumanoidArm humanoidArm) {
         return switch (humanoidArm) {
             case LEFT -> LeftArm2;
@@ -328,11 +309,6 @@ public class LatexSquidDogFemaleModel extends AdvancedHumanoidModel<LatexSquidDo
     public void translateToLowerHand(LatexSquidDogFemale entity, HumanoidArm arm, PoseStack poseStack) {
         this.getOtherArm(arm).translateAndRotate(poseStack);
         poseStack.translate(0.0, (this.animator.armLength - 12.0f) / 20.0, 0.0);
-    }
-
-    @Override
-    public void setupHand(LatexSquidDogFemale entity) {
-        animator.setupHand();
     }
 
     @Override

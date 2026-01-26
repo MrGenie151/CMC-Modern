@@ -5,8 +5,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.ltxprogrammer.changed.client.renderer.AdvancedHumanoidRenderer;
 import net.ltxprogrammer.changed.client.renderer.layers.FirstPersonLayer;
 import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
-import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModelInterface;
-import net.ltxprogrammer.changed.client.renderer.model.CorrectorType;
 import net.ltxprogrammer.changed.client.tfanimations.TransfurAnimator;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.extension.ChangedCompatibility;
@@ -105,9 +103,8 @@ public abstract class FormRenderHandler {
             renderingHand = true;
 
             AdvancedHumanoidModel entModel = advRenderer.getModel(changedEntity);
-            var modelInterface = (AdvancedHumanoidModelInterface)entModel;
 
-            var controller = modelInterface.getAnimator(changedEntity);
+            var controller = entModel.getAnimator(changedEntity);
 
             controller.resetVariables();
             ModelPart handPart = entModel.getArm(arm);
@@ -115,15 +112,14 @@ public abstract class FormRenderHandler {
             modelInterface.setupHand(changedEntity);*/
             handPart.loadPose(armPose);
 
-            PoseStack stackCorrector = modelInterface.getPlacementCorrectors(CorrectorType.fromArm(arm));
             ResourceLocation texture = entRenderer.getTextureLocation(changedEntity);
 
-            renderModelPartWithTexture(handPart, stackCorrector, stack, buffer.getBuffer(RenderType.entityCutout(texture)), light, 1F);
+            renderModelPartWithTexture(handPart, stack, buffer.getBuffer(RenderType.entityCutout(texture)), light, 1F);
 
             if (layers) {
                 for (var layer : advRenderer.layers)  {
                     if (layer instanceof FirstPersonLayer firstPersonLayer)
-                        firstPersonLayer.renderFirstPersonOnArms(stack, buffer, light, changedEntity, arm, armPose, stackCorrector, partialTick);
+                        firstPersonLayer.renderFirstPersonOnArms(stack, buffer, light, changedEntity, arm, armPose, partialTick);
                 }
             }
 
@@ -169,25 +165,25 @@ public abstract class FormRenderHandler {
         }, () -> false);
     }
 
-    public static void renderModelPartWithTexture(ModelPart part, PoseStack stackCorrector, PoseStack stack, VertexConsumer buffer, int light, float alpha) {
+    public static void renderModelPartWithTexture(ModelPart part, PoseStack stack, VertexConsumer buffer, int light, float alpha) {
         if(part == null) return;
 
         part.render(stack, buffer, light, OverlayTexture.NO_OVERLAY, 1F, 1F, 1F, alpha);
     }
 
-    public static void renderVanillaModelPartWithTexture(ModelPart part, PoseStack stackCorrector, PoseStack stack, VertexConsumer buffer, int light, float alpha) {
+    public static void renderVanillaModelPartWithTexture(ModelPart part, PoseStack stack, VertexConsumer buffer, int light, float alpha) {
         if(part == null) return;
 
         part.render(stack, buffer, light, OverlayTexture.NO_OVERLAY, 1F, 1F, 1F, alpha);
     }
 
-    public static void renderModelPartWithTexture(ModelPart part, PoseStack stackCorrector, PoseStack stack, VertexConsumer buffer, int light, float red, float green, float blue, float alpha) {
+    public static void renderModelPartWithTexture(ModelPart part, PoseStack stack, VertexConsumer buffer, int light, float red, float green, float blue, float alpha) {
         if(part == null) return;
 
         part.render(stack, buffer, light, OverlayTexture.NO_OVERLAY, red, green, blue, alpha);
     }
 
-    public static void renderVanillaModelPartWithTexture(ModelPart part, PoseStack stackCorrector, PoseStack stack, VertexConsumer buffer, int light, float red, float green, float blue, float alpha) {
+    public static void renderVanillaModelPartWithTexture(ModelPart part, PoseStack stack, VertexConsumer buffer, int light, float red, float green, float blue, float alpha) {
         if(part == null) return;
 
         part.render(stack, buffer, light, OverlayTexture.NO_OVERLAY, red, green, blue, alpha);

@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class DarkLatexWolfPupModel extends AdvancedHumanoidModel<DarkLatexWolfPup> implements AdvancedHumanoidModelInterface<DarkLatexWolfPup, DarkLatexWolfPupModel> {
+public class DarkLatexWolfPupModel extends AdvancedHumanoidModel<DarkLatexWolfPup> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("dark_latex_wolf_pup"), "main");
     private final ModelPart RightLegBack;
@@ -206,7 +206,7 @@ public class DarkLatexWolfPupModel extends AdvancedHumanoidModel<DarkLatexWolfPu
             Puddle.visible = false;
         }
 
-        this.prepareMobModel(animator, entity, limbSwing, limbSwingAmount, partialTicks);
+        super.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTicks);
         
         this.Body.xRot = 0.0F;
         this.Tail.xRot = -0.05235988F;
@@ -279,10 +279,6 @@ public class DarkLatexWolfPupModel extends AdvancedHumanoidModel<DarkLatexWolfPu
         }*/
     }
 
-    public void setupHand(DarkLatexWolfPup entity) {
-        animator.setupHand();
-    }
-
     @Override
     public void setupAnim(@NotNull DarkLatexWolfPup entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         if (!entity.isSleeping()) {
@@ -306,7 +302,6 @@ public class DarkLatexWolfPupModel extends AdvancedHumanoidModel<DarkLatexWolfPu
             this.LeftFrontLeg.zRot = f / 2.0F;
         }
 
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
         super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
         if (entity.isPuddle())
             Head.copyFrom(this.HeadAnchor); // For custom eyes layer

@@ -3,8 +3,6 @@ package net.ltxprogrammer.changed.client.renderer.layers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
-import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModelInterface;
-import net.ltxprogrammer.changed.client.renderer.model.CorrectorType;
 import net.ltxprogrammer.changed.client.renderer.model.HairModel;
 import net.ltxprogrammer.changed.client.renderer.model.hair.HairRemodel;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
@@ -40,8 +38,8 @@ public class LatexHumanoidHairLayer<T extends ChangedEntity, M extends AdvancedH
 
         pose.pushPose();
         pose.translate(head.x / 16.0F, head.y / 16.0F, head.z / 16.0F);
-        if (this.getParentModel() instanceof AdvancedHumanoidModelInterface modelInterface)
-            pose.mulPoseMatrix(modelInterface.getPlacementCorrectors(CorrectorType.LOWER_HAIR).last().pose());
+        /*if (this.getParentModel() instanceof AdvancedHumanoidModelInterface modelInterface)
+            pose.mulPoseMatrix(modelInterface.getPlacementCorrectors(CorrectorType.LOWER_HAIR).last().pose());*/
         int colorLayer = 0;
         int overlay = LivingEntityRenderer.getOverlayCoords(entity, 0.0F);
         for (ResourceLocation layer : style.textureLayers) {
@@ -54,8 +52,8 @@ public class LatexHumanoidHairLayer<T extends ChangedEntity, M extends AdvancedH
         pose.popPose();
         pose.pushPose();
         head.translateAndRotate(pose);
-        if (this.getParentModel() instanceof AdvancedHumanoidModelInterface modelInterface)
-            pose.mulPoseMatrix(modelInterface.getPlacementCorrectors(CorrectorType.HAIR).last().pose());
+        /*if (this.getParentModel() instanceof AdvancedHumanoidModelInterface modelInterface)
+            pose.mulPoseMatrix(modelInterface.getPlacementCorrectors(CorrectorType.HAIR).last().pose());*/
         for (ResourceLocation layer : style.textureLayers) {
             Color3 color = entity.getHairColor(colorLayer);
             VertexConsumer buffer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(layer));

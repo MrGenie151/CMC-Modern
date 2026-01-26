@@ -16,12 +16,11 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
-public class LatexRaccoonModel extends AdvancedHumanoidModel<LatexRaccoon> implements AdvancedHumanoidModelInterface<LatexRaccoon, LatexRaccoonModel> {
+public class LatexRaccoonModel extends AdvancedHumanoidModel<LatexRaccoon> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("latex_raccoon"), "main");
     private final ModelPart RightLeg;
@@ -140,21 +139,6 @@ public class LatexRaccoonModel extends AdvancedHumanoidModel<LatexRaccoon> imple
         PartDefinition LeftArm = partdefinition.addOrReplaceChild("LeftArm", CubeListBuilder.create().texOffs(32, 44).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, CubeDeformation.NONE), PartPose.offset(5.0F, 1.5F, 0.0F));
 
         return LayerDefinition.create(meshdefinition, 96, 96);
-    }
-
-    @Override
-    public void prepareMobModel(LatexRaccoon p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-        this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
-    }
-
-    public void setupHand(LatexRaccoon entity) {
-        animator.setupHand();
-    }
-
-    @Override
-    public void setupAnim(@NotNull LatexRaccoon entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
     }
 
     public ModelPart getArm(HumanoidArm p_102852_) {

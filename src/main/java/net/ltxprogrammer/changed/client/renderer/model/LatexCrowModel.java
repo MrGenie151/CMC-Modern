@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.client.renderer.animate.AnimatorPresets;
 import net.ltxprogrammer.changed.client.renderer.animate.HumanoidAnimator;
-import net.ltxprogrammer.changed.entity.beast.LatexCrocodile;
 import net.ltxprogrammer.changed.entity.beast.LatexCrow;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -14,12 +13,11 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
-public class LatexCrowModel extends AdvancedHumanoidModel<LatexCrow> implements AdvancedHumanoidModelInterface<LatexCrow, LatexCrowModel> {
+public class LatexCrowModel extends AdvancedHumanoidModel<LatexCrow> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("latex_crow"), "main");
     private final ModelPart RightLeg;
@@ -154,23 +152,6 @@ public class LatexCrowModel extends AdvancedHumanoidModel<LatexCrow> implements 
         PartDefinition LeftSubFlight = LeftFlight.addOrReplaceChild("LeftSubFlight", CubeListBuilder.create().texOffs(16, 42).addBox(0.0F, -6.0F, 0.25F, 6.0F, 13.0F, 0.0F, CubeDeformation.NONE), PartPose.offset(4.0F, -2.0F, 0.0F));
 
         return LayerDefinition.create(meshdefinition, 64, 64);
-    }
-
-
-    @Override
-    public void prepareMobModel(LatexCrow p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-        this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
-    }
-
-    public void setupHand(LatexCrow entity) {
-        animator.setupHand();
-    }
-
-    @Override
-    public void setupAnim(@NotNull LatexCrow entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-
     }
 
     public ModelPart getArm(HumanoidArm p_102852_) {

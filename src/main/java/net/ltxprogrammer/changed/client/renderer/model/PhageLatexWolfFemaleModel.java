@@ -17,12 +17,11 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
-public class PhageLatexWolfFemaleModel extends AdvancedHumanoidModel<PhageLatexWolfFemale> implements AdvancedHumanoidModelInterface<PhageLatexWolfFemale, PhageLatexWolfFemaleModel> {
+public class PhageLatexWolfFemaleModel extends AdvancedHumanoidModel<PhageLatexWolfFemale> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("phage_latex_wolf_female"), "main");
     private final ModelPart RightLeg;
@@ -178,21 +177,6 @@ public class PhageLatexWolfFemaleModel extends AdvancedHumanoidModel<PhageLatexW
         PartDefinition LeftArm = partdefinition.addOrReplaceChild("LeftArm", CubeListBuilder.create().texOffs(36, 41).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, CubeDeformation.NONE), PartPose.offset(5.0F, 2.0F, 0.0F));
 
         return LayerDefinition.create(meshdefinition, 96, 96);
-    }
-
-    @Override
-    public void prepareMobModel(PhageLatexWolfFemale p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-        this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
-    }
-
-    public void setupHand(PhageLatexWolfFemale entity) {
-        animator.setupHand();
-    }
-
-    @Override
-    public void setupAnim(@NotNull PhageLatexWolfFemale entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
     }
 
     public ModelPart getArm(HumanoidArm p_102852_) {

@@ -3,7 +3,7 @@ package net.ltxprogrammer.changed.mixin.render;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModelInterface;
+import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
 import net.ltxprogrammer.changed.item.ExtendedItemProperties;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HeadedModel;
@@ -36,7 +36,7 @@ public abstract class CustomHeadLayerMixin<T extends LivingEntity, M extends Ent
     @Inject(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/geom/ModelPart;translateAndRotate(Lcom/mojang/blaze3d/vertex/PoseStack;)V"))
     public void offsetForAdvancedModels(PoseStack poseStack, MultiBufferSource buffers, int packedLight, T entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo ci) {
-        if (this.getParentModel() instanceof AdvancedHumanoidModelInterface<?,?> modelInterface)
-            modelInterface.scaleForHead(poseStack);
+        if (this.getParentModel() instanceof AdvancedHumanoidModel<?> model)
+            model.scaleForHead(poseStack);
     }
 }

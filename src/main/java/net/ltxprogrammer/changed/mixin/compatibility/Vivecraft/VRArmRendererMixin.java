@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.world.entity.HumanoidArm;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -40,7 +39,7 @@ public abstract class VRArmRendererMixin extends PlayerRenderer {
             if (layer instanceof FirstPersonLayer firstPersonLayer)
                 firstPersonLayer.renderFirstPersonOnArms(
                         matrixStackIn, bufferIn, combinedLightIn, playerIn, getModel().rightArm != rendererArmIn ? HumanoidArm.LEFT : HumanoidArm.RIGHT,
-                        rendererArmIn.storePose(), new PoseStack(), Minecraft.getInstance().getDeltaFrameTime());
+                        rendererArmIn.storePose(), Minecraft.getInstance().getDeltaFrameTime());
         }
     }
 }

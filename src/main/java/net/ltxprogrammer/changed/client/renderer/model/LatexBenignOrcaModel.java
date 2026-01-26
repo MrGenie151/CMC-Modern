@@ -11,11 +11,10 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.world.entity.HumanoidArm;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class LatexBenignOrcaModel extends AdvancedHumanoidModel<LatexBenignOrca> implements AdvancedHumanoidModelInterface<LatexBenignOrca, LatexBenignOrcaModel> {
+public class LatexBenignOrcaModel extends AdvancedHumanoidModel<LatexBenignOrca> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("latex_benign_orca"), "main");
     private final ModelPart RightLeg;
@@ -140,21 +139,6 @@ public class LatexBenignOrcaModel extends AdvancedHumanoidModel<LatexBenignOrca>
                 .texOffs(0, 65).addBox(-1.65F, -1.5F, -1.25F, 1.0F, 3.0F, 1.0F, CubeDeformation.NONE), PartPose.offsetAndRotation(3.15F, 3.5F, 2.15F, -0.48F, -0.6981F, 0.8727F));
 
         return LayerDefinition.create(meshdefinition, 96, 96);
-    }
-
-    @Override
-    public void prepareMobModel(LatexBenignOrca p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-        this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
-    }
-
-    public void setupHand(LatexBenignOrca entity) {
-        animator.setupHand();
-    }
-
-    @Override
-    public void setupAnim(@NotNull LatexBenignOrca entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
     }
 
     public ModelPart getArm(HumanoidArm p_102852_) {

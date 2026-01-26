@@ -4,13 +4,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
-import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModelInterface;
 import net.ltxprogrammer.changed.entity.BasicPlayerInfo;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.EyeStyle;
 import net.ltxprogrammer.changed.extension.ChangedCompatibility;
 import net.ltxprogrammer.changed.util.Color3;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -19,7 +17,6 @@ import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -104,8 +101,7 @@ public class AdditionalEyesLayer<M extends AdvancedHumanoidModel<T>, T extends C
         float zFightOffset = CustomEyesLayer.getZFightingOffset(entity);
 
         pose.pushPose();
-        if (this.getParentModel() instanceof AdvancedHumanoidModelInterface<?,?> modelInterface)
-            modelInterface.scaleForHead(pose);
+        this.getParentModel().scaleForHead(pose);
 
         pose.scale(zFightOffset + 1.0f, zFightOffset + 1.0f, zFightOffset + 1.0f);
         scleraColorFn.getColorSafe(entity, info).ifPresent(data -> {

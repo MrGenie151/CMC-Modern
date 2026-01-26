@@ -18,6 +18,8 @@ import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -33,15 +35,16 @@ public class CommandAnimate {
     @SubscribeEvent
     public static void registerCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("animate").requires(p -> p.hasPermission(2))
-                .then(Commands.argument("player", EntityArgument.player())
+                .then(Commands.argument("entity", EntityArgument.entity())
                         .then(Commands.argument("animate", ResourceLocationArgument.id()).suggests(SUGGEST_ANIMATIONS)
-                                .executes(context -> doAnimate(context.getSource(), EntityArgument.getPlayer(context, "player"), ChangedRegistry.ANIMATION_EVENTS.get().getValue(ResourceLocationArgument.getId(context, "animate"))))
+                                .executes(context -> doAnimate(context.getSource(), EntityArgument.getEntity(context, "entity"), ChangedRegistry.ANIMATION_EVENTS.get().getValue(ResourceLocationArgument.getId(context, "animate"))))
                 ))
         );
     }
 
-    private static int doAnimate(CommandSourceStack source, ServerPlayer player, AnimationEvent<?> event) throws CommandSyntaxException {
-        ChangedAnimationEvents.broadcastEntityAnimation(player, event, null);
+    private static int doAnimate(CommandSourceStack source, Entity entity, AnimationEvent<?> event) throws CommandSyntaxException {
+        if (entity instanceof LivingEntity livingEntity)
+            ChangedAnimationEvents.broadcastEntityAnimation(livingEntity, event, null);
         return Command.SINGLE_SUCCESS;
     }
 }

@@ -11,11 +11,10 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.world.entity.HumanoidArm;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class LatexBenignWolfModel extends AdvancedHumanoidModel<LatexBenignWolf> implements AdvancedHumanoidModelInterface<LatexBenignWolf, LatexBenignWolfModel> {
+public class LatexBenignWolfModel extends AdvancedHumanoidModel<LatexBenignWolf> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("latex_benign_wolf"), "main");
     private final ModelPart RightLeg;
@@ -133,21 +132,6 @@ public class LatexBenignWolfModel extends AdvancedHumanoidModel<LatexBenignWolf>
         PartDefinition GooStrand_r2 = LeftArm.addOrReplaceChild("GooStrand_r2", CubeListBuilder.create().texOffs(30, 63).addBox(-3.75F, 1.4F, -1.25F, 6.0F, 2.0F, 2.0F, new CubeDeformation(-0.05F)), PartPose.offsetAndRotation(-1.0F, -0.5F, 0.0F, 0.0F, 0.2618F, 0.3927F));
 
         return LayerDefinition.create(meshdefinition, 96, 96);
-    }
-
-    @Override
-    public void prepareMobModel(LatexBenignWolf p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-        this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
-    }
-
-    public void setupHand(LatexBenignWolf entity) {
-        animator.setupHand();
-    }
-
-    @Override
-    public void setupAnim(@NotNull LatexBenignWolf entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
     }
 
     public ModelPart getArm(HumanoidArm p_102852_) {

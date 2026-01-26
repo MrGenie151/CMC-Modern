@@ -20,7 +20,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
-public class BuffLatexSharkMaleModel extends AdvancedHumanoidModel<BuffLatexSharkMale> implements AdvancedHumanoidModelInterface<BuffLatexSharkMale, BuffLatexSharkMaleModel> {
+public class BuffLatexSharkMaleModel extends AdvancedHumanoidModel<BuffLatexSharkMale> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("latex_shark_buff_male"), "main");
 	private final ModelPart RightLeg;
@@ -181,23 +181,8 @@ public class BuffLatexSharkMaleModel extends AdvancedHumanoidModel<BuffLatexShar
 	}
 
 	@Override
-	public void prepareMobModel(BuffLatexSharkMale p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-		this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
-	}
-
-	public void setupHand(BuffLatexSharkMale entity) {
-		animator.setupHand();
-	}
-
-	@Override
 	public HumanoidAnimator<BuffLatexSharkMale, BuffLatexSharkMaleModel> getAnimator(BuffLatexSharkMale entity) {
 		return animator;
-	}
-
-	@Override
-	public void setupAnim(BuffLatexSharkMale entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-		animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-		super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
 	}
 
 	public ModelPart getArm(HumanoidArm p_102852_) {

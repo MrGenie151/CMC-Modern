@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.client.renderer.animate.AnimatorPresets;
 import net.ltxprogrammer.changed.client.renderer.animate.HumanoidAnimator;
-import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.beast.LatexStiger;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -15,7 +14,7 @@ import net.minecraft.world.entity.HumanoidArm;
 
 import java.util.List;
 
-public class LatexStigerModel extends AdvancedHumanoidModel<LatexStiger> implements AdvancedHumanoidModelInterface<LatexStiger, LatexStigerModel>, TripleArmedModel<LatexStiger> {
+public class LatexStigerModel extends AdvancedHumanoidModel<LatexStiger> implements TripleArmedModel<LatexStiger> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("latex_stiger"), "main");
     public final ModelPart Head;
     public final ModelPart Torso;
@@ -172,24 +171,6 @@ public class LatexStigerModel extends AdvancedHumanoidModel<LatexStiger> impleme
     }
 
     @Override
-    public void prepareMobModel(LatexStiger p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-        this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
-    }
-
-    @Override
-    public void setupAnim(LatexStiger entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-    }
-
-    public PoseStack getPlacementCorrectors(CorrectorType type) {
-        PoseStack corrector = AdvancedHumanoidModelInterface.super.getPlacementCorrectors(type);
-        /*if (type.isArm())
-            corrector.translate(0.0f, -6f / 16.0f, 0.0f);*/
-        return corrector;
-    }
-
-    @Override
     public ModelPart getArm(HumanoidArm humanoidArm) {
         return switch (humanoidArm) {
             case LEFT -> LeftArm3;
@@ -233,11 +214,6 @@ public class LatexStigerModel extends AdvancedHumanoidModel<LatexStiger> impleme
 
     public ModelPart getLeg(HumanoidArm p_102852_) {
         return p_102852_ == HumanoidArm.LEFT ? this.LeftLeg : this.RightLeg;
-    }
-
-    @Override
-    public void setupHand(LatexStiger entity) {
-        animator.setupHand();
     }
 
     @Override

@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.ltxprogrammer.changed.client.renderer.layers.*;
 import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
-import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModelInterface;
 import net.ltxprogrammer.changed.client.renderer.model.armor.ArmorModelPicker;
 import net.ltxprogrammer.changed.client.renderer.model.armor.ArmorModelSet;
 import net.ltxprogrammer.changed.client.renderer.model.armor.LatexHumanoidArmorModel;
@@ -129,21 +128,13 @@ public abstract class AdvancedHumanoidRenderer<T extends ChangedEntity, M extend
             if (entity.isVisuallySwimming()) {
                 poseStack.translate(0.0D, -1.0D, (double)0.3F);
             }
-
-            if (getModel() instanceof AdvancedHumanoidModelInterface<?, ?> modelInterface) {
-                //poseStack.translate(0.0D, 0.0D, (-modelInterface.getAnimator().forwardOffset * swimAmount) / 16.0);
-            }
         } else if (upright && entity.isSleeping()) {
             super.setupRotations(entity, poseStack, bob, bodyYRot, partialTicks);
-            if (getModel() instanceof AdvancedHumanoidModelInterface<?, ?> modelInterface) {
-                //poseStack.translate(0.0D, -modelInterface.getAnimator().forwardOffset / 16.0, -modelInterface.getAnimator().forwardOffset / 16.0);
-            }
         } else {
             super.setupRotations(entity, poseStack, bob, bodyYRot, partialTicks);
         }
 
-        if (this.getModel(entity) instanceof AdvancedHumanoidModelInterface modelInterface)
-            poseStack.translate(0, 0, modelInterface.getAnimator(entity).forwardOffset / 16.0D);
+        poseStack.translate(0, 0, model.getAnimator(entity).forwardOffset / 16.0D);
     }
 
     public static HumanoidModel.ArmPose getArmPose(ChangedEntity p_117795_, InteractionHand p_117796_) {
@@ -194,8 +185,7 @@ public abstract class AdvancedHumanoidRenderer<T extends ChangedEntity, M extend
 
     @Override
     public void render(T entity, float yRot, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
-        if (this instanceof AdvancedHumanoidModelInterface modelInterface)
-            modelInterface.getAnimator(entity).partialTicks = partialTicks;
+        model.getAnimator(entity).partialTicks = partialTicks;
         super.render(entity, yRot, partialTicks, poseStack, bufferSource, packedLight);
     }
 

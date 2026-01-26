@@ -11,11 +11,10 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.world.entity.HumanoidArm;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class LatexTigerSharkModel extends AdvancedHumanoidModel<LatexTigerShark> implements AdvancedHumanoidModelInterface<LatexTigerShark, LatexTigerSharkModel> {
+public class LatexTigerSharkModel extends AdvancedHumanoidModel<LatexTigerShark> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("latex_tiger_shark"), "main");
     private final ModelPart RightLeg;
@@ -148,29 +147,6 @@ public class LatexTigerSharkModel extends AdvancedHumanoidModel<LatexTigerShark>
                 .texOffs(48, 50).addBox(-0.125F, -0.5F, -0.5F, 1.0F, 4.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(2.6568F, 2.0711F, 1.6568F, -0.4796F, -0.6979F, 0.7102F));
 
         return LayerDefinition.create(meshdefinition, 96, 96);
-    }
-
-    @Override
-    public PoseStack getPlacementCorrectors(CorrectorType type) {
-        var corrector = AdvancedHumanoidModelInterface.super.getPlacementCorrectors(type);
-        if (type == CorrectorType.HAIR)
-            corrector.translate(0.0f, 0.25f / 16f, 0.0f);
-        return corrector;
-    }
-
-    @Override
-    public void prepareMobModel(LatexTigerShark p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-        this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
-    }
-
-    public void setupHand(LatexTigerShark entity) {
-        animator.setupHand();
-    }
-
-    @Override
-    public void setupAnim(@NotNull LatexTigerShark entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
     }
 
     public ModelPart getArm(HumanoidArm p_102852_) {

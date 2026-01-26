@@ -1,10 +1,9 @@
 package net.ltxprogrammer.changed.client.renderer.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.ltxprogrammer.changed.client.ClientLivingEntityExtender;
 import net.ltxprogrammer.changed.client.ModelPartStem;
 import net.ltxprogrammer.changed.client.PoseStackExtender;
-import net.ltxprogrammer.changed.client.renderer.ExoskeletonRenderer;
+import net.ltxprogrammer.changed.client.animations.AnimationContainer;
 import net.ltxprogrammer.changed.client.renderer.accessory.WornExoskeletonRenderer;
 import net.ltxprogrammer.changed.client.renderer.layers.AccessoryLayer;
 import net.ltxprogrammer.changed.client.tfanimations.HelperModel;
@@ -14,11 +13,9 @@ import net.ltxprogrammer.changed.client.tfanimations.*;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.robot.Exoskeleton;
 import net.ltxprogrammer.changed.extension.ChangedCompatibility;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.*;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.HumanoidArm;
@@ -49,9 +46,17 @@ public abstract class AdvancedHumanoidModel<T extends ChangedEntity> extends Pla
         this.rootModelPart = root;
     }
 
+    public abstract HumanoidAnimator<T, ?> getAnimator(T entity);
+
+    public void setupHand(T entity) {
+        getAnimator(entity).setupHand();
+    }
+
+    public void scaleForBody(PoseStack poseStack) {}
+    public void scaleForHead(PoseStack poseStack) {}
+
     public void syncPropertyModel(T entity) {
-        if (this instanceof AdvancedHumanoidModelInterface modelInterface)
-            modelInterface.getAnimator(entity).writePropertyModel(this);
+        getAnimator(entity).writePropertyModel(this);
     }
 
     public PlayerModel<?> preparePropertyModel(T entity) {
@@ -59,10 +64,21 @@ public abstract class AdvancedHumanoidModel<T extends ChangedEntity> extends Pla
         return this;
     }
 
-    public void prepareMobModel(HumanoidAnimator<T, ? extends EntityModel<T>> animator, T entity, float p_102862_, float p_102863_, float partialTicks) {
-        super.prepareMobModel(entity, p_102862_, p_102863_, partialTicks);
+    public PoseStack.Pose resetPoseStack = null;
+    public void swapResetPoseStack(PoseStack poseStack) {
+        // This function is to maybe reset any poseStack changes for exception case models (im looking at you centaur)
+        if (resetPoseStack != null && poseStack instanceof PoseStackExtender extender) {
+            var copied = extender.copyLast();
+            extender.setPose(resetPoseStack);
+            resetPoseStack = copied;
+        }
+    }
+
+    @Override
+    public void prepareMobModel(T entity, float limbSwing, float limbSwingAmount, float partialTicks) {
+        super.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTicks);
         this.setAllLimbsVisible(entity, true);
-        animator.setupVariables(entity, partialTicks);
+        this.getAnimator(entity).setupVariables(entity, partialTicks);
 
         if (ChangedCompatibility.isFirstPersonRendering()) {
             getHead().visible = false;
@@ -77,31 +93,15 @@ public abstract class AdvancedHumanoidModel<T extends ChangedEntity> extends Pla
         this.syncPropertyModel(entity);
     }
 
-    public PoseStack.Pose resetPoseStack = null;
-    public void swapResetPoseStack(PoseStack poseStack) {
-        // This function is to maybe reset any poseStack changes for exception case models (im looking at you centaur)
-        if (resetPoseStack != null && poseStack instanceof PoseStackExtender extender) {
-            var copied = extender.copyLast();
-            extender.setPose(resetPoseStack);
-            resetPoseStack = copied;
-        }
-    }
-
     @Override
     public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (!TransfurAnimator.isCapturing()) {
-            ((ClientLivingEntityExtender) entity.maybeGetUnderlying()).getOrderedAnimations().forEach(instance -> {
-                instance.animate(this, entity, Mth.positiveModulo(ageInTicks, 1.0f));
-            });
-        }
+        AnimationContainer.resetModel(this);
 
-        if (limbSwing == 0.0f && limbSwingAmount == 0.0f && ageInTicks == 0.0f && netHeadYaw == 0.0f && headPitch == 0.0f) {
-            ((ClientLivingEntityExtender) entity).getOrderedAnimations().forEach(instance -> {
-                instance.resetToBaseline(this, entity, identifier -> {
-                    return identifier.limb() != Limb.LEFT_ARM && identifier.limb() != Limb.RIGHT_ARM;
-                });
-            });
-        }
+        this.getAnimator(entity).setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+
+        AnimationContainer.getForEntity(entity).ifPresent(
+                animationContainer -> animationContainer.animateModel(this, entity, Mth.positiveModulo(ageInTicks, 1.0f))
+        );
 
         Exoskeleton.getEntityExoskeleton(entity).ifPresent(pair -> {
             AccessoryLayer.getRenderer(pair.getSecond()).ifPresent(renderer -> {
@@ -198,8 +198,7 @@ public abstract class AdvancedHumanoidModel<T extends ChangedEntity> extends Pla
 
     public void translateToHand(T entity, HumanoidArm arm, PoseStack poseStack) {
         this.getArm(arm).translateAndRotate(poseStack);
-        if (this instanceof AdvancedHumanoidModelInterface modelInterface)
-            poseStack.translate(0.0, (modelInterface.getAnimator(entity).armLength - 12.0f) / 20.0, 0.0);
+        poseStack.translate(0.0, (getAnimator(entity).armLength - 12.0f) / 20.0, 0.0);
     }
 
     private Stream<ModelPartStem> getAllPartsFor(ModelPart root) {

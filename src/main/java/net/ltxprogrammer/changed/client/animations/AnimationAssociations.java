@@ -82,7 +82,7 @@ public class AnimationAssociations extends SimplePreparableReloadListener<Immuta
                     propEntities.forEach(instance::addEntity);
                     propItems.forEach(instance::addItem);
 
-                    ((ClientLivingEntityExtender)livingEntity).addAnimation(
+                    AnimationContainer.getForEntityOrCreate(livingEntity).addAnimation(
                         category == null ? chosen.orElseThrow().getCategory() : category,
                         instance);
                 });

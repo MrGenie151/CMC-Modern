@@ -9,7 +9,6 @@ import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.client.renderer.animate.AnimatorPresets;
 import net.ltxprogrammer.changed.client.renderer.animate.HumanoidAnimator;
 import net.ltxprogrammer.changed.entity.beast.LatexEel;
-import net.ltxprogrammer.changed.entity.beast.LatexShark;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -21,7 +20,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
-public class LatexEelModel extends AdvancedHumanoidModel<LatexEel> implements AdvancedHumanoidModelInterface<LatexEel, LatexEelModel> {
+public class LatexEelModel extends AdvancedHumanoidModel<LatexEel> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Changed.modResource("latex_eel"), "main");
 	private final ModelPart RightLeg;
@@ -141,26 +140,6 @@ public class LatexEelModel extends AdvancedHumanoidModel<LatexEel> implements Ad
 		return LayerDefinition.create(meshdefinition, 96, 96);
 	}
 
-	@Override
-	public void prepareMobModel(LatexEel p_102861_, float p_102862_, float p_102863_, float p_102864_) {
-		this.prepareMobModel(animator, p_102861_, p_102862_, p_102863_, p_102864_);
-	}
-
-	public void setupHand(LatexEel entity) {
-		animator.setupHand();
-	}
-
-	@Override
-	public HumanoidAnimator<LatexEel, LatexEelModel> getAnimator(LatexEel entity) {
-		return animator;
-	}
-
-	@Override
-	public void setupAnim(LatexEel entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-		animator.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-		super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-	}
-
 	public ModelPart getArm(HumanoidArm p_102852_) {
 		return p_102852_ == HumanoidArm.LEFT ? this.LeftArm : this.RightArm;
 	}
@@ -185,5 +164,10 @@ public class LatexEelModel extends AdvancedHumanoidModel<LatexEel> implements Ad
 		Torso.render(poseStack, buffer, packedLight, packedOverlay);
 		RightArm.render(poseStack, buffer, packedLight, packedOverlay);
 		LeftArm.render(poseStack, buffer, packedLight, packedOverlay);
+	}
+
+	@Override
+	public HumanoidAnimator<LatexEel, LatexEelModel> getAnimator(LatexEel entity) {
+		return animator;
 	}
 }

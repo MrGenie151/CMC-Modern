@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import net.ltxprogrammer.changed.client.renderer.animate.HumanoidAnimator;
 import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
-import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModelInterface;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -60,9 +59,7 @@ public record ModelPartIdentifier(@Nullable Limb limb, @Nullable LimbExtension e
     }
 
     private @Nullable HumanoidAnimator<?, ?> getAnimatorOrNull(AdvancedHumanoidModel<?> model, ChangedEntity entity) {
-        if (model instanceof AdvancedHumanoidModelInterface advanced)
-            return advanced.getAnimator(entity);
-        return null;
+        return ((AdvancedHumanoidModel)model).getAnimator(entity);
     }
 
     public @Nullable ModelPart getModelPart(AdvancedHumanoidModel<?> model, ChangedEntity entity) {

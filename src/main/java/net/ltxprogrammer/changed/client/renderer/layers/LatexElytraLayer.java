@@ -3,7 +3,6 @@ package net.ltxprogrammer.changed.client.renderer.layers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
-import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModelInterface;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.minecraft.client.model.ElytraModel;
 import net.minecraft.client.model.geom.EntityModelSet;
@@ -90,13 +89,7 @@ public class LatexElytraLayer<T extends ChangedEntity, M extends AdvancedHumanoi
             }
 
             p_116951_.pushPose();
-            if (this.getParentModel() instanceof AdvancedHumanoidModelInterface modelInterface) {
-                p_116951_.translate(0.0D, 0.0D + ((12.0f - modelInterface.getAnimator(p_116954_).legLength) / 8.0f), 0.125D);
-            }
-
-            else {
-                p_116951_.translate(0.0D, 0.0D, 0.125D);
-            }
+            p_116951_.translate(0.0D, 0.0D + ((12.0f - this.getParentModel().getAnimator(p_116954_).legLength) / 8.0f), 0.125D);
 
             this.getParentModel().copyPropertiesTo(this.elytraModel);
             this.elytraModel.setupAnim(p_116954_, p_116955_, p_116956_, p_116958_, p_116959_, p_116960_);

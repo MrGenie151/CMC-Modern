@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.ltxprogrammer.changed.client.renderer.AdvancedHumanoidRenderer;
 import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
-import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModelInterface;
 import net.ltxprogrammer.changed.client.renderer.model.armor.ArmorModel;
 import net.ltxprogrammer.changed.client.renderer.model.armor.ArmorModelPicker;
 import net.ltxprogrammer.changed.client.renderer.model.armor.LatexHumanoidArmorModel;
@@ -15,7 +14,6 @@ import net.ltxprogrammer.changed.world.enchantments.FormFittingEnchantment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -52,12 +50,10 @@ public class LatexHumanoidArmorLayer<T extends ChangedEntity, M extends Advanced
     public void render(PoseStack pose, MultiBufferSource buffers, int packedLight, T entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
         if (!parent.shouldRenderArmor(entity)) return;
 
-        if (parent.getModel(entity) instanceof AdvancedHumanoidModelInterface advancedModel) {
-            final var animator = advancedModel.getAnimator(entity);
-            this.modelPicker.forEach(entity, ArmorModel::isArmor, (layer, model) -> {
-                model.getAnimator(entity).copyProperties(animator);
-            });
-        }
+        final var animator = parent.getModel(entity).getAnimator(entity);
+        this.modelPicker.forEach(entity, ArmorModel::isArmor, (layer, model) -> {
+            model.getAnimator(entity).copyProperties(animator);
+        });
         this.modelPicker.prepareAndSetupModels(entity, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch);
         boolean firstPerson = ChangedCompatibility.isFirstPersonRendering();
 

@@ -1,7 +1,6 @@
 package net.ltxprogrammer.changed.client.renderer.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.ltxprogrammer.changed.entity.PlayerDataExtension;
 import net.ltxprogrammer.changed.util.EntityUtil;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -17,7 +16,7 @@ public interface FirstPersonLayer<T extends LivingEntity> {
     float ZFIGHT_OFFSET = 1.0002f;
 
     default void renderFirstPersonOnFace(PoseStack stack, MultiBufferSource bufferSource, int packedLight, T entity, Camera camera) {}
-    default void renderFirstPersonOnArms(PoseStack stack, MultiBufferSource bufferSource, int packedLight, T entity, HumanoidArm arm, PartPose armPose, PoseStack stackCorrector, float partialTick) {}
+    default void renderFirstPersonOnArms(PoseStack stack, MultiBufferSource bufferSource, int packedLight, T entity, HumanoidArm arm, PartPose armPose, float partialTick) {}
 
     static void renderFirstPersonLayersOnFace(PoseStack poseStack, Camera camera, float partialTicks) {
         if (!(Minecraft.getInstance().getCameraEntity() instanceof LivingEntity livingEntity))

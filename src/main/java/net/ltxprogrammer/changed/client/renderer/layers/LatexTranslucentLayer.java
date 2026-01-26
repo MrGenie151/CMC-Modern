@@ -49,9 +49,9 @@ public class LatexTranslucentLayer<T extends ChangedEntity, M extends AdvancedHu
     }
 
     @Override
-    public void renderFirstPersonOnArms(PoseStack stack, MultiBufferSource bufferSource, int packedLight, T entity, HumanoidArm arm, PartPose armPose, PoseStack stackCorrector, float partialTick) {
+    public void renderFirstPersonOnArms(PoseStack stack, MultiBufferSource bufferSource, int packedLight, T entity, HumanoidArm arm, PartPose armPose, float partialTick) {
         var armPart = model.getArm(arm);
         armPart.loadPose(armPose);
-        FormRenderHandler.renderModelPartWithTexture(armPart, stackCorrector, stack, bufferSource.getBuffer(RenderType.entityTranslucent(texture)), packedLight, 1F);
+        FormRenderHandler.renderModelPartWithTexture(armPart, stack, bufferSource.getBuffer(RenderType.entityTranslucent(texture)), packedLight, 1F);
     }
 }
