@@ -58,37 +58,37 @@ public abstract class Gas extends ForgeFlowingFluid {
     protected FluidState getNewLiquid(Level level, BlockPos pos, BlockState state) {
         // Overwritten from FlowingFluid.getNewLiquid()
 
-        int i = 0;
-        int j = 0;
+        int maxNeighborAmount = 0;
+        int sourceNeighbors = 0;
 
-        for(Direction direction : Direction.Plane.HORIZONTAL) {
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
             BlockPos blockpos = pos.relative(direction);
             BlockState blockstate = level.getBlockState(blockpos);
             FluidState fluidstate = blockstate.getFluidState();
             if (fluidstate.getType().isSame(this) && this.canPassThroughWall(direction, level, pos, state, blockpos, blockstate)) {
                 if (fluidstate.isSource() && net.minecraftforge.event.ForgeEventFactory.canCreateFluidSource(level, blockpos, blockstate, this.canConvertToSource(level))) {
-                    ++j;
+                    ++sourceNeighbors;
                 }
 
-                i = Math.max(i, fluidstate.getAmount());
+                maxNeighborAmount = Math.max(maxNeighborAmount, fluidstate.getAmount());
             }
         }
 
-        if (j >= 2) {
-            BlockState blockstate1 = level.getBlockState(pos.below());
-            FluidState fluidstate1 = blockstate1.getFluidState();
-            if (blockstate1.isSolid() || this.isSourceBlockOfThisType(fluidstate1)) {
+        if (sourceNeighbors >= 2) {
+            BlockState surfaceBlockState = level.getBlockState(pos.below());
+            FluidState surfaceFluidState = surfaceBlockState.getFluidState();
+            if (surfaceBlockState.isSolid() || this.isSourceBlockOfThisType(surfaceFluidState)) {
                 return this.getSource(false);
             }
         }
 
-        BlockPos blockpos1 = pos.above();
-        BlockState blockstate2 = level.getBlockState(blockpos1);
-        FluidState fluidstate2 = blockstate2.getFluidState();
-        if (!fluidstate2.isEmpty() && fluidstate2.getType().isSame(this) && this.canPassThroughWall(Direction.UP, level, pos, state, blockpos1, blockstate2)) {
-            return this.getFlowing(fluidstate2.getAmount(), false); // Prevents amount from resetting to 8 when going down
+        BlockPos abovePos = pos.above();
+        BlockState aboveBlockState = level.getBlockState(abovePos);
+        FluidState aboveFluidState = aboveBlockState.getFluidState();
+        if (!aboveFluidState.isEmpty() && aboveFluidState.getType().isSame(this) && this.canPassThroughWall(Direction.UP, level, pos, state, abovePos, aboveBlockState)) {
+            return this.getFlowing(Math.min(aboveFluidState.getAmount(), 7), false); // Prevents amount from resetting to 8 when going down
         } else {
-            int k = i - this.getDropOff(level);
+            int k = maxNeighborAmount - this.getDropOff(level);
             return k <= 0 ? Fluids.EMPTY.defaultFluidState() : this.getFlowing(k, false);
         }
     }

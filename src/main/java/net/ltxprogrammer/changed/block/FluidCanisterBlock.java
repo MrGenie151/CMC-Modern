@@ -35,7 +35,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -168,6 +167,12 @@ public class FluidCanisterBlock extends AbstractCustomShapeTallEntityBlock {
     public FluidState getFluidState(BlockState blockState) {
         maybeInitializeFluidStates();
         return blockState.getValue(OPEN) ? stateOpen : stateClosed;
+    }
+
+    @Override
+    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
+        maybeInitializeFluidStates();
+        return super.onDestroyedByPlayer(state, level, pos, player, willHarvest, stateClosed);
     }
 
     @Override
