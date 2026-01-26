@@ -16,7 +16,6 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
-import java.util.Map;
 
 public class ArmorSnakeAbdomenModel<T extends ChangedEntity> extends LatexHumanoidArmorModel<T, ArmorSnakeAbdomenModel<T>> implements LeglessModel {
     public static final ArmorModelSet<ChangedEntity, ArmorSnakeAbdomenModel<ChangedEntity>> MODEL_SET =
@@ -71,16 +70,9 @@ public class ArmorSnakeAbdomenModel<T extends ChangedEntity> extends LatexHumano
     @Override
     public void prepareVisibility(EquipmentSlot armorSlot, ItemStack item) {
         super.prepareVisibility(armorSlot, item);
+        setAllPartsVisibility(TailPrimary, true);
         if (armorSlot == EquipmentSlot.LEGS) {
             setAllPartsVisibility(TailPrimary, false);
-        }
-    }
-
-    @Override
-    public void unprepareVisibility(EquipmentSlot armorSlot, ItemStack item) {
-        super.unprepareVisibility(armorSlot, item);
-        if (armorSlot == EquipmentSlot.LEGS) {
-            setAllPartsVisibility(TailPrimary, true);
         }
     }
 

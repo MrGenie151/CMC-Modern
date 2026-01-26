@@ -76,16 +76,9 @@ public class ArmorFemaleMantaRayAbdomenModel<T extends ChangedEntity> extends La
     @Override
     public void prepareVisibility(EquipmentSlot armorSlot, ItemStack item) {
         super.prepareVisibility(armorSlot, item);
+        setAllPartsVisibility(TailPrimary, true);
         if (armorSlot == EquipmentSlot.LEGS) {
             setAllPartsVisibility(TailPrimary, false);
-        }
-    }
-
-    @Override
-    public void unprepareVisibility(EquipmentSlot armorSlot, ItemStack item) {
-        super.unprepareVisibility(armorSlot, item);
-        if (armorSlot == EquipmentSlot.LEGS) {
-            setAllPartsVisibility(TailPrimary, true);
         }
     }
 

@@ -101,6 +101,7 @@ public class ArmorHeadlessKnightModel extends LatexHumanoidArmorModel<HeadlessKn
     @Override
     public void prepareVisibility(EquipmentSlot armorSlot, ItemStack item) {
         super.prepareVisibility(armorSlot, item);
+        setAllPartsVisibility(LowerTorso, true);
         if (armorSlot == EquipmentSlot.LEGS) {
             prepareUnifiedLegsForArmor(item, LeftLeg, RightLeg);
 
@@ -108,18 +109,6 @@ public class ArmorHeadlessKnightModel extends LatexHumanoidArmorModel<HeadlessKn
                 setAllPartsVisibility(LowerTorso, false);
                 LeftLeg2.getChild("LeftUpperLeg_r2").visible = true;
                 RightLeg2.getChild("RightUpperLeg_r2").visible = true;
-            }
-        }
-    }
-
-    @Override
-    public void unprepareVisibility(EquipmentSlot armorSlot, ItemStack item) {
-        super.unprepareVisibility(armorSlot, item);
-        if (armorSlot == EquipmentSlot.LEGS) {
-            prepareUnifiedLegsForArmor(item, LeftLeg, RightLeg);
-
-            if (item.getItem() instanceof Shorts) {
-                setAllPartsVisibility(LowerTorso, true);
             }
         }
     }

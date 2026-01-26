@@ -100,11 +100,6 @@ public class LeglessArmorStandModel extends EntityModel<LeglessArmorStand> {
         }
 
         @Override
-        public void unprepareVisibility(EquipmentSlot armorSlot, ItemStack item) {
-
-        }
-
-        @Override
         public void setupAnim(LeglessArmorStand entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
             this.Head.xRot = ((float)Math.PI / 180F) * entity.getHeadPose().getX();
             this.Head.yRot = ((float)Math.PI / 180F) * entity.getHeadPose().getY();
@@ -145,15 +140,9 @@ public class LeglessArmorStandModel extends EntityModel<LeglessArmorStand> {
 
         @Override
         public void prepareVisibility(EquipmentSlot armorSlot, ItemStack item) {
+            TailPrimary.visible = true;
             if (armorSlot == EquipmentSlot.LEGS) {
                 TailPrimary.visible = false;
-            }
-        }
-
-        @Override
-        public void unprepareVisibility(EquipmentSlot armorSlot, ItemStack item) {
-            if (armorSlot == EquipmentSlot.LEGS) {
-                TailPrimary.visible = true;
             }
         }
 

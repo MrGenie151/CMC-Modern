@@ -8,7 +8,6 @@ import net.ltxprogrammer.changed.client.renderer.animate.HumanoidAnimator;
 import net.ltxprogrammer.changed.client.renderer.animate.multihead.DoubleHeadAnimator;
 import net.ltxprogrammer.changed.client.renderer.model.DoubleHeadedModel;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
-import net.ltxprogrammer.changed.entity.beast.DarkLatexDoubleYufeng;
 import net.ltxprogrammer.changed.entity.beast.DoubleHeadedEntity;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -125,14 +124,6 @@ public class ArmorLatexMaleDoubleHeadedWingedDragonModel<T extends ChangedEntity
     @Override
     public void prepareVisibility(EquipmentSlot armorSlot, ItemStack item) {
         super.prepareVisibility(armorSlot, item);
-        if (armorSlot == EquipmentSlot.LEGS) {
-            prepareUnifiedLegsForArmor(item, LeftLeg, RightLeg, Tail);
-        }
-    }
-
-    @Override
-    public void unprepareVisibility(EquipmentSlot armorSlot, ItemStack item) {
-        super.unprepareVisibility(armorSlot, item);
         if (armorSlot == EquipmentSlot.LEGS) {
             prepareUnifiedLegsForArmor(item, LeftLeg, RightLeg, Tail);
         }

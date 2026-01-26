@@ -666,7 +666,6 @@ public abstract class TransfurAnimator {
                                 afterModel,
                                 partialTick, morphProgress, Color3.WHITE, 1f, stack, buffer, light,
                                 texture, true);
-                        afterModel.unprepareVisibility(armorSlot, item);
                     } catch (Exception e) {
                         CrashReport report = CrashReport.forThrowable(e, "Rendering transfurring entity's armor");
                         CrashReportCategory category = report.addCategory("Armor being rendered");

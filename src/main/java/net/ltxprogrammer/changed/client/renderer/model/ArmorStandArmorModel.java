@@ -13,7 +13,6 @@ public abstract class ArmorStandArmorModel<T extends AbstractArmorStand> extends
                                        PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha);
 
     public abstract void prepareVisibility(EquipmentSlot armorSlot, ItemStack item);
-    public abstract void unprepareVisibility(EquipmentSlot armorSlot, ItemStack item);
 
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {}

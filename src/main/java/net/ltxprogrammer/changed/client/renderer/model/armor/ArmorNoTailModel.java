@@ -96,17 +96,6 @@ public class ArmorNoTailModel<T extends ChangedEntity> extends LatexHumanoidArmo
     }
 
     @Override
-    public void unprepareVisibility(EquipmentSlot armorSlot, ItemStack item) {
-        super.unprepareVisibility(armorSlot, item);
-        if (armorSlot == EquipmentSlot.LEGS) {
-            if (item.getItem() instanceof Shorts) {
-                setAllPartsVisibility(LeftLeg, true);
-                setAllPartsVisibility(RightLeg, true);
-            }
-        }
-    }
-
-    @Override
     public void renderForSlot(T entity, RenderLayerParent<? super T, ?> parent, ItemStack stack, EquipmentSlot slot, PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         poseStack.pushPose();
         this.scaleForSlot(parent, slot, poseStack);

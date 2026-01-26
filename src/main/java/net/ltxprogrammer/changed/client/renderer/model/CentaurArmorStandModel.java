@@ -120,11 +120,6 @@ public class CentaurArmorStandModel extends EntityModel<CentaurArmorStand> {
         }
 
         @Override
-        public void unprepareVisibility(EquipmentSlot armorSlot, ItemStack item) {
-
-        }
-
-        @Override
         public void setupAnim(CentaurArmorStand entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
             this.Head.xRot = ((float)Math.PI / 180F) * entity.getHeadPose().getX();
             this.Head.yRot = ((float)Math.PI / 180F) * entity.getHeadPose().getY();
@@ -174,11 +169,6 @@ public class CentaurArmorStandModel extends EntityModel<CentaurArmorStand> {
 
         @Override
         public void prepareVisibility(EquipmentSlot armorSlot, ItemStack item) {
-
-        }
-
-        @Override
-        public void unprepareVisibility(EquipmentSlot armorSlot, ItemStack item) {
 
         }
 

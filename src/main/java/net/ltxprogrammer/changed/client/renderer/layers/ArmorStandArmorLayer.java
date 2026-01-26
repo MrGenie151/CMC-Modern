@@ -123,7 +123,6 @@ public class ArmorStandArmorLayer<T extends AbstractArmorStand, M extends Entity
         model.renderForSlot(entity, (RenderLayerParent) this.parent, stack, slot, pose,
                 buffers.getBuffer(RenderType.armorCutoutNoCull(armorResource)),
                 packedLight, OverlayTexture.NO_OVERLAY, red, green, blue, 1.0F);
-        model.prepareVisibility(slot, stack);
     }
 
     private void renderModel(PoseStack pose, MultiBufferSource buffers, int packedLight, net.minecraft.client.model.Model model, float red, float green, float blue, ResourceLocation armorResource) {
@@ -150,8 +149,6 @@ public class ArmorStandArmorLayer<T extends AbstractArmorStand, M extends Entity
         VertexConsumer vertexconsumer = textureatlassprite.wrap(buffers.getBuffer(Sheets.armorTrimsSheet()));
         model.renderForSlot(entity, (RenderLayerParent) this.parent, stack, slot, pose,
                 vertexconsumer, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-
-        model.prepareVisibility(slot, stack);
     }
 
     private void renderTrim(ArmorMaterial material, PoseStack pose, MultiBufferSource buffers, int packedLight, ArmorTrim trim, net.minecraft.client.model.Model model, boolean inner) {
@@ -166,8 +163,6 @@ public class ArmorStandArmorLayer<T extends AbstractArmorStand, M extends Entity
 
         model.renderForSlot(entity, (RenderLayerParent) this.parent, stack, slot, pose,
                 buffers.getBuffer(RenderType.armorEntityGlint()), packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-
-        model.prepareVisibility(slot, stack);
     }
 
     private void renderGlint(PoseStack pose, MultiBufferSource buffers, int packedLight, net.minecraft.client.model.Model model) {

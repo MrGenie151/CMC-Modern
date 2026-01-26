@@ -122,13 +122,6 @@ public class BipedArmorStandModel extends EntityModel<BipedArmorStand> {
         }
 
         @Override
-        public void unprepareVisibility(EquipmentSlot armorSlot, ItemStack item) {
-            if (armorSlot == EquipmentSlot.LEGS) {
-                LatexHumanoidArmorModel.unprepareUnifiedLegsForArmor(item, LeftLeg, RightLeg);
-            }
-        }
-
-        @Override
         public void setupAnim(BipedArmorStand entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
             this.Head.xRot = ((float)Math.PI / 180F) * entity.getHeadPose().getX();
             this.Head.yRot = ((float)Math.PI / 180F) * entity.getHeadPose().getY();

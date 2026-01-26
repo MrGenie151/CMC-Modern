@@ -72,38 +72,27 @@ public abstract class LatexHumanoidArmorModel<T extends ChangedEntity, M extends
                                        PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha);
 
     public static void prepareUnifiedLegsForArmor(ItemStack stack, ModelPart LeftLeg, ModelPart RightLeg) {
-        prepareUnifiedLegsForArmor(stack, LeftLeg, RightLeg, null);
-    }
-
-    public static void prepareUnifiedLegsForArmor(ItemStack stack, ModelPart LeftLeg, ModelPart RightLeg, @Nullable ModelPart Tail) {
         if (stack.getItem() instanceof Shorts) {
             setAllPartsVisibility(LeftLeg.getChild("LeftLowerLeg"), false);
             setAllPartsVisibility(RightLeg.getChild("RightLowerLeg"), false);
-            if (Tail != null)
-                Tail.visible = false;
         } else if (stack.getItem() instanceof Clothing) {
             setAllPartsVisibility(LeftLeg.getChild("LeftLowerLeg").getChild("LeftFoot"), false);
             setAllPartsVisibility(RightLeg.getChild("RightLowerLeg").getChild("RightFoot"), false);
-            if (Tail != null)
-                Tail.visible = false;
         } else {
             setAllPartsVisibility(LeftLeg, true);
             setAllPartsVisibility(RightLeg, true);
-            if (Tail != null)
-                Tail.visible = true;
         }
     }
 
-    public static void unprepareUnifiedLegsForArmor(ItemStack stack, ModelPart LeftLeg, ModelPart RightLeg) {
-        unprepareUnifiedLegsForArmor(stack, LeftLeg, RightLeg, null);
-    }
+    public static void prepareUnifiedLegsForArmor(ItemStack stack, ModelPart LeftLeg, ModelPart RightLeg, ModelPart Tail) {
+        prepareUnifiedLegsForArmor(stack, LeftLeg, RightLeg);
 
-    public static void unprepareUnifiedLegsForArmor(ItemStack stack, ModelPart LeftLeg, ModelPart RightLeg, @Nullable ModelPart Tail) {
         if (stack.getItem() instanceof Shorts) {
-            setAllPartsVisibility(LeftLeg, true);
-            setAllPartsVisibility(RightLeg, true);
-            if (Tail != null)
-                Tail.visible = true;
+            Tail.visible = false;
+        } else if (stack.getItem() instanceof Clothing) {
+            Tail.visible = false;
+        } else {
+            Tail.visible = true;
         }
     }
 
@@ -253,5 +242,4 @@ public abstract class LatexHumanoidArmorModel<T extends ChangedEntity, M extends
     }
 
     public void prepareVisibility(EquipmentSlot armorSlot, ItemStack item) {}
-    public void unprepareVisibility(EquipmentSlot armorSlot, ItemStack item) {}
 }
