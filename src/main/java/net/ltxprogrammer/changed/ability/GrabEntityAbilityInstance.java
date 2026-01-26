@@ -56,7 +56,7 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
     }
 
     public boolean shouldRenderGrabbedEntity() {
-        return suited && grabbedHasControl && grabbedEntity != null;
+        return grabbedHasControl && grabbedEntity != null;
     }
 
     public boolean shouldAnimateArms() {
@@ -212,23 +212,22 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
 
         getController().resetHoldTicks();
 
-        if (this.grabbedEntity == entity) {
-            this.suited = false;
-            this.grabbedHasControl = false;
-            //this.grabStrength = 1.0f;
-            return true;
-        }
-
-        this.releaseEntity();
-        this.grabbedEntity = entity;
-        this.grabStrength = 1.0f;
-
         if (entity instanceof Player player && ProcessTransfur.isPlayerTransfurred(player)) {
             ProcessTransfur.ifPlayerTransfurred(player, variant -> {
                 if (variant.isTemporaryFromSuit())
                     ProcessTransfur.removePlayerTransfurVariant(player);
             });
         }
+
+        if (this.grabbedEntity == entity) {
+            this.suited = false;
+            this.grabbedHasControl = false;
+            return true;
+        }
+
+        this.releaseEntity();
+        this.grabbedEntity = entity;
+        this.grabStrength = 1.0f;
 
         prevGrabber.ifPresent(this::stealGrabFrom);
         return true;

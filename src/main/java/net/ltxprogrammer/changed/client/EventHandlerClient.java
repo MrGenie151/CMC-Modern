@@ -36,12 +36,12 @@ import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.ForgeRenderTypes;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -50,21 +50,28 @@ import net.minecraftforge.fml.common.Mod;
 @OnlyIn(Dist.CLIENT)
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class EventHandlerClient {
+    private boolean shouldEntityBeRendered(LivingEntity entity) {
+        if (entity instanceof LivingEntityDataExtension ext && ext.getGrabbedBy() != null) {
+            var grabAbility = AbstractAbility.getAbilityInstance(ext.getGrabbedBy(), ChangedAbilities.GRAB_ENTITY_ABILITY.get());
+            if (grabAbility != null && !grabAbility.shouldRenderGrabbedEntity())
+                return false;
+        }
+
+        var entityGrabAbility = AbstractAbility.getAbilityInstance(entity, ChangedAbilities.GRAB_ENTITY_ABILITY.get());
+        if (entityGrabAbility != null && !entityGrabAbility.shouldRenderLatex())
+            return false;
+        if (entity.isDeadOrDying() && entity.getLastDamageSource() != null && entity.getLastDamageSource().is(ChangedTags.DamageTypes.IS_TRANSFUR))
+            return false;
+        if (entity.vehicle instanceof SeatEntity seat && seat.shouldSeatedBeInvisible())
+            return false;
+
+        return true;
+    }
+
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public void onRenderEntityPre(RenderLivingEvent.Pre<?, ?> event) {
-        if (event.getEntity() instanceof LivingEntityDataExtension ext && ext.getGrabbedBy() != null) {
-            var grabAbility = AbstractAbility.getAbilityInstance(ext.getGrabbedBy(), ChangedAbilities.GRAB_ENTITY_ABILITY.get());
-            if (grabAbility != null && !grabAbility.shouldRenderGrabbedEntity()) {
-                event.setCanceled(true);
-            } else if (grabAbility != null && grabAbility.shouldRenderGrabbedEntity()) {
-                // TODO deprecate
-            }
-            return;
-        }
-
-        var entityGrabAbility = AbstractAbility.getAbilityInstance(event.getEntity(), ChangedAbilities.GRAB_ENTITY_ABILITY.get());
-        if (entityGrabAbility != null && !entityGrabAbility.shouldRenderLatex())
+        if (!this.shouldEntityBeRendered(event.getEntity()))
             event.setCanceled(true);
     }
 
@@ -75,30 +82,14 @@ public class EventHandlerClient {
 
         if (event.isCanceled())
             return;
-
-        if (player.isDeadOrDying() && player.getLastDamageSource() != null && player.getLastDamageSource().is(ChangedTags.DamageTypes.IS_TRANSFUR)) {
+        if (!this.shouldEntityBeRendered(event.getEntity())) {
             event.setCanceled(true);
             return;
-        }
-
-        if (player.vehicle != null && player.vehicle instanceof SeatEntity seat) {
-            if (seat.shouldSeatedBeInvisible()) {
-                event.setCanceled(true);
-                return;
-            }
         }
 
         if (player instanceof PlayerDataExtension ext && ext.isPlayerMover(PlayerMover.LATEX_SWIM.get())) {
             event.setCanceled(true);
             return;
-        }
-
-        if (event.getEntity() instanceof LivingEntityDataExtension ext && ext.getGrabbedBy() != null) {
-            var grabAbility = AbstractAbility.getAbilityInstance(ext.getGrabbedBy(), ChangedAbilities.GRAB_ENTITY_ABILITY.get());
-            if (grabAbility != null && grabAbility.suited && !grabAbility.grabbedHasControl) {
-                event.setCanceled(true);
-                return;
-            }
         }
 
         if (!player.isRemoved() && !player.isSpectator() && !TransfurAnimator.shouldRenderHuman()) {
