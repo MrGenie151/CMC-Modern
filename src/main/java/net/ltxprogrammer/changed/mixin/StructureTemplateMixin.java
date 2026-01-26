@@ -273,7 +273,7 @@ public abstract class StructureTemplateMixin implements StructureTemplateExtende
         BlockPos blockpos = coverInfo.pos();
         if (placeRegion == null || placeRegion.isInside(blockpos)) {
             LatexCoverState coverState = coverInfo.state().mirror(settings.getMirror()).rotate(settings.getRotation());
-            if (LatexCoverState.setAt(level.getLevel(), blockpos, coverState, setBlockFlags))
+            if (LatexCoverState.setAt(level, blockpos, coverState, setBlockFlags))
                 return true;
         }
 
