@@ -23,6 +23,7 @@ public class EmittedLaserRenderer extends EntityRenderer<EmittedLaser> {
     public static final ResourceLocation TEXTURE = Changed.modResource("textures/block/laser_beam.png");
     public static final RenderType BEAM_RENDER_TYPE = RenderType.entityCutout(TEXTURE);
     public static final RenderType BEAM_RENDER_HIGHLIGHT_TYPE = RenderType.eyes(TEXTURE);
+    public static final List<RenderType> RENDER_TYPES = List.of(BEAM_RENDER_TYPE, BEAM_RENDER_HIGHLIGHT_TYPE);
 
     public EmittedLaserRenderer(EntityRendererProvider.Context context) {
         super(context);
@@ -81,39 +82,39 @@ public class EmittedLaserRenderer extends EntityRenderer<EmittedLaser> {
         Matrix4f pose = posestack$pose.pose();
         Matrix3f normal = posestack$pose.normal();
 
-        vertex(buffers, pose, normal, f19, laserLength, f20, red, green, blue, 1.0F, f30);
-        vertex(buffers, pose, normal, f19, 0.0F, f20, red, green, blue, 1.0F, f29);
-        vertex(buffers, pose, normal, f21, 0.0F, f22, red, green, blue, 0.0F, f29);
-        vertex(buffers, pose, normal, f21, laserLength, f22, red, green, blue, 0.0F, f30);
+        RENDER_TYPES.stream().map(bufferSource::getBuffer).forEach(vertexConsumer -> {
+            vertex(vertexConsumer, pose, normal, f19, laserLength, f20, red, green, blue, 1.0F, f30);
+            vertex(vertexConsumer, pose, normal, f19, 0.0F, f20, red, green, blue, 1.0F, f29);
+            vertex(vertexConsumer, pose, normal, f21, 0.0F, f22, red, green, blue, 0.0F, f29);
+            vertex(vertexConsumer, pose, normal, f21, laserLength, f22, red, green, blue, 0.0F, f30);
 
-        vertex(buffers, pose, normal, f23, laserLength, f24, red, green, blue, 1.0F, f30);
-        vertex(buffers, pose, normal, f23, 0.0F, f24, red, green, blue, 1.0F, f29);
-        vertex(buffers, pose, normal, f25, 0.0F, f26, red, green, blue, 0.0F, f29);
-        vertex(buffers, pose, normal, f25, laserLength, f26, red, green, blue, 0.0F, f30);
+            vertex(vertexConsumer, pose, normal, f23, laserLength, f24, red, green, blue, 1.0F, f30);
+            vertex(vertexConsumer, pose, normal, f23, 0.0F, f24, red, green, blue, 1.0F, f29);
+            vertex(vertexConsumer, pose, normal, f25, 0.0F, f26, red, green, blue, 0.0F, f29);
+            vertex(vertexConsumer, pose, normal, f25, laserLength, f26, red, green, blue, 0.0F, f30);
 
-        vertex(buffers, pose, normal, f19, 0.0F, f20, red, green, blue, 1.0F, f29);
-        vertex(buffers, pose, normal, f19, laserLength, f20, red, green, blue, 1.0F, f30);
-        vertex(buffers, pose, normal, f21, laserLength, f22, red, green, blue, 0.0F, f30);
-        vertex(buffers, pose, normal, f21, 0.0F, f22, red, green, blue, 0.0F, f29);
+            vertex(vertexConsumer, pose, normal, f19, 0.0F, f20, red, green, blue, 1.0F, f29);
+            vertex(vertexConsumer, pose, normal, f19, laserLength, f20, red, green, blue, 1.0F, f30);
+            vertex(vertexConsumer, pose, normal, f21, laserLength, f22, red, green, blue, 0.0F, f30);
+            vertex(vertexConsumer, pose, normal, f21, 0.0F, f22, red, green, blue, 0.0F, f29);
 
-        vertex(buffers, pose, normal, f23, 0.0F, f24, red, green, blue, 1.0F, f29);
-        vertex(buffers, pose, normal, f23, laserLength, f24, red, green, blue, 1.0F, f30);
-        vertex(buffers, pose, normal, f25, laserLength, f26, red, green, blue, 0.0F, f30);
-        vertex(buffers, pose, normal, f25, 0.0F, f26, red, green, blue, 0.0F, f29);
+            vertex(vertexConsumer, pose, normal, f23, 0.0F, f24, red, green, blue, 1.0F, f29);
+            vertex(vertexConsumer, pose, normal, f23, laserLength, f24, red, green, blue, 1.0F, f30);
+            vertex(vertexConsumer, pose, normal, f25, laserLength, f26, red, green, blue, 0.0F, f30);
+            vertex(vertexConsumer, pose, normal, f25, 0.0F, f26, red, green, blue, 0.0F, f29);
+        });
 
         poseStack.popPose();
     }
 
-    private static void vertex(Collection<VertexConsumer> buffers, Matrix4f pose, Matrix3f normal, float x, float y, float z, int red, int green, int blue, float u, float v) {
-        for (var buffer : buffers) {
-            buffer.vertex(pose, x, y, z)
-                    .color(red, green, blue, 255)
-                    .uv(u, v)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY)
-                    .uv2(15728880)
-                    .normal(normal, 0.0F, 1.0F, 0.0F)
-                    .endVertex();
-        }
+    private static void vertex(VertexConsumer buffer, Matrix4f pose, Matrix3f normal, float x, float y, float z, int red, int green, int blue, float u, float v) {
+        buffer.vertex(pose, x, y, z)
+                .color(red, green, blue, 255)
+                .uv(u, v)
+                .overlayCoords(OverlayTexture.NO_OVERLAY)
+                .uv2(15728880)
+                .normal(normal, 0.0F, 1.0F, 0.0F)
+                .endVertex();
     }
 
     @Override
