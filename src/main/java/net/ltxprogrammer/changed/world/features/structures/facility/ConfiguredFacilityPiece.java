@@ -77,4 +77,9 @@ public class ConfiguredFacilityPiece implements WeightedEntry {
         this.name = name;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return name.toString();
+    }
 }
