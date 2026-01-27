@@ -1,8 +1,10 @@
 package net.ltxprogrammer.changed.world.features.structures.facility;
 
 import com.google.common.collect.ImmutableList;
+import net.ltxprogrammer.changed.data.RegistryElementPredicate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.random.Weight;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Set;
 
@@ -26,12 +28,12 @@ public class FacilityPieceCollectionBuilder {
     }
 
     public FacilityPieceCollectionBuilder register(ResourceLocation pieceName, int weight, FacilityPiece piece) {
-        builder.add(new ConfiguredFacilityPiece(piece, Weight.of(weight), 0, 10, Set.of()).setName(pieceName));
+        builder.add(new ConfiguredFacilityPiece(piece, Weight.of(weight), 0, 10, Set.of(), RegistryElementPredicate.forAll(ForgeRegistries.BIOMES)).setName(pieceName));
         return this;
     }
 
     public FacilityPieceCollectionBuilder register(ResourceLocation pieceName, Weight weight, FacilityPiece piece) {
-        builder.add(new ConfiguredFacilityPiece(piece, weight, 0, 10, Set.of()).setName(pieceName));
+        builder.add(new ConfiguredFacilityPiece(piece, weight, 0, 10, Set.of(), RegistryElementPredicate.forAll(ForgeRegistries.BIOMES)).setName(pieceName));
         return this;
     }
 

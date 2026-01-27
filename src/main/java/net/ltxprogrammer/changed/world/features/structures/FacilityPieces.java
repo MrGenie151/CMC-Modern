@@ -30,14 +30,11 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FacilityPieces extends SimplePreparableReloadListener<Set<ConfiguredFacilityPiece>> {
@@ -141,6 +138,26 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
         return configuredFacilityPiece -> {
             return configuredFacilityPiece.getConnectsTo().isEmpty() || (
                     configuredFacilityPiece.getConnectsTo().contains(zone) && configuredFacilityPiece.getConnectsTo().contains(wantedZone));
+        };
+    }
+
+    private static Predicate<ConfiguredFacilityPiece> meetsPiecePositionRequirements(FacilityGenerationContext context, BoundingBox region) {
+        final var center = region.getCenter();
+        final var surfaceBiomes = context.structureContext.biomeSource().getBiomesWithin(
+                center.getX(), context.structureContext.chunkGenerator().getSeaLevel(), center.getZ(), /* Radius */ 16,
+                context.structureContext.randomState().sampler());
+        return configuredFacilityPiece -> {
+            return surfaceBiomes.stream().anyMatch(configuredFacilityPiece.surfaceBiomePredicate::testHolder);
+        };
+    }
+
+    private static Predicate<Zone> meetsZonePositionRequirements(FacilityGenerationContext context, BoundingBox region) {
+        final var center = region.getCenter();
+        final var surfaceBiomes = context.structureContext.biomeSource().getBiomesWithin(
+                center.getX(), context.structureContext.chunkGenerator().getSeaLevel(), center.getZ(), /* Radius */ 16,
+                context.structureContext.randomState().sampler());
+        return zone -> {
+            return surfaceBiomes.stream().anyMatch(zone.getSurfaceBiomePredicate()::testHolder);
         };
     }
 
@@ -256,7 +273,9 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
 
                 if (random.nextInt(4) < zoneDelta) {
                     // Queue transitions first
-                    facilityContext.getRemainingZonesToGenerate(zone).forEach(nextZone -> {
+                    facilityContext.getRemainingZonesToGenerate(zone)
+                            .filter(meetsZonePositionRequirements(facilityContext, parentStructure.getBoundingBox()))
+                            .forEach(nextZone -> {
                         sink.accept(Pair.of(ChangedFacilityPieceTypes.TRANSITION.get(), nextZone));
                     });
 
@@ -269,7 +288,9 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
                     sink.accept(Pair.of(pieceType, zone));
 
                     // Queue transitions last
-                    facilityContext.getRemainingZonesToGenerate(zone).forEach(nextZone -> {
+                    facilityContext.getRemainingZonesToGenerate(zone)
+                            .filter(meetsZonePositionRequirements(facilityContext, parentStructure.getBoundingBox()))
+                            .forEach(nextZone -> {
                         sink.accept(Pair.of(ChangedFacilityPieceTypes.TRANSITION.get(), nextZone));
                     });
                 }
@@ -284,7 +305,9 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
             final PieceType<?> pieceType = pair.getFirst();
             final Zone nextZone = pair.getSecond();
             return INSTANCE.facilityPieceCollections.get(pieceType).shuffledStream(random)
-                    .filter(hasNotReachedMaximum(facilityContext).and(pieceConnectsToZones(zone, nextZone))).map(nextConfiguredPiece -> {
+                    .filter(hasNotReachedMaximum(facilityContext)
+                            .and(pieceConnectsToZones(zone, nextZone))
+                            .and(meetsPiecePositionRequirements(facilityContext, parentStructure.getBoundingBox()))).map(nextConfiguredPiece -> {
                         var nextPiece = nextConfiguredPiece.getFacilityPiece();
                         var nextStructure = nextPiece.createStructurePiece(facilityContext.structureContext.structureTemplateManager(), genDepth);
                         if (!nextStructure.setupBoundingBox(facilityContext.builder, start.blockInfo(), random, allowedRegion))
@@ -348,6 +371,8 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
         }).flatMap(entry -> entry.getValue().stream()).filter(placedPiece -> {
             return facilityContext.pieceDependents.get(placedPiece).isEmpty() &&
                 facilityContext.configuredPieceCounts.get(placedPiece.definition) > placedPiece.definition.minimum;
+        }).filter(placedPiece -> {
+            return meetsPiecePositionRequirements(facilityContext, placedPiece.parent.instance.getBoundingBox()).test(requiredPiece);
         }).toList(); // Collect so that the next stage can modify piecesByZone
 
         Stream<PlacedFacilityPiece> replacedRoomStream = replaceableRooms.stream().map(replacingPiece -> {
@@ -393,8 +418,10 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
 
         Stack<ConfiguredFacilityPiece> stack = new Stack<>();
         List<GenStep> starts = new ArrayList<>();
-        ConfiguredFacilityPiece entranceNew = INSTANCE.facilityPieceCollections.get(ChangedFacilityPieceTypes.ENTRANCE.get()).findNextPiece(context.random())
-                .orElseThrow();
+        var facilityGenerationContext = new FacilityGenerationContext(builder, context);
+        ConfiguredFacilityPiece entranceNew = INSTANCE.facilityPieceCollections.get(ChangedFacilityPieceTypes.ENTRANCE.get()).shuffledStream(context.random())
+                .filter(meetsPiecePositionRequirements(facilityGenerationContext, new BoundingBox(blockPos).inflatedBy(7)))
+                .findFirst().orElseThrow();
         FacilityPieceInstance entrancePiece = entranceNew.getFacilityPiece().createStructurePiece(context.structureTemplateManager(), genDepth);
 
         var directions = new ArrayList<>(Direction.Plane.HORIZONTAL.stream().toList());
@@ -425,7 +452,6 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
         }
 
         stack.push(entranceNew);
-        var facilityGenerationContext = new FacilityGenerationContext(builder, context);
 
         builder.addPiece(entrancePiece);
 

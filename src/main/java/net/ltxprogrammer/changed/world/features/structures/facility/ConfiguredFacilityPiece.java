@@ -3,11 +3,14 @@ package net.ltxprogrammer.changed.world.features.structures.facility;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.ltxprogrammer.changed.data.RegistryElementPredicate;
 import net.ltxprogrammer.changed.init.ChangedRegistry;
 import net.ltxprogrammer.changed.world.features.structures.facility.types.PieceType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.random.Weight;
 import net.minecraft.util.random.WeightedEntry;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 import java.util.Set;
@@ -20,7 +23,9 @@ public class ConfiguredFacilityPiece implements WeightedEntry {
             Codec.INT.fieldOf("minimum").orElse(0).forGetter(ConfiguredFacilityPiece::getMinimum),
             Codec.INT.fieldOf("maximum").orElse(20).forGetter(ConfiguredFacilityPiece::getMaximum),
             ChangedRegistry.FACILITY_ZONES.get().getCodec().listOf().xmap(Set::copyOf, List::copyOf)
-                    .fieldOf("neighboring_zones").forGetter(ConfiguredFacilityPiece::getConnectsTo)
+                    .fieldOf("neighboring_zones").forGetter(ConfiguredFacilityPiece::getConnectsTo),
+            RegistryElementPredicate.codec(ForgeRegistries.BIOMES).fieldOf("surface_biome").orElseGet(() ->
+                    RegistryElementPredicate.forAll(ForgeRegistries.BIOMES)).forGetter(ConfiguredFacilityPiece::getSurfaceBiomePredicate)
     ).apply(instance, ConfiguredFacilityPiece::new));
 
     public final FacilityPiece facilityPiece;
@@ -28,6 +33,7 @@ public class ConfiguredFacilityPiece implements WeightedEntry {
     public final int minimum;
     public final int maximum;
     public final Set<Zone> connectsTo;
+    public final RegistryElementPredicate<Biome> surfaceBiomePredicate;
     private ResourceLocation name;
 
     /**
@@ -40,12 +46,14 @@ public class ConfiguredFacilityPiece implements WeightedEntry {
                                    Weight spawnWeight,
                                    int minimum,
                                    int maximum,
-                                   Set<Zone> connectsTo) {
+                                   Set<Zone> connectsTo,
+                                   RegistryElementPredicate<Biome> surfaceBiomePredicate) {
         this.facilityPiece = facilityPiece;
         this.spawnWeight = spawnWeight;
         this.minimum = minimum;
         this.maximum = maximum;
         this.connectsTo = connectsTo;
+        this.surfaceBiomePredicate = surfaceBiomePredicate;
     }
 
     public FacilityPiece getFacilityPiece() {
@@ -67,6 +75,10 @@ public class ConfiguredFacilityPiece implements WeightedEntry {
 
     public Set<Zone> getConnectsTo() {
         return connectsTo;
+    }
+
+    public RegistryElementPredicate<Biome> getSurfaceBiomePredicate() {
+        return surfaceBiomePredicate;
     }
 
     public ResourceLocation getName() {

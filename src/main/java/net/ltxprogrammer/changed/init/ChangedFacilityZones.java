@@ -3,10 +3,13 @@ package net.ltxprogrammer.changed.init;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.world.features.structures.facility.Zone;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryObject;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * Define identifiable areas in facility generation that group pieces together.
@@ -15,9 +18,11 @@ import java.util.function.Function;
 public class ChangedFacilityZones {
     public static final DeferredRegister<Zone> REGISTRY = ChangedRegistry.FACILITY_ZONES.createDeferred(Changed.MODID);
 
-    private static RegistryObject<Zone> registerZone(String name, Function<ResourceLocation, Zone> ctor) {
+    private static RegistryObject<Zone> registerZone(String name, BiFunction<IForgeRegistry<Biome>, ResourceLocation, Zone> ctor) {
         ResourceLocation id = ResourceLocation.fromNamespaceAndPath(Changed.MODID, name);
-        return REGISTRY.register(name, () -> ctor.apply(id));
+        return REGISTRY.register(name, () -> {
+            return ctor.apply(ForgeRegistries.BIOMES, id);
+        });
     }
 
     /**
@@ -29,7 +34,7 @@ public class ChangedFacilityZones {
      *     <li>Home to a large variety of white latex based organisms</li>
      * </ul>
      */
-    public static final RegistryObject<Zone> GENERAL_ZONE = registerZone("general", Zone.withParam(false, 1));
+    public static final RegistryObject<Zone> GENERAL_ZONE = registerZone("general", Zone.anyBiome(false, 1));
     /**
      * A server farm, filled with servers, boxes, and fans.
      * <ul>
@@ -40,7 +45,7 @@ public class ChangedFacilityZones {
      *     <li>Servers, fans and boxes everywhere</li>
      * </ul>
      */
-    public static final RegistryObject<Zone> SERVER_ZONE = registerZone("server", Zone.withParam(true, 3));
+    public static final RegistryObject<Zone> SERVER_ZONE = registerZone("server", Zone.anyBiome(true, 3));
     /**
      * A more residential area fit for typical office life with computers.
      * <ul>
@@ -50,8 +55,7 @@ public class ChangedFacilityZones {
      *     <li>Home to dark latexes</li>
      * </ul>
      */
-    public static final RegistryObject<Zone> OFFICE_ZONE = registerZone("office", Zone.withParam(true, 4));
-    //public static final RegistryObject<Zone> OFFICE_ZONE = registerZone("office", Zone.withParam(24, 28, 2f, 4));
+    public static final RegistryObject<Zone> OFFICE_ZONE = registerZone("office", Zone.anyBiome(true, 4));
     /**
      * Portion of the office zone that has been completely overtaken by dark latexes.
      * <ul>
@@ -61,7 +65,7 @@ public class ChangedFacilityZones {
      *     <li>Home to dark latexes</li>
      * </ul>
      */
-    public static final RegistryObject<Zone> DARK_LATEX_ZONE = registerZone("dark_latex", Zone.withParam(true, 2));
+    public static final RegistryObject<Zone> DARK_LATEX_ZONE = registerZone("dark_latex", Zone.anyBiome(true, 2));
     /**
      * Books.
      * <ul>
@@ -71,7 +75,7 @@ public class ChangedFacilityZones {
      *     <li>Home to ceiling dwelling kade, and circle</li>
      * </ul>
      */
-    public static final RegistryObject<Zone> LIBRARY_ZONE = registerZone("library", Zone.withParam(true, 3));
+    public static final RegistryObject<Zone> LIBRARY_ZONE = registerZone("library", Zone.anyBiome(true, 3));
     /**
      * Backend area that is generally not meant for foot traffic. Connects all places of the facility together.
      * <ul>
@@ -81,7 +85,7 @@ public class ChangedFacilityZones {
      *     <li>Home to spiders, snakes, moths, etc.</li>
      * </ul>
      */
-    public static final RegistryObject<Zone> VENT_ZONE = registerZone("vent", Zone.withParam(true, 2));
+    public static final RegistryObject<Zone> VENT_ZONE = registerZone("vent", Zone.anyBiome(true, 2));
     /**
      * Botanical area filled with grass, plants, and shrubs.
      * <ul>
@@ -90,7 +94,7 @@ public class ChangedFacilityZones {
      *     <li>Home to latex leaf, mimic plant, squirrel</li>
      * </ul>
      */
-    public static final RegistryObject<Zone> GREENHOUSE_ZONE = registerZone("greenhouse", Zone.withParam(true, 3));
+    public static final RegistryObject<Zone> GREENHOUSE_ZONE = registerZone("greenhouse", Zone.anyBiome(true, 3));
     /**
      * Electrical area flooded by water.
      * <ul>
@@ -101,8 +105,7 @@ public class ChangedFacilityZones {
      *     <li>Home to sharks and squid dogs</li>
      * </ul>
      */
-    public static final RegistryObject<Zone> MAINTENANCE_ZONE = registerZone("maintenance", Zone.withParam(true, 4));
-    //public static final RegistryObject<Zone> MAINTENANCE_ZONE = registerZone("maintenance", Zone.withParam(10, 14, 2f, 4));
+    public static final RegistryObject<Zone> MAINTENANCE_ZONE = registerZone("maintenance", Zone.anyBiome(true, 4));
     /**
      * Portion of the general zone that has been completely overtaken by white latexes. "White latex jungle"
      * <ul>
@@ -111,7 +114,7 @@ public class ChangedFacilityZones {
      *     <li>Home to pure white latexes, behemoths</li>
      * </ul>
      */
-    public static final RegistryObject<Zone> WHITE_LATEX_ZONE = registerZone("white_latex", Zone.withParam(true, 2));
+    public static final RegistryObject<Zone> WHITE_LATEX_ZONE = registerZone("white_latex", Zone.anyBiome(true, 2));
     /**
      * First zone seen when entering the facility. Still being developed in Changed: SE
      * <ul>
@@ -119,5 +122,5 @@ public class ChangedFacilityZones {
      *     <li>Light green diagonal walls</li>
      * </ul>
      */
-    public static final RegistryObject<Zone> ENTRANCE_ZONE = registerZone("entrance", Zone.withParam(true, 4));
+    public static final RegistryObject<Zone> ENTRANCE_ZONE = registerZone("entrance", Zone.anyBiome(true, 4));
 }
