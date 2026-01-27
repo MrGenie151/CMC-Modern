@@ -243,11 +243,11 @@ public class EventHandlerClient {
             if (event.livingEntity.level().isClientSide)
                 return;
 
-            if (event.oldVariant == event.newVariant || event.cause == null)
+            if (event.oldVariant == event.newVariant || event.context == null)
                 return;
 
             final int duration = event.livingEntity.level().getGameRules().getBoolean(ChangedGameRules.RULE_DO_TRANSFUR_ANIMATION) ?
-                    (int)(event.cause.getDuration() * 20) : 40;
+                    (int)(event.context.cause.getDuration() * 20) : 40;
             event.livingEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 4, false, false));
 
             if (event.oldVariant != null || event.livingEntity.tickCount < 20)
