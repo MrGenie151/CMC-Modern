@@ -42,6 +42,16 @@ public class WallSign extends HangingEntity {
         super(type, level);
     }
 
+    private boolean isItemRep = false;
+    public WallSign markAsItemRep() {
+        isItemRep = true;
+        return this;
+    }
+
+    public boolean isItemRep() {
+        return isItemRep;
+    }
+
     private WallSign(Level level, BlockPos blockPos) {
         super(ChangedEntities.WALL_SIGN.get(), level, blockPos);
     }
