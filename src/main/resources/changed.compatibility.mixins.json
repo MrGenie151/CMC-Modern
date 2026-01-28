@@ -7,6 +7,7 @@
   "plugin": "net.ltxprogrammer.changed.mixin.compatibility.ChangedMixinPlugin",
   "mixins": [
     "AttributesLib.AttributeEventsMixin",
+    "Curios.CuriosApiMixin",
     "SleepTight.HumanoidAnimatorMixin"
   ],
   "client": [
@@ -15,6 +16,8 @@
     "CarryOn.PickupHandlerMixin",
     "Create.AdvancedHumanoidRendererMixin",
     "Create.HumanoidAnimatorMixin",
+    "Curios.AdvancedHumanoidRendererMixin",
+    "Curios.PlayerLayerWrapperMixin",
     "DoABarrelRoll.AdvancedHumanoidRendererMixin",
     "EMF.HumanoidAnimatorMixin",
     "EntityCulling.WaveVisionRendererMixin",
