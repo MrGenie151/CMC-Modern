@@ -782,6 +782,8 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
 
         float damage = (float)maybeGetUnderlying().getAttributeValue(ChangedAttributes.TRANSFUR_DAMAGE.get());
         damage = ProcessTransfur.difficultyAdjustTransfurAmount(entity.level().getDifficulty(), damage, abstractChangedEntity);
+        float attackStrengthScale = this.getUnderlyingPlayer() != null ? this.getUnderlyingPlayer().getAttackStrengthScale(0.5F) : 1.0F;
+        damage *= 0.2F + attackStrengthScale * attackStrengthScale * 0.8F;
         TransfurVariant<?> variant = this.getTransfurVariant();
 
         if (entity instanceof LivingEntity livingEntity) {
