@@ -23,7 +23,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class LatexTrafficCone extends AbstractCustomShapeBlock implements WearableBlock {
-    public static final VoxelShape SHAPE_WHOLE = Block.box(2.0D, 0.0D, 2.0D, 14.0D, 15.0D, 14.0D);
+    public static final VoxelShape SHAPE_WHOLE = Block.box(3.0D, 0.0D, 3.0D, 13.0D, 16.0D, 13.0D);
 
     public LatexTrafficCone() {
         super(Properties.of().sound(SoundType.WOOD).strength(0.2F));
