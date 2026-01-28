@@ -53,7 +53,7 @@ public abstract class EnchantmentHelperMixin {
     }
 
     @WrapOperation(method = "getRandomItemWith(Lnet/minecraft/world/item/enchantment/Enchantment;Lnet/minecraft/world/entity/LivingEntity;Ljava/util/function/Predicate;)Ljava/util/Map$Entry;",
-            at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayList()Ljava/util/ArrayList;"))
+            at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayList()Ljava/util/ArrayList;", remap = false))
     @SuppressWarnings("deprecation")
     private static ArrayList<Map.Entry<EquipmentSlot, ItemStack>> orRandomAccessoryWith(Operation<ArrayList<Map.Entry<EquipmentSlot, ItemStack>>> original,
                                                                                         @Local(argsOnly = true) Enchantment enchantment,

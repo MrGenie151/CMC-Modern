@@ -5,6 +5,7 @@ import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
 import net.ltxprogrammer.changed.init.ChangedAbilities;
 import net.ltxprogrammer.changed.init.ChangedAttributes;
+import net.ltxprogrammer.changed.init.ChangedDamageSources;
 import net.ltxprogrammer.changed.init.ChangedTags;
 import net.ltxprogrammer.changed.network.packet.GrabEntityPacket;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
@@ -15,6 +16,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -32,7 +35,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
     @Nullable
     public LivingEntity grabbedEntity = null;
-    private int grabCooldown = 0;
     public boolean grabbedHasControl = false;
     public boolean suited = false;
     public float grabStrength = 0.0f;
@@ -117,7 +119,24 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
         return true;
     }
 
+    public void applyReleaseDebuff(float scale, @Nullable LivingEntity grabbed) {
+        if (this.entity.getEntity().level().isClientSide)
+            return;
+
+        this.getController().forceCooldown(Mth.lerpInt(scale, 20 * 2 /* 2 Seconds */, 20 * 8 /* 8 Seconds */));
+        this.ability.setDirty(this.entity);
+
+        this.entity.getEntity().addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,
+                Mth.lerpInt(scale, 0 /* 0 Seconds */, 20 * 5 /* 5 Seconds */), 1)); // Slowness II (0-5 seconds)
+        this.entity.getEntity().addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN,
+                Mth.lerpInt(scale, 0 /* 0 Seconds */, 20 * 3 /* 3 Seconds */), 7)); // Mining Fatigue VIII (0-3 seconds)
+        this.entity.getEntity().hurt(ChangedDamageSources.GRAB_ESCAPE.source(this.entity.getEntity().level().registryAccess(), grabbed),
+                Mth.lerp(scale, 0.0F /* 0 Damage */, 6.0F /* 3 Hearts Damage */));
+    }
+
     public void releaseEntity() {
+        var debuffStrength = 1.0F - this.grabStrength;
+
         this.grabbedHasControl = false;
         this.grabStrength = 0.0f;
         this.suitTransition = 0.0f;
@@ -145,14 +164,20 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
                 });
             }
         }
+
+        if (!(this.grabbedEntity instanceof Player)) {
+            debuffStrength *= 0.25F;
+        }
         this.grabbedEntity.noPhysics = false;
         this.grabbedEntity.resetFallDistance();
         this.entity.getEntity().noPhysics = false;
+        var lastGrabbed = this.grabbedEntity;
         this.grabbedEntity = null;
         this.suited = false;
         this.attackDown = false;
         this.useDown = false;
-        this.grabCooldown = 40;
+
+        this.applyReleaseDebuff(debuffStrength, lastGrabbed);
     }
 
     public void replaceEntityReference(LivingEntity newEntity) {
@@ -427,9 +452,6 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
         this.grabStrengthO = this.grabStrength;
         this.suitTransitionO = this.suitTransition;
 
-        if (this.grabCooldown > 0)
-            this.grabCooldown--;
-
         if (this.grabbedEntity != null) {
             if (this.grabbedEntity instanceof Mob mob) {
                 mob.goalSelector.getRunningGoals().forEach(WrappedGoal::stop);
@@ -525,7 +547,6 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
     @Override
     public void tick() {
         if (this.grabbedEntity != null) {
-
             if (grabbedEntity instanceof Player && !Changed.config.server.isGrabEnabled.get()) {
                 this.releaseEntity();
                 return;
@@ -547,9 +568,6 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
             }
             return;
         }
-
-        if (this.grabCooldown > 0)
-            return;
 
         var grabbedEntity = this.getHoveredEntity(entity);
         if (grabbedEntity != null && entity.getLevel().isClientSide && entity.getEntity() instanceof PlayerDataExtension ext) {

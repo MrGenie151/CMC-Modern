@@ -86,7 +86,8 @@ public abstract class AbstractAbility<Instance extends AbstractAbilityInstance> 
         }
 
         public void applyCoolDown() {
-            coolDownTicksRemaining = abilityInstance.ability.getCoolDown(abilityInstance.entity);
+            if (abilityInstance.ability.shouldApplyCoolDown(abilityInstance.entity))
+                coolDownTicksRemaining = abilityInstance.ability.getCoolDown(abilityInstance.entity);
         }
 
         public void tickCoolDown() {
@@ -246,6 +247,7 @@ public abstract class AbstractAbility<Instance extends AbstractAbilityInstance> 
     public UseType getUseType(IAbstractChangedEntity entity) { return UseType.INSTANT; }
     public int getChargeTime(IAbstractChangedEntity entity) { return 0; }
     public int getCoolDown(IAbstractChangedEntity entity) { return 0; }
+    public boolean shouldApplyCoolDown(IAbstractChangedEntity entity) { return true; }
 
     public boolean canUse(IAbstractChangedEntity entity) { return false; }
     public boolean canKeepUsing(IAbstractChangedEntity entity) { return canUse(entity); }
@@ -266,7 +268,7 @@ public abstract class AbstractAbility<Instance extends AbstractAbilityInstance> 
     // Broadcast changes to clients
     public final void setDirty(IAbstractChangedEntity entity) {
         CompoundTag data = new CompoundTag();
-        saveData(data, entity);
+        entity.getAbilityInstance(this).saveData(data);
 
         if (entity.getLevel().isClientSide)
             Changed.PACKET_HANDLER.sendToServer(new SyncVariantAbilityPacket(this, data));

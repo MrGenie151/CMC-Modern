@@ -90,6 +90,7 @@ public class ChangedTags {
         public static final TagKey<DamageType> IS_TRANSFUR = create("is_transfur");
         public static final TagKey<DamageType> LATEX_IMMUNE_TO = create("latex_immune_to");
         public static final TagKey<DamageType> LATEX_WEAK_TO = create("latex_weak_to");
+        public static final TagKey<DamageType> IGNORES_FACTION_IMMUNITY = create("ignores_faction_immunity");
 
         private static TagKey<DamageType> create(String name) {
             return TagKey.create(Registries.DAMAGE_TYPE, Changed.modResource(name));

@@ -83,11 +83,13 @@ public abstract class AbstractAbilityInstance {
 
     // A unique tag for the ability is provided when saving/reading data. If no data is saved to the tag, then readData does not run
     public void saveData(CompoundTag tag) {
+        ability.saveData(tag, this.entity);
         var controllerTag = new CompoundTag();
         controller.saveData(controllerTag);
         tag.put("Controller", controllerTag);
     }
     public void readData(CompoundTag tag) {
+        ability.readData(tag, this.entity);
         if (tag.contains("Controller"))
             controller.readData(tag.getCompound("Controller"));
     }

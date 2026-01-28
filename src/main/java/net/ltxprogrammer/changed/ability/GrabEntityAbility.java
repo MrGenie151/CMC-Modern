@@ -61,4 +61,14 @@ public class GrabEntityAbility extends AbstractAbility<GrabEntityAbilityInstance
     public Collection<Component> getAbilityDescription(IAbstractChangedEntity entity) {
         return DESCRIPTION;
     }
+
+    @Override
+    public int getCoolDown(IAbstractChangedEntity entity) {
+        return 20 * 8;
+    }
+
+    @Override
+    public boolean shouldApplyCoolDown(IAbstractChangedEntity entity) {
+        return false; // Cooldown is applied manually in the ability
+    }
 }

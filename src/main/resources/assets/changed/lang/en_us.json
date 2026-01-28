@@ -284,6 +284,8 @@
   "death.attack.changed:fan.player": "%1$s was diced by a fan whilst fighting %2$s",
   "death.attack.changed:heart_attack": "%s had a heart attack",
   "death.attack.changed:heart_attack.player": "%1$s had a heart attack whilst fighting %2$s",
+  "death.attack.changed:grab_escape": "%1$s couldn't hold on to %2$s",
+  "death.attack.changed:grab_escape.item": "%1$s couldn't hold on to %2$s",
 
   "command.changed.success.transfurred.one": "Transfurred %s into %s",
   "command.changed.success.transfurred.many": "Transfurred %s player(s) into %s",

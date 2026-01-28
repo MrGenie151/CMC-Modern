@@ -669,6 +669,8 @@ public class ProcessTransfur {
             event.setCanceled(true);
             return;
         }
+        if (event.getSource().is(ChangedTags.DamageTypes.IGNORES_FACTION_IMMUNITY))
+            return;
         // Check for faction immunity
         LatexType factionD = LatexType.getEntityLatexType(event.getEntity());
         LatexType factionS = LatexType.getEntityLatexType(sourceEntity);

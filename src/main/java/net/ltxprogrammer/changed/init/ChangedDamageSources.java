@@ -42,6 +42,7 @@ public class ChangedDamageSources {
     public static final DamageTypeHolder PALE = holder("pale");
     public static final DamageTypeHolder FAN = holder("fan");
     public static final DamageTypeHolder HEART_ATTACK = holder("heart_attack");
+    public static final DamageTypeHolder GRAB_ESCAPE = holder("grab_escape");
 
     public static DamageSource entityTransfur(RegistryAccess access, LivingEntity source) {
         return TRANSFUR.source(access, source);
