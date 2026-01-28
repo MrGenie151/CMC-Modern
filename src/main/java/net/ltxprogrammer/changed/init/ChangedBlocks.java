@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.init;
 
 import com.google.common.collect.ImmutableList;
 import net.ltxprogrammer.changed.Changed;
+import net.ltxprogrammer.changed.block.BeehiveWall;
 import net.ltxprogrammer.changed.block.PipeBlock;
 import net.ltxprogrammer.changed.block.*;
 import net.ltxprogrammer.changed.entity.beast.DarkLatexEntity;
@@ -61,10 +62,7 @@ public class ChangedBlocks {
     public static final RegistryObject<Beaker> BEAKER = register("beaker", Beaker::new);
     public static final RegistryObject<BedsideIVRack> BEDSIDE_IV_RACK = register("bedside_iv_rack", BedsideIVRack::new);
     public static final RegistryObject<BeehiveBed> BEEHIVE_BED = register("beehive_bed", BeehiveBed::new);
-    public static final RegistryObject<AbstractBeehiveBlock> BEEHIVE_WALL = register("beehive_wall", AbstractBeehiveBlock::new);
-    public static final RegistryObject<AbstractBeehiveBlock> BEEHIVE_CORNER = register("beehive_corner", AbstractBeehiveBlock::new);
-    public static final RegistryObject<AbstractBeehiveBlock> BEEHIVE_FLOOR = register("beehive_floor", AbstractBeehiveBlock::new);
-    public static final RegistryObject<AbstractBeehiveBlock> BEEHIVE_ROOF = register("beehive_roof", AbstractBeehiveBlock::new);
+    public static final RegistryObject<BeehiveWall> BEEHIVE_WALL = register("beehive_wall", BeehiveWall::new);
     public static final RegistryObject<RailingBlock> BLACK_RAILING = register("black_railing", () -> new RailingBlock(BlockBehaviour.Properties.of().sound(SoundType.METAL).requiresCorrectToolForDrops().strength(3.0F, 5.0F)));
     public static final RegistryObject<BookStack> BOOK_STACK = registerNoItem("book_stack", () -> new BookStack(BlockBehaviour.Properties.of().sound(SoundType.WOOD).strength(0.5F)));
     public static final RegistryObject<BoxPile> BOX_PILE = register("box_pile", BoxPile::new);

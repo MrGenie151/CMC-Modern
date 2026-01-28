@@ -35,9 +35,6 @@ public class FurnaceFuel {
     }
 
     static {
-        addBlockBurnTime(ChangedBlocks.BEEHIVE_CORNER, 200);
-        addBlockBurnTime(ChangedBlocks.BEEHIVE_FLOOR, 200);
-        addBlockBurnTime(ChangedBlocks.BEEHIVE_ROOF, 200);
         addBlockBurnTime(ChangedBlocks.BEEHIVE_WALL, 200);
         addBlockBurnTime(ChangedBlocks.BOOK_STACK, 150);
         addBlockBurnTime(ChangedBlocks.BOX_PILE, 300);

@@ -2,9 +2,6 @@
   "replace": false,
   "values": [
     "changed:beehive_bed",
-    "changed:beehive_corner",
-    "changed:beehive_floor",
-    "changed:beehive_roof",
     "changed:beehive_wall",
     "changed:box_pile",
     "changed:cardboard_box",

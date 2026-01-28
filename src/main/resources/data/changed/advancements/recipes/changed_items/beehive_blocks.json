@@ -2,9 +2,6 @@
   "parent": "minecraft:recipes/root",
   "rewards": {
     "recipes": [
-      "changed:beehive_corner",
-      "changed:beehive_floor",
-      "changed:beehive_roof",
       "changed:beehive_wall"
     ]
   },
@@ -25,9 +22,6 @@
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
         "recipe": [
-          "changed:beehive_corner",
-          "changed:beehive_floor",
-          "changed:beehive_roof",
           "changed:beehive_wall"
         ]
       }

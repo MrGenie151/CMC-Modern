@@ -3,7 +3,10 @@ package net.ltxprogrammer.changed.world.features.structures;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ltxprogrammer.changed.init.ChangedStructureTypes;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BiomeTags;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
@@ -42,6 +45,15 @@ public class Beehive extends Structure {
 
     @Override
     protected Optional<GenerationStub> findGenerationPoint(GenerationContext context) {
+        int i = context.chunkPos().getBlockX(9);
+        int j = context.chunkPos().getBlockZ(9);
+
+        for(Holder<Biome> holder : context.biomeSource().getBiomesWithin(i, context.chunkGenerator().getSeaLevel(), j, 6, context.randomState().sampler())) {
+            if (holder.is(BiomeTags.IS_OCEAN) || holder.is(BiomeTags.IS_RIVER)) {
+                return Optional.empty();
+            }
+        }
+        
         return onTopOfChunkCenter(context, Heightmap.Types.WORLD_SURFACE_WG, (builder) -> {
             generatePieces(builder, context);
         });

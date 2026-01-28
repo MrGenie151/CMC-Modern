@@ -90,6 +90,10 @@ public class ChangedDataFixer {
         map.put(Changed.modResource("tiles_grayblue_connected"), ChangedBlocks.TILES_GRAYBLUE.getId());
         //map.put(Changed.modResource("tiles_grayblue_bolted_connected"), ChangedBlocks.TILES_GRAYBLUE_BOLTED.getId());
         map.put(Changed.modResource("tiles_white_connected"), ChangedBlocks.TILES_WHITE.getId());
+        //map.put(Changed.modResource("beehive_wall"), ChangedBlocks.TILES_WHITE.getId());
+        map.put(Changed.modResource("beehive_corner"), ChangedBlocks.BEEHIVE_WALL.getId());
+        map.put(Changed.modResource("beehive_floor"), ChangedBlocks.BEEHIVE_WALL.getId());
+        map.put(Changed.modResource("beehive_roof"), ChangedBlocks.BEEHIVE_WALL.getId());
     });
 
     private final HashMap<ResourceLocation, ResourceLocation> ZONE_REMAP = Util.make(new HashMap<>(), map -> {
