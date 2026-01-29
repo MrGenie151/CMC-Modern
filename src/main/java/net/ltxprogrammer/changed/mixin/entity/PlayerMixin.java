@@ -316,6 +316,13 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerDataExte
         return abilityTree;
     }
 
+    @WrapOperation(method = "causeFallDamage", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/player/Abilities;mayfly:Z"))
+    public boolean changed$shouldIgnoreFallDamage(Abilities instance, Operation<Boolean> original) {
+        if (this.getTransfurVariant() == null)
+            return original.call(instance);
+        return original.call(instance) && !this.getTransfurVariant().getParent().canGlide;
+    }
+
     @WrapOperation(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/material/FluidState;isEmpty()Z"))
     public boolean canSwimInAir(FluidState instance, Operation<Boolean> original) {
         return !(this.getTransfurVariant() != null && this.getTransfurVariant().getChangedEntity().canSwimInFluidType(instance.getFluidType())) &&
