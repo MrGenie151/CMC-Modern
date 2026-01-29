@@ -27,6 +27,7 @@ public class ChangedAccessoryRenderers {
             AccessoryLayer.registerRenderer(ChangedItems.SPORTS_BRA.get(), SimpleClothingRenderer.of(ArmorModel.CLOTHING_INNER, EquipmentSlot.CHEST));
             AccessoryLayer.registerRenderer(ChangedItems.BLACK_TSHIRT.get(), SimpleClothingRenderer.of(ArmorModel.CLOTHING_INNER, EquipmentSlot.CHEST));
             AccessoryLayer.registerRenderer(ChangedItems.WHITE_TSHIRT.get(), SimpleClothingRenderer.of(ArmorModel.CLOTHING_INNER, EquipmentSlot.CHEST));
+            AccessoryLayer.registerRenderer(ChangedItems.TSC_VEST.get(), SimpleClothingRenderer.of(ArmorModel.CLOTHING_INNER, EquipmentSlot.CHEST));
             AccessoryLayer.registerRenderer(ChangedItems.LAB_COAT.get(), SimpleClothingRenderer.of(ArmorModel.CLOTHING_OUTER, Set.of(
                     new SimpleClothingRenderer.ModelComponent(ArmorModel.CLOTHING_OUTER, EquipmentSlot.CHEST),
                     new SimpleClothingRenderer.ModelComponent(ArmorModel.CLOTHING_MIDDLE, EquipmentSlot.LEGS)
@@ -54,7 +55,7 @@ public class ChangedAccessoryRenderers {
                     AccessoryLayer.RenderOrder.SAME, ChangedItems.BLACK_TSHIRT.get());
             AccessoryLayer.registerItemRenderOrder(
                     Set.of(ChangedItems.ORANGE_NECK_TIE.get(), ChangedItems.RED_NECK_TIE.get(), ChangedItems.BLUE_NECK_TIE.get(), ChangedItems.DOG_COLLAR.get(),
-                            ChangedItems.FACE_MASK.get()),
+                            ChangedItems.FACE_MASK.get(), ChangedItems.TSC_VEST.get()),
                     AccessoryLayer.RenderOrder.ABOVE, ChangedItems.BLACK_TSHIRT.get());
             AccessoryLayer.registerItemRenderOrder(
                     Set.of(ChangedItems.LAB_COAT.get()),
