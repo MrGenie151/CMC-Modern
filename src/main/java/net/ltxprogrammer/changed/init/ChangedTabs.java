@@ -297,6 +297,7 @@ public class ChangedTabs {
                         output.accept(ChangedItems.ORANGE_NECK_TIE.get());
                         output.accept(ChangedItems.RED_NECK_TIE.get());
                         output.accept(ChangedItems.BLUE_NECK_TIE.get());
+                        output.accept(ChangedItems.DOG_COLLAR.get());
                     })
                     .build());
 

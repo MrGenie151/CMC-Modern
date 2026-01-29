@@ -366,6 +366,21 @@
       "changed:equip3"
     ]
   },
+  "item.collar.break": {
+    "category": "player",
+    "subtitle": "subtitles.changed.item.collar.break",
+    "sounds": [
+      "changed:slash10"
+    ]
+  },
+  "item.collar.equip": {
+    "category": "player",
+    "subtitle": "subtitles.changed.item.collar.equip",
+    "sounds": [
+      "changed:equip2",
+      "changed:equip3"
+    ]
+  },
   "item.dark_latex_mask.complete_transfur": {
     "category": "player",
     "subtitle": "subtitles.changed.item.dark_latex_mask.complete_transfur",

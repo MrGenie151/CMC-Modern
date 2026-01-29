@@ -83,6 +83,8 @@ public class ChangedSounds {
     public static final RegistryObject<SoundEvent> BRA_EQUIP = register("item.bra.equip");
     public static final RegistryObject<SoundEvent> COAT_BREAK = register("item.coat.break");
     public static final RegistryObject<SoundEvent> COAT_EQUIP = register("item.coat.equip");
+    public static final RegistryObject<SoundEvent> COLLAR_BREAK = register("item.collar.break");
+    public static final RegistryObject<SoundEvent> COLLAR_EQUIP = register("item.collar.equip");
     public static final RegistryObject<SoundEvent> DARK_LATEX_MASK_COMPLETE_TRANSFUR = register("item.dark_latex_mask.complete_transfur");
     public static final RegistryObject<SoundEvent> GLOVES_BREAK = register("item.gloves.break");
     public static final RegistryObject<SoundEvent> GLOVES_EQUIP = register("item.gloves.equip");

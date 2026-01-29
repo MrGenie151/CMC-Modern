@@ -70,6 +70,7 @@ public class ChangedItems {
     public static final RegistryObject<NeckTieItem> ORANGE_NECK_TIE = register("orange_neck_tie", NeckTieItem::new);
     public static final RegistryObject<NeckTieItem> RED_NECK_TIE = register("red_neck_tie", NeckTieItem::new);
     public static final RegistryObject<NeckTieItem> BLUE_NECK_TIE = register("blue_neck_tie", NeckTieItem::new);
+    public static final RegistryObject<CollarItem> DOG_COLLAR = register("dog_collar", CollarItem::new);
     public static final RegistryObject<GasMaskItem> GAS_MASK = register("gas_mask", GasMaskItem::new);
     public static final RegistryObject<AbstractChangedItem> DARK_LATEX_CRYSTAL_FRAGMENT = register("dark_latex_crystal_fragment", AbstractChangedItem::new);
     public static final RegistryObject<AbstractLatexItem> DARK_LATEX_GOO = register("dark_latex_goo", () -> new AbstractLatexItem(ChangedBlocks.DARK_LATEX_WALL_SPLOTCH.get(), ChangedLatexTypes.DARK_LATEX));
