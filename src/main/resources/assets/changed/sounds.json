@@ -381,6 +381,21 @@
       "changed:equip3"
     ]
   },
+  "item.face_mask.break": {
+    "category": "player",
+    "subtitle": "subtitles.changed.item.face_mask.break",
+    "sounds": [
+      "changed:slash10"
+    ]
+  },
+  "item.face_mask.equip": {
+    "category": "player",
+    "subtitle": "subtitles.changed.item.face_mask.equip",
+    "sounds": [
+      "changed:equip2",
+      "changed:equip3"
+    ]
+  },
   "item.dark_latex_mask.complete_transfur": {
     "category": "player",
     "subtitle": "subtitles.changed.item.dark_latex_mask.complete_transfur",

@@ -1,8 +1,10 @@
 package net.ltxprogrammer.changed.process;
 
+import net.ltxprogrammer.changed.data.AccessorySlots;
 import net.ltxprogrammer.changed.entity.PlayerDataExtension;
 import net.ltxprogrammer.changed.init.ChangedDamageSources;
 import net.ltxprogrammer.changed.init.ChangedGameRules;
+import net.ltxprogrammer.changed.init.ChangedItems;
 import net.ltxprogrammer.changed.init.ChangedTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -50,15 +52,16 @@ public class Pale {
             return;
 
         int exposure = getPaleExposure(player);
+        final boolean wearingMask = AccessorySlots.isWearing(player, itemStack -> itemStack.is(ChangedItems.FACE_MASK.get()));
 
         AtomicInteger localExposure = new AtomicInteger(0);
         player.level().getEntitiesOfClass(LivingEntity.class, new AABB(player.blockPosition()).inflate(1.5)).forEach(livingEntity -> {
             if (player == livingEntity) return;
 
             if (livingEntity.getType().is(ChangedTags.EntityTypes.PALE_SMALL_EXPOSURE))
-                localExposure.addAndGet(1);
+                localExposure.addAndGet(wearingMask ? 0 : 1);
             else if (livingEntity.getType().is(ChangedTags.EntityTypes.PALE_LARGE_EXPOSURE))
-                localExposure.addAndGet(2); // Standing next to a zombie will tick you over immune exposure
+                localExposure.addAndGet(wearingMask ? 1 : 2); // Standing next to a zombie will tick you over immune exposure
             else if (livingEntity instanceof Player otherPlayer) {
                 int otherExposure = getPaleExposure(otherPlayer);
                 if (otherExposure < THRESHOLD_IMMUNE_MAX)

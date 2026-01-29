@@ -1,7 +1,5 @@
 package net.ltxprogrammer.changed.item;
 
-import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
-import net.ltxprogrammer.changed.init.ChangedTabs;
 import net.ltxprogrammer.changed.init.ChangedTags;
 import net.ltxprogrammer.changed.init.ChangedTransfurVariants;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
