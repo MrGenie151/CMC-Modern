@@ -92,6 +92,8 @@ public class ChangedSounds {
     public static final RegistryObject<SoundEvent> FACE_MASK_EQUIP = register("item.face_mask.equip");
     public static final RegistryObject<SoundEvent> NECK_TIE_BREAK = register("item.neck_tie.break");
     public static final RegistryObject<SoundEvent> NECK_TIE_EQUIP = register("item.neck_tie.equip");
+    public static final RegistryObject<SoundEvent> PANTS_BREAK = register("item.pants.break");
+    public static final RegistryObject<SoundEvent> PANTS_EQUIP = register("item.pants.equip");
     public static final RegistryObject<SoundEvent> TSC_WEAPON_SHOCK = register("item.tsc_weapon.shock");
     public static final RegistryObject<SoundEvent> SHIRT_BREAK = register("item.shirt.break");
     public static final RegistryObject<SoundEvent> SHIRT_EQUIP = register("item.shirt.equip");

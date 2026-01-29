@@ -22,6 +22,8 @@ public class ChangedAccessoryRenderers {
 
             AccessoryLayer.registerRenderer(ChangedItems.BENIGN_SHORTS.get(), SimpleClothingRenderer.of(ArmorModel.CLOTHING_INNER, EquipmentSlot.LEGS));
             AccessoryLayer.registerRenderer(ChangedItems.PINK_SHORTS.get(), SimpleClothingRenderer.of(ArmorModel.CLOTHING_INNER, EquipmentSlot.LEGS));
+            AccessoryLayer.registerRenderer(ChangedItems.BLACK_PANTS.get(), SimpleClothingRenderer.of(ArmorModel.CLOTHING_INNER, EquipmentSlot.LEGS));
+            AccessoryLayer.registerRenderer(ChangedItems.NAVY_PANTS.get(), SimpleClothingRenderer.of(ArmorModel.CLOTHING_INNER, EquipmentSlot.LEGS));
             AccessoryLayer.registerRenderer(ChangedItems.SPORTS_BRA.get(), SimpleClothingRenderer.of(ArmorModel.CLOTHING_INNER, EquipmentSlot.CHEST));
             AccessoryLayer.registerRenderer(ChangedItems.BLACK_TSHIRT.get(), SimpleClothingRenderer.of(ArmorModel.CLOTHING_INNER, EquipmentSlot.CHEST));
             AccessoryLayer.registerRenderer(ChangedItems.WHITE_TSHIRT.get(), SimpleClothingRenderer.of(ArmorModel.CLOTHING_INNER, EquipmentSlot.CHEST));
@@ -44,7 +46,8 @@ public class ChangedAccessoryRenderers {
                     new WornExoskeletonRenderer(modelSet, ExoskeletonModel.LAYER_LOCATION_SUIT, ExoskeletonModel.LAYER_LOCATION_VISOR, ExoskeletonModel.LAYER_LOCATION_HUMAN));
 
             AccessoryLayer.registerItemRenderOrder(
-                    Set.of(ChangedItems.BENIGN_SHORTS.get(), ChangedItems.PINK_SHORTS.get(), ChangedItems.SPORTS_BRA.get()),
+                    Set.of(ChangedItems.BENIGN_SHORTS.get(), ChangedItems.PINK_SHORTS.get(), ChangedItems.SPORTS_BRA.get(),
+                            ChangedItems.BLACK_PANTS.get(), ChangedItems.NAVY_PANTS.get()),
                     AccessoryLayer.RenderOrder.BELOW, ChangedItems.BLACK_TSHIRT.get());
             AccessoryLayer.registerItemRenderOrder(
                     Set.of(ChangedItems.WHITE_TSHIRT.get(), ChangedItems.WETSUIT.get()),

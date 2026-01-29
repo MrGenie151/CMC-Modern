@@ -72,15 +72,15 @@ public abstract class LatexHumanoidArmorModel<T extends ChangedEntity, M extends
                                        PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha);
 
     public static void prepareUnifiedLegsForArmor(ItemStack stack, ModelPart LeftLeg, ModelPart RightLeg) {
+        setAllPartsVisibility(LeftLeg, true);
+        setAllPartsVisibility(RightLeg, true);
+
         if (stack.getItem() instanceof Shorts) {
             setAllPartsVisibility(LeftLeg.getChild("LeftLowerLeg"), false);
             setAllPartsVisibility(RightLeg.getChild("RightLowerLeg"), false);
         } else if (stack.getItem() instanceof Clothing) {
             setAllPartsVisibility(LeftLeg.getChild("LeftLowerLeg").getChild("LeftFoot"), false);
             setAllPartsVisibility(RightLeg.getChild("RightLowerLeg").getChild("RightFoot"), false);
-        } else {
-            setAllPartsVisibility(LeftLeg, true);
-            setAllPartsVisibility(RightLeg, true);
         }
     }
 

@@ -440,6 +440,21 @@
       "changed:equip3"
     ]
   },
+  "item.pants.break": {
+    "category": "player",
+    "subtitle": "subtitles.changed.item.pants.break",
+    "sounds": [
+      "changed:slash10"
+    ]
+  },
+  "item.pants.equip": {
+    "category": "player",
+    "subtitle": "subtitles.changed.item.pants.equip",
+    "sounds": [
+      "changed:equip2",
+      "changed:equip3"
+    ]
+  },
   "item.shirt.break": {
     "category": "player",
     "subtitle": "subtitles.changed.item.shirt.break",
