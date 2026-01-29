@@ -292,6 +292,7 @@ public class ChangedTabs {
                         output.accept(ChangedItems.NAVY_PANTS.get());
                         output.accept(ChangedItems.BLACK_TSHIRT.get());
                         output.accept(ChangedItems.WHITE_TSHIRT.get());
+                        output.accept(ChangedItems.TSC_VEST.get());
                         output.accept(ChangedItems.SPORTS_BRA.get());
                         output.accept(ChangedItems.LAB_COAT.get());
                         output.accept(ChangedItems.WETSUIT.get());
