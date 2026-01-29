@@ -22,6 +22,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.block.state.BlockState;
@@ -146,6 +147,14 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
         final var surfaceBiomes = context.structureContext.biomeSource().getBiomesWithin(
                 center.getX(), context.structureContext.chunkGenerator().getSeaLevel(), center.getZ(), /* Radius */ 16,
                 context.structureContext.randomState().sampler());
+        if (center.getY() > context.structureContext.chunkGenerator().getSeaLevel() - 30) {
+            final var pieceBiomes = context.structureContext.biomeSource().getBiomesWithin(
+                    center.getX(), center.getY(), center.getZ(), /* Radius */ 2,
+                    context.structureContext.randomState().sampler());
+            if (pieceBiomes.stream().anyMatch(pieceBiome -> pieceBiome.is(BiomeTags.IS_RIVER) || pieceBiome.is(BiomeTags.IS_OCEAN)))
+                return piece -> false; // Deny pieces generating too close to surface water
+        }
+
         return configuredFacilityPiece -> {
             return surfaceBiomes.stream().anyMatch(configuredFacilityPiece.surfaceBiomePredicate::testHolder);
         };
