@@ -55,7 +55,7 @@ public abstract class EntityRenderDispatcherMixin {
             return;
 
         if (entity.getVehicle() == Minecraft.getInstance().cameraEntity && Minecraft.getInstance().options.getCameraType().isFirstPerson()) {
-            double yRot = Math.toRadians(Mth.rotLerp(Minecraft.getInstance().getDeltaFrameTime(), livingEntity.yBodyRotO, livingEntity.yBodyRot));
+            double yRot = Math.toRadians(Mth.rotLerp(partialTicks, livingEntity.yBodyRotO, livingEntity.yBodyRot));
             poseStack.translate(Math.sin(yRot) * 0.5f, 0.0f, -Math.cos(yRot) * 0.5f);
         }
     }

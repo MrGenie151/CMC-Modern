@@ -59,7 +59,7 @@ public abstract class AdvancedHumanoidRendererMixin<T extends ChangedEntity, M e
         if (animation == null) {
             return;
         }
-        parCool$rotator = new PlayerModelRotator(stack, player, Minecraft.getInstance().getFrameTime(), xRot, yRot, zRot);
+        parCool$rotator = new PlayerModelRotator(stack, player, Minecraft.getInstance().getPartialTick(), xRot, yRot, zRot);
         if (animation.rotatePre(clientPlayer, parCool$rotator)) {
             parCool$rotator = null;
             ci.cancel();

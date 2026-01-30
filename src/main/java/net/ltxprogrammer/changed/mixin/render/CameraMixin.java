@@ -162,7 +162,7 @@ public abstract class CameraMixin implements CameraExtender {
     @Unique
     private float getEntityZOffset(LivingEntity entity) {
         var playerVariantOffset = ProcessTransfur.getPlayerTransfurVariantSafe(EntityUtil.playerOrNull(entity)).map(variant ->
-                Mth.lerp(variant.getMorphProgression(Minecraft.getInstance().getDeltaFrameTime()), 0.0f, variant.getParent().cameraZOffset));
+                Mth.lerp(variant.getMorphProgression(Minecraft.getInstance().getPartialTick()), 0.0f, variant.getParent().cameraZOffset));
         if (playerVariantOffset.isPresent())
             return playerVariantOffset.get();
 

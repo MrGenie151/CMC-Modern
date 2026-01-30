@@ -45,7 +45,7 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
             if (layer instanceof FirstPersonLayer firstPersonLayer)
                 firstPersonLayer.renderFirstPersonOnArms(
                         stack, buffer, light, player, getModel().rightArm != arm ? HumanoidArm.LEFT : HumanoidArm.RIGHT,
-                        arm.storePose(), Minecraft.getInstance().getDeltaFrameTime());
+                        arm.storePose(), Minecraft.getInstance().getPartialTick());
         }
     }
 }

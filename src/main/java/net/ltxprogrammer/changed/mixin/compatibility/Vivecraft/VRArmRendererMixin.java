@@ -39,7 +39,7 @@ public abstract class VRArmRendererMixin extends PlayerRenderer {
             if (layer instanceof FirstPersonLayer firstPersonLayer)
                 firstPersonLayer.renderFirstPersonOnArms(
                         matrixStackIn, bufferIn, combinedLightIn, playerIn, getModel().rightArm != rendererArmIn ? HumanoidArm.LEFT : HumanoidArm.RIGHT,
-                        rendererArmIn.storePose(), Minecraft.getInstance().getDeltaFrameTime());
+                        rendererArmIn.storePose(), Minecraft.getInstance().getPartialTick());
         }
     }
 }
