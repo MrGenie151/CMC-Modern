@@ -45,7 +45,8 @@ public class SwitchHandsAbilityInstance extends AbstractAbilityInstance {
         extraRightHand = isRightHanded ? mainHand : offHand;
         extraLeftHand = isRightHanded ? offHand : mainHand;
 
-        ability.setDirty(entity);
+        if (!entity.getLevel().isClientSide)
+            ability.setDirty(entity);
     }
 
     @Override
