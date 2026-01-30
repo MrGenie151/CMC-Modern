@@ -134,7 +134,7 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
                 Mth.lerp(scale, 0.0F /* 0 Damage */, 6.0F /* 3 Hearts Damage */));
     }
 
-    public void releaseEntity() {
+    public void releaseEntity(boolean applyDebuffs) {
         var debuffStrength = 1.0F - this.grabStrength;
 
         this.grabbedHasControl = false;
@@ -177,7 +177,8 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
         this.attackDown = false;
         this.useDown = false;
 
-        this.applyReleaseDebuff(debuffStrength, lastGrabbed);
+        if (applyDebuffs)
+            this.applyReleaseDebuff(debuffStrength, lastGrabbed);
     }
 
     public void replaceEntityReference(LivingEntity newEntity) {
@@ -209,7 +210,7 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
         ProcessTransfur.forceNearbyToRetarget(entity.level(), entity);
 
         if (this.grabbedEntity != entity)
-            this.releaseEntity();
+            this.releaseEntity(true);
 
         this.grabbedEntity = entity;
         this.suited = true;
@@ -250,7 +251,7 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
             return true;
         }
 
-        this.releaseEntity();
+        this.releaseEntity(true);
         this.grabbedEntity = entity;
         this.grabStrength = 1.0f;
 
@@ -270,12 +271,12 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
         this.lastEscapeKey = other.lastEscapeKey;
         this.currentEscapeKey = other.currentEscapeKey;
         this.ticksGrabbed = other.ticksGrabbed;
-        other.releaseEntity();
+        other.releaseEntity(false);
     }
 
     @Override
     public void onRemove() {
-        releaseEntity();
+        releaseEntity(false);
     }
 
     void handleInstructions(Level level) {
@@ -422,7 +423,7 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
         }
     }
 
-    public boolean wantsToRelease() {
+    public boolean isGrabbedInvalid() {
         if (this.grabbedEntity == null)
             return false;
 
@@ -441,7 +442,7 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
             }
         }
 
-        if (this.grabbedEntity.isDeadOrDying() || this.grabbedEntity.isRemoved() || this.grabStrength <= 0.0f) {
+        if (this.grabbedEntity.isDeadOrDying() || this.grabbedEntity.isRemoved()) {
             return true;
         }
 
@@ -486,8 +487,11 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
                 this.grabbedEntity.resetFallDistance();
             }
 
-            if (this.wantsToRelease()) {
-                this.releaseEntity();
+            if (this.isGrabbedInvalid()) {
+                this.releaseEntity(false);
+                return;
+            } else if (this.grabStrength <= 0.0f) {
+                this.releaseEntity(true);
                 return;
             }
 
@@ -505,7 +509,7 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
                 damage = ProcessTransfur.difficultyAdjustTransfurAmount(entity.getLevel().getDifficulty(), damage, this.entity) * 1.5f;
                 if (this.entity.getChangedEntity().tryAbsorbTarget(this.grabbedEntity, this.entity, damage, null)
                         && !this.entity.getLevel().isClientSide) {
-                    this.releaseEntity();
+                    this.releaseEntity(false);
                     return;
                 }
             }
@@ -515,7 +519,7 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
                 damage = ProcessTransfur.difficultyAdjustTransfurAmount(entity.getLevel().getDifficulty(), damage, this.entity);
                 if (ProcessTransfur.progressTransfur(this.grabbedEntity, damage, entity.getChangedEntity().getTransfurVariant(), TransfurContext.latexHazard(this.entity, TransfurCause.GRAB_REPLICATE))
                         && !this.entity.getLevel().isClientSide)
-                    this.releaseEntity();
+                    this.releaseEntity(false);
             }
 
             else if (useDown) {
@@ -548,7 +552,7 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
     public void tick() {
         if (this.grabbedEntity != null) {
             if (grabbedEntity instanceof Player && !Changed.config.server.isGrabEnabled.get()) {
-                this.releaseEntity();
+                this.releaseEntity(false);
                 return;
             }
 
@@ -559,7 +563,7 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
                         Changed.PACKET_HANDLER.sendToServer(GrabEntityPacket.initialGrab((Player)entity.getEntity(), this.grabbedEntity));
                     this.suitTransition = 0.0f;
                 } else
-                    this.releaseEntity();
+                    this.releaseEntity(true);
 
                 this.getController().resetHoldTicks();
             }

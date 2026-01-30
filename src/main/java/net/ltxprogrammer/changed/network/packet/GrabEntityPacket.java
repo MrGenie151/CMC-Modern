@@ -82,7 +82,7 @@ public class GrabEntityPacket implements ChangedPacket {
                 latexSource.getAbilityInstanceSafe(ChangedAbilities.GRAB_ENTITY_ABILITY.get()).ifPresent(ability -> {
                     switch (type) {
                         case REPLACE -> ability.replaceEntityReference(livingTarget);
-                        case RELEASE -> ability.releaseEntity();
+                        case RELEASE -> ability.releaseEntity(false);
                         case SUIT -> ability.suitEntity(livingTarget);
                         case ARMS -> ability.grabEntity(livingTarget);
                     }
@@ -118,7 +118,7 @@ public class GrabEntityPacket implements ChangedPacket {
                     switch (type) {
                         case RELEASE -> {
                             boolean wasSuited = ability.suited;
-                            ability.releaseEntity();
+                            ability.releaseEntity(true);
                             ChangedSounds.broadcastSound(sender, wasSuited ? ChangedSounds.LATEX_UNSUIT_ENTITY : ChangedSounds.LATEX_UNGRAB_ENTITY, 1.0f, 1.0f);
                         }
                         case SUIT -> {
