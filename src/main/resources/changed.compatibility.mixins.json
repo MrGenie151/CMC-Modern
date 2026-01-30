@@ -37,7 +37,6 @@
     "Personality.AdvancedHumanoidRendererMixin",
     "Personality.HumanoidAnimatorMixin",
     "Personality.PersonalityClientEventsMixin",
-    "Personality.TransfurVariantInstanceMixin",
     "PlayerAnimator.AdvancedHumanoidModelMixin",
     "PlayerAnimator.AdvancedHumanoidRendererMixin",
     "PlayerAnimator.HumanoidAnimatorMixin",

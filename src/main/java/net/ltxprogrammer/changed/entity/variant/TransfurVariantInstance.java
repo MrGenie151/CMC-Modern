@@ -21,7 +21,6 @@ import net.ltxprogrammer.changed.world.LatexCoverHitResult;
 import net.ltxprogrammer.changed.world.LatexCoverState;
 import net.ltxprogrammer.changed.world.enchantments.FormFittingEnchantment;
 import net.minecraft.Util;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -35,14 +34,10 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -385,15 +380,14 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
         }
     }
 
-    public EntityDimensions getTransfurDimensions(Pose pose) {
+    public EntityDimensions getTransfurDimensions(Pose pose, EntityDimensions preTransfurDimensions) {
         ChangedEntity changedEntity = getChangedEntity();
         final float morphProgress = getMorphProgression();
 
         if (morphProgress < 1f) {
-            final var playerDim = host.getDimensions(pose);
             final var latexDim = changedEntity.getDimensions(pose);
-            float width = Mth.lerp(morphProgress, playerDim.width, latexDim.width);
-            float height = Mth.lerp(morphProgress, playerDim.height, latexDim.height);
+            float width = Mth.lerp(morphProgress, preTransfurDimensions.width, latexDim.width);
+            float height = Mth.lerp(morphProgress, preTransfurDimensions.height, latexDim.height);
 
             return new EntityDimensions(width, height, latexDim.fixed);
         } else {
@@ -401,29 +395,14 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
         }
     }
 
-    @SubscribeEvent
-    public static void onSizeEvent(EntityEvent.Size event) {
-        if (event.getEntity() instanceof Player player) {
-            if (player.isAddedToWorld()) {
-                ProcessTransfur.ifPlayerTransfurred(player, variant -> {
-                    ChangedEntity changedEntity = variant.getChangedEntity();
-                    final float morphProgress = variant.getMorphProgression();
-                    final EntityDimensions morphDimensions = variant.getTransfurDimensions(event.getPose());
+    public float getTransfurEyeHeight(Pose pose, float preTransfurEyeHeight) {
+        ChangedEntity changedEntity = getChangedEntity();
+        final float morphProgress = getMorphProgression();
 
-                    if (morphProgress < 1f) {
-                        event.setNewSize(morphDimensions);
-                        event.setNewEyeHeight(Mth.lerp(morphProgress, player.getEyeHeight(event.getPose()), changedEntity.getEyeHeight(event.getPose())));
-                    } else {
-                        event.setNewSize(morphDimensions);
-                        event.setNewEyeHeight(changedEntity.getEyeHeight(event.getPose()));
-                    }
-                });
-
-                if (player instanceof PlayerDataExtension extension && extension.getPlayerMover() != null) {
-                    event.setNewSize(extension.getPlayerMover().getDimensions(player, event.getPose(), event.getNewSize()));
-                    event.setNewEyeHeight(extension.getPlayerMover().getEyeHeight(player, event.getPose(), event.getNewEyeHeight()));
-                }
-            }
+        if (morphProgress < 1f) {
+            return Mth.lerp(morphProgress, preTransfurEyeHeight, changedEntity.getEyeHeight(pose));
+        } else {
+            return changedEntity.getEyeHeight(pose);
         }
     }
 

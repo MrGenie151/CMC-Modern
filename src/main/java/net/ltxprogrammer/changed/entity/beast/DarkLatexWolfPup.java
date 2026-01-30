@@ -2,7 +2,6 @@ package net.ltxprogrammer.changed.entity.beast;
 
 import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.entity.ai.DarkLatexFavor;
-import net.ltxprogrammer.changed.entity.ai.DarkLatexInventory;
 import net.ltxprogrammer.changed.entity.variant.EntityShape;
 import net.ltxprogrammer.changed.init.ChangedAttributes;
 import net.ltxprogrammer.changed.init.ChangedLatexTypes;
@@ -130,7 +129,7 @@ public class DarkLatexWolfPup extends AbstractDarkLatexEntity {
     }
 
     @Override
-    public float getEyeHeightMul() {
+    protected float getEyeHeightMul() {
         if (this.isCrouching())
             return 0.65F;
         if (this.isPuddle())

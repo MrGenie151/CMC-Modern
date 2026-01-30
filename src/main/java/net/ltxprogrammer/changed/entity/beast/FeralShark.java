@@ -49,7 +49,7 @@ public class FeralShark extends AbstractAquaticEntity {
         return new WaterBoundPathNavigation(this, p_28362_);
     }
 
-    protected float getStandingEyeHeight(Pose p_28352_, EntityDimensions p_28353_) {
+    protected float getStandingEyeHeight(Pose pose, EntityDimensions dimensions) {
         return 0.3F;
     }
 

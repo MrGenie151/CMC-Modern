@@ -58,7 +58,10 @@ public abstract class ItemRendererMixin implements ResourceManagerReloadListener
         return original.call(stack, level, entity, seed);
     }
 
-    @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/client/ForgeHooksClient;handleCameraTransforms(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemDisplayContext;Z)Lnet/minecraft/client/resources/model/BakedModel;"))
+    @WrapOperation(method = "render", at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraftforge/client/ForgeHooksClient;handleCameraTransforms(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemDisplayContext;Z)Lnet/minecraft/client/resources/model/BakedModel;",
+            remap = false))
     public BakedModel getOverriddenModel(PoseStack poseStack, BakedModel model, ItemDisplayContext cameraTransformType, boolean applyLeftHandTransform, Operation<BakedModel> original,
                                         @Local(argsOnly = true) ItemStack stack) {
         if (stack.getItem() instanceof SpecializedItemRendering special) {

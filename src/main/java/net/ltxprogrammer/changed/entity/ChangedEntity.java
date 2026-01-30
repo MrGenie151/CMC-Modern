@@ -400,7 +400,7 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
         return getLatexType().isHostileTo(LatexType.getEntityLatexType(player));
     }
 
-    public float getEyeHeightMul() {
+    protected float getEyeHeightMul() {
         if (this.isCrouching())
             return 0.83F;
         else
@@ -1223,5 +1223,10 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
     public int getMaxAirSupply() {
         // This function is called in the ctor of Entity, so attributes aren't ready yet.
         return this.getAttributes() == null ? 300 : Math.round(20f * (float) this.getAttributes().getValue(ChangedAttributes.AIR_CAPACITY.get()));
+    }
+
+    @Override
+    protected float getStandingEyeHeight(Pose pose, EntityDimensions dimensions) {
+        return dimensions.height * this.getEyeHeightMul();
     }
 }

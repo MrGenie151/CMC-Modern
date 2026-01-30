@@ -52,7 +52,7 @@ public class GasWolfPup extends GasWolfMale {
     }
 
     @Override
-    public float getEyeHeightMul() {
+    protected float getEyeHeightMul() {
         if (this.isCrouching())
             return 0.65F;
         else

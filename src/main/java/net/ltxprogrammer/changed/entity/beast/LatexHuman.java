@@ -4,7 +4,6 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.entity.*;
-import net.ltxprogrammer.changed.init.ChangedTransfurVariants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.resources.DefaultPlayerSkin;
@@ -13,7 +12,9 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
@@ -133,8 +134,17 @@ public class LatexHuman extends ChangedEntity implements ComplexRenderer {
     }
 
     @Override
-    public float getEyeHeightMul() {
-        return 0.9F;
+    protected float getStandingEyeHeight(Pose pose, EntityDimensions dimensions) {
+        switch (pose) {
+            case SWIMMING:
+            case FALL_FLYING:
+            case SPIN_ATTACK:
+                return 0.4F;
+            case CROUCHING:
+                return 1.27F;
+            default:
+                return 1.62F;
+        }
     }
 
     @Override

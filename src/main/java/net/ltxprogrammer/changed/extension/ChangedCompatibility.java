@@ -248,7 +248,7 @@ public class ChangedCompatibility {
             if (item != null)
                 LOGGER.info("Found registry object {}", ResourceKey.create(registry.key(), name));
             else
-                LOGGER.info("Missing registry object {}, skipping", ResourceKey.create(registry.key(), name));
+                LOGGER.debug("Missing registry object {}, skipping", ResourceKey.create(registry.key(), name));
             return item;
         });
     }
@@ -259,7 +259,7 @@ public class ChangedCompatibility {
             if (item != null)
                 LOGGER.info("Found forge registry object {}", ResourceKey.create(registry.getRegistryKey(), name));
             else
-                LOGGER.info("Missing forge registry object {}, skipping", ResourceKey.create(registry.getRegistryKey(), name));
+                LOGGER.debug("Missing forge registry object {}, skipping", ResourceKey.create(registry.getRegistryKey(), name));
             return item;
         });
     }

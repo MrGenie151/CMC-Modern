@@ -529,7 +529,10 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDa
         }
     }
 
-    @WrapOperation(method = "playBlockFallSound", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getSoundType(Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/world/level/block/SoundType;"))
+    @WrapOperation(method = "playBlockFallSound", at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/level/block/state/BlockState;getSoundType(Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/world/level/block/SoundType;",
+            remap = false))
     public SoundType extendedSoundEvent(BlockState instance, LevelReader reader, BlockPos blockPos, Entity entity, Operation<SoundType> original) {
         final LatexCoverState coverState = LatexCoverState.getAt(reader, blockPos.above());
         if (coverState.isAir())
@@ -556,5 +559,14 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDa
         });
 
         return total.intValue() + original.call(armorSlots, damageSource);
+    }
+
+    @WrapMethod(method = "getEyeHeight(Lnet/minecraft/world/entity/Pose;Lnet/minecraft/world/entity/EntityDimensions;)F")
+    protected float getEyeHeight(Pose pose, EntityDimensions dimensions, Operation<Float> original) {
+        var variant = ProcessTransfur.getPlayerTransfurVariant(EntityUtil.playerOrNull(this));
+        if (variant == null)
+            return original.call(pose, dimensions);
+
+        return variant.getTransfurEyeHeight(pose, original.call(pose, dimensions));
     }
 }

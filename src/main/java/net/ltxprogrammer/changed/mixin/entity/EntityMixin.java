@@ -81,24 +81,6 @@ public abstract class EntityMixin extends net.minecraftforge.common.capabilities
         });
     }
 
-    @Inject(method = "getEyeHeight(Lnet/minecraft/world/entity/Pose;Lnet/minecraft/world/entity/EntityDimensions;)F", at = @At("RETURN"), cancellable = true)
-    protected void getEyeHeight(Pose pose, EntityDimensions dimensions, CallbackInfoReturnable<Float> callback) {
-        if ((asEntity()) instanceof ChangedEntity le) {
-            callback.setReturnValue(dimensions.height * le.getEyeHeightMul());
-        }
-
-        else ProcessTransfur.ifPlayerTransfurred(EntityUtil.playerOrNull(asEntity()), variant -> {
-            ChangedEntity ChangedEntity = variant.getChangedEntity();
-            final float morphProgress = variant.getMorphProgression();
-
-            if (morphProgress < 1f) {
-                //callback.setReturnValue(Mth.lerp(morphProgress, callback.getReturnValue(), ChangedEntity.getEyeHeight(pose)));
-            } else {
-                callback.setReturnValue(ChangedEntity.getEyeHeight(pose));
-            }
-        });
-    }
-
     @Inject(method = "interact", at = @At("HEAD"), cancellable = true)
     public void interact(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> callback) {
         ProcessTransfur.ifPlayerTransfurred(EntityUtil.playerOrNull(asEntity()), variant -> {
@@ -270,7 +252,7 @@ public abstract class EntityMixin extends net.minecraftforge.common.capabilities
     @WrapOperation(method = {"playCombinationStepSounds", "playMuffledStepSound"},
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/block/state/BlockState;getSoundType(Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/world/level/block/SoundType;",
-                    remap = true),
+                    remap = false),
             remap = false)
     protected SoundType maybeGetLatexCoverSound(BlockState instance, LevelReader reader, BlockPos blockPos, Entity entity, Operation<SoundType> original) {
         final LatexCoverState coverState = LatexCoverState.getAt(reader, blockPos.above());
@@ -283,7 +265,10 @@ public abstract class EntityMixin extends net.minecraftforge.common.capabilities
     }
 
     @WrapOperation(method = {"playStepSound"},
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getSoundType(Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/world/level/block/SoundType;"))
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/level/block/state/BlockState;getSoundType(Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/world/level/block/SoundType;",
+                    remap = false))
     protected SoundType maybeGetLatexCoverSoundRemapped(BlockState instance, LevelReader reader, BlockPos blockPos, Entity entity, Operation<SoundType> original) {
         final LatexCoverState coverState = LatexCoverState.getAt(reader, blockPos.above());
         if (coverState.isAir())
