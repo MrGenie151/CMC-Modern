@@ -259,6 +259,12 @@ public class ChangedEntities {
     public static final RegistryObject<EntityType<LatexPurpleFox>> LATEX_PURPLE_FOX = registerSpawning("latex_purple_fox", 0xcebbe8, 0xf1e3f1,
             EntityType.Builder.of(LatexPurpleFox::new, MobCategory.MONSTER).clientTrackingRange(10).sized(0.7F, 1.93F),
             ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, LatexPurpleFox::checkEntitySpawnRules);
+    public static final RegistryObject<EntityType<LatexRabbitFemale>> LATEX_RABBIT_FEMALE = registerSpawning("latex_rabbit_female", 0xFEF0E5, 0xFFC4C4,
+            EntityType.Builder.of(LatexRabbitFemale::new, MobCategory.CREATURE).clientTrackingRange(10).sized(0.7F, 1.93F),
+            ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, LatexRabbitFemale::checkEntitySpawnRules);
+    public static final RegistryObject<EntityType<LatexRabbitMale>> LATEX_RABBIT_MALE = registerSpawning("latex_rabbit_male", 0xFEF0E5, 0xFFC4C4,
+            EntityType.Builder.of(LatexRabbitMale::new, MobCategory.CREATURE).clientTrackingRange(10).sized(0.7F, 1.93F),
+            ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, LatexRabbitMale::checkEntitySpawnRules);
     public static final RegistryObject<EntityType<LatexRaccoon>> LATEX_RACCOON = registerSpawning("latex_raccoon", 0x949494, 0x535353,
             EntityType.Builder.of(LatexRaccoon::new, MobCategory.MONSTER).clientTrackingRange(10).sized(0.7F, 1.93F),
             ChangedEntities::overworldOnly, SpawnPlacements.Type.ON_GROUND, LatexRaccoon::checkEntitySpawnRules);
