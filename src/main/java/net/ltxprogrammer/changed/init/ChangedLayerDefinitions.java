@@ -87,6 +87,8 @@ public class ChangedLayerDefinitions {
         event.registerLayerDefinition(LatexPinkWyvernModel.LAYER_LOCATION, LatexPinkWyvernModel::createBodyLayer);
         event.registerLayerDefinition(LatexPinkYuinDragonModel.LAYER_LOCATION, LatexPinkYuinDragonModel::createBodyLayer);
         event.registerLayerDefinition(LatexPurpleFoxModel.LAYER_LOCATION, LatexPurpleFoxModel::createBodyLayer);
+        event.registerLayerDefinition(LatexRabbitFemaleModel.LAYER_LOCATION, LatexRabbitFemaleModel::createBodyLayer);
+        event.registerLayerDefinition(LatexRabbitMaleModel.LAYER_LOCATION, LatexRabbitMaleModel::createBodyLayer);
         event.registerLayerDefinition(LatexRaccoonModel.LAYER_LOCATION, LatexRaccoonModel::createBodyLayer);
         event.registerLayerDefinition(LatexRedDragonModel.LAYER_LOCATION, LatexRedDragonModel::createBodyLayer);
         event.registerLayerDefinition(LatexRedPandaModel.LAYER_LOCATION, LatexRedPandaModel::createBodyLayer);

@@ -173,6 +173,8 @@ public class RecipeCategories {
         event.addGendered(ChangedTransfurVariants.WHITE_LATEX_WOLF_FEMALE);
         event.addGendered(ChangedTransfurVariants.WHITE_WOLF_MALE);
         event.addGendered(ChangedTransfurVariants.WHITE_WOLF_FEMALE);
+        event.addGendered(ChangedTransfurVariants.LATEX_RABBIT_MALE);
+        event.addGendered(ChangedTransfurVariants.LATEX_RABBIT_FEMALE);
         event.addGendered(ChangedTransfurVariants.LATEX_SQUID_DOG_MALE);
         event.addGendered(ChangedTransfurVariants.LATEX_SQUID_DOG_FEMALE);
         event.addGendered(ChangedTransfurVariants.LATEX_SNOW_LEOPARD_MALE);

@@ -9,6 +9,8 @@
     { "type": "changed:latex_squirrel", "weight": 8, "minCount": 1, "maxCount": 3 },
     { "type": "changed:latex_moth", "weight": 4, "minCount": 1, "maxCount": 3 },
     { "type": "changed:latex_mimic_plant", "weight": 5, "minCount": 1, "maxCount": 3 },
+    { "type": "changed:latex_rabbit_female", "weight": 3, "minCount": 1, "maxCount": 3 },
+    { "type": "changed:latex_rabbit_male", "weight": 3, "minCount": 1, "maxCount": 3 },
     { "type": "changed:latex_raccoon", "weight": 3, "minCount": 1, "maxCount": 3 },
 
     { "type": "changed:gas_skunk", "weight": 1, "minCount": 1, "maxCount": 3 }
