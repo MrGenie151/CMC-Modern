@@ -49,7 +49,6 @@
     "server.ServerPlayerGameModeMixin"
   ],
   "client": [
-    "block.BlockColorsMixin",
     "client.ChunkRenderDispatcherMixin",
     "client.ClientLevelMixin",
     "client.ClientLivingEntityMixin",
