@@ -1,11 +1,8 @@
 package net.ltxprogrammer.changed.block;
 
-import net.ltxprogrammer.changed.entity.TransfurCause;
-import net.ltxprogrammer.changed.entity.TransfurContext;
 import net.ltxprogrammer.changed.entity.latex.LatexType;
 import net.ltxprogrammer.changed.init.ChangedSounds;
 import net.ltxprogrammer.changed.init.ChangedTags;
-import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.util.EntityUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -16,6 +13,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -42,6 +40,7 @@ import java.util.function.Supplier;
 public class AlertingPuddle extends ChangedBlock {
     public static final BooleanProperty OCCUPIED = BlockStateProperties.OCCUPIED;
     public static final VoxelShape SHAPE_WHOLE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 1.0D, 15.0D);
+    protected final TargetingConditions targetingConditions = TargetingConditions.forCombat().ignoreLineOfSight();
     protected final Predicate<? super LivingEntity> toTarget;
     protected final Predicate<? super LivingEntity> toAlert;
 
@@ -92,6 +91,9 @@ public class AlertingPuddle extends ChangedBlock {
 
                 AABB alertZone = new AABB(blockPos).inflate(12.0);
                 level.getEntities(EntityTypeTest.forClass(LivingEntity.class), alertZone, this.toAlert).forEach(alertEntity -> {
+                    if (!this.targetingConditions.test(alertEntity, livingEntity))
+                        return;
+
                     if (alertEntity instanceof Player player) {
                         ChangedSounds.sendLocalSound(player, blockPos, ChangedSounds.PUDDLE_ALERT, 1.0f, 1.0f);
                     } else if (alertEntity instanceof Mob mob) {
