@@ -83,9 +83,10 @@ public class ServerTransfurVariantInstance<T extends ChangedEntity> extends Tran
         if (parent.canGlide && shouldApplyAbilities()) {
             if (!host.isSpectator() && host.getAbilities().flying)
                 ChangedCriteriaTriggers.FLYING.trigger(host, ticksFlying);
-
-            this.entity.setChangedEntityFlag(ChangedEntity.FLAG_IS_FLYING, host.getAbilities().flying);
         }
+
+        this.entity.setChangedEntityFlag(ChangedEntity.FLAG_IS_FLYING, host.getAbilities().flying &&
+                host.getVehicle() == null);
     }
 
     @Override
