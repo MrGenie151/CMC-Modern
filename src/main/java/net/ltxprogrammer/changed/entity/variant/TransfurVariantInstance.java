@@ -820,7 +820,7 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
                         boolean oldState = controller.exchangeKeyState(isDown);
                         if (isDown || instance.getController().isCoolingDown())
                             this.resetTicksSinceLastAbilityActivity();
-                        if (host.containerMenu == host.inventoryMenu && !host.isUsingItem() && !instance.getController().isCoolingDown())
+                        if (!host.isUsingItem() && !instance.getController().isCoolingDown())
                             instance.getUseType().check(isDown, oldState, unique, controller);
                     });
                 }

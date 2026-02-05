@@ -50,6 +50,7 @@ public class ChangedOverlays {
                 ext.isEyeInGas(TransfurGas.class).map(TransfurGas::getColor).ifPresent(color -> {
                     RenderSystem.disableDepthTest();
                     RenderSystem.depthMask(false);
+                    RenderSystem.enableBlend();
                     RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
                     graphics.setColor(color.red(), color.green(), color.blue(), 1.0F);
 
@@ -66,6 +67,7 @@ public class ChangedOverlays {
                     RenderSystem.depthMask(true);
                     RenderSystem.enableDepthTest();
                     graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+                    RenderSystem.disableBlend();
                     RenderSystem.defaultBlendFunc();
                 });
             }
