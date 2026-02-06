@@ -1,5 +1,6 @@
 package net.ltxprogrammer.changed.world.features.structures;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.init.ChangedStructureTypes;
@@ -30,14 +31,17 @@ public class Facility extends Structure {
         Rotation rotation = Rotation.getRandom(context.random());
         BlockPos blockpos = this.getLowestYIn5by5BoxOffset7Blocks(context, rotation);
         return blockpos.getY() < 60 ? Optional.empty() : Optional.of(new Structure.GenerationStub(blockpos, (builder) -> {
-            this.generatePieces(builder, context, blockpos, rotation);
+            this.tryGeneratePieces(builder, context, blockpos, rotation);
         }));
     }
 
     private static final int REROLL_FOR_SIZE_COUNT = 1;
 
-    private void generatePieces(StructurePiecesBuilder builder, GenerationContext context, BlockPos blockPos, Rotation rotation) {
+    private void tryGeneratePieces(StructurePiecesBuilder builder, GenerationContext context, BlockPos blockPos, Rotation rotation) {
         ChunkPos center = context.chunkPos();
+        Changed.LOGGER.info("Started facility generation at ChunkPos {}",
+                center);
+
         ChunkPos min = new ChunkPos(center.x - GENERATION_CHUNK_RADIUS, center.z - GENERATION_CHUNK_RADIUS);
         ChunkPos max = new ChunkPos(center.x + GENERATION_CHUNK_RADIUS, center.z + GENERATION_CHUNK_RADIUS);
         BlockPos minPos = new BlockPos(min.getMinBlockX(), context.heightAccessor().getMinBuildHeight(), min.getMinBlockZ());
@@ -52,7 +56,10 @@ public class Facility extends Structure {
         for (int reroll = 0; reroll < REROLL_FOR_SIZE_COUNT; reroll++) {
             builder.clear();
 
-            FacilityKeystone keystone = FacilityPieces.generateFacility(builder, context, 5, 20, generationRegion);
+            Optional<FacilityKeystone> keystoneOpt = FacilityPieces.generateFacility(builder, context, 5, 20, generationRegion);
+            if (keystoneOpt.isEmpty()) continue;
+            FacilityKeystone keystone = keystoneOpt.get();
+
             builder.addPiece(keystone);
 
             int size = ((StructurePiecesBuilderExtender)builder).pieceCount();
@@ -64,6 +71,12 @@ public class Facility extends Structure {
         }
 
         builder.clear();
+        if (largestKeystone == null) {
+            Changed.LOGGER.info("Failed generating facility at ChunkPos {}",
+                    center);
+            return;
+        }
+
         largestSet.forEach(builder::addPiece);
 
         Changed.LOGGER.info("Generated facility \"{}\" with {} pieces (best of {}), at ChunkPos {}",

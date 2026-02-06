@@ -418,7 +418,7 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
         return replacedRoomStream.findFirst();
     }
 
-    public static FacilityKeystone generateFacility(StructurePiecesBuilder builder, Structure.GenerationContext context, int genDepth, int span, BoundingBox allowedRegion) {
+    public static Optional<FacilityKeystone> generateFacility(StructurePiecesBuilder builder, Structure.GenerationContext context, int genDepth, int span, BoundingBox allowedRegion) {
         BlockPos blockPos = new BlockPos(
                 context.chunkPos().getBlockX(8), 0,
                 context.chunkPos().getBlockZ(8));
@@ -509,6 +509,10 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
                     Pair.of(pair.definition.getName(), pair.instance.getBoundingBox())).toList());
         });
 
-        return new FacilityKeystone(genDepth, zoneBoundingBoxes, entrancePiece.getBoundingBox(), context.random());
+        try {
+            return Optional.of(new FacilityKeystone(genDepth, zoneBoundingBoxes, entrancePiece.getBoundingBox(), context.random()));
+        } catch (Exception ignored) {
+            return Optional.empty();
+        }
     }
 }
