@@ -45,13 +45,6 @@ public class PillowBlockEntity extends BlockEntity implements SeatableBlockEntit
         return false;
     }
 
-    public void forceOutEntity() {
-        final var entity = this.getSeatedEntity();
-        if (entity != null && entity.vehicle == entityHolder) {
-            entity.vehicle = null;
-        }
-    }
-
     public void setColor(DyeColor color) {
         this.color = color;
     }

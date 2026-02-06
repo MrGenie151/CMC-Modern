@@ -542,7 +542,7 @@ public class StasisChamber extends HorizontalDirectionalBlock implements Partial
     }
 
     public static boolean isEntityStabilized(LivingEntity livingEntity) {
-        if (livingEntity.vehicle instanceof SeatEntity seatEntity) {
+        if (livingEntity.getVehicle() instanceof SeatEntity seatEntity) {
             return livingEntity.level().getBlockEntity(seatEntity.getAttachedBlockPos(), ChangedBlockEntities.STASIS_CHAMBER.get())
                     .map(StasisChamberBlockEntity::isStabilized)
                     .orElse(false);
@@ -552,7 +552,7 @@ public class StasisChamber extends HorizontalDirectionalBlock implements Partial
     }
 
     public static boolean isEntityCaptured(LivingEntity livingEntity) {
-        if (livingEntity.vehicle instanceof SeatEntity seatEntity) {
+        if (livingEntity.getVehicle() instanceof SeatEntity seatEntity) {
             return livingEntity.level().getBlockEntity(seatEntity.getAttachedBlockPos(), ChangedBlockEntities.STASIS_CHAMBER.get())
                     .isPresent();
         }

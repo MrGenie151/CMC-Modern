@@ -30,7 +30,7 @@ public class ClientLevelExtension extends LevelExtension {
 
     @Override
     public void sendCoverUpdated(LevelAccessor level, BlockPos blockPos, LatexCoverState oldState, LatexCoverState newState, int flags) {
-        Minecraft.getInstance().levelRenderer.blockChanged(level, blockPos, Blocks.AIR.defaultBlockState, Blocks.AIR.defaultBlockState, flags);
+        Minecraft.getInstance().levelRenderer.blockChanged(level, blockPos, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), flags);
     }
 
     public void addDestroyLatexCoverEffect(ClientLevel level, BlockPos blockPos, LatexCoverState state, BlockState repBlockState) {

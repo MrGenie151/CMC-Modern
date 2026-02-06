@@ -275,7 +275,7 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerDataExte
 
     @Inject(method = "wantsToStopRiding", at = @At("HEAD"), cancellable = true)
     public void forceRiding(CallbackInfoReturnable<Boolean> cir) {
-        if (this.vehicle instanceof SeatEntity seatEntity && !seatEntity.canSeatedDismount())
+        if (this.getVehicle() instanceof SeatEntity seatEntity && !seatEntity.canSeatedDismount())
             cir.setReturnValue(false);
     }
 

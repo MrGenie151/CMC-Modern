@@ -80,7 +80,7 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements P
         ProcessTransfur.ifPlayerTransfurred(this, variant -> {
             if (!variant.getParent().getBreatheMode().canBreatheWater())
                 return;
-            if (!this.isEyeInFluid(FluidTags.WATER))
+            if (!this.isEyeInFluidType(ForgeMod.WATER_TYPE.get()))
                 return;
             for (var level : Thread.currentThread().getStackTrace()) {
                 if (level.toString().contains("LightTexture")) // Light texture breaks when returning > 1.0F

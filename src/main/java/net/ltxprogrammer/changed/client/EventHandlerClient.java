@@ -62,7 +62,7 @@ public class EventHandlerClient {
             return false;
         if (entity.isDeadOrDying() && entity.getLastDamageSource() != null && entity.getLastDamageSource().is(ChangedTags.DamageTypes.IS_TRANSFUR))
             return false;
-        if (entity.vehicle instanceof SeatEntity seat && seat.shouldSeatedBeInvisible())
+        if (entity.getVehicle() instanceof SeatEntity seat && seat.shouldSeatedBeInvisible())
             return false;
 
         return true;

@@ -23,6 +23,7 @@ import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.event.entity.living.LivingBreatheEvent;
 
 import java.util.HashMap;
@@ -93,7 +94,7 @@ public class ServerTransfurVariantInstance<T extends ChangedEntity> extends Tran
     protected void tickBreathing(LivingBreatheEvent event) {
         super.tickBreathing(event);
 
-        if (host.isAlive() && breatheMode.canBreatheWater() && shouldApplyAbilities() && host.isEyeInFluid(FluidTags.WATER)) {
+        if (host.isAlive() && breatheMode.canBreatheWater() && shouldApplyAbilities() && host.isEyeInFluidType(ForgeMod.WATER_TYPE.get())) {
             ChangedCriteriaTriggers.AQUATIC_BREATHE.trigger(host, this.ticksBreathingUnderwater);
         }
     }

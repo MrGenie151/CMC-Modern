@@ -57,6 +57,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.network.PacketDistributor;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.spongepowered.asm.mixin.Final;
@@ -169,7 +170,7 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDa
                 if (WhiteLatexTransportInterface.isEntityInWhiteLatex(player))
                     callback.setReturnValue(true);
             }
-            if (variant.breatheMode.canBreatheWater() && effect.equals(MobEffects.CONDUIT_POWER) && isEyeInFluid(FluidTags.WATER))
+            if (variant.breatheMode.canBreatheWater() && effect.equals(MobEffects.CONDUIT_POWER) && isEyeInFluidType(ForgeMod.WATER_TYPE.get()))
                 callback.setReturnValue(true);
         });
     }
@@ -187,7 +188,7 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDa
                 if (WhiteLatexTransportInterface.isEntityInWhiteLatex(player))
                     callback.setReturnValue(new MobEffectInstance(MobEffects.NIGHT_VISION, 300, 1, false, false));
             }
-            if (variant.breatheMode.canBreatheWater() && effect.equals(MobEffects.CONDUIT_POWER) && isEyeInFluid(FluidTags.WATER))
+            if (variant.breatheMode.canBreatheWater() && effect.equals(MobEffects.CONDUIT_POWER) && isEyeInFluidType(ForgeMod.WATER_TYPE.get()))
                 callback.setReturnValue(new MobEffectInstance(MobEffects.CONDUIT_POWER, 300, 1, false, false));
         });
     }
@@ -284,7 +285,7 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDa
                     blockstate.getValue(StasisChamber.SECTION).getRelative(blockpos, blockstate.getValue(HorizontalDirectionalBlock.FACING), ThreeXThreeSection.CENTER),
                     ChangedBlockEntities.STASIS_CHAMBER.get()
             ).filter(chamber -> chamber.getFluidYHeight() > yCheck).flatMap(StasisChamberBlockEntity::getFluidType).ifPresent(fluid -> {
-                fluid.defaultFluidState().getTags().forEach(this.fluidOnEyes::add);
+                this.forgeFluidTypeOnEyes = fluid.getFluidType();
                 if (fluid instanceof Gas gas)
                     eyeInGas = gas;
             });
@@ -484,7 +485,7 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDa
         if ((LivingEntity)(Object)this instanceof Player && level() instanceof ServerLevel serverLevel) {
             if (serverLevel.players().stream().filter(player -> !player.isSpectator()).count() == 1) {
                 // Singleplayer, just skip stasis time
-                if (this.vehicle instanceof SeatEntity seatEntity) {
+                if (this.getVehicle() instanceof SeatEntity seatEntity) {
                     this.level().getBlockEntity(seatEntity.getAttachedBlockPos(), ChangedBlockEntities.STASIS_CHAMBER.get())
                             .ifPresent(StasisChamberBlockEntity::trimSchedule);
                 }
@@ -497,7 +498,7 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDa
 
     @Inject(method = "getBedOrientation", at = @At("HEAD"), cancellable = true)
     public void getStasisChamberOrientation(CallbackInfoReturnable<Direction> cir) {
-        if (this.vehicle instanceof SeatEntity seatEntity) {
+        if (this.getVehicle() instanceof SeatEntity seatEntity) {
             seatEntity.getAttachedBlockState()
                     .map(state -> state.getBedDirection(this.level(), seatEntity.getAttachedBlockPos()))
                     .ifPresent(cir::setReturnValue);

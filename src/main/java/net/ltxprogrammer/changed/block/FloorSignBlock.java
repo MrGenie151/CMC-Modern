@@ -38,7 +38,7 @@ public class FloorSignBlock extends ChangedBlock {
 
     @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.defaultBlockState.setValue(HORIZONTAL_AXIS, context.getHorizontalDirection().getAxis());
+        return this.defaultBlockState().setValue(HORIZONTAL_AXIS, context.getHorizontalDirection().getAxis());
     }
 
     @Override

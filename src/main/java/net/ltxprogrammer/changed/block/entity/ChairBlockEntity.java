@@ -41,12 +41,5 @@ public class ChairBlockEntity extends BlockEntity implements SeatableBlockEntity
         return false;
     }
 
-    public void forceOutEntity() {
-        final var entity = this.getSeatedEntity();
-        if (entity != null && entity.vehicle == entityHolder) {
-            entity.vehicle = null;
-        }
-    }
-
     public static void tick(Level level, BlockPos pos, BlockState state, ChairBlockEntity blockEntity) {}
 }
