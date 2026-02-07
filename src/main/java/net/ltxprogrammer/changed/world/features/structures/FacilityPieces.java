@@ -428,9 +428,12 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
         Stack<ConfiguredFacilityPiece> stack = new Stack<>();
         List<GenStep> starts = new ArrayList<>();
         var facilityGenerationContext = new FacilityGenerationContext(builder, context);
-        ConfiguredFacilityPiece entranceNew = INSTANCE.facilityPieceCollections.get(ChangedFacilityPieceTypes.ENTRANCE.get()).shuffledStream(context.random())
-                .filter(meetsPiecePositionRequirements(facilityGenerationContext, new BoundingBox(blockPos).inflatedBy(7)))
-                .findFirst().orElseThrow();
+        Optional<ConfiguredFacilityPiece> entranceNewOpt = INSTANCE.facilityPieceCollections.get(ChangedFacilityPieceTypes.ENTRANCE.get()).shuffledStream(context.random())
+                .filter(meetsPiecePositionRequirements(facilityGenerationContext, new BoundingBox(blockPos).inflatedBy(7))).findFirst();
+        if (entranceNewOpt.isEmpty())
+            return Optional.empty();
+
+        ConfiguredFacilityPiece entranceNew = entranceNewOpt.get();
         FacilityPieceInstance entrancePiece = entranceNew.getFacilityPiece().createStructurePiece(context.structureTemplateManager(), genDepth);
 
         var directions = new ArrayList<>(Direction.Plane.HORIZONTAL.stream().toList());
