@@ -733,7 +733,7 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
                     host.getAbilities().mayfly = false;
                     host.getAbilities().flying = false;
                     host.onUpdateAbilities();
-                } else if (host.isEyeInFluid(FluidTags.WATER) && host.getAbilities().mayfly) {
+                } else if (host.isEyeInFluidType(ForgeMod.WATER_TYPE.get()) && host.getAbilities().mayfly) {
                     host.getAbilities().mayfly = false;
                     host.getAbilities().flying = false;
                     host.onUpdateAbilities();
@@ -884,12 +884,12 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
                     }
                 });
 
-        if (getEntityShape().isLegless() && host.isEyeInFluid(FluidTags.WATER) && shouldApplyAbilities())
+        if (getEntityShape().isLegless() && host.isEyeInFluidType(ForgeMod.WATER_TYPE.get()) && shouldApplyAbilities())
             host.setPose(Pose.SWIMMING);
 
         // Sink in water
         if (host.getAttributeBaseValue(ForgeMod.SWIM_SPEED.get()) > 1.0) {
-            host.setNoGravity(host.isEyeInFluid(FluidTags.WATER));
+            host.setNoGravity(host.isEyeInFluidType(ForgeMod.WATER_TYPE.get()));
         }
 
         // Effects
@@ -1014,7 +1014,7 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
     }
 
     public float getFoodEfficiency() {
-        if (host.isSwimming() || host.isEyeInFluid(FluidTags.WATER) || host.isInWater()) {
+        if (host.isSwimming() || host.isEyeInFluidType(ForgeMod.WATER_TYPE.get()) || host.isInWater()) {
             return getSwimEfficiency();
         } else if (host.onGround() && host.isSprinting()) {
             return getSprintEfficiency();

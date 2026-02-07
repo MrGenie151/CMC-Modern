@@ -43,7 +43,7 @@ public class LatexMantaRayFemale extends AbstractLatexMantaRay {
 
     @Override
     public boolean isVisuallySwimming() {
-        if (this.getUnderlyingPlayer() != null && this.getUnderlyingPlayer().isEyeInFluid(FluidTags.WATER))
+        if (this.getUnderlyingPlayer() != null && this.getUnderlyingPlayer().isEyeInFluidType(ForgeMod.WATER_TYPE.get()))
             return true;
         return super.isVisuallySwimming();
     }

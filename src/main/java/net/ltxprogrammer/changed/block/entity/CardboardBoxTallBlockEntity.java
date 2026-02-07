@@ -48,21 +48,14 @@ public class CardboardBoxTallBlockEntity extends BlockEntity implements Seatable
         return false;
     }
 
-    public void forceOutEntity() {
-        final var entity = this.getSeatedEntity();
-        if (entity != null && entity.vehicle == entityHolder) {
-            entity.vehicle = null;
-        }
-    }
-
     public static void tick(Level level, BlockPos pos, BlockState state, CardboardBoxTallBlockEntity blockEntity) {
         blockEntity.ticksSinceChange++;
 
         final var entity = blockEntity.getSeatedEntity();
 
         if (entity != null && blockEntity.entityHolder != null) {
-            if (entity.vehicle != blockEntity.entityHolder) {
-                if (entity.vehicle == null || !entity.vehicle.blockPosition().equals(blockEntity.entityHolder.blockPosition())) {
+            if (entity.getVehicle() != blockEntity.entityHolder) {
+                if (entity.getVehicle() == null || !entity.getVehicle().blockPosition().equals(blockEntity.entityHolder.blockPosition())) {
                     blockEntity.ticksSinceChange = 0;
                 }
             }

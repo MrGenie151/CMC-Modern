@@ -904,7 +904,7 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
 
         this.setSharedFlag(7, player.isFallFlying());
 
-        this.vehicle = player.vehicle;
+        this.vehicle = player.getVehicle();
 
         this.useItemRemaining = player.useItemRemaining;
 

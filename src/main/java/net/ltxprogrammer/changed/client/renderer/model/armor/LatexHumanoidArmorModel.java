@@ -58,11 +58,11 @@ public abstract class LatexHumanoidArmorModel<T extends ChangedEntity, M extends
     public void scaleForSlot(RenderLayerParent<? super T, ?> parent, EquipmentSlot slot, PoseStack poseStack) {
         switch (slot) {
             case HEAD -> {
-                if (parent instanceof AdvancedHumanoidModel<?> model)
+                if (parent.getModel() instanceof AdvancedHumanoidModel<?> model)
                     model.scaleForHead(poseStack);
             }
             case CHEST, LEGS, FEET -> {
-                if (parent instanceof AdvancedHumanoidModel<?> model)
+                if (parent.getModel() instanceof AdvancedHumanoidModel<?> model)
                     model.scaleForBody(poseStack);
             }
         }

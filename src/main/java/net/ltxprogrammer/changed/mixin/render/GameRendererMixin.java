@@ -26,6 +26,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.GameType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.fml.ModLoader;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -62,7 +63,7 @@ public abstract class GameRendererMixin {
                 callback.setReturnValue(1.0f);
             }
 
-            if (variant.getParent().getBreatheMode().canBreatheWater() && livingEntity.isEyeInFluid(FluidTags.WATER)) {
+            if (variant.getParent().getBreatheMode().canBreatheWater() && livingEntity.isEyeInFluidType(ForgeMod.WATER_TYPE.get())) {
                 callback.setReturnValue(0.85f);
             }
         });

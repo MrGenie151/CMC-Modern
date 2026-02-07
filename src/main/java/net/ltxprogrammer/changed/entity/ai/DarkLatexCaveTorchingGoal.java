@@ -106,12 +106,12 @@ public class DarkLatexCaveTorchingGoal extends MoveToBlockGoal {
         if (this.isReachedTarget() && !placed) {
             var torchPos = blockPos.above();
             this.entity.swing(InteractionHand.OFF_HAND);
-            this.level.setBlockAndUpdate(torchPos, Blocks.TORCH.defaultBlockState);
+            this.level.setBlockAndUpdate(torchPos, Blocks.TORCH.defaultBlockState());
             this.entity.getOffhandItem().shrink(1);
 
-            SoundType soundtype = Blocks.TORCH.defaultBlockState.getSoundType(level, torchPos, entity);
+            SoundType soundtype = Blocks.TORCH.defaultBlockState().getSoundType(level, torchPos, entity);
             level.playSound(entity, torchPos, soundtype.getPlaceSound(), SoundSource.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-            level.gameEvent(GameEvent.BLOCK_PLACE, torchPos, GameEvent.Context.of(entity, Blocks.TORCH.defaultBlockState));
+            level.gameEvent(GameEvent.BLOCK_PLACE, torchPos, GameEvent.Context.of(entity, Blocks.TORCH.defaultBlockState()));
 
             placed = true;
             this.nextStartTick = 10; // Shorter cooldown after placing a torch
