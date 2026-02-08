@@ -123,6 +123,10 @@ public class ChangedTransfurVariants {
             TransfurVariant.Builder.of(ChangedEntities.LATEX_PINK_YUIN_DRAGON).glide());
     public static final RegistryObject<TransfurVariant<LatexPurpleFox>> LATEX_PURPLE_FOX = register("form_latex_purple_fox",
             TransfurVariant.Builder.of(ChangedEntities.LATEX_PURPLE_FOX));
+    public static final RegistryObject<TransfurVariant<LatexRabbitFemale>> LATEX_RABBIT_FEMALE = register("form_latex_rabbit/female",
+            TransfurVariant.Builder.of(ChangedEntities.LATEX_RABBIT_FEMALE).absorbing());
+    public static final RegistryObject<TransfurVariant<LatexRabbitMale>> LATEX_RABBIT_MALE = register("form_latex_rabbit/male",
+            TransfurVariant.Builder.of(ChangedEntities.LATEX_RABBIT_MALE));
     public static final RegistryObject<TransfurVariant<LatexRaccoon>> LATEX_RACCOON = register("form_latex_raccoon",
             TransfurVariant.Builder.of(ChangedEntities.LATEX_RACCOON).visionType(VisionType.REDUCED));
     public static final RegistryObject<TransfurVariant<LatexRedDragon>> LATEX_RED_DRAGON = register("form_latex_red_dragon",
@@ -206,6 +210,7 @@ public class ChangedTransfurVariants {
         public static final GenderedPair<DarkLatexWolfMale, DarkLatexWolfFemale> DARK_LATEX_WOLVES = registerPair(DARK_LATEX_WOLF_MALE, DARK_LATEX_WOLF_FEMALE);
         public static final GenderedPair<PhageLatexWolfMale, PhageLatexWolfFemale> PHAGE_LATEX_WOLVES = registerPair(PHAGE_LATEX_WOLF_MALE, PHAGE_LATEX_WOLF_FEMALE);
         public static final GenderedPair<LatexMantaRayMale, LatexMantaRayFemale> LATEX_MANTA_RAYS = registerPair(LATEX_MANTA_RAY_MALE, LATEX_MANTA_RAY_FEMALE);
+        public static final GenderedPair<LatexRabbitMale, LatexRabbitFemale> LATEX_RABBITS = registerPair(LATEX_RABBIT_MALE, LATEX_RABBIT_FEMALE);
         public static final GenderedPair<LatexMermaidShark, LatexSiren> LATEX_MERMAID_SHARKS = registerPair(LATEX_MERMAID_SHARK, LATEX_SIREN);
         public static final GenderedPair<BuffLatexSharkMale, BuffLatexSharkFemale> LATEX_SHARK_FUSIONS = registerPair(LATEX_SHARK_FUSION_MALE, LATEX_SHARK_FUSION_FEMALE);
         public static final GenderedPair<LatexSquidDogMale, LatexSquidDogFemale> LATEX_SQUID_DOGS = registerPair(LATEX_SQUID_DOG_MALE, LATEX_SQUID_DOG_FEMALE);
