@@ -126,12 +126,12 @@ public abstract class SpreadingLatexType extends LatexType {
 
     protected VoxelShape computeSwimShapeForState(LatexCoverState state) {
         return Shapes.or(
-                state.getValue(UP) ? Block.box(-2, 12, -2, 18, 18, 18) : Shapes.empty(),
-                state.getValue(DOWN) ? Block.box(-2, -2, -2, 18, 4, 18) : Shapes.empty(),
-                state.getValue(NORTH) ? Block.box(-2, -2, -2, 18, 18, 4) : Shapes.empty(),
-                state.getValue(SOUTH) ? Block.box(-2, -2, 12, 18, 18, 18) : Shapes.empty(),
-                state.getValue(EAST) ? Block.box(12, -2, -2, 18, 18, 18) : Shapes.empty(),
-                state.getValue(WEST) ? Block.box(-2, -2, -2, 4, 18, 18) : Shapes.empty()
+                state.getValue(UP) ? Block.box(0, 14, 0, 16, 16, 16) : Shapes.empty(),
+                state.getValue(DOWN) ? Block.box(0, 0, 0, 16, 2, 16) : Shapes.empty(),
+                state.getValue(NORTH) ? Block.box(0, 0, 0, 16, 16, 2) : Shapes.empty(),
+                state.getValue(SOUTH) ? Block.box(0, 0, 14, 16, 16, 16) : Shapes.empty(),
+                state.getValue(EAST) ? Block.box(14, 0, 0, 16, 16, 16) : Shapes.empty(),
+                state.getValue(WEST) ? Block.box(0, 0, 0, 2, 16, 16) : Shapes.empty()
         );
     }
 
@@ -204,18 +204,26 @@ public abstract class SpreadingLatexType extends LatexType {
                 .noneMatch(otherState -> otherState.getValue(SATURATION) < thisSaturation);
     }
 
-    public static boolean canExistOnSurface(BlockGetter level, BlockPos neighborPos, BlockState neighbor, Direction surfaceNormal) {
-        return !neighbor.is(surfaceNormal == Direction.UP ? ChangedTags.Blocks.DENY_LATEX_COVER : ChangedTags.Blocks.DENY_LATEX_COVER_CLIMB) &&
+    public static boolean canExistOnSurface(BlockGetter level, BlockPos sourcePos, BlockState sourceState, BlockPos neighborPos, BlockState neighbor, Direction surfaceNormal) {
+        boolean neighborSurfacePresent =
+                !neighbor.is(surfaceNormal == Direction.UP ? ChangedTags.Blocks.DENY_LATEX_COVER : ChangedTags.Blocks.DENY_LATEX_COVER_CLIMB) &&
                 neighbor.isFaceSturdy(level, neighborPos, surfaceNormal, SupportType.FULL);
+
+        if (!neighborSurfacePresent)
+            return false;
+
+        // Deny surface cover if block at sourcePos has complete collision
+        return !sourceState.isFaceSturdy(level, sourcePos, surfaceNormal.getOpposite(), SupportType.FULL);
     }
 
     public LatexCoverState spreadState(LevelReader level, BlockPos blockPos, LatexCoverState state) {
         state = state.setValue(SATURATION, state.getValue(SATURATION) + 1);
+        BlockState sourceState = level.getBlockState(blockPos);
         for (Direction direction : Direction.values()) {
             var face = FACES.get(direction);
             var checkPos = blockPos.relative(direction);
             var checkState = level.getBlockState(checkPos);
-            state = state.setValue(face, canExistOnSurface(level, checkPos, checkState, direction.getOpposite()));
+            state = state.setValue(face, canExistOnSurface(level, blockPos, sourceState, checkPos, checkState, direction.getOpposite()));
         }
 
         LatexCoverState wantedState = state;
@@ -235,6 +243,8 @@ public abstract class SpreadingLatexType extends LatexType {
         if (!level.isAreaLoaded(blockPos, 3)) return; // Forge: prevent loading unloaded chunks when checking neighbor's light and spreading
         if (random.nextInt(10 * level.getGameRules().getInt(ChangedGameRules.RULE_LATEX_GROWTH_RATE)) < 600) return;
 
+        BlockState sourceState = level.getBlockState(blockPos);
+
         Direction checkDir = Direction.getRandom(random);
         BlockPos.MutableBlockPos checkPos = blockPos.relative(checkDir).mutable();
 
@@ -248,7 +258,7 @@ public abstract class SpreadingLatexType extends LatexType {
             if (checkPos.subtract(blockPos).getY() > 0 && random.nextInt(3) > 0) // Reduced chance of spreading up
                 return;
 
-            if (Arrays.stream(Direction.values()).noneMatch(direction -> canExistOnSurface(level, checkPos, level.getBlockState(checkPos.relative(direction)), direction.getOpposite())))
+            if (Arrays.stream(Direction.values()).noneMatch(direction -> canExistOnSurface(level, blockPos, sourceState, checkPos, level.getBlockState(checkPos.relative(direction)), direction.getOpposite())))
                 return;
 
             var event = new CoveringBlockEvent(this,
@@ -309,7 +319,8 @@ public abstract class SpreadingLatexType extends LatexType {
 
     @Override
     public LatexCoverState updateShape(LatexCoverState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos blockPos, BlockPos neighborPos) {
-        LatexCoverState wantedState = state.setValue(FACES.get(direction), canExistOnSurface(level, neighborPos, neighborState, direction.getOpposite()));
+        BlockState sourceState = level.getBlockState(blockPos);
+        LatexCoverState wantedState = state.setValue(FACES.get(direction), canExistOnSurface(level, blockPos, sourceState, neighborPos, neighborState, direction.getOpposite()));
         if (FACES.values().stream().noneMatch(wantedState::getValue) && level.getBlockState(blockPos).isAir())
             return ChangedLatexTypes.NONE.get().defaultCoverState();
         return wantedState;
@@ -345,6 +356,11 @@ public abstract class SpreadingLatexType extends LatexType {
     @Override
     public VoxelShape getShape(LatexCoverState state, LatexCoverGetter level, BlockPos blockPos, CollisionContext context) {
         return cachedShapes.get(getVisualState(state));
+    }
+
+    @Override
+    public VoxelShape getSwimShape(LatexCoverState state, LatexCoverGetter level, BlockPos blockPos, CollisionContext context) {
+        return cachedShapesSwim.get(getVisualState(state));
     }
 
     @Override

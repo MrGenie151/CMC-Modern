@@ -55,7 +55,7 @@ public class AbstractLatexItem extends ItemNameBlockItem {
                 context.getClickedPos().relative(context.getClickedFace()) : context.getClickedPos();
 
         BlockState originalState = context.getLevel().getBlockState(positionToCover);
-        if (SpreadingLatexType.canExistOnSurface(context.getLevel(), positionToCover, originalState, context.getClickedFace()))
+        if (SpreadingLatexType.canExistOnSurface(context.getLevel(), positionToCover, originalState, positionToCover, originalState, context.getClickedFace()))
             return InteractionResult.FAIL;
 
         LatexCoverState originalCover = LatexCoverState.getAt(context.getLevel(), positionToCover);
