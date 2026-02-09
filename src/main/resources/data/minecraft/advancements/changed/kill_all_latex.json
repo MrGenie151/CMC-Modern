@@ -701,6 +701,34 @@
         ]
       }
     },
+    "changed:latex_rabbit_female": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "predicate": {
+              "type": "changed:latex_rabbit_female"
+            },
+            "entity": "this"
+          }
+        ]
+      }
+    },
+    "changed:latex_rabbit_male": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "predicate": {
+              "type": "changed:latex_rabbit_male"
+            },
+            "entity": "this"
+          }
+        ]
+      }
+    },
     "changed:latex_raccoon": {
       "trigger": "minecraft:player_killed_entity",
       "conditions": {
@@ -1371,6 +1399,12 @@
     ],
     [
       "changed:latex_purple_fox"
+    ],
+    [
+      "changed:latex_rabbit_female"
+    ],
+    [
+      "changed:latex_rabbit_male"
     ],
     [
       "changed:latex_raccoon"

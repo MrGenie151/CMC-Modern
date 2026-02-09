@@ -20,7 +20,9 @@
     { "type": "changed:crystal_wolf", "weight": 1, "minCount": 1, "maxCount": 2 },
     { "type": "changed:crystal_wolf_horned", "weight": 1, "minCount": 1, "maxCount": 2 },
     { "type": "changed:gas_skunk", "weight": 1, "minCount": 1, "maxCount": 2 },
-    { "type": "changed:gas_wolf", "weight": 1, "minCount": 1, "maxCount": 2 },
+    { "type": "changed:gas_wolf_female", "weight": 1, "minCount": 1, "maxCount": 2 },
+    { "type": "changed:gas_wolf_male", "weight": 1, "minCount": 1, "maxCount": 2 },
+    { "type": "changed:gas_wolf_pup", "weight": 1, "minCount": 1, "maxCount": 1 },
     { "type": "changed:sniper_dog", "weight": 1, "minCount": 1, "maxCount": 2 }
   ]
 }
