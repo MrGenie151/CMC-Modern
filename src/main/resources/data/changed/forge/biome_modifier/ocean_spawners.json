@@ -13,6 +13,7 @@
     { "type": "changed:latex_orca", "weight": 8, "minCount": 1, "maxCount": 3 },
     { "type": "changed:latex_squid_dog_male", "weight": 8, "minCount": 1, "maxCount": 3 },
     { "type": "changed:latex_squid_dog_female", "weight": 8, "minCount": 1, "maxCount": 3 },
-    { "type": "changed:shark", "weight": 10, "minCount": 1, "maxCount": 3 }
+    { "type": "changed:shark", "weight": 10, "minCount": 1, "maxCount": 3 },
+    { "type": "changed:latex_eel", "weight": 8, "minCount": 1, "maxCount": 3 }
   ]
 }
