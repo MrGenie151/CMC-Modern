@@ -31,6 +31,7 @@ import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.BlockModelRotation;
+import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.FileToIdConverter;
@@ -55,6 +56,7 @@ import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.geometry.UnbakedGeometryHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 
 import java.io.Reader;
@@ -83,6 +85,34 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
     private static final ResourceLocation DEFAULT_EAST = Changed.modResource("default_east");
     private static final ResourceLocation DEFAULT_WEST = Changed.modResource("default_west");
     private static final ResourceLocation DEFAULT_EXTRA = Changed.modResource("default_extra");
+
+    private static final MultiVariantFaces DEFAULT_MODEL = new MultiVariantFaces(
+            Map.of(Direction.UP, new Variant(DEFAULT_TOP, BlockModelRotation.X0_Y0.getRotation(), false, 0),
+                    Direction.DOWN, new Variant(DEFAULT_BOTTOM, BlockModelRotation.X0_Y0.getRotation(), false, 0),
+                    Direction.NORTH, new Variant(DEFAULT_NORTH, BlockModelRotation.X0_Y0.getRotation(), false, 0),
+                    Direction.SOUTH, new Variant(DEFAULT_SOUTH, BlockModelRotation.X0_Y0.getRotation(), false, 0),
+                    Direction.EAST, new Variant(DEFAULT_EAST, BlockModelRotation.X0_Y0.getRotation(), false, 0),
+                    Direction.WEST, new Variant(DEFAULT_WEST, BlockModelRotation.X0_Y0.getRotation(), false, 0)),
+            new Variant(DEFAULT_EXTRA, BlockModelRotation.X0_Y0.getRotation(), false, 0)
+    );
+
+    public interface TypedModelResolver {
+        CompletableFuture<BakedModel> resolve(ResourceLocation modelLocation, ModelState modelState);
+    }
+
+    public interface ModelResolver {
+        CompletableFuture<BakedModel> resolve(LatexType type, ResourceLocation modelLocation, ModelState modelState);
+
+        default TypedModelResolver withType(LatexType type) {
+            return (modelLocation, modelState) -> resolve(type, modelLocation, modelState);
+        }
+
+        static ModelResolver forUnbakedMapAndAtlas(Map<ResourceLocation, BlockModel> models, Function<ResourceLocation, TextureAtlasSprite> getSprite, Executor executor) {
+            return (latexType, modelLocation, modelState) -> {
+                return bakeModelAsync(models.get(modelLocation), IClientLatexTypeExtensions.of(latexType), getSprite, modelState, modelLocation, executor);
+            };
+        }
+    }
 
     public static class MultiVariantFaces {
         private final Map<Direction, Variant> faces;
@@ -290,12 +320,10 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
             this.extra = extra;
         }
 
-        private static BakedModel getOrNull(@Nullable Variant variant, Function<ResourceLocation, BakedModel> resolver) {
+        private static CompletableFuture<BakedModel> getOrNull(@Nullable Variant variant, TypedModelResolver resolver) {
             if (variant == null)
-                return null;
-            try {
-                return resolver.apply(variant.getModelLocation());
-            } catch (Exception e) {
+                return CompletableFuture.completedFuture(null);
+            return resolver.resolve(variant.getModelLocation(), variant).exceptionally(e -> {
                 var modelLocation = variant.getModelLocation();
                 if (modelLocation.equals(DEFAULT_BOTTOM) ||
                         modelLocation.equals(DEFAULT_TOP) ||
@@ -306,24 +334,36 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
                         modelLocation.equals(DEFAULT_EXTRA))
                     return null;
 
-                LOGGER.error("Failed to resolve model {}", variant.getModelLocation());
-                throw e;
-            }
+                LOGGER.error("Failed to resolve model {} : {}", variant.getModelLocation(), e);
+                return null;
+            });
         }
 
-        public static Map<LatexType, ModelSet> resolve(MultiVariantFaces multiVariantFaces, Function<ResourceLocation, Map<LatexType, BakedModel>> resolver) {
-            return getCoverTypes().collect(Collectors.toMap(Function.identity(), latexType -> {
-                Function<ResourceLocation, BakedModel> typedResolver = name -> resolver.apply(name).get(latexType);
-                return new ModelSet(
-                        getOrNull(multiVariantFaces.faces.get(Direction.UP), typedResolver),
+        public static CompletableFuture<Map<LatexType, ModelSet>> resolveModels(MultiVariantFaces multiVariantFaces, ModelResolver resolver) {
+            final var modelSetByType = getCoverTypes().map(latexType -> {
+                var typedResolver = resolver.withType(latexType);
+                return Util.sequence(List.of(getOrNull(multiVariantFaces.faces.get(Direction.UP), typedResolver),
                         getOrNull(multiVariantFaces.faces.get(Direction.DOWN), typedResolver),
                         getOrNull(multiVariantFaces.faces.get(Direction.NORTH), typedResolver),
                         getOrNull(multiVariantFaces.faces.get(Direction.SOUTH), typedResolver),
                         getOrNull(multiVariantFaces.faces.get(Direction.EAST), typedResolver),
                         getOrNull(multiVariantFaces.faces.get(Direction.WEST), typedResolver),
-                        getOrNull(multiVariantFaces.extra, typedResolver)
-                );
-            }));
+                        getOrNull(multiVariantFaces.extra, typedResolver))).thenApply(bakedModels -> {
+                            return Pair.of(latexType, new ModelSet(
+                                    bakedModels.get(0),
+                                    bakedModels.get(1),
+                                    bakedModels.get(2),
+                                    bakedModels.get(3),
+                                    bakedModels.get(4),
+                                    bakedModels.get(5),
+                                    bakedModels.get(6)
+                            ));
+                });
+            }).toList();
+
+            return Util.sequence(modelSetByType).thenApply((result) -> {
+                return result.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableMap(Pair::getFirst, Pair::getSecond));
+            });
         }
 
         @Nullable
@@ -480,11 +520,11 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
         }
     }
 
-    private static IModelBuilder<?> modelBuilderFor(TextureAtlasSprite particle) {
+    private static IModelBuilder<?> modelBuilderFor(TextureAtlasSprite particle, ResourceLocation namedRenderType) {
         return IModelBuilder.of(true, true, true,
                 ItemTransforms.NO_TRANSFORMS, ItemOverrides.EMPTY,
                 particle,
-                NamedRenderTypeManager.get(RENDERTYPE_SOLID));
+                NamedRenderTypeManager.get(namedRenderType));
     }
 
     private static CompletableFuture<Map<Block, LatexModelDefinition>> loadBlockStates(ResourceManager resources, Executor executor) {
@@ -563,14 +603,19 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
         };
     }
 
-    private static CompletableFuture<Map<BlockState, Map<LatexType, ModelSet>>> bakeBlockStateModels(Map<ResourceLocation, Map<LatexType, BakedModel>> bakedModels,
+    private static CompletableFuture<Map<BlockState, Map<LatexType, ModelSet>>> bakeBlockStateModels(ModelResolver modelResolver,
                                                                                                      Map<Block, LatexModelDefinition> definitions) {
         var futures = definitions.entrySet().stream().map(definitionEntry -> {
-            return CompletableFuture.supplyAsync(() -> {
-                return definitionEntry.getValue().getVariants().entrySet().stream()
-                        .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
-                            return ModelSet.resolve(entry.getValue(), bakedModels::get);
-                        }));
+            List<CompletableFuture<Pair<String, Map<LatexType, ModelSet>>>> list = new ArrayList<>(definitionEntry.getValue().getVariants().size());
+
+            definitionEntry.getValue().getVariants().forEach((text, faces) -> {
+                list.add(ModelSet.resolveModels(faces, modelResolver).thenApply(modelSets -> {
+                    return Pair.of(text, modelSets);
+                }));
+            });
+
+            return Util.sequence(list).thenApply((result) -> {
+                return result.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableMap(Pair::getFirst, Pair::getSecond));
             }).thenApply(blockStateToModelSet -> {
                 Map<BlockState, Map<LatexType, ModelSet>> blockStateMap = Maps.newHashMap();
                 StateDefinition<Block, BlockState> stateDefinition = definitionEntry.getKey().getStateDefinition();
@@ -619,63 +664,55 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
                 .filter(type -> type != ChangedLatexTypes.NONE.get());
     }
 
-    private static CompletableFuture<Map<ResourceLocation, Map<LatexType, BakedModel>>> bakeModels(Function<ResourceLocation, TextureAtlasSprite> getSprite,
-                                                                                                   Map<ResourceLocation, BlockModel> unbakedModels,
-                                                                                                   Executor executor) {
-        final var modelBakes = unbakedModels.entrySet().stream().map(entry -> {
-            final var stateBake = getCoverTypes()
-                    .map(type -> {
-                        final var properties = IClientLatexTypeExtensions.of(type);
+    private static void bakeElements(IModelBuilder<?> builder,
+                                     List<BlockElement> elements,
+                                     IClientLatexTypeExtensions properties,
+                                     Function<ResourceLocation, TextureAtlasSprite> getSprite,
+                                     ModelState modelState,
+                                     ResourceLocation modelLocation) {
+        final var normalMatrix = modelState.getRotation().getNormalMatrix();
 
-                        return CompletableFuture.supplyAsync(() -> modelBuilderFor(getSprite.apply(properties.getTextureForParticle())), executor)
-                                .thenApply(builder -> {
-                                    entry.getValue().getElements().forEach(blockElement -> {
-                                        blockElement.faces.forEach((side, face) -> {
-                                            var sprite = getSprite.apply(properties.getTextureForFace(side));
-                                            var quad = UnbakedGeometryHelper.bakeElementFace(blockElement, face, sprite, side, BlockModelRotation.X0_Y0, entry.getKey());
-                                            if (face.cullForDirection == null)
-                                                builder.addUnculledFace(quad);
-                                            else
-                                                builder.addCulledFace(face.cullForDirection, quad);
+        elements.forEach(blockElement -> {
+            blockElement.faces.forEach((side, face) -> {
+                final var normal = new Vector3f(side.getStepX(), side.getStepY(), side.getStepZ());
+                normal.mul(normalMatrix);
 
-                                        });
-                                    });
+                final var apparentDirection = Direction.getNearest(normal.x, normal.y, normal.z);
 
-                                    return Pair.of(type, builder.build());
-                                });
-                    }).toList();
-
-            return Util.sequence(stateBake).thenApply((result) -> {
-                return Pair.of(entry.getKey(), result.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableMap(Pair::getFirst, Pair::getSecond)));
+                var sprite = getSprite.apply(properties.getTextureForFace(apparentDirection));
+                var quad = UnbakedGeometryHelper.bakeElementFace(blockElement, face, sprite, side, modelState, modelLocation);
+                if (face.cullForDirection == null)
+                    builder.addUnculledFace(quad);
+                else
+                    builder.addCulledFace(face.cullForDirection, quad);
             });
-        }).toList();
-
-        return Util.sequence(modelBakes).thenApply((result) -> {
-            return result.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableMap(Pair::getFirst, Pair::getSecond));
         });
+    }
+
+    private static CompletableFuture<BakedModel> bakeModelAsync(BlockModel unbakedModel,
+                                                                IClientLatexTypeExtensions properties,
+                                                                Function<ResourceLocation, TextureAtlasSprite> getSprite,
+                                                                ModelState modelState,
+                                                                ResourceLocation modelLocation,
+                                                                Executor executor) {
+        return CompletableFuture.supplyAsync(() -> {
+            final var builder = modelBuilderFor(getSprite.apply(properties.getTextureForParticle()), properties.getNamedRenderType());
+            bakeElements(builder, unbakedModel.getElements(), properties, getSprite, modelState, modelLocation);
+            return builder.build();
+        }, executor);
     }
 
     @Override
     public CompletableFuture<Void> reload(PreparationBarrier barrier, ResourceManager resources, ProfilerFiller profilerA, ProfilerFiller profilerB, Executor backgroundExecutor, Executor minecraftExecutor) {
         return loadBlockModels(resources, backgroundExecutor)
+                .thenApply(unbakedModels -> ModelResolver.forUnbakedMapAndAtlas(unbakedModels, minecraft.getTextureAtlas(BLOCK_ATLAS), backgroundExecutor))
                 .thenCompose(barrier::wait)
-                .thenCompose(unbakedModels -> {
-                    return bakeModels(minecraft.getTextureAtlas(BLOCK_ATLAS),
-                            unbakedModels, minecraftExecutor);
-                })
-                .thenApply(bakedModels -> {
-                    this.defaultModelSets = getCoverTypes().collect(Collectors.toUnmodifiableMap(Function.identity(),
-                            state -> new ModelSet(
-                                    bakedModels.getOrDefault(DEFAULT_TOP, Map.of()).get(state),
-                                    bakedModels.getOrDefault(DEFAULT_BOTTOM, Map.of()).get(state),
-                                    bakedModels.getOrDefault(DEFAULT_NORTH, Map.of()).get(state),
-                                    bakedModels.getOrDefault(DEFAULT_SOUTH, Map.of()).get(state),
-                                    bakedModels.getOrDefault(DEFAULT_EAST, Map.of()).get(state),
-                                    bakedModels.getOrDefault(DEFAULT_WEST, Map.of()).get(state),
-                                    bakedModels.getOrDefault(DEFAULT_EXTRA, Map.of()).get(state)
-                            )));
-
-                    return bakedModels;
+                .thenCompose(resolver -> {
+                    return ModelSet.resolveModels(DEFAULT_MODEL, resolver)
+                            .thenApplyAsync(defaultModelSets -> {
+                                this.defaultModelSets = defaultModelSets;
+                                return resolver;
+                            }, minecraftExecutor);
                 })
                 .thenCombine(loadBlockStates(resources, minecraftExecutor), LatexCoveredBlocksRenderer::bakeBlockStateModels)
                 .thenCompose(Function.identity())
