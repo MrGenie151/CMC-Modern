@@ -169,7 +169,7 @@
   "item.changed.nitrile_gloves": "丁腈手套",
   "item.changed.orange": "橘子",
   "item.changed.orange_neck_tie": "橙色领带",
-  "item.changed.pink_shorts": "粉色 T 恤",
+  "item.changed.pink_shorts": "粉色短裤",
   "item.changed.red_neck_tie": "红色领带",
   "item.changed.roomba": "扫地机器人",
   "item.changed.sports_bra": "运动胸衣",
@@ -941,4 +941,5 @@
   "builtin_resources.changed:experiment_ability_tree": "实验性：Changed 技能树",
   "builtin_resources.changed:instant_transfur": "Changed 即时兽化",
   "builtin_resources.changed:changed_pbr": "Changed PBR"
+
 }
