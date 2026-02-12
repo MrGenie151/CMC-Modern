@@ -64,6 +64,8 @@ public abstract class TscWeapon extends Item implements Vanishable {
     }
 
     public static void applyShock(LivingEntity enemy, int attackStun) {
+        if (enemy.level().isClientSide) return;
+
         ChangedSounds.broadcastSound(enemy, ChangedSounds.TSC_WEAPON_SHOCK, 1, 1);
         enemy.addEffect(new MobEffectInstance(ChangedEffects.SHOCK.get(), attackStun, 0, false, false, true));
         ChangedAnimationEvents.broadcastEntityAnimation(enemy, ChangedAnimationEvents.SHOCK_STUN.get(), StunAnimationParameters.INSTANCE);
