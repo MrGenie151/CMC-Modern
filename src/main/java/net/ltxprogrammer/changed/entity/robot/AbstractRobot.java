@@ -252,6 +252,12 @@ public abstract class AbstractRobot extends PathfinderMob {
         return yRot * 90F;
     }
 
+    @Override
+    public void stopSleeping() {
+        this.detachFromCharger();
+        super.stopSleeping();
+    }
+
     protected void detachFromCharger() {
         if (this.isCharging() && this.getSleepingPos().isPresent()) {
             final var chargerPos = this.getSleepingPos().get();
