@@ -536,12 +536,12 @@ public class LatexCoveredBlocksRenderer implements PreparableReloadListener {
             for (Map.Entry<ResourceLocation, Resource> entry : namedResources.entrySet()) {
                 list.add(CompletableFuture.supplyAsync(() -> {
                     ResourceLocation blockId = STATE_LISTER.fileToId(entry.getKey());
-                    Block block = ForgeRegistries.BLOCKS.getValue(blockId);
-                    if (block == null) {
+                    if (!ForgeRegistries.BLOCKS.containsKey(blockId)) {
                         LOGGER.error("Skipping {} as it does not map to a block", blockId);
                         return null;
                     }
 
+                    Block block = ForgeRegistries.BLOCKS.getValue(blockId);
                     try (Reader reader = entry.getValue().openAsReader()) {
                         return Pair.of(block, LatexModelDefinition.fromStream(LATEX_MODEL_DEFINITION_CONTEXT, reader));
                     } catch (Exception exception) {
