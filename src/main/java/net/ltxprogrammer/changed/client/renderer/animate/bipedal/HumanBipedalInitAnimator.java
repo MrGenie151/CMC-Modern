@@ -35,5 +35,10 @@ public class HumanBipedalInitAnimator<T extends ChangedEntity, M extends Advance
         leftLeg.xRot = Mth.cos(limbSwing * 0.6662F + (float)Math.PI) * 1.4F * limbSwingAmount / swingSpeed;
         rightLeg.yRot = 0.0F;
         leftLeg.yRot = 0.0F;
+        rightLeg.zRot = 0.0F;
+        leftLeg.zRot = 0.0F;
+
+        rightLeg.x = -(2.0F + core.legSpacing);
+        leftLeg.x = (2.0F + core.legSpacing);
     }
 }
