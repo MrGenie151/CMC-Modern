@@ -1,5 +1,6 @@
 package net.ltxprogrammer.changed.client.renderer.animate;
 
+import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.client.CameraExtender;
 import net.ltxprogrammer.changed.client.renderer.AdvancedHumanoidRenderer;
 import net.ltxprogrammer.changed.client.renderer.model.AdvancedHumanoidModel;
@@ -14,6 +15,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.fml.event.IModBusEvent;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -23,6 +26,14 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class HumanoidAnimator<T extends ChangedEntity, M extends AdvancedHumanoidModel<T>> {
+    public static class GatherAnimatorsEvent<T extends ChangedEntity, M extends AdvancedHumanoidModel<T>> extends Event {
+        public final HumanoidAnimator<T, M> humanoidAnimator;
+
+        public GatherAnimatorsEvent(HumanoidAnimator<T, M> humanoidAnimator) {
+            this.humanoidAnimator = humanoidAnimator;
+        }
+    }
+
     public final M entityModel;
     public float hipOffset = -2.0f;
     public float torsoWidth = 5.0f;
@@ -131,6 +142,8 @@ public class HumanoidAnimator<T extends ChangedEntity, M extends AdvancedHumanoi
         this.cameraAnimators = new EnumMap<>(AnimateStage.class);
         Arrays.stream(AnimateStage.values()).forEach(stage -> animators.put(stage, new ArrayList<>())); // Populate array
         Arrays.stream(AnimateStage.values()).forEach(stage -> cameraAnimators.put(stage, new ArrayList<>())); // Populate array
+
+        Changed.postModEvent(new GatherAnimatorsEvent<>(this));
     }
 
     public void applyPropertyModelLimbs(HumanoidModel<?> propertyModel) {

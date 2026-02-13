@@ -60,7 +60,11 @@ public abstract class AdvancedHumanoidRenderer<T extends ChangedEntity, M extend
         this.addLayer(new LatexSpinAttackEffectLayer<>(this, context.getModelSet()));
         this.addLayer(new LatexHeldEntityLayer<>(this));
 
-        this.addLayer(new AccessoryLayer<>(this));
+        this.addLayer(this.makeAccessoryLayer());
+    }
+
+    protected AccessoryLayer<T, M> makeAccessoryLayer() {
+        return new AccessoryLayer<>(this);
     }
 
     public void setModelResetPoseStack(T entity, @Nullable PoseStack.Pose pose) {
