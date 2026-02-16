@@ -1,5 +1,6 @@
 package net.ltxprogrammer.changed.world.features.structures.facility;
 
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 public abstract class FacilityPieceInstance extends StructurePiece {
     protected static final WeightedRandomList<WeightedPieceNeighborSupplier> NO_NEIGHBORS = WeightedRandomList.create();
@@ -37,6 +39,8 @@ public abstract class FacilityPieceInstance extends StructurePiece {
     protected void addAdditionalSaveData(StructurePieceSerializationContext context, CompoundTag tag) {
         tag.putInt("R", rotation.ordinal());
     }
+
+    public abstract List<StructureTemplate.StructureBlockInfo> getGluBlocks();
 
     public abstract void addSteps(@Nullable FacilityGenerationStack stack, List<GenStep> steps);
 
@@ -74,5 +78,8 @@ public abstract class FacilityPieceInstance extends StructurePiece {
         }
     }
 
-    public abstract BlockPos getRandomStart(RandomSource random);
+    public BlockPos getRandomStart(RandomSource random) {
+        var gluBlocks = this.getGluBlocks();
+        return Util.getRandom(gluBlocks, random).pos();
+    }
 }

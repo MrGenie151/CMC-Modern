@@ -340,6 +340,12 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
                         for (var next : starts) {
                             if (next.blockInfo().pos().equals(startPos))
                                 continue;
+                            var connectorPos = GluBlock.getConnection(next.blockInfo().pos(), next.blockInfo().state());
+                            if (parentStructure.getBoundingBox().isInside(connectorPos))
+                                continue;
+                            if (directDependents.stream().map(placedDependent -> placedDependent.instance.getBoundingBox())
+                                    .anyMatch(box -> box.isInside(connectorPos)))
+                                continue;
 
                             var childRoom = treeGenerate(facilityContext, stack, nextStructure, next, genDepth,
                                     firstStart ? nextSpan : nextSpan - 5,

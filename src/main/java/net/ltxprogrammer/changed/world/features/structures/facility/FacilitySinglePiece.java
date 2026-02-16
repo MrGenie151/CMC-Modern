@@ -19,7 +19,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.random.Weight;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
@@ -149,7 +148,7 @@ public abstract class FacilitySinglePiece extends FacilityPiece {
         }
 
         @Override
-        public void addSteps(@Nullable FacilityGenerationStack stack, List<GenStep> steps) {
+        public List<StructureTemplate.StructureBlockInfo> getGluBlocks() {
             var settings = new StructurePlaceSettings()
                     .setMirror(this.getMirror())
                     .setRotation(this.getRotation())
@@ -158,13 +157,15 @@ public abstract class FacilitySinglePiece extends FacilityPiece {
             var gluBlocks = template.filterBlocks(generationPosition, settings, ChangedBlocks.GLU_BLOCK.get());
             if (gluBlocks.isEmpty())
                 Changed.LOGGER.error("Facility structure is missing placement blocks {}", templateName);
+            return gluBlocks;
+        }
+
+        @Override
+        public void addSteps(@Nullable FacilityGenerationStack stack, List<GenStep> steps) {
+            var gluBlocks = this.getGluBlocks();
             gluBlocks.forEach(blockInfo -> {
                 steps.add(new GenStep(blockInfo, stack == null ? NO_NEIGHBORS : stack.getParent().getFacilityPiece().getValidNeighbors(stack)));
             });
-        }
-
-        private static BlockPos gluNeighbor(BlockPos gluPos, BlockState gluState) {
-            return gluPos.relative(gluState.getValue(GluBlock.ORIENTATION).front());
         }
 
         @Override
@@ -173,7 +174,7 @@ public abstract class FacilitySinglePiece extends FacilityPiece {
                     .addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK)
                     .setIgnoreEntities(true);
 
-            var gluBlockPos = gluNeighbor(exitGlu.pos(), exitGlu.state());
+            var gluBlockPos = GluBlock.getConnection(exitGlu.pos(), exitGlu.state());
 
             var directions = new ArrayList<>(Direction.Plane.HORIZONTAL.stream().toList());
             CollectionUtil.shuffle(directions, random);
@@ -219,19 +220,6 @@ public abstract class FacilitySinglePiece extends FacilityPiece {
                 case CLOCKWISE_180 -> new BlockPos(this.boundingBox.maxX(), this.boundingBox.minY(), this.boundingBox.maxZ());
                 case COUNTERCLOCKWISE_90 -> new BlockPos(this.boundingBox.minX(), this.boundingBox.minY(), this.boundingBox.maxZ());
             };
-        }
-
-        @Override
-        public BlockPos getRandomStart(RandomSource random) {
-            var settings = new StructurePlaceSettings()
-                    .setMirror(this.getMirror())
-                    .setRotation(this.getRotation())
-                    .addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK)
-                    .setIgnoreEntities(true);
-            var gluBlocks = template.filterBlocks(generationPosition, settings, ChangedBlocks.GLU_BLOCK.get());
-            if (gluBlocks.isEmpty())
-                Changed.LOGGER.error("Facility structure is missing placement blocks {}", templateName);
-            return Util.getRandom(gluBlocks, random).pos();
         }
     }
 

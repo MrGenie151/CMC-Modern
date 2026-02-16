@@ -5,7 +5,6 @@ import net.ltxprogrammer.changed.init.ChangedBlocks;
 import net.ltxprogrammer.changed.init.ChangedRegistry;
 import net.ltxprogrammer.changed.util.TagUtil;
 import net.ltxprogrammer.changed.util.UniversalDist;
-import net.ltxprogrammer.changed.world.features.structures.facility.Zone;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
@@ -31,6 +30,10 @@ public class GluBlock extends Block implements EntityBlock, GameMasterBlock {
     public GluBlock() {
         super(BlockBehaviour.Properties.of().requiresCorrectToolForDrops().strength(-1.0F, 3600000.0F).noLootTable());
         this.registerDefaultState(this.stateDefinition.any().setValue(ORIENTATION, FrontAndTop.NORTH_UP));
+    }
+
+    public static BlockPos getConnection(BlockPos gluPos, BlockState gluState) {
+        return gluPos.relative(gluState.getValue(GluBlock.ORIENTATION).front());
     }
 
     public BlockState rotate(BlockState state, Rotation rotation) {
