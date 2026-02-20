@@ -5,6 +5,7 @@ import net.ltxprogrammer.changed.init.ChangedBlocks;
 import net.ltxprogrammer.changed.init.ChangedRegistry;
 import net.ltxprogrammer.changed.util.TagUtil;
 import net.ltxprogrammer.changed.util.UniversalDist;
+import net.ltxprogrammer.changed.world.features.structures.facility.Zone;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
@@ -34,6 +35,10 @@ public class GluBlock extends Block implements EntityBlock, GameMasterBlock {
 
     public static BlockPos getConnection(BlockPos gluPos, BlockState gluState) {
         return gluPos.relative(gluState.getValue(GluBlock.ORIENTATION).front());
+    }
+
+    public static Zone getZone(CompoundTag nbt) {
+        return ChangedRegistry.FACILITY_ZONES.getValue(TagUtil.getResourceLocation(nbt, GluBlockEntity.ZONE));
     }
 
     public BlockState rotate(BlockState state, Rotation rotation) {
@@ -78,8 +83,8 @@ public class GluBlock extends Block implements EntityBlock, GameMasterBlock {
         if (orientA.front().getAxis() != Direction.Axis.Y && orientA.front() != orientB.front().getOpposite())
             return false;
 
-        var zoneA = ChangedRegistry.FACILITY_ZONES.getValue(TagUtil.getResourceLocation(nbtA, GluBlockEntity.ZONE));
-        var zoneB = ChangedRegistry.FACILITY_ZONES.getValue(TagUtil.getResourceLocation(nbtB, GluBlockEntity.ZONE));
+        var zoneA = getZone(nbtA);
+        var zoneB = getZone(nbtB);
         if (zoneA == null || zoneB == null || !zoneA.canConnectTo(zoneB))
             return false;
 
