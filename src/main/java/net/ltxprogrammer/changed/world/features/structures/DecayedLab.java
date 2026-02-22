@@ -39,7 +39,7 @@ public class DecayedLab extends Structure {
     }
 
     private void generatePieces(StructurePiecesBuilder builder, GenerationContext context) {
-        builder.addPiece(new SurfaceNBTPiece(this.getPiece(), null, context));
+        builder.addPiece(new SurfaceNBTPiece(this.getPiece(), lootTable, context));
     }
 
     @Override
