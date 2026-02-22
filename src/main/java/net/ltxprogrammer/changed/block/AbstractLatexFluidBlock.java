@@ -48,6 +48,15 @@ public abstract class AbstractLatexFluidBlock extends LiquidBlock implements Lat
         return Shapes.empty();
     }
 
+    @Override
+    public boolean isLadder(BlockState blockState, LevelReader level, BlockPos pos, LivingEntity entity) {
+        if (!entity.canStandOnFluid(blockState.getFluidState()))
+            return false;
+        VoxelShape shape = level.getFluidState(pos.above()).is(blockState.getFluidState().getType()) ? Shapes.block() : LiquidBlock.STABLE_SHAPE;
+        return !CollisionContext.of(entity).isAbove(shape, pos, true);
+    }
+
+    @Override
     public boolean isScaffolding(BlockState blockState, LevelReader level, BlockPos pos, LivingEntity entity) {
         return entity.canStandOnFluid(blockState.getFluidState());
     }

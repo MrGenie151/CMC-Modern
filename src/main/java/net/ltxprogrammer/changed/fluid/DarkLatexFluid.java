@@ -3,6 +3,7 @@ package net.ltxprogrammer.changed.fluid;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.entity.latex.LatexType;
 import net.ltxprogrammer.changed.init.*;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
@@ -16,6 +17,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -35,7 +37,9 @@ public abstract class DarkLatexFluid extends AbstractLatexFluid {
             public void initializeClient(Consumer<IClientFluidTypeExtensions> consumer) {
                 consumer.accept(new IClientFluidTypeExtensions() {
                     private static final ResourceLocation DARK_LATEX_STILL = Changed.modResource("block/dark_latex_block_top");
-                    private static final ResourceLocation DARK_LATEX_FLOW = Changed.modResource("block/dark_latex_block_top");
+                    private static final ResourceLocation DARK_LATEX_FLOW = Changed.modResource("block/dark_latex_fluid_flow");
+                    private static final ResourceLocation DARK_LATEX_OVERLAY = Changed.modResource("block/dark_latex_fluid_overlay");
+                    private static final ResourceLocation DARK_LATEX_RENDER_OVERLAY = Changed.modResource("textures/block/dark_latex_fluid_flow.png");
 
                     public ResourceLocation getStillTexture() {
                         return DARK_LATEX_STILL;
@@ -44,7 +48,22 @@ public abstract class DarkLatexFluid extends AbstractLatexFluid {
                     public ResourceLocation getFlowingTexture() {
                         return DARK_LATEX_FLOW;
                     }
+
+                    @Override
+                    public @Nullable ResourceLocation getOverlayTexture() {
+                        return DARK_LATEX_OVERLAY;
+                    }
+
+                    @Override
+                    public @Nullable ResourceLocation getRenderOverlayTexture(Minecraft mc) {
+                        return DARK_LATEX_RENDER_OVERLAY;
+                    }
                 });
+            }
+
+            @Override
+            public boolean canDrownIn(LivingEntity entity) {
+                return !ChangedLatexTypes.DARK_LATEX.get().isFriendlyTo(LatexType.getEntityLatexType(entity));
             }
         };
     }
