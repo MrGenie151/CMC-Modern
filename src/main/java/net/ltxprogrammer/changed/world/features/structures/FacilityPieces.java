@@ -488,13 +488,20 @@ public class FacilityPieces extends SimplePreparableReloadListener<Set<Configure
         stack.push(entrance.definition);
         entrance.instance.addSteps(new FacilityGenerationStack(stack, entrance.instance.getBoundingBox(), context, span), starts);
 
+        Set<PlacedFacilityPiece> directDependents = new HashSet<>();
         if (span > 0) {
             starts.forEach(start -> {
-                treeGenerate(facilityGenerationContext, stack, entrance.instance, start, genDepth, span - 1, allowedRegion, 0);
+                treeGenerate(facilityGenerationContext, stack, entrance.instance, start, genDepth, span - 1, allowedRegion, 0)
+                        .ifPresent(directDependents::add);
             });
         }
 
         stack.pop();
+
+        if (directDependents.isEmpty()) {
+            LOGGER.debug("Skipping entrance that failed to generate neighbors");
+            return Optional.empty();
+        }
 
         var requiredMap = INSTANCE.facilityPieceCollections.values().stream().flatMap(collection -> collection.shuffledStream(context.random()))
                 .filter(piece -> piece.getFacilityPiece().getType() == ChangedFacilityPieceTypes.ROOM.get()) // Rooms only, for now
