@@ -62,166 +62,30 @@ public class StasisChamber extends HorizontalDirectionalBlock implements Partial
 
     private static final Component CONTAINER_TITLE = Component.translatable("container.changed.stasis_chamber");
 
-    public static final VoxelShape SHAPE_FRAME_LEFT = Block.box(25.3D, 0.0D, 0.0D, 27.3D, 48.0D, 16.0D);
-    public static final VoxelShape SHAPE_FRAME_RIGHT = Block.box(-11.3D, 0.0D, 0.0D, -9.3D, 48.0D, 16.0D);
-    public static final VoxelShape SHAPE_FRAME_BACK = Shapes.or(
-            Block.box(0.0D, 0.0D, 25.3D, 16.0D, 48.0D, 27.3D),
+    public static final VoxelShape SHAPE_FRAME_LEFT = Block.box(25.0D, 2.0D, -11.0D, 27.0D, 46.0D, 27.0D);
+    public static final VoxelShape SHAPE_FRAME_LEFT_OPEN = Block.box(25.0D, 2.0D, 0.0D, 27.0D, 46.0D, 27.0D);
+    public static final VoxelShape SHAPE_FRAME_RIGHT = Block.box(-11.0D, 2.0D, -11.0D, -9.0D, 46.0D, 27.0D);
+    public static final VoxelShape SHAPE_FRAME_RIGHT_OPEN = Block.box(-11.0D, 2.0D, 0.0D, -9.0D, 46.0D, 27.0D);
 
-            Block.box(-1.0D, 2.0D, 24.0D, 0.0D, 46.0D, 26.3D),
-            Block.box(-2.0D, 2.0D, 23.0D, -1.0D, 46.0D, 25.3D),
-            Block.box(-3.0D, 2.0D, 22.0D, -2.0D, 46.0D, 24.3D),
-            Block.box(-4.0D, 2.0D, 21.0D, -3.0D, 46.0D, 23.3D),
-            Block.box(-5.0D, 2.0D, 20.0D, -4.0D, 46.0D, 22.3D),
-            Block.box(-6.0D, 2.0D, 19.0D, -5.0D, 46.0D, 21.3D),
-            Block.box(-7.0D, 2.0D, 18.0D, -6.0D, 46.0D, 20.3D),
-            Block.box(-8.0D, 2.0D, 17.0D, -7.0D, 46.0D, 19.3D),
-            Block.box(-9.0D, 2.0D, 16.0D, -8.0D, 46.0D, 18.3D),
-            Block.box(-10.0D, 2.0D, 16.0D, -9.0D, 46.0D, 17.3D),
+    public static final VoxelShape SHAPE_FRAME_BACK = Block.box(-11.0D, 2.0D, 25.0D, 27.0D, 46.0D, 27.0D);
+    public static final VoxelShape SHAPE_FRAME_FRONT = Block.box(-11.0D, 2.0D, -11.0D, 27.0D, 46.0D, -9.0D);
+    public static final VoxelShape SHAPE_FRAME_BOTTOM = Block.box(-11.0D, 0.0D, -11.0D, 27.0D, 2.0D, 27.0D);
+    public static final VoxelShape SHAPE_FRAME_TOP = Block.box(-11.0D, 46.0D, -11.0D, 27.0D, 48.0D, 27.0D);
 
-            Block.box(16.0D, 2.0D, 24.0D, 17.0D, 46.0D, 26.3D),
-            Block.box(17.0D, 2.0D, 23.0D, 18.0D, 46.0D, 25.3D),
-            Block.box(18.0D, 2.0D, 22.0D, 19.0D, 46.0D, 24.3D),
-            Block.box(19.0D, 2.0D, 21.0D, 20.0D, 46.0D, 23.3D),
-            Block.box(20.0D, 2.0D, 20.0D, 21.0D, 46.0D, 22.3D),
-            Block.box(21.0D, 2.0D, 19.0D, 22.0D, 46.0D, 21.3D),
-            Block.box(22.0D, 2.0D, 18.0D, 23.0D, 46.0D, 20.3D),
-            Block.box(23.0D, 2.0D, 17.0D, 24.0D, 46.0D, 19.3D),
-            Block.box(24.0D, 2.0D, 16.0D, 25.0D, 46.0D, 18.3D),
-            Block.box(25.0D, 2.0D, 16.0D, 26.0D, 46.0D, 17.3D)
+    public static final VoxelShape INTERACTION_SHAPE = Block.box(-11.0D, 0.0D, -11.0D, 27.0D, 48.0D, 27.0D);
+
+    public static final VoxelShape SHAPE_COLLISION_CLOSED = Shapes.or(
+            SHAPE_FRAME_LEFT, SHAPE_FRAME_RIGHT,
+            SHAPE_FRAME_BACK, SHAPE_FRAME_FRONT,
+            SHAPE_FRAME_BOTTOM, SHAPE_FRAME_TOP
     );
-    public static final VoxelShape SHAPE_FRAME_BOTTOM = Shapes.or(
-            Block.box(-11.3D, 0.0D, 0.0D, 27.3D, 2.0D, 16.0D),
-            Block.box(0.0D, 0.0D, -11.3D, 16.0D, 2.0D, 27.3D),
-
-            Block.box(-1.0D, 0.0D, 16.0D, 0.0D, 2.0D, 26.3D),
-            Block.box(-2.0D, 0.0D, 16.0D, -1.0D, 2.0D, 25.3D),
-            Block.box(-3.0D, 0.0D, 16.0D, -2.0D, 2.0D, 24.3D),
-            Block.box(-4.0D, 0.0D, 16.0D, -3.0D, 2.0D, 23.3D),
-            Block.box(-5.0D, 0.0D, 16.0D, -4.0D, 2.0D, 22.3D),
-            Block.box(-6.0D, 0.0D, 16.0D, -5.0D, 2.0D, 21.3D),
-            Block.box(-7.0D, 0.0D, 16.0D, -6.0D, 2.0D, 20.3D),
-            Block.box(-8.0D, 0.0D, 16.0D, -7.0D, 2.0D, 19.3D),
-            Block.box(-9.0D, 0.0D, 16.0D, -8.0D, 2.0D, 18.3D),
-            Block.box(-10.0D, 0.0D, 16.0D, -9.0D, 2.0D, 17.3D),
-
-            Block.box(16.0D, 0.0D, 16.0D, 17.0D, 2.0D, 26.3D),
-            Block.box(17.0D, 0.0D, 16.0D, 18.0D, 2.0D, 25.3D),
-            Block.box(18.0D, 0.0D, 16.0D, 19.0D, 2.0D, 24.3D),
-            Block.box(19.0D, 0.0D, 16.0D, 20.0D, 2.0D, 23.3D),
-            Block.box(20.0D, 0.0D, 16.0D, 21.0D, 2.0D, 22.3D),
-            Block.box(21.0D, 0.0D, 16.0D, 22.0D, 2.0D, 21.3D),
-            Block.box(22.0D, 0.0D, 16.0D, 23.0D, 2.0D, 20.3D),
-            Block.box(23.0D, 0.0D, 16.0D, 24.0D, 2.0D, 19.3D),
-            Block.box(24.0D, 0.0D, 16.0D, 25.0D, 2.0D, 18.3D),
-            Block.box(25.0D, 0.0D, 16.0D, 26.0D, 2.0D, 17.3D),
-
-            Block.box(-1.0D, 0.0D, -10.3D, 0.0D, 2.0D, 0.0D),
-            Block.box(-2.0D, 0.0D, -9.3D, -1.0D, 2.0D, 0.0D),
-            Block.box(-3.0D, 0.0D, -8.3D, -2.0D, 2.0D, 0.0D),
-            Block.box(-4.0D, 0.0D, -7.3D, -3.0D, 2.0D, 0.0D),
-            Block.box(-5.0D, 0.0D, -6.3D, -4.0D, 2.0D, 0.0D),
-            Block.box(-6.0D, 0.0D, -5.3D, -5.0D, 2.0D, 0.0D),
-            Block.box(-7.0D, 0.0D, -4.3D, -6.0D, 2.0D, 0.0D),
-            Block.box(-8.0D, 0.0D, -3.3D, -7.0D, 2.0D, 0.0D),
-            Block.box(-9.0D, 0.0D, -2.3D, -8.0D, 2.0D, 0.0D),
-            Block.box(-10.0D, 0.0D, -1.3D, -9.0D, 2.0D, 0.0D),
-
-            Block.box(16.0D, 0.0D, -10.3D, 17.0D, 2.0D, 0.0D),
-            Block.box(17.0D, 0.0D, -9.3D, 18.0D, 2.0D, 0.0D),
-            Block.box(18.0D, 0.0D, -8.3D, 19.0D, 2.0D, 0.0D),
-            Block.box(19.0D, 0.0D, -7.3D, 20.0D, 2.0D, 0.0D),
-            Block.box(20.0D, 0.0D, -6.3D, 21.0D, 2.0D, 0.0D),
-            Block.box(21.0D, 0.0D, -5.3D, 22.0D, 2.0D, 0.0D),
-            Block.box(22.0D, 0.0D, -4.3D, 23.0D, 2.0D, 0.0D),
-            Block.box(23.0D, 0.0D, -3.3D, 24.0D, 2.0D, 0.0D),
-            Block.box(24.0D, 0.0D, -2.3D, 25.0D, 2.0D, 0.0D),
-            Block.box(25.0D, 0.0D, -1.3D, 26.0D, 2.0D, 0.0D)
+    public static final VoxelShape SHAPE_COLLISION_OPEN = Shapes.or(
+            SHAPE_FRAME_LEFT_OPEN, SHAPE_FRAME_RIGHT_OPEN,
+            SHAPE_FRAME_BACK,
+            SHAPE_FRAME_BOTTOM, SHAPE_FRAME_TOP
     );
-    public static final VoxelShape SHAPE_FRAME_TOP = Shapes.or(
-            Block.box(-11.3D, 46.0D, 0.0D, 27.3D, 48.0D, 16.0D),
-            Block.box(0.0D, 46.0D, -11.3D, 16.0D, 48.0D, 27.3D),
-
-            Block.box(-1.0D, 46.0D, 16.0D, 0.0D, 48.0D, 26.3D),
-            Block.box(-2.0D, 46.0D, 16.0D, -1.0D, 48.0D, 25.3D),
-            Block.box(-3.0D, 46.0D, 16.0D, -2.0D, 48.0D, 24.3D),
-            Block.box(-4.0D, 46.0D, 16.0D, -3.0D, 48.0D, 23.3D),
-            Block.box(-5.0D, 46.0D, 16.0D, -4.0D, 48.0D, 22.3D),
-            Block.box(-6.0D, 46.0D, 16.0D, -5.0D, 48.0D, 21.3D),
-            Block.box(-7.0D, 46.0D, 16.0D, -6.0D, 48.0D, 20.3D),
-            Block.box(-8.0D, 46.0D, 16.0D, -7.0D, 48.0D, 19.3D),
-            Block.box(-9.0D, 46.0D, 16.0D, -8.0D, 48.0D, 18.3D),
-            Block.box(-10.0D, 46.0D, 16.0D, -9.0D, 48.0D, 17.3D),
-
-            Block.box(16.0D, 46.0D, 16.0D, 17.0D, 48.0D, 26.3D),
-            Block.box(17.0D, 46.0D, 16.0D, 18.0D, 48.0D, 25.3D),
-            Block.box(18.0D, 46.0D, 16.0D, 19.0D, 48.0D, 24.3D),
-            Block.box(19.0D, 46.0D, 16.0D, 20.0D, 48.0D, 23.3D),
-            Block.box(20.0D, 46.0D, 16.0D, 21.0D, 48.0D, 22.3D),
-            Block.box(21.0D, 46.0D, 16.0D, 22.0D, 48.0D, 21.3D),
-            Block.box(22.0D, 46.0D, 16.0D, 23.0D, 48.0D, 20.3D),
-            Block.box(23.0D, 46.0D, 16.0D, 24.0D, 48.0D, 19.3D),
-            Block.box(24.0D, 46.0D, 16.0D, 25.0D, 48.0D, 18.3D),
-            Block.box(25.0D, 46.0D, 16.0D, 26.0D, 48.0D, 17.3D),
-
-            Block.box(-1.0D, 46.0D, -10.3D, 0.0D, 48.0D, 0.0D),
-            Block.box(-2.0D, 46.0D, -9.3D, -1.0D, 48.0D, 0.0D),
-            Block.box(-3.0D, 46.0D, -8.3D, -2.0D, 48.0D, 0.0D),
-            Block.box(-4.0D, 46.0D, -7.3D, -3.0D, 48.0D, 0.0D),
-            Block.box(-5.0D, 46.0D, -6.3D, -4.0D, 48.0D, 0.0D),
-            Block.box(-6.0D, 46.0D, -5.3D, -5.0D, 48.0D, 0.0D),
-            Block.box(-7.0D, 46.0D, -4.3D, -6.0D, 48.0D, 0.0D),
-            Block.box(-8.0D, 46.0D, -3.3D, -7.0D, 48.0D, 0.0D),
-            Block.box(-9.0D, 46.0D, -2.3D, -8.0D, 48.0D, 0.0D),
-            Block.box(-10.0D, 46.0D, -1.3D, -9.0D, 48.0D, 0.0D),
-
-            Block.box(16.0D, 46.0D, -10.3D, 17.0D, 48.0D, 0.0D),
-            Block.box(17.0D, 46.0D, -9.3D, 18.0D, 48.0D, 0.0D),
-            Block.box(18.0D, 46.0D, -8.3D, 19.0D, 48.0D, 0.0D),
-            Block.box(19.0D, 46.0D, -7.3D, 20.0D, 48.0D, 0.0D),
-            Block.box(20.0D, 46.0D, -6.3D, 21.0D, 48.0D, 0.0D),
-            Block.box(21.0D, 46.0D, -5.3D, 22.0D, 48.0D, 0.0D),
-            Block.box(22.0D, 46.0D, -4.3D, 23.0D, 48.0D, 0.0D),
-            Block.box(23.0D, 46.0D, -3.3D, 24.0D, 48.0D, 0.0D),
-            Block.box(24.0D, 46.0D, -2.3D, 25.0D, 48.0D, 0.0D),
-            Block.box(25.0D, 46.0D, -1.3D, 26.0D, 48.0D, 0.0D)
-    );
-
-    public static final VoxelShape SHAPE_FRAME_FRONT = Shapes.or(
-            Block.box(0.0D, 0.0D, -11.3D, 16.0D, 48.0D, -9.3D),
-
-            Block.box(-1.0D, 2.0D, -10.3D, 0.0D, 46.0D, -8.0D),
-            Block.box(-2.0D, 2.0D, -9.3D, -1.0D, 46.0D, -7.0D),
-            Block.box(-3.0D, 2.0D, -8.3D, -2.0D, 46.0D, -6.0D),
-            Block.box(-4.0D, 2.0D, -7.3D, -3.0D, 46.0D, -5.0D),
-            Block.box(-5.0D, 2.0D, -6.3D, -4.0D, 46.0D, -4.0D),
-            Block.box(-6.0D, 2.0D, -5.3D, -5.0D, 46.0D, -3.0D),
-            Block.box(-7.0D, 2.0D, -4.3D, -6.0D, 46.0D, -2.0D),
-            Block.box(-8.0D, 2.0D, -3.3D, -7.0D, 46.0D, -1.0D),
-            Block.box(-9.0D, 2.0D, -2.3D, -8.0D, 46.0D, 0.0D),
-            Block.box(-10.0D, 2.0D, -1.3D, -9.0D, 46.0D, 0.0D),
-
-            Block.box(16.0D, 2.0D, -10.3D, 17.0D, 46.0D, -8.0D),
-            Block.box(17.0D, 2.0D, -9.3D, 18.0D, 46.0D, -7.0D),
-            Block.box(18.0D, 2.0D, -8.3D, 19.0D, 46.0D, -6.0D),
-            Block.box(19.0D, 2.0D, -7.3D, 20.0D, 46.0D, -5.0D),
-            Block.box(20.0D, 2.0D, -6.3D, 21.0D, 46.0D, -4.0D),
-            Block.box(21.0D, 2.0D, -5.3D, 22.0D, 46.0D, -3.0D),
-            Block.box(22.0D, 2.0D, -4.3D, 23.0D, 46.0D, -2.0D),
-            Block.box(23.0D, 2.0D, -3.3D, 24.0D, 46.0D, -1.0D),
-            Block.box(24.0D, 2.0D, -2.3D, 25.0D, 46.0D, 0.0D),
-            Block.box(25.0D, 2.0D, -1.3D, 26.0D, 46.0D, 0.0D)
-    );
-
-    public static final VoxelShape INTERACTION_SHAPE = Block.box(-11.3D, 0.0D, -11.3D, 27.3D, 48.0D, 27.3D);
-
-    public static final VoxelShape SHAPE_FRAME = Shapes.or(SHAPE_FRAME_LEFT, SHAPE_FRAME_RIGHT, SHAPE_FRAME_BACK, SHAPE_FRAME_BOTTOM, SHAPE_FRAME_TOP);
-    public static final VoxelShape SHAPE_DOOR = Shapes.or(SHAPE_FRAME_FRONT);
-    public static final VoxelShape SHAPE_COLLISION_CLOSED = Shapes.or(SHAPE_FRAME, SHAPE_DOOR);
 
     private final RegistryObject<SoundEvent> open, close;
-
-    private final VoxelShape shapeFrame;
-    private final VoxelShape shapeCollisionClosed;
 
     protected static int getLightLevel(BlockState state) {
         return (state.getValue(ACTIVE) && state.getValue(SECTION) == ThreeXThreeSection.MIDDLE_TOP_MIDDLE) ? 15 : 0;
@@ -237,19 +101,16 @@ public class StasisChamber extends HorizontalDirectionalBlock implements Partial
                 .setValue(ACTIVE, Boolean.FALSE));
         this.open = open;
         this.close = close;
-
-        this.shapeFrame = SHAPE_FRAME;
-        this.shapeCollisionClosed = SHAPE_COLLISION_CLOSED;
     }
 
     public VoxelShape getOcclusionShape(BlockState state, BlockGetter level, BlockPos pos) {
-        VoxelShape shape = shapeFrame;
+        VoxelShape shape = SHAPE_COLLISION_OPEN;
 
         if (state.getValue(OPEN)) {
-            shape = AbstractCustomShapeBlock.calculateShapes(state.getValue(FACING), shapeFrame);
+            shape = AbstractCustomShapeBlock.calculateShapes(state.getValue(FACING), SHAPE_COLLISION_OPEN);
         }
         else {
-            shape = AbstractCustomShapeBlock.calculateShapes(state.getValue(FACING), shapeCollisionClosed);
+            shape = AbstractCustomShapeBlock.calculateShapes(state.getValue(FACING), SHAPE_COLLISION_CLOSED);
         }
 
         var offset = state.getValue(SECTION).getOffset(state.getValue(FACING), ThreeXThreeSection.MIDDLE_BOTTOM_MIDDLE);
@@ -548,7 +409,10 @@ public class StasisChamber extends HorizontalDirectionalBlock implements Partial
 
     @Override
     public AABB getDetectionSize(BlockState state, Level level, BlockPos pos) {
-        return new AABB(state.getValue(SECTION).getRelative(pos, state.getValue(FACING), ThreeXThreeSection.CENTER));
+        return new AABB(state.getValue(SECTION).getRelative(pos, state.getValue(FACING), ThreeXThreeSection.CENTER))
+                .inflate(9.0 / 16.0,
+                        14.0 / 16.0,
+                        9.0 / 16.0);
     }
 
     @Override
