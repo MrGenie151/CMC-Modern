@@ -58,6 +58,7 @@ import java.util.List;
 public class StasisChamber extends HorizontalDirectionalBlock implements PartialEntityBlock, OpenableDoor, SeatableBlock {
     public static final EnumProperty<ThreeXThreeSection> SECTION = EnumProperty.create("section", ThreeXThreeSection.class);
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
+    public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
 
     private static final Component CONTAINER_TITLE = Component.translatable("container.changed.stasis_chamber");
 
@@ -222,12 +223,18 @@ public class StasisChamber extends HorizontalDirectionalBlock implements Partial
     private final VoxelShape shapeFrame;
     private final VoxelShape shapeCollisionClosed;
 
+    protected static int getLightLevel(BlockState state) {
+        return (state.getValue(ACTIVE) && state.getValue(SECTION) == ThreeXThreeSection.MIDDLE_TOP_MIDDLE) ? 15 : 0;
+    }
+
     public StasisChamber(RegistryObject<SoundEvent> open, RegistryObject<SoundEvent> close) {
-        super(Properties.of().sound(SoundType.METAL).requiresCorrectToolForDrops().strength(6.5F, 9.0F));
+        super(Properties.of().sound(SoundType.METAL).requiresCorrectToolForDrops().strength(6.5F, 9.0F)
+                .lightLevel(StasisChamber::getLightLevel));
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
                 .setValue(SECTION, ThreeXThreeSection.MIDDLE_BOTTOM_MIDDLE)
-                .setValue(OPEN, Boolean.FALSE));
+                .setValue(OPEN, Boolean.FALSE)
+                .setValue(ACTIVE, Boolean.FALSE));
         this.open = open;
         this.close = close;
 
@@ -275,7 +282,7 @@ public class StasisChamber extends HorizontalDirectionalBlock implements Partial
 
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(FACING, SECTION, OPEN);
+        builder.add(FACING, SECTION, OPEN, ACTIVE);
     }
 
     @Override
@@ -499,6 +506,44 @@ public class StasisChamber extends HorizontalDirectionalBlock implements Partial
     @Override
     public boolean isOpen(BlockState state, Level level, BlockPos pos) {
         return state.getValue(OPEN);
+    }
+
+    public boolean markAsActive(BlockState state, Level level, BlockPos pos) {
+        if (state.getValue(ACTIVE))
+            return false;
+
+        var wantState = true;
+        var thisSect = state.getValue(SECTION);
+        for (var sect : ThreeXThreeSection.values()) {
+            var nPos = thisSect.getRelative(pos, state.getValue(FACING), sect);
+            var nBlock = level.getBlockState(nPos);
+            if (nBlock.getBlock() != this)
+                continue;
+            level.setBlockAndUpdate(nPos, nBlock.setValue(ACTIVE, wantState));
+        }
+
+        return true;
+    }
+
+    public boolean markAsInactive(BlockState state, Level level, BlockPos pos) {
+        if (!state.getValue(ACTIVE))
+            return false;
+
+        var wantState = false;
+        var thisSect = state.getValue(SECTION);
+        for (var sect : ThreeXThreeSection.values()) {
+            var nPos = thisSect.getRelative(pos, state.getValue(FACING), sect);
+            var nBlock = level.getBlockState(nPos);
+            if (nBlock.getBlock() != this)
+                continue;
+            level.setBlockAndUpdate(nPos, nBlock.setValue(ACTIVE, wantState));
+        }
+
+        return true;
+    }
+
+    public boolean isActive(BlockState state, Level level, BlockPos pos) {
+        return state.getValue(ACTIVE);
     }
 
     @Override

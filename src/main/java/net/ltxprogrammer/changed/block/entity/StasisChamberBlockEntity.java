@@ -703,6 +703,10 @@ public class StasisChamberBlockEntity extends BaseContainerBlockEntity implement
          * Requires: Chamber door is closed, the chamber is not full, and a fluid is configured.
          */
         FILL("fill", StasisChamberBlockEntity::isClosedAndNotFullAndHasFluid, blockEntity -> {
+            if (blockEntity.getBlockState().getBlock() instanceof StasisChamber chamber) {
+                chamber.markAsActive(blockEntity.getBlockState(), blockEntity.getLevel(), blockEntity.getBlockPos());
+            }
+
             blockEntity.fluidLevelO = blockEntity.fluidLevel;
             blockEntity.fluidLevel += (0.05f / 12.0f); // Take 12 seconds to fill
 
@@ -893,6 +897,7 @@ public class StasisChamberBlockEntity extends BaseContainerBlockEntity implement
                 return false; // No entities inside, no need to open
             if (blockEntity.getBlockState().getBlock() instanceof StasisChamber chamber) {
                 chamber.openDoor(blockEntity.getBlockState(), blockEntity.getLevel(), blockEntity.getBlockPos());
+                chamber.markAsInactive(blockEntity.getBlockState(), blockEntity.getLevel(), blockEntity.getBlockPos());
             }
             return false;
         }),
