@@ -314,9 +314,13 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerDataExte
 
     @WrapMethod(method = "getDimensions")
     public EntityDimensions changed$getTransfurDimensions(Pose pose, Operation<EntityDimensions> original) {
-        if (this.getTransfurVariant() == null)
-            return original.call(pose);
-        return this.getTransfurVariant().getTransfurDimensions(pose, original.call(pose));
+        var dimensions = this.getTransfurVariant() == null ? original.call(pose) : this.getTransfurVariant().getTransfurDimensions(pose, original.call(pose));
+
+        var mover = getPlayerMover();
+        if (mover != null)
+            dimensions = getPlayerMover().getDimensions(this, pose, dimensions);
+
+        return dimensions;
     }
 
     @WrapOperation(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/material/FluidState;isEmpty()Z"))

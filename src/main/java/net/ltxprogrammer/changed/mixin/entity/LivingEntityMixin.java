@@ -565,9 +565,14 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDa
     @WrapMethod(method = "getEyeHeight(Lnet/minecraft/world/entity/Pose;Lnet/minecraft/world/entity/EntityDimensions;)F")
     protected float getEyeHeight(Pose pose, EntityDimensions dimensions, Operation<Float> original) {
         var variant = ProcessTransfur.getPlayerTransfurVariant(EntityUtil.playerOrNull(this));
-        if (variant == null)
-            return original.call(pose, dimensions);
 
-        return variant.getTransfurEyeHeight(pose, original.call(pose, dimensions));
+        float eyeHeight = variant == null ? original.call(pose, dimensions) : variant.getTransfurEyeHeight(pose, original.call(pose, dimensions));
+        if (this instanceof PlayerDataExtension ext) {
+            var mover = ext.getPlayerMover();
+            if (mover != null)
+                return mover.getEyeHeight((LivingEntity)(Object)this, pose, eyeHeight);
+        }
+
+        return eyeHeight;
     }
 }
