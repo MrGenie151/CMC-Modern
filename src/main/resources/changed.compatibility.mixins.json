@@ -26,6 +26,7 @@
     "Forgery.LatexHumanoidArmorLayerMixin",
     "HardcoreRevival.KnockoutHandlerMixin",
     "JEG.AdvancedHumanoidRendererMixin",
+    "JEG.AnimatedGunRendererMixin",
     "JEG.HumanoidAnimatorMixin",
     "JEG.LatexItemInHandLayerMixin",
     "Leashed.LeadUtilMixin",
