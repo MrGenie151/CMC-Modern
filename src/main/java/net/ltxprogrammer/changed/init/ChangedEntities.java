@@ -56,6 +56,16 @@ public class ChangedEntities {
         });
     }
 
+    /**
+     * Allows addon mods to set their entity's colors without requiring a spawn egg
+     * @param location registry location of the entity
+     * @param background eggBack
+     * @param highlight eggHighlight
+     */
+    public static void registerEntityColor(ResourceLocation location, int background, int highlight) {
+        ENTITY_COLOR_MAP.put(location, Pair.of(background, highlight));
+    }
+
     public static int getEntityColorBack(ResourceLocation location) {
         return getEntityColor(location).getFirst();
     }
@@ -391,7 +401,7 @@ public class ChangedEntities {
             int eggHighlight,
             EntityType.Builder<T> builder) {
         String regName = Changed.modResource(name).toString();
-        ENTITY_COLOR_MAP.put(Changed.modResource(name), new Pair<>(eggBack, eggHighlight));
+        registerEntityColor(Changed.modResource(name), eggBack, eggHighlight);
         RegistryObject<EntityType<T>> entityType = REGISTRY.register(name, () -> builder.build(regName));
         ATTR_FUNC_REGISTRY.add(new Pair<>(entityType::get, T::createLatexAttributes));
         return entityType;
@@ -426,7 +436,7 @@ public class ChangedEntities {
             SpawnPlacements.Type spawnType,
             SpawnPlacements.SpawnPredicate<T> spawnPredicate,
             Supplier<AttributeSupplier.Builder> attributes) {
-        ENTITY_COLOR_MAP.put(Changed.modResource(name), new Pair<>(eggBack, eggHighlight));
+        registerEntityColor(Changed.modResource(name), eggBack, eggHighlight);
         String regName = Changed.modResource(name).toString();
         RegistryObject<EntityType<T>> entityType = REGISTRY.register(name, () -> builder.build(regName));
         INIT_FUNC_REGISTRY.add(ChangedEntity.getInit(entityType, spawnType, spawnPredicate));
