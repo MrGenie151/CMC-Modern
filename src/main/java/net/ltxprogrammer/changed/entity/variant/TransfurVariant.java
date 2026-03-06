@@ -533,15 +533,6 @@ public class TransfurVariant<T extends ChangedEntity> {
         return null;
     }
 
-    public static TransfurVariant<?> getEntityTransfur(LivingEntity entity) {
-        return ProcessTransfur.ifPlayerTransfurred(EntityUtil.playerOrNull(entity),
-                variant -> variant.getChangedEntity().getTransfurVariant(), () -> {
-            if (entity instanceof ChangedEntity changedEntity)
-                return changedEntity.getTransfurVariant();
-            return null;
-        });
-    }
-
     public static TransfurVariant<?> getEntityVariant(LivingEntity entity) {
         return ProcessTransfur.ifPlayerTransfurred(EntityUtil.playerOrNull(entity),
                 TransfurVariantInstance::getParent,

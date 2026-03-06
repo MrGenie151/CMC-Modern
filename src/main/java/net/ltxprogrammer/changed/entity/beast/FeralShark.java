@@ -41,7 +41,7 @@ public class FeralShark extends AbstractAquaticEntity {
     }
 
     @Override
-    public TransfurVariant<?> getTransfurVariant() {
+    protected TransfurVariant<?> getTransfurVariant() {
         return this.level().getSeaLevel() - 6 > this.getBlockY() ? ChangedTransfurVariants.Gendered.LATEX_MERMAID_SHARKS.getRandomVariant(this.random) : ChangedTransfurVariants.LATEX_SHARK.get();
     }
 

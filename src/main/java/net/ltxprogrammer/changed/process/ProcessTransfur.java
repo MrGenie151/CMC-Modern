@@ -552,7 +552,7 @@ public class ProcessTransfur {
     }
 
     public static boolean hasVariant(LivingEntity entity) {
-        return TransfurVariant.getEntityVariant(entity) != null || TransfurVariant.getEntityTransfur(entity) != null;
+        return TransfurVariant.getEntityVariant(entity) != null;
     }
 
     private static void bonusHurt(LivingEntity entity, DamageSource source, float damage, boolean overrideImmunity) {

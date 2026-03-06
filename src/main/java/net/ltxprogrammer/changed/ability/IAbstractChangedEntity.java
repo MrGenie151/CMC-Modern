@@ -5,7 +5,6 @@ import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.entity.beast.AbstractDarkLatexEntity;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
-import net.ltxprogrammer.changed.init.ChangedEntities;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.util.Cacheable;
 import net.minecraft.core.BlockPos;
@@ -34,7 +33,8 @@ public interface IAbstractChangedEntity {
 
     @NotNull BlockPos getBlockPosition();
     @Nullable TransfurVariant<?> getSelfVariant();
-    @Nullable TransfurVariant<?> getTransfurVariant();
+    default @Deprecated @Nullable TransfurVariant<?> getTransfurVariant() { return null; }
+    @Nullable TransfurDecision<?> getTransfurDecision(TransfurCause cause, LivingEntity target);
     @Nullable TransfurVariantInstance<?> getTransfurVariantInstance();
     @NotNull Level getLevel();
     @Deprecated
@@ -83,8 +83,8 @@ public interface IAbstractChangedEntity {
             doesAbsorption = getTransfurVariantInstance().transfurMode == TransfurMode.ABSORPTION;
         else if (getSelfVariant() != null)
             doesAbsorption = getSelfVariant().transfurMode() == TransfurMode.ABSORPTION;
-        else if (getTransfurVariant() != null && getTransfurVariant().transfurMode() == TransfurMode.ABSORPTION)
-            doesAbsorption = true;
+        /*else if (getTransfurVariant() != null && getTransfurVariant().transfurMode() == TransfurMode.ABSORPTION)
+            doesAbsorption = true;*/
         else
             doesAbsorption = false;
 
@@ -140,8 +140,8 @@ public interface IAbstractChangedEntity {
 
             @org.jetbrains.annotations.Nullable
             @Override
-            public TransfurVariant<?> getTransfurVariant() {
-                return instance.get().getChangedEntity().getTransfurVariant();
+            public TransfurDecision<?> getTransfurDecision(TransfurCause cause, LivingEntity target) {
+                return instance.get().getChangedEntity().getTransfurDecision(cause, target);
             }
 
             @Override
@@ -323,10 +323,9 @@ public interface IAbstractChangedEntity {
                 return cached.get().getSelfVariant();
             }
 
-            @org.jetbrains.annotations.Nullable
             @Override
-            public TransfurVariant<?> getTransfurVariant() {
-                return cached.get().getTransfurVariant();
+            public @org.jetbrains.annotations.Nullable TransfurDecision<?> getTransfurDecision(TransfurCause cause, LivingEntity target) {
+                return cached.get().getTransfurDecision(cause, target);
             }
 
             @org.jetbrains.annotations.Nullable

@@ -5,15 +5,22 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.datafixers.util.Either;
 import net.ltxprogrammer.changed.Changed;
+import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.client.animations.AnimationDefinition;
+import net.ltxprogrammer.changed.entity.ai.AssimilationBehavior;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
+import net.ltxprogrammer.changed.process.ProcessTransfur;
+import net.ltxprogrammer.changed.util.EntityUtil;
 import net.ltxprogrammer.changed.util.ResourceUtil;
+import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.InputStreamReader;
@@ -89,6 +96,88 @@ public class ChangedFusions extends SimplePreparableReloadListener<List<ChangedF
         return getFusionDefinitions().filter(fusionDefinition -> {
             return fusionDefinition.matches(variant, mob);
         }).map(FusionDefinition::fusion);
+    }
+
+    private void killOrDiscard(LivingEntity pvpLoser, IAbstractChangedEntity damageSource) {
+        if (pvpLoser instanceof Player player) {
+            ProcessTransfur.killPlayerByAbsorption(player, damageSource.getEntity());
+        } else {
+            pvpLoser.discard();
+        }
+    }
+
+    private AssimilationBehavior getLatexFusionBehavior(TransfurVariant<?> fusionVariant, IAbstractChangedEntity assimVictim, IAbstractChangedEntity transfurSource) {
+        Level level = assimVictim.getEntity().level();
+
+        { // Check if attacker can't fuse
+            var instance = transfurSource.getTransfurVariantInstance();
+            if (instance != null && instance.ageAsVariant > level.getGameRules().getInt(ChangedGameRules.RULE_FUSABILITY_DURATION_PLAYER))
+                return null;
+        }
+
+        { // Check if attackee can't fuse
+            var instance = assimVictim.getTransfurVariantInstance();
+            if (instance != null && instance.ageAsVariant > level.getGameRules().getInt(ChangedGameRules.RULE_FUSABILITY_DURATION_PLAYER))
+                return null;
+        }
+
+        if (assimVictim.isPlayer() && !transfurSource.isPlayer()) {
+            if (!level.getGameRules().getBoolean(ChangedGameRules.RULE_NPC_WANT_FUSE_PLAYER))
+                return null;
+        }
+
+        if (transfurSource.isPlayer() || !assimVictim.isPlayer()) {
+            return AssimilationBehavior.instant(() -> {
+                transfurSource.replaceVariant(fusionVariant);
+                ChangedSounds.broadcastSound(transfurSource.getEntity(), ChangedSounds.LATEX_FUSE_ENTITY, 1f, 1f);
+                killOrDiscard(assimVictim.getEntity(), transfurSource);
+
+                ChangedAnimationEvents.broadcastTransfurAnimation(transfurSource.getEntity(), fusionVariant, transfurSource.absorb());
+            });
+        } else {
+            return AssimilationBehavior.instant(() -> {
+                assimVictim.replaceVariant(fusionVariant);
+                ChangedSounds.broadcastSound(assimVictim.getEntity(), ChangedSounds.LATEX_FUSE_ENTITY, 1f, 1f);
+                killOrDiscard(transfurSource.getEntity(), assimVictim);
+
+                ChangedAnimationEvents.broadcastTransfurAnimation(assimVictim.getEntity(), fusionVariant, assimVictim.absorb());
+            });
+        }
+    }
+
+    private AssimilationBehavior getMobFusionBehavior(TransfurVariant<?> fusionVariant, LivingEntity assimVictim, IAbstractChangedEntity transfurSource) {
+        Level level = assimVictim.level();
+
+        { // Check if attacker can't fuse
+            var instance = transfurSource.getTransfurVariantInstance();
+            if (instance != null && instance.ageAsVariant > level.getGameRules().getInt(ChangedGameRules.RULE_FUSABILITY_DURATION_PLAYER))
+                return null;
+        }
+
+        return AssimilationBehavior.instant(() -> {
+            transfurSource.replaceVariant(fusionVariant);
+            ChangedSounds.broadcastSound(transfurSource.getEntity(), ChangedSounds.LATEX_FUSE_ENTITY, 1f, 1f);
+            killOrDiscard(assimVictim, transfurSource);
+
+            ChangedAnimationEvents.broadcastTransfurAnimation(transfurSource.getEntity(), fusionVariant, transfurSource.absorb());
+        });
+    }
+
+    public AssimilationBehavior getFusionBehavior(LivingEntity assimVictim, IAbstractChangedEntity transfurSource) {
+        IAbstractChangedEntity assimVictimVariant = IAbstractChangedEntity.forEither(assimVictim);
+        if (assimVictimVariant != null) {
+            var latexFusion = Util.getRandomSafe(getFusionsFor(transfurSource.getSelfVariant(), assimVictimVariant.getSelfVariant()).toList(), transfurSource.getEntity().getRandom());
+            if (latexFusion.isPresent()) {
+                return getLatexFusionBehavior(latexFusion.get(), assimVictimVariant, transfurSource);
+            }
+        }
+
+        var latexFusion = Util.getRandomSafe(getFusionsFor(transfurSource.getSelfVariant(), assimVictim.getClass()).toList(), transfurSource.getEntity().getRandom());
+        if (latexFusion.isPresent()) {
+            return getMobFusionBehavior(latexFusion.get(), assimVictim, transfurSource);
+        }
+
+        return null;
     }
 
     private FusionDefinition processJSONFile(ResourceLocation name, JsonObject root) throws ClassNotFoundException {

@@ -3,10 +3,7 @@ package net.ltxprogrammer.changed.ability;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
-import net.ltxprogrammer.changed.init.ChangedAbilities;
-import net.ltxprogrammer.changed.init.ChangedAttributes;
-import net.ltxprogrammer.changed.init.ChangedDamageSources;
-import net.ltxprogrammer.changed.init.ChangedTags;
+import net.ltxprogrammer.changed.init.*;
 import net.ltxprogrammer.changed.network.packet.GrabEntityPacket;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.util.KeyStatesTracker;
@@ -505,21 +502,15 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
             }
 
             if (attackDown && useDown && suited) {
-                float damage = (float)entity.getEntity().getAttributeValue(ChangedAttributes.TRANSFUR_DAMAGE.get());
-                damage = ProcessTransfur.difficultyAdjustTransfurAmount(entity.getLevel().getDifficulty(), damage, this.entity) * 1.5f;
-                if (this.entity.getChangedEntity().tryAbsorbTarget(this.grabbedEntity, this.entity, damage, null)
-                        && !this.entity.getLevel().isClientSide) {
-                    this.releaseEntity(false);
-                    return;
-                }
+                var behavior = ChangedTransfurVariants.getAssimilationBehavior(TransfurCause.GRAB_ABSORB, this.grabbedEntity, entity);
+                if (behavior != null)
+                    behavior.appendTransfurLogic(() -> this.releaseEntity(false)).attack(1.5f);
             }
 
             if (attackDown && !suited) {
-                float damage = (float)entity.getEntity().getAttributeValue(ChangedAttributes.TRANSFUR_DAMAGE.get());
-                damage = ProcessTransfur.difficultyAdjustTransfurAmount(entity.getLevel().getDifficulty(), damage, this.entity);
-                if (ProcessTransfur.progressTransfur(this.grabbedEntity, damage, entity.getChangedEntity().getTransfurVariant(), TransfurContext.latexHazard(this.entity, TransfurCause.GRAB_REPLICATE))
-                        && !this.entity.getLevel().isClientSide)
-                    this.releaseEntity(false);
+                var behavior = ChangedTransfurVariants.getAssimilationBehavior(TransfurCause.GRAB_REPLICATE, this.grabbedEntity, entity);
+                if (behavior != null)
+                    behavior.appendTransfurLogic(() -> this.releaseEntity(false)).attack();
             }
 
             else if (useDown) {

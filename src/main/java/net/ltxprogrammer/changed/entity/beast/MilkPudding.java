@@ -1,14 +1,15 @@
 package net.ltxprogrammer.changed.entity.beast;
 
 import net.ltxprogrammer.changed.entity.ChangedEntity;
-import net.ltxprogrammer.changed.entity.LatexTypeOld;
+import net.ltxprogrammer.changed.entity.TransfurCause;
+import net.ltxprogrammer.changed.entity.TransfurDecision;
 import net.ltxprogrammer.changed.entity.TransfurMode;
-import net.ltxprogrammer.changed.entity.latex.LatexType;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.init.ChangedEntities;
 import net.ltxprogrammer.changed.init.ChangedTransfurVariants;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
@@ -43,8 +44,13 @@ public class MilkPudding extends ChangedEntity {
     }
 
     @Override
-    public TransfurVariant<?> getTransfurVariant() {
+    protected TransfurVariant<?> getTransfurVariant() {
         return ChangedTransfurVariants.Gendered.WHITE_LATEX_WOLVES.getRandomVariant(random);
+    }
+
+    @Override
+    public TransfurDecision<?> getTransfurDecision(TransfurCause cause, LivingEntity targetEntity) {
+        return TransfurDecision.weak(TransfurDecision.Method.ABSORPTION, ChangedTransfurVariants.Gendered.WHITE_LATEX_WOLVES.getRandomVariant(random));
     }
 
     @Override
