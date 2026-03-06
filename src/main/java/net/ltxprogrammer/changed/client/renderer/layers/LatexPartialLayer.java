@@ -27,18 +27,6 @@ public class LatexPartialLayer<T extends ChangedEntity, M extends AdvancedHumano
         this.texture = texture;
     }
 
-    public void prepareMobModel(T entity, float partialTicks) {
-        if (ChangedCompatibility.isFirstPersonRendering()) {
-            model.getHead().visible = false;
-            model.getTorso().visible = !entity.isVisuallySwimming();
-        }
-
-        else {
-            model.getHead().visible = true;
-            model.getTorso().visible = true;
-        }
-    }
-
     public void render(PoseStack pose, MultiBufferSource bufferSource, int packedLight, T entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
         Minecraft minecraft = Minecraft.getInstance();
         boolean flag = minecraft.shouldEntityAppearGlowing(entity) && entity.isInvisible();
@@ -50,9 +38,11 @@ public class LatexPartialLayer<T extends ChangedEntity, M extends AdvancedHumano
                 vertexconsumer = bufferSource.getBuffer(renderType());
             }
 
-            this.prepareMobModel(entity, partialTicks);
-            this.model.getAnimator(entity).setupVariables(entity, partialTicks);
-            this.model.getAnimator(entity).applyPropertyModel(this.getParentModel());
+            this.model.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTicks);
+            this.model.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+
+            // Ensure limbs line up so modded animations copy over.
+            this.model.getAnimator(entity).applyPropertyModel(this.getParentModel().preparePropertyModel(entity));
             this.model.renderToBuffer(pose, vertexconsumer, packedLight, LivingEntityRenderer.getOverlayCoords(entity, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
