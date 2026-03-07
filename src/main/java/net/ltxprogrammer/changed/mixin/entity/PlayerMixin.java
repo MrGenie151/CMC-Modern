@@ -5,7 +5,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.ability.AbstractAbility;
-import net.ltxprogrammer.changed.ability.GrabEntityAbilityInstance;
 import net.ltxprogrammer.changed.ability.tree.AbilityTreeInstance;
 import net.ltxprogrammer.changed.block.WhiteLatexTransportInterface;
 import net.ltxprogrammer.changed.data.AccessorySlots;
@@ -23,8 +22,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
@@ -108,17 +105,6 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerDataExte
             ci.setReturnValue(ForgeRegistries.SOUND_EVENTS.getValue(ResourceLocation.parse("block.slime_block.step")));
             ci.cancel();
         }
-    }
-
-    @Inject(method = "createAttributes", at = @At("RETURN"))
-    private static void addChangedAttributes(CallbackInfoReturnable<AttributeSupplier.Builder> cir) {
-        cir.getReturnValue().add(ChangedAttributes.TRANSFUR_DAMAGE.get(), 3.0D)
-                .add(ChangedAttributes.GRAB_STRUGGLE_STRENGTH.get(), GrabEntityAbilityInstance.GRAB_STRENGTH_DECAY_PLAYER)
-                .add(ChangedAttributes.SPRINT_SPEED.get(), 1.0D)
-                .add(ChangedAttributes.SNEAK_SPEED.get(), 1.0D)
-                .add(ChangedAttributes.AIR_CAPACITY.get(), 15.0)
-                .add(ChangedAttributes.JUMP_STRENGTH.get(), 1.0D)
-                .add(ChangedAttributes.FALL_RESISTANCE.get(), 1.0D);
     }
 
     @Inject(method = "attack", at = @At("HEAD"), cancellable = true)
