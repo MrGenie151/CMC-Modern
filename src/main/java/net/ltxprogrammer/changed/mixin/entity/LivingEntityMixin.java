@@ -128,7 +128,7 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDa
     private void updateFallFlying(CallbackInfo callback) {
         if (this.level().isClientSide) return;
         ProcessTransfur.ifPlayerTransfurred(EntityUtil.playerOrNull(this), (player, variant) -> {
-            if (variant.getParent().canGlide) {
+            if (variant.canElytraGlide()) {
                 this.setSharedFlag(7, player.isFallFlying() && !player.onGround() && !player.isPassenger() && !player.hasEffect(MobEffects.LEVITATION));
                 callback.cancel();
             }

@@ -64,13 +64,11 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerDataExte
     @Inject(method = "tryToStartFallFlying", at = @At("HEAD"), cancellable = true)
     protected void tryToStartFallFlying(CallbackInfoReturnable<Boolean> ci) {
         Player player = (Player)(Object)this;
-        if (latexVariant != null && latexVariant.getParent().canGlide) {
+        if (latexVariant != null && latexVariant.canElytraGlide()) {
             if (!player.onGround() && !player.isFallFlying() && !player.isInWater() && !player.hasEffect(MobEffects.LEVITATION)) {
                 player.startFallFlying();
                 ci.setReturnValue(true);
                 ci.cancel();
-
-                //player.respawn();
             }
         }
     }

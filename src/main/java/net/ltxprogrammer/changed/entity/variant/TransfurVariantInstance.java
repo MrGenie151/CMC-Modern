@@ -27,7 +27,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -737,8 +736,16 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
         return true;
     }
 
+    public boolean canElytraGlide() {
+        return this.parent.canGlide;
+    }
+
+    public boolean canCreativeFly() {
+        return this.parent.canGlide;
+    }
+
     protected void tickFlying() {
-        if (parent.canGlide && shouldApplyAbilities()) {
+        if (this.canCreativeFly() && shouldApplyAbilities()) {
             if (!host.isCreative() && !host.isSpectator()) {
                 boolean meetsCriteria = this.meetsCriteriaForFlying();
 
@@ -948,7 +955,7 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
         });
         mapAttributes(player, previousAttributes, TransfurVariantInstance::noOp);
         player.setHealth(Math.min(player.getMaxHealth(), player.getHealth()));
-        if (parent.canGlide) {
+        if (this.canCreativeFly()) {
             player.getAbilities().mayfly = player.isCreative() || player.isSpectator();
             if (!player.isCreative() && !player.isSpectator()) {
                 player.getAbilities().flying = false;
