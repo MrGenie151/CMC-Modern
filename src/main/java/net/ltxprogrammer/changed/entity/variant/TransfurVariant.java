@@ -184,6 +184,7 @@ public class TransfurVariant<T extends ChangedEntity> {
 
     public T generateForm(@NotNull Player player, Level level) {
         T latexForm = createChangedEntity(level);
+        latexForm.setUnderlyingPlayer(player);
         latexForm.moveTo((player.getX()), (player.getY()), (player.getZ()), player.getYRot(), 0);
         latexForm.setCustomName(player.getDisplayName());
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
