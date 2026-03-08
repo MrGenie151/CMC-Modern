@@ -3,6 +3,7 @@ package net.ltxprogrammer.changed.init;
 import com.mojang.datafixers.util.Pair;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
+import net.ltxprogrammer.changed.entity.EntityColorProvider;
 import net.ltxprogrammer.changed.entity.SeatEntity;
 import net.ltxprogrammer.changed.entity.beast.*;
 import net.ltxprogrammer.changed.entity.beast.boss.BehemothHandLeft;
@@ -13,6 +14,8 @@ import net.ltxprogrammer.changed.entity.projectile.GasParticle;
 import net.ltxprogrammer.changed.entity.projectile.LatexInkball;
 import net.ltxprogrammer.changed.entity.robot.Exoskeleton;
 import net.ltxprogrammer.changed.entity.robot.Roomba;
+import net.ltxprogrammer.changed.util.Color3;
+import net.ltxprogrammer.changed.util.EntityUtil;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -54,6 +57,16 @@ public class ChangedEntities {
                 return new Pair<>(0xF0F0F0, 0xF0F0F0);
             }
         });
+    }
+
+    public static Pair<Color3, Color3> getEntityColor(LivingEntity entity) {
+        entity = EntityUtil.maybeGetOverlaying(entity);
+        if (entity instanceof EntityColorProvider colorProvider) {
+            return Pair.of(colorProvider.getFrontColor(), colorProvider.getBackColor());
+        } else {
+            return getEntityColor(ForgeRegistries.ENTITY_TYPES.getKey(entity.getType()))
+                    .mapFirst(Color3::fromInt).mapSecond(Color3::fromInt);
+        }
     }
 
     /**

@@ -23,6 +23,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.event.IModBusEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -552,8 +553,9 @@ public class TransfurVariant<T extends ChangedEntity> {
                 });
     }
 
+    @Deprecated
     public Pair<Color3, Color3> getColors() {
-        var ints = ChangedEntities.getEntityColor(getEntityType().builtInRegistryHolder().key().location());
+        var ints = ChangedEntities.getEntityColor(ForgeRegistries.ENTITY_TYPES.getKey(getEntityType()));
         return new Pair<>(
                 Color3.fromInt(ints.getFirst()),
                 Color3.fromInt(ints.getSecond()));

@@ -1,6 +1,7 @@
 package net.ltxprogrammer.changed.entity.variant;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.ability.*;
@@ -1036,4 +1037,8 @@ public abstract class TransfurVariantInstance<T extends ChangedEntity> {
     }
 
     public void prepareForRender(float partialTicks) {}
+
+    public Pair<Color3, Color3> getColors() {
+        return ChangedEntities.getEntityColor(this.entity);
+    }
 }
