@@ -826,6 +826,7 @@ public class StasisChamberBlockEntity extends BaseContainerBlockEntity implement
 
             blockEntity.getChamberedEntity().ifPresent(entity -> {
                 if (TransfurVariant.getEntityVariant(entity) != null) return;
+                if (!entity.getType().is(ChangedTags.EntityTypes.HUMANOIDS)) return;
 
                 ProcessTransfur.transfur(entity, entity.level(), blockEntity.findVariantFromSlots(), true, TransfurContext.hazard(TransfurCause.STASIS_CHAMBER));
                 if (entity.isRemoved() || entity.isDeadOrDying()) { // Transfurring killed entity, replaced with npc
