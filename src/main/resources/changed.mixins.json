@@ -46,6 +46,7 @@
     "server.LevelChunkSectionMixin",
     "server.MinecraftServerMixin",
     "server.ServerEntityMixin",
+    "server.ServerGamePacketListenerImplMixin",
     "server.ServerLevelMixin",
     "server.ServerPlayerGameModeMixin"
   ],
