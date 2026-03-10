@@ -1224,4 +1224,13 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
     protected float getStandingEyeHeight(Pose pose, EntityDimensions dimensions) {
         return dimensions.height * this.getEyeHeightMul();
     }
+
+    @Override
+    public float getFlyingSpeed() {
+        if (underlyingPlayer != null && underlyingPlayer.getAbilities().flying && !underlyingPlayer.isPassenger()) {
+            return this.isSprinting() ? underlyingPlayer.getAbilities().getFlyingSpeed() * 2.0F : underlyingPlayer.getAbilities().getFlyingSpeed();
+        } else {
+            return this.isSprinting() ? 0.025999999F : 0.02F;
+        }
+    }
 }

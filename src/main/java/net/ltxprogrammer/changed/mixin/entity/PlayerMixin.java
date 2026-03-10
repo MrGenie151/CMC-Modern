@@ -22,6 +22,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
@@ -35,6 +36,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -47,6 +49,8 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerDataExte
     @Shadow public abstract boolean isSwimming();
 
     @Shadow public abstract boolean isSpectator();
+
+    @Shadow @Final private Abilities abilities;
 
     protected PlayerMixin(EntityType<? extends LivingEntity> p_20966_, Level p_20967_) {
         super(p_20966_, p_20967_);
@@ -321,5 +325,10 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerDataExte
     @Override
     public boolean canSwimInFluidType(FluidType type) {
         return this.getTransfurVariant() != null ? this.getTransfurVariant().getChangedEntity().canSwimInFluidType(type) : super.canSwimInFluidType(type);
+    }
+
+    @WrapMethod(method = "getFlyingSpeed")
+    public float changed$getTransfurFlyingSpeed(Operation<Float> original) {
+        return this.getTransfurVariant() != null ? this.getTransfurVariant().getChangedEntity().getFlyingSpeed() : original.call();
     }
 }
