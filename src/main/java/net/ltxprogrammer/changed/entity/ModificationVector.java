@@ -1,13 +1,19 @@
 package net.ltxprogrammer.changed.entity;
 
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
+import net.minecraftforge.registries.IForgeRegistry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -49,7 +55,7 @@ public interface ModificationVector {
         void acceptState(boolean state);
     }
 
-    class SimpleEnumVector<T extends Enum<T> & StringRepresentable> implements EnumVector {
+    class SimpleEnumVector<T extends StringRepresentable> implements EnumVector {
         private final List<T> values;
         private final Supplier<T> getCurrentValue;
         private final Consumer<T> setValue;
@@ -105,6 +111,190 @@ public interface ModificationVector {
             }
 
             return false;
+        }
+    }
+
+    class SimpleRegistryVector<T> implements EnumVector {
+        private final Registry<T> registry;
+        private final Supplier<T> getCurrentValue;
+        private final Consumer<T> setValue;
+        private final String displayId;
+        private final @Nullable String tooltipId;
+
+        public SimpleRegistryVector(Registry<T> registry, Supplier<T> getCurrentValue, Consumer<T> setValue, String displayId, @Nullable String tooltipId) {
+            this.registry = registry;
+            this.getCurrentValue = getCurrentValue;
+            this.setValue = setValue;
+            this.displayId = displayId;
+            this.tooltipId = tooltipId;
+        }
+
+        public void cycleForward() {
+            var current = this.getCurrentValue.get();
+
+            T firstValue = null;
+            boolean forwardNext = false;
+
+            for (Map.Entry<ResourceKey<T>, T> entry : registry.entrySet()) {
+                if (firstValue == null)
+                    firstValue = entry.getValue();
+
+                if (forwardNext) {
+                    this.setValue.accept(entry.getValue());
+                    return;
+                }
+
+                if (current == entry.getValue())
+                    forwardNext = true;
+            }
+
+            if (firstValue != null)
+                this.setValue.accept(firstValue);
+        }
+
+        public void cycleBackward() {
+            var current = this.getCurrentValue.get();
+
+            T firstValue = null;
+            boolean forwardNext = false;
+
+            var entryList = registry.entrySet().stream().toList();
+            var it = entryList.listIterator(entryList.size());
+
+            while (it.hasPrevious()) {
+                var entry = it.previous();
+                if (firstValue == null)
+                    firstValue = entry.getValue();
+
+                if (forwardNext) {
+                    this.setValue.accept(entry.getValue());
+                    return;
+                }
+
+                if (current == entry.getValue())
+                    forwardNext = true;
+            }
+
+            if (firstValue != null)
+                this.setValue.accept(firstValue);
+        }
+
+        @Override
+        public Component getDisplayText() {
+            return Component.translatable(displayId, registry.getKey(getCurrentValue.get()));
+        }
+
+        @Override
+        public @Nullable Component getTooltipText() {
+            return tooltipId == null ? null : Component.translatable(tooltipId);
+        }
+
+        @Override
+        public Tag writeAsTag() {
+            return IntTag.valueOf(registry.getId(getCurrentValue.get()));
+        }
+
+        @Override
+        public boolean readFromTag(Tag tag) {
+            var value = registry.byId(((IntTag)tag).getAsInt());
+
+            if (getCurrentValue.get() == value)
+                return false;
+
+            setValue.accept(value);
+            return true;
+        }
+    }
+
+    class SimpleForgeRegistryVector<T> implements EnumVector {
+        private final IForgeRegistry<T> registry;
+        private final Supplier<T> getCurrentValue;
+        private final Consumer<T> setValue;
+        private final String displayId;
+        private final @Nullable String tooltipId;
+
+        public SimpleForgeRegistryVector(IForgeRegistry<T> registry, Supplier<T> getCurrentValue, Consumer<T> setValue, String displayId, @Nullable String tooltipId) {
+            this.registry = registry;
+            this.getCurrentValue = getCurrentValue;
+            this.setValue = setValue;
+            this.displayId = displayId;
+            this.tooltipId = tooltipId;
+        }
+
+        public void cycleForward() {
+            var current = this.getCurrentValue.get();
+
+            T firstValue = null;
+            boolean forwardNext = false;
+
+            for (Map.Entry<ResourceKey<T>, T> entry : registry.getEntries()) {
+                if (firstValue == null)
+                    firstValue = entry.getValue();
+
+                if (forwardNext) {
+                    this.setValue.accept(entry.getValue());
+                    return;
+                }
+
+                if (current == entry.getValue())
+                    forwardNext = true;
+            }
+
+            if (firstValue != null)
+                this.setValue.accept(firstValue);
+        }
+
+        public void cycleBackward() {
+            var current = this.getCurrentValue.get();
+
+            T firstValue = null;
+            boolean forwardNext = false;
+
+            var entryList = registry.getEntries().stream().toList();
+            var it = entryList.listIterator(entryList.size());
+
+            while (it.hasPrevious()) {
+                var entry = it.previous();
+                if (firstValue == null)
+                    firstValue = entry.getValue();
+
+                if (forwardNext) {
+                    this.setValue.accept(entry.getValue());
+                    return;
+                }
+
+                if (current == entry.getValue())
+                    forwardNext = true;
+            }
+
+            if (firstValue != null)
+                this.setValue.accept(firstValue);
+        }
+
+        @Override
+        public Component getDisplayText() {
+            return Component.translatable(displayId, registry.getKey(getCurrentValue.get()));
+        }
+
+        @Override
+        public @Nullable Component getTooltipText() {
+            return tooltipId == null ? null : Component.translatable(tooltipId);
+        }
+
+        @Override
+        public Tag writeAsTag() {
+            return StringTag.valueOf(registry.getKey(getCurrentValue.get()).toString());
+        }
+
+        @Override
+        public boolean readFromTag(Tag tag) {
+            var value = registry.getValue(ResourceLocation.parse(((StringTag)tag).getAsString()));
+
+            if (getCurrentValue.get() == value)
+                return false;
+
+            setValue.accept(value);
+            return true;
         }
     }
 
@@ -215,8 +405,24 @@ public interface ModificationVector {
                 getCurrentValue, setValue, displayId, tooltipId);
     }
 
-    static <T extends Enum<T> & StringRepresentable> ModificationVector simpleEnum(List<T> values, Supplier<T> getCurrentValue, Consumer<T> setValue, String displayId, @Nullable String tooltipId) {
+    static <T extends StringRepresentable> ModificationVector simpleEnum(List<T> values, Supplier<T> getCurrentValue, Consumer<T> setValue, String displayId, @Nullable String tooltipId) {
         return new SimpleEnumVector<>(values, getCurrentValue, setValue, displayId, tooltipId);
+    }
+
+    static <T> ModificationVector simpleEnum(Registry<T> registry, Supplier<T> getCurrentValue, Consumer<T> setValue, String displayId) {
+        return simpleEnum(registry, getCurrentValue, setValue, displayId, displayId + ".tooltip");
+    }
+
+    static <T> ModificationVector simpleEnum(Registry<T> registry, Supplier<T> getCurrentValue, Consumer<T> setValue, String displayId, @Nullable String tooltipId) {
+        return new SimpleRegistryVector<>(registry, getCurrentValue, setValue, displayId, tooltipId);
+    }
+
+    static <T> ModificationVector simpleEnum(IForgeRegistry<T> registry, Supplier<T> getCurrentValue, Consumer<T> setValue, String displayId) {
+        return simpleEnum(registry, getCurrentValue, setValue, displayId, displayId + ".tooltip");
+    }
+
+    static <T> ModificationVector simpleEnum(IForgeRegistry<T> registry, Supplier<T> getCurrentValue, Consumer<T> setValue, String displayId, @Nullable String tooltipId) {
+        return new SimpleForgeRegistryVector<>(registry, getCurrentValue, setValue, displayId, tooltipId);
     }
 
     static ModificationVector simpleLinear(double minimum, double maximum, Supplier<Double> getCurrentValue, Consumer<Double> setValue, String displayId) {
