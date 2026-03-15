@@ -126,7 +126,8 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
     }
 
     public float getSimulatedSpring(SpringType type, SpringType.Direction direction, float partialTicks) {
-        return simulatedSprings.get(direction).get(type).getSpring(partialTicks);
+        var typeMap = simulatedSprings.computeIfAbsent(direction, dir -> new EnumMap<>(SpringType.class));
+        return typeMap.computeIfAbsent(type, SpringType.Simulator::new).getSpring(partialTicks);
     }
 
     private void moveCloak() {
@@ -474,13 +475,6 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
         hairStyle = this.getDefaultHairStyle();
         if (level.isClientSide) { // Springs are only simulated on the client side
             simulatedSprings = new HashMap<>();
-            Arrays.stream(SpringType.Direction.values()).forEach(direction -> {
-                final var map = new EnumMap<SpringType, SpringType.Simulator>(SpringType.class);
-                simulatedSprings.put(direction, map);
-                Arrays.stream(SpringType.values()).forEach(springType -> {
-                    map.put(springType, new SpringType.Simulator(springType));
-                });
-            });
         } else {
             simulatedSprings = Map.of();
         }
@@ -687,6 +681,7 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
         this.attackAnim = player.attackAnim;
         this.oAttackAnim = player.oAttackAnim;
         this.flyDist = player.flyDist;
+        this.jumping = player.jumping;
 
         this.wasTouchingWater = player.wasTouchingWater;
         this.swimAmount = player.swimAmount;
@@ -977,7 +972,7 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
     }
 
     public void copyTraitsFrom(IAbstractChangedEntity entity) {
-
+        getBasicPlayerInfo().copyFrom(entity.getChangedEntity().getBasicPlayerInfo());
     }
 
     public CompoundTag savePlayerVariantData() {
@@ -1021,5 +1016,14 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
     @Override
     protected float getStandingEyeHeight(Pose pose, EntityDimensions dimensions) {
         return dimensions.height * this.getEyeHeightMul();
+    }
+
+    @Override
+    public float getFlyingSpeed() {
+        if (underlyingPlayer != null && underlyingPlayer.getAbilities().flying && !underlyingPlayer.isPassenger()) {
+            return this.isSprinting() ? underlyingPlayer.getAbilities().getFlyingSpeed() * 2.0F : underlyingPlayer.getAbilities().getFlyingSpeed();
+        } else {
+            return this.isSprinting() ? 0.025999999F : 0.02F;
+        }
     }
 }
