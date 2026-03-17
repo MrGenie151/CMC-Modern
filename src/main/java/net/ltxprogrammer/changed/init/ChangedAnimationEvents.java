@@ -11,7 +11,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -52,13 +51,13 @@ public class ChangedAnimationEvents {
         if (livingEntity.level().isClientSide) return; // Should only be called on the server
         if (!livingEntity.level().getGameRules().getBoolean(ChangedGameRules.RULE_DO_TRANSFUR_ANIMATION)) return;
 
-        if (context.source != null)
+        if (context.source() != null)
             Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> livingEntity),
                     AnimationEventPacket.Builder.of(livingEntity, TRANSFUR.get(), AnimationCategory.TRANSFUR,
-                            new TransfurAnimationParameters(variant, context.cause)).addEntity(context.source.getEntity()).build());
+                            new TransfurAnimationParameters(variant, context.cause())).addEntity(context.source().getEntity()).build());
         else
             Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> livingEntity),
                     AnimationEventPacket.Builder.of(livingEntity, TRANSFUR.get(), AnimationCategory.TRANSFUR,
-                            new TransfurAnimationParameters(variant, context.cause)).build());
+                            new TransfurAnimationParameters(variant, context.cause())).build());
     }
 }

@@ -1,24 +1,17 @@
 package net.ltxprogrammer.changed.init;
 
 import net.ltxprogrammer.changed.Changed;
-import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
-import net.ltxprogrammer.changed.entity.ChangedEntity;
-import net.ltxprogrammer.changed.entity.TransfurCause;
-import net.ltxprogrammer.changed.entity.TransfurMode;
-import net.ltxprogrammer.changed.entity.VisionType;
-import net.ltxprogrammer.changed.entity.ai.AssimilationBehavior;
+import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.entity.ai.EntityAssimilationBehavior;
+import net.ltxprogrammer.changed.entity.ai.TransfurDecider;
 import net.ltxprogrammer.changed.entity.beast.*;
 import net.ltxprogrammer.changed.entity.variant.GenderedPair;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
-import net.minecraft.resources.ResourceLocation;
+import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.util.*;
@@ -27,48 +20,6 @@ import java.util.stream.Stream;
 
 public class ChangedTransfurVariants {
     public static final DeferredRegister<TransfurVariant<?>> REGISTRY = ChangedRegistry.TRANSFUR_VARIANT.createDeferred(Changed.MODID);
-
-    private static final Map<ResourceLocation, EntityAssimilationBehavior<?>> ASSIMILATED_MOB_TRANSFUR_LOGIC = new HashMap<>();
-
-    public static <T extends LivingEntity> void registerMobAssimilation(EntityType<T> entityType, EntityAssimilationBehavior<T> entityAssimilationBehavior) {
-        ASSIMILATED_MOB_TRANSFUR_LOGIC.put(ForgeRegistries.ENTITY_TYPES.getKey(entityType), entityAssimilationBehavior);
-    }
-
-    public static <T extends LivingEntity> void registerMobAssimilation(RegistryObject<EntityType<T>> entityType, EntityAssimilationBehavior<T> entityAssimilationBehavior) {
-        ASSIMILATED_MOB_TRANSFUR_LOGIC.put(entityType.getId(), entityAssimilationBehavior);
-    }
-
-    public static <T extends LivingEntity> EntityAssimilationBehavior<T> getEntityAssimilationBehavior(T entity) {
-        if (entity == null)
-            return null;
-        var key = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
-        if (!ASSIMILATED_MOB_TRANSFUR_LOGIC.containsKey(key)) {
-            if (entity instanceof Player)
-                return (EntityAssimilationBehavior<T>) EntityAssimilationBehavior.defaultPlayer();
-            else if (entity.getType().is(ChangedTags.EntityTypes.HUMANOIDS))
-                return (EntityAssimilationBehavior<T>) EntityAssimilationBehavior.defaultHumanoid();
-            else
-                return null;
-        }
-        return (EntityAssimilationBehavior<T>) ASSIMILATED_MOB_TRANSFUR_LOGIC.get(key);
-    }
-
-    /**
-     * Computes the assimilation behavior that occurs between the victim and the source.
-     * @param assimVictim
-     * @param transfurSource
-     * @return
-     */
-    public static AssimilationBehavior getAssimilationBehavior(TransfurCause cause, LivingEntity assimVictim, IAbstractChangedEntity transfurSource) {
-        var fusionBehavior = ChangedFusions.INSTANCE.getFusionBehavior(assimVictim, transfurSource);
-        if (fusionBehavior != null)
-            return fusionBehavior;
-
-        var behavior = getEntityAssimilationBehavior(assimVictim);
-        if (behavior == null)
-            return null;
-        return behavior.entityAssimilateVictimBehavior(cause, assimVictim, transfurSource);
-    }
 
     public static final RegistryObject<TransfurVariant<FeralShark>> FERAL_LATEX_SHARK = register("form_latex_shark_feral",
             TransfurVariant.Builder.of(ChangedEntities.FERAL_LATEX_SHARK).holdItemsInMouth().breatheMode(TransfurVariant.BreatheMode.WATER));
@@ -250,6 +201,11 @@ public class ChangedTransfurVariants {
 
     private static <T extends ChangedEntity> RegistryObject<TransfurVariant<T>> register(String name, TransfurVariant.Builder<T> builder) {
         return REGISTRY.register(name, builder::build);
+    }
+
+    static {
+        ProcessTransfur.registerMobAssimilation(EntityType.BEE, EntityAssimilationBehavior.latexAssimilation(1.4, true,
+                TransfurDecider.simpleMobDecider(LATEX_BEE, 3.0f)));
     }
 
     public static class Gendered {

@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.ability;
 
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.entity.*;
+import net.ltxprogrammer.changed.entity.ai.LatexAssimilationDecision;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
 import net.ltxprogrammer.changed.init.*;
 import net.ltxprogrammer.changed.network.packet.GrabEntityPacket;
@@ -446,6 +447,12 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
         return false;
     }
 
+    protected @Nullable LatexAssimilationDecision<?> makeAssimilationDecision() {
+        return entity.makeLatexAssimilationDecision(
+                suited ? TransfurCause.GRAB_ABSORB :TransfurCause.GRAB_REPLICATE, grabbedEntity
+        );
+    }
+
     public void tickIdle() { // Called every tick of LatexVariantInstance, for variants that have this ability
         this.grabStrengthO = this.grabStrength;
         this.suitTransitionO = this.suitTransition;
@@ -501,16 +508,15 @@ public class GrabEntityAbilityInstance extends AbstractAbilityInstance {
                 useDown = useKeyDown;
             }
 
-            if (attackDown && useDown && suited) {
-                var behavior = ChangedTransfurVariants.getAssimilationBehavior(TransfurCause.GRAB_ABSORB, this.grabbedEntity, entity);
-                if (behavior != null)
-                    behavior.appendTransfurLogic(() -> this.releaseEntity(false)).attack(1.5f);
+            var assimilationDecision = this.makeAssimilationDecision();
+            if (assimilationDecision != null && attackDown && useDown && suited) {
+                if (ProcessTransfur.progressTransfur(this.grabbedEntity, assimilationDecision.withTransfurProgress(assimilationDecision.transfurProgress() * 1.5f)))
+                    this.releaseEntity(false);
             }
 
-            if (attackDown && !suited) {
-                var behavior = ChangedTransfurVariants.getAssimilationBehavior(TransfurCause.GRAB_REPLICATE, this.grabbedEntity, entity);
-                if (behavior != null)
-                    behavior.appendTransfurLogic(() -> this.releaseEntity(false)).attack();
+            if (assimilationDecision != null && attackDown && !suited) {
+                if (ProcessTransfur.progressTransfur(this.grabbedEntity, assimilationDecision))
+                    this.releaseEntity(false);
             }
 
             else if (useDown) {

@@ -6,6 +6,7 @@ import net.ltxprogrammer.changed.ability.AbstractAbilityInstance;
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.block.WhiteLatexTransportInterface;
 import net.ltxprogrammer.changed.entity.ai.AssimilationBehavior;
+import net.ltxprogrammer.changed.entity.ai.LatexAssimilationDecision;
 import net.ltxprogrammer.changed.entity.ai.LookAtPlayerButNotHostGoal;
 import net.ltxprogrammer.changed.entity.ai.UseAbilityGoal;
 import net.ltxprogrammer.changed.entity.beast.*;
@@ -19,9 +20,7 @@ import net.ltxprogrammer.changed.network.syncher.ChangedEntityDataSerializers;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.util.Cacheable;
 import net.ltxprogrammer.changed.util.Color3;
-import net.ltxprogrammer.changed.util.EntityUtil;
 import net.ltxprogrammer.changed.util.UniversalDist;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -443,20 +442,45 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
         return () -> SpawnPlacements.register(registryObject.get(), spawnPlacement, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, spawnPredicate);
     }
 
+    @Deprecated
     protected TransfurVariant<?> getTransfurVariant() {
         return getSelfVariant();
     }
 
+    protected TransfurVariant<?> getTransfurVariant(LatexAssimilationDecision.Method method) {
+        return this.getTransfurVariant();
+    }
+
+    protected float computeTransfurDamage() {
+        IAbstractChangedEntity self = IAbstractChangedEntity.forEntity(this);
+
+        float damage = (float)self.getEntity().getAttributeValue(ChangedAttributes.TRANSFUR_DAMAGE.get());
+        damage = ProcessTransfur.difficultyAdjustTransfurAmount(self.getLevel().getDifficulty(), damage, self);
+        float attackStrengthScale = underlyingPlayer != null ? underlyingPlayer.getAttackStrengthScale(0.5F) : 1.0F;
+        damage *= 0.2F + attackStrengthScale * attackStrengthScale * 0.8F;
+
+        return damage;
+    }
+
     /**
-     * Returns a decision on how this entity will transfur the target entity
-     * @param cause
-     * @param targetEntity
-     * @return
+     * Returns a decision on how this entity wants to transfur the target entity
+     * @param cause tagged transfur cause. Expected to be GRAB_REPLICATE or GRAB_ABSORB for entity sources.
+     * @param targetEntity target entity that this entity is deciding how to assimilate
+     * @return decision on how this entity wants to transfur the target entity, or null if it doesn't want to.
      */
-    public TransfurDecision<?> getTransfurDecision(TransfurCause cause, LivingEntity targetEntity) {
+    public @Nullable LatexAssimilationDecision<?> makeLatexAssimilationDecision(TransfurCause cause, LivingEntity targetEntity) {
+        IAbstractChangedEntity self = IAbstractChangedEntity.forEntity(this);
+
         return switch (cause) {
-            case GRAB_REPLICATE -> TransfurDecision.strong(TransfurDecision.Method.REPLICATION, getTransfurVariant());
-            case GRAB_ABSORB -> TransfurDecision.strong(TransfurDecision.Method.ABSORPTION, getTransfurVariant());
+            case GRAB_REPLICATE -> LatexAssimilationDecision.strong(LatexAssimilationDecision.Method.REPLICATION,
+                    getTransfurVariant(LatexAssimilationDecision.Method.REPLICATION),
+                    self.replicate(),
+                    this.computeTransfurDamage(),
+                    this::onReplicateOther);
+            case GRAB_ABSORB -> LatexAssimilationDecision.strong(LatexAssimilationDecision.Method.ABSORPTION,
+                    getTransfurVariant(LatexAssimilationDecision.Method.ABSORPTION),
+                    self.absorb(),
+                    this.computeTransfurDamage());
             default -> null;
         };
     }
@@ -579,16 +603,16 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
         if (!(entity instanceof LivingEntity target))
             return false;
 
-        IAbstractChangedEntity abstractChangedEntity = IAbstractChangedEntity.forEither(maybeGetUnderlying());
-        AssimilationBehavior behavior = switch (this.getTransfurMode()) {
-            case REPLICATION -> ChangedTransfurVariants.getAssimilationBehavior(TransfurCause.GRAB_REPLICATE, target, abstractChangedEntity);
-            case ABSORPTION -> ChangedTransfurVariants.getAssimilationBehavior(TransfurCause.GRAB_ABSORB, target, abstractChangedEntity);
+        LatexAssimilationDecision<?> decision = switch (this.getTransfurMode()) {
+            case REPLICATION -> this.makeLatexAssimilationDecision(TransfurCause.GRAB_REPLICATE, target);
+            case ABSORPTION -> this.makeLatexAssimilationDecision(TransfurCause.GRAB_ABSORB, target);
             default -> null;
         };
+        AssimilationBehavior behavior = ProcessTransfur.computeAssimilationBehavior(target, decision);
         if (behavior == null)
             return false;
 
-        behavior.attack();
+        behavior.stepAssimilate();
         return true;
     }
 

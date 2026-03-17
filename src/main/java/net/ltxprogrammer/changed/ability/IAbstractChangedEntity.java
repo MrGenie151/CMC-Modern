@@ -2,6 +2,7 @@ package net.ltxprogrammer.changed.ability;
 
 import net.ltxprogrammer.changed.data.AccessorySlots;
 import net.ltxprogrammer.changed.entity.*;
+import net.ltxprogrammer.changed.entity.ai.LatexAssimilationDecision;
 import net.ltxprogrammer.changed.entity.beast.AbstractDarkLatexEntity;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
@@ -36,7 +37,8 @@ public interface IAbstractChangedEntity {
     @NotNull BlockPos getBlockPosition();
     @Nullable TransfurVariant<?> getSelfVariant();
     default @Deprecated @Nullable TransfurVariant<?> getTransfurVariant() { return null; }
-    @Nullable TransfurDecision<?> getTransfurDecision(TransfurCause cause, LivingEntity target);
+    @Nullable
+    LatexAssimilationDecision<?> makeLatexAssimilationDecision(TransfurCause cause, LivingEntity target);
     @Nullable TransfurVariantInstance<?> getTransfurVariantInstance();
     @NotNull Level getLevel();
     @Deprecated
@@ -142,8 +144,8 @@ public interface IAbstractChangedEntity {
 
             @org.jetbrains.annotations.Nullable
             @Override
-            public TransfurDecision<?> getTransfurDecision(TransfurCause cause, LivingEntity target) {
-                return instance.get().getChangedEntity().getTransfurDecision(cause, target);
+            public LatexAssimilationDecision<?> makeLatexAssimilationDecision(TransfurCause cause, LivingEntity target) {
+                return instance.get().getChangedEntity().makeLatexAssimilationDecision(cause, target);
             }
 
             @Override
@@ -326,8 +328,8 @@ public interface IAbstractChangedEntity {
             }
 
             @Override
-            public @org.jetbrains.annotations.Nullable TransfurDecision<?> getTransfurDecision(TransfurCause cause, LivingEntity target) {
-                return cached.get().getTransfurDecision(cause, target);
+            public @org.jetbrains.annotations.Nullable LatexAssimilationDecision<?> makeLatexAssimilationDecision(TransfurCause cause, LivingEntity target) {
+                return cached.get().makeLatexAssimilationDecision(cause, target);
             }
 
             @org.jetbrains.annotations.Nullable

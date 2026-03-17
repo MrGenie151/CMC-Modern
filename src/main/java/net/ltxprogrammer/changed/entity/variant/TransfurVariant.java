@@ -1,10 +1,12 @@
 package net.ltxprogrammer.changed.entity.variant;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.ability.AbstractAbility;
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
+import net.ltxprogrammer.changed.ability.ILatexAssimilatedEntity;
 import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.init.*;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
@@ -211,6 +213,14 @@ public class TransfurVariant<T extends ChangedEntity> {
 
     public IAbstractChangedEntity replaceEntity(@NotNull LivingEntity entity, @Nullable IAbstractChangedEntity cause) {
         return replaceEntity(entity, cause == null ? null : cause.getEntity());
+    }
+
+    public IAbstractChangedEntity replaceEntity(@NotNull LivingEntity entity, @Nullable ILatexAssimilatedEntity cause) {
+        return replaceEntity(entity, cause == null ? null : cause.getEntity());
+    }
+
+    public IAbstractChangedEntity replaceEntity(@NotNull LivingEntity entity, @Nullable Either<IAbstractChangedEntity, ILatexAssimilatedEntity> cause) {
+        return replaceEntity(entity, cause == null ? null : cause.map(IAbstractChangedEntity::getEntity, ILatexAssimilatedEntity::getEntity));
     }
 
     public IAbstractChangedEntity replaceEntity(@NotNull LivingEntity entity, @Nullable LivingEntity cause) {

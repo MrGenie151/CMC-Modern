@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.entity.*;
+import net.ltxprogrammer.changed.entity.ai.*;
 import net.ltxprogrammer.changed.entity.latex.LatexType;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariantInstance;
@@ -13,7 +14,6 @@ import net.ltxprogrammer.changed.init.*;
 import net.ltxprogrammer.changed.network.packet.*;
 import net.ltxprogrammer.changed.util.EntityUtil;
 import net.ltxprogrammer.changed.world.enchantments.LatexProtectionEnchantment;
-import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
@@ -22,6 +22,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.player.Player;
@@ -35,23 +36,95 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static net.ltxprogrammer.changed.init.ChangedGameRules.RULE_KEEP_BRAIN;
-
 @Mod.EventBusSubscriber(modid = Changed.MODID)
 public class ProcessTransfur {
     private static final Logger LOGGER = LogUtils.getLogger();
+
+    private static final Map<ResourceLocation, EntityAssimilationBehavior<?>> ASSIMILATED_MOB_TRANSFUR_LOGIC = new HashMap<>();
+
+    public static <T extends LivingEntity> void registerMobAssimilation(EntityType<T> entityType, EntityAssimilationBehavior<T> entityAssimilationBehavior) {
+        ASSIMILATED_MOB_TRANSFUR_LOGIC.put(ForgeRegistries.ENTITY_TYPES.getKey(entityType), entityAssimilationBehavior);
+    }
+
+    public static <T extends LivingEntity> void registerMobAssimilation(RegistryObject<EntityType<T>> entityType, EntityAssimilationBehavior<T> entityAssimilationBehavior) {
+        ASSIMILATED_MOB_TRANSFUR_LOGIC.put(entityType.getId(), entityAssimilationBehavior);
+    }
+
+    public static <T extends LivingEntity> EntityAssimilationBehavior<T> getEntityAssimilationBehavior(T entity) {
+        if (entity == null)
+            return null;
+        var key = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
+        if (!ASSIMILATED_MOB_TRANSFUR_LOGIC.containsKey(key)) {
+            if (entity instanceof Player)
+                return (EntityAssimilationBehavior<T>) EntityAssimilationBehavior.defaultPlayer();
+            else if (entity.getType().is(ChangedTags.EntityTypes.HUMANOIDS))
+                return (EntityAssimilationBehavior<T>) EntityAssimilationBehavior.defaultHumanoid();
+            else
+                return null;
+        }
+        return (EntityAssimilationBehavior<T>) ASSIMILATED_MOB_TRANSFUR_LOGIC.get(key);
+    }
+
+    /**
+     * Computes the assimilation behavior that occurs between the victim and the source.
+     */
+    public static @Nullable AssimilationBehavior computeAssimilationBehavior(LivingEntity assimilationVictim, @Nullable LatexAssimilationDecision<?> decision) {
+        if (decision == null)
+            return null;
+        var fusionBehavior = ChangedFusions.INSTANCE.getFusionBehavior(assimilationVictim, decision.context());
+        if (fusionBehavior != null)
+            return fusionBehavior;
+
+        var behavior = getEntityAssimilationBehavior(assimilationVictim);
+        if (behavior == null)
+            return null;
+
+        return behavior.latexAssimilateVictimBehavior(assimilationVictim, decision);
+    }
+
+    /**
+     * Computes the assimilation behavior that occurs between the victim and the source.
+     */
+    public static @Nullable AssimilationBehavior computeAssimilationBehavior(LivingEntity assimilationVictim, @Nullable NonLatexAssimilationDecision<?> decision) {
+        if (decision == null)
+            return null;
+
+        var behavior = getEntityAssimilationBehavior(assimilationVictim);
+        if (behavior == null)
+            return null;
+
+        return behavior.nonLatexAssimilateVictimBehavior(assimilationVictim, decision);
+    }
+
+    /**
+     * Computes the assimilation behavior that occurs between the victim and the source.
+     */
+    public static @Nullable AssimilationBehavior computeAssimilationBehavior(LivingEntity assimilationTarget, @Nullable ImmediateTransfurDecision<?> decision) {
+        if (decision == null)
+            return null;
+
+        var behavior = getEntityAssimilationBehavior(assimilationTarget);
+        if (behavior == null)
+            return null;
+
+        return behavior.immediateTransfurTargetBehavior(assimilationTarget, decision);
+    }
 
     // Intended to apply statuses on the source entity
     public static void onAbsorbEntity(IAbstractChangedEntity source) {
@@ -129,6 +202,7 @@ public class ProcessTransfur {
 
         return amount;
     }
+/*
 
     protected static boolean progressPlayerTransfur(Player player, float amount, TransfurVariant<?> transfurVariant, TransfurContext context) {
         if (player.isCreative() || player.isSpectator() || ProcessTransfur.isPlayerPermTransfurred(player))
@@ -145,7 +219,7 @@ public class ProcessTransfur {
             amount = LatexProtectionEnchantment.getLatexProtection(player, amount);
             if (ChangedCompatibility.isPlayerUsedByOtherMod(player)) {
                 setPlayerTransfurProgress(player, 0.0f);
-                var damageSource = player.level().damageSources().mobAttack(context.source == null ? transfurVariant.getEntityType().create(player.level()) : context.source.getEntity());
+                var damageSource = player.level().damageSources().mobAttack(context.source() == null ? transfurVariant.getEntityType().create(player.level()) : context.source().getEntity());
                 player.hurt(damageSource, amount);
                 return false;
             }
@@ -172,6 +246,7 @@ public class ProcessTransfur {
             return false;
         }
     }
+*/
 
     public static boolean willTransfur(LivingEntity entity, float amount) {
         amount = LatexProtectionEnchantment.getLatexProtection(entity, amount);
@@ -219,8 +294,16 @@ public class ProcessTransfur {
         return progressTransfur(entity, amount, transfurVariant, TransfurContext.hazard(TransfurCause.GRAB_REPLICATE));
     }
 
+    @Deprecated
     public static boolean progressTransfur(LivingEntity entity, float amount, TransfurVariant<?> transfurVariant, TransfurContext context) {
-        if (entity instanceof Player player)
+        return progressTransfur(entity, LatexAssimilationDecision.strong(
+                context.cause() == TransfurCause.GRAB_ABSORB ? LatexAssimilationDecision.Method.ABSORPTION : LatexAssimilationDecision.Method.REPLICATION,
+                transfurVariant,
+                context,
+                amount
+        ));
+
+        /*if (entity instanceof Player player)
             return progressPlayerTransfur(player, amount, transfurVariant, context);
         else {
             if (entity.isDeadOrDying() || entity.isRemoved())
@@ -237,7 +320,7 @@ public class ProcessTransfur {
                 }
 
                 else {
-                    entity.hurt(ChangedDamageSources.entityTransfur(entity.level().registryAccess(), context.source), amount * scale);
+                    entity.hurt(ChangedDamageSources.entityTransfur(entity.level().registryAccess(), context.source()), amount * scale);
                     return false;
                 }
             }
@@ -254,11 +337,37 @@ public class ProcessTransfur {
                 }
 
                 else {
-                    entity.hurt(ChangedDamageSources.entityTransfur(entity.level().registryAccess(), context.source), amount * scale);
+                    entity.hurt(ChangedDamageSources.entityTransfur(entity.level().registryAccess(), context.source()), amount * scale);
                     return false;
                 }
             }
-        }
+        }*/
+    }
+
+    public static boolean progressTransfur(LivingEntity entity, LatexAssimilationDecision<?> decision) {
+        var behavior = computeAssimilationBehavior(entity, decision);
+        if (behavior == null)
+            return false;
+
+        AtomicBoolean completed = new AtomicBoolean(false);
+        behavior.appendTransfurListener(newEntity -> {
+            completed.set(true);
+        }).stepAssimilate();
+
+        return completed.getAcquire();
+    }
+
+    public static boolean progressTransfur(LivingEntity entity, NonLatexAssimilationDecision<?> decision) {
+        var behavior = computeAssimilationBehavior(entity, decision);
+        if (behavior == null)
+            return false;
+
+        AtomicBoolean completed = new AtomicBoolean(false);
+        behavior.appendTransfurListener(newEntity -> {
+            completed.set(true);
+        }).stepAssimilate();
+
+        return completed.getAcquire();
     }
 
     public static LivingEntity changeTransfur(LivingEntity entity, TransfurVariant<?> transfurVariant) {
@@ -708,94 +817,21 @@ public class ProcessTransfur {
     }
 
     // Transfurs an entity, keepConscious applies to players being transfurred
+    @Deprecated
     public static void transfur(LivingEntity entity, Level level, TransfurVariant<?> variant, boolean keepConscious, TransfurContext context) {
-        if (entity == null)
-            return;
-        if (entity.isDeadOrDying())
-            return; // To prevent most bugs, entity has to be alive to transfur
-        if (level.getGameRules().getBoolean(RULE_KEEP_BRAIN))
-            keepConscious = true;
-        else if (entity instanceof Player player) {
-            if (player.isCreative())
-                keepConscious = true;
-            else {
-                KeepConsciousEvent event = new KeepConsciousEvent(player, variant, context, keepConscious);
-                Changed.postModEvent(event);
-                keepConscious = event.shouldKeepConscious;
-            }
-        }
+        var source = context.source() == null ? null : context.source().left().orElse(null);
 
-        final boolean doAnimation = level.getGameRules().getBoolean(ChangedGameRules.RULE_DO_TRANSFUR_ANIMATION);
+        var decision = keepConscious ?
+                ImmediateTransfurDecision.safe(variant, context.cause(), source) :
+                ImmediateTransfurDecision.unsafe(variant, context.cause(), source);
 
-        if (entity.level().isClientSide) {
-            return;
-        }
+        transfur(entity, decision);
+    }
 
-        if (variant == null)
-            return;
+    public static void transfur(LivingEntity entity, ImmediateTransfurDecision<?> decision) {
+        var behavior = computeAssimilationBehavior(entity, decision);
 
-        final BiConsumer<IAbstractChangedEntity, TransfurVariant<?>> onReplicate = (iAbstractLatex, variant1) -> {
-            if (context.source != null) {
-                onReplicateEntity(context.source);
-                context.source.getChangedEntity().onReplicateOther(iAbstractLatex);
-            }
-        };
-
-        if (!(EntityUtil.maybeGetOverlaying(entity) instanceof ChangedEntity changedEntity)) {
-            ChangedSounds.broadcastSound(entity, variant.sound, 1.0f, 1.0f);
-            if ((keepConscious || doAnimation) && entity instanceof ServerPlayer player) {
-                var instance = setPlayerTransfurVariant(player, variant, context, doAnimation ? 0.0f : 1.0f);
-                if (instance == null)
-                    return; // Event canceled
-                IAbstractChangedEntity iAbstractChanged = IAbstractChangedEntity.forPlayerWithVariant(player, instance);
-
-                ChangedAnimationEvents.broadcastTransfurAnimation(player, instance.getParent(), context);
-
-                instance.willSurviveTransfur = keepConscious;
-                instance.transfurContext = context;
-
-                onNewlyTransfurred(iAbstractChanged);
-
-                onReplicate.accept(iAbstractChanged, variant);
-            }
-
-            else if (!entity.level().isClientSide) {
-                EntityVariantAssigned event = new EntityVariantAssigned(entity, variant, context);
-                Changed.postModEvent(event);
-                if (event.variant != null)
-                    onReplicate.accept(event.variant.replaceEntity(entity, context.source), event.variant);
-            }
-        }
-
-        else {
-            TransfurVariant<?> current = TransfurVariant.getEntityVariant(entity);
-            List<TransfurVariant<?>> possible = ChangedFusions.INSTANCE.getFusionsFor(current, variant).toList();
-
-            if (possible.isEmpty())
-                return;
-            if (entity instanceof Player player) {
-                var instance = getPlayerTransfurVariant(player);
-                if (instance != null && instance.ageAsVariant > entity.level().getGameRules().getInt(ChangedGameRules.RULE_FUSABILITY_DURATION_PLAYER))
-                    return;
-            }
-
-            TransfurVariant<?> fusion = possible.get(level.random.nextInt(possible.size()));
-            ChangedSounds.broadcastSound(entity, fusion.sound, 1.0f, 1.0f);
-
-            if (entity instanceof ServerPlayer player) {
-                setPlayerTransfurVariant(player, fusion, context);
-
-                onNewlyTransfurred(IAbstractChangedEntity.forPlayer(player));
-
-                LOGGER.info("Fused " + entity + " with " + variant);
-            }
-
-            else if (!entity.level().isClientSide) {
-                EntityVariantAssigned event = new EntityVariantAssigned(entity, fusion, context);
-                Changed.postModEvent(event);
-                if (event.variant != null)
-                    event.variant.replaceEntity(entity, context.source);
-            }
-        }
+        if (behavior != null)
+            behavior.stepAssimilate();
     }
 }

@@ -1,27 +1,31 @@
 package net.ltxprogrammer.changed.entity.ai;
 
+import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
+import net.ltxprogrammer.changed.world.enchantments.LatexProtectionEnchantment;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 public interface AssimilationBehavior {
-    void attack(float damageMultiplier);
-    AssimilationBehavior appendTransfurLogic(Runnable transfurLogic);
+    void stepAssimilate();
+    boolean willAssimilate();
+    AssimilationBehavior appendTransfurListener(Consumer<IAbstractChangedEntity> transfurLogic);
 
-    default void attack() {
-        this.attack(1.0f);
-    }
-
-    static AssimilationBehavior damagePlayerThenTransfur(Player player, float damage, Runnable transfurLogic) {
+    static AssimilationBehavior progressPlayerThenTransfur(Player player, float transfurProgress, Supplier<IAbstractChangedEntity> transfurLogic) {
         return new AssimilationBehavior() {
             @Override
-            public void attack(float damageMultiplier) {
+            public void stepAssimilate() {
                 boolean justHit = player.invulnerableTime == 20 && player.hurtDuration == 10;
 
                 if (player.invulnerableTime > 10 && !justHit)
                     return;
-                if (damage <= 0.0f)
+
+                float scaledDamage = LatexProtectionEnchantment.getLatexProtection(player, transfurProgress);
+                if (scaledDamage <= 0.0f)
                     return;
 
                 player.invulnerableTime = 20;
@@ -30,61 +34,106 @@ public interface AssimilationBehavior {
                 player.setLastHurtByMob(null);
 
                 float old = ProcessTransfur.getPlayerTransfurProgress(player);
-                float next = old + (damage * damageMultiplier);
+                float next = old + scaledDamage;
                 float max = (float) ProcessTransfur.getEntityTransfurTolerance(player);
                 ProcessTransfur.setPlayerTransfurProgress(player, next);
                 if (next >= max && old < max)
-                    transfurLogic.run();
+                    transfurLogic.get();
             }
 
             @Override
-            public AssimilationBehavior appendTransfurLogic(Runnable nextTransfurLogic) {
-                return damagePlayerThenTransfur(player, damage, () -> {
-                    transfurLogic.run();
-                    nextTransfurLogic.run();
+            public boolean willAssimilate() {
+                boolean justHit = player.invulnerableTime == 20 && player.hurtDuration == 10;
+
+                if (player.invulnerableTime > 10 && !justHit)
+                    return false;
+
+                float scaledDamage = LatexProtectionEnchantment.getLatexProtection(player, transfurProgress);
+                if (scaledDamage <= 0.0f)
+                    return false;
+
+                float old = ProcessTransfur.getPlayerTransfurProgress(player);
+                float next = old + scaledDamage;
+                float max = (float) ProcessTransfur.getEntityTransfurTolerance(player);
+                return next >= max && old < max;
+            }
+
+            @Override
+            public AssimilationBehavior appendTransfurListener(Consumer<IAbstractChangedEntity> nextTransfurLogic) {
+                return progressPlayerThenTransfur(player, transfurProgress, () -> {
+                    var variant = transfurLogic.get();
+                    nextTransfurLogic.accept(variant);
+                    return variant;
                 });
             }
         };
     }
 
-    static AssimilationBehavior damageThenTransfur(LivingEntity target, DamageSource source, float damage, Runnable transfurLogic) {
+    static AssimilationBehavior progressThenTransfur(LivingEntity target, DamageSource source, float transfurProgress, Supplier<IAbstractChangedEntity> transfurLogic) {
         if (target instanceof Player player) {
-            return damagePlayerThenTransfur(player, damage, transfurLogic);
+            return progressPlayerThenTransfur(player, transfurProgress, transfurLogic);
         } else {
             return new AssimilationBehavior() {
                 @Override
-                public void attack(float damageMultiplier) {
+                public void stepAssimilate() {
+                    float scaledDamage = LatexProtectionEnchantment.getLatexProtection(target, transfurProgress);
+                    float scale = 20.0f / Math.max(0.1f, (float)ProcessTransfur.getEntityTransfurTolerance(target));
+
+                    scaledDamage *= scale;
+
                     var health = target.getHealth();
-                    if (health <= (damage * damageMultiplier) && health > 0.0F) {
-                        transfurLogic.run();
+                    if (health <= (scaledDamage) && health > 0.0F) {
+                        transfurLogic.get();
                     } else {
-                        target.hurt(source, damage * damageMultiplier);
+                        target.hurt(source, scaledDamage);
                     }
                 }
 
                 @Override
-                public AssimilationBehavior appendTransfurLogic(Runnable nextTransfurLogic) {
-                    return damageThenTransfur(target, source, damage, () -> {
-                        transfurLogic.run();
-                        nextTransfurLogic.run();
+                public boolean willAssimilate() {
+                    float scaledDamage = LatexProtectionEnchantment.getLatexProtection(target, transfurProgress);
+                    float scale = 20.0f / Math.max(0.1f, (float)ProcessTransfur.getEntityTransfurTolerance(target));
+
+                    scaledDamage *= scale;
+
+                    var health = target.getHealth();
+                    if (health <= (scaledDamage) && health > 0.0F) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+
+                @Override
+                public AssimilationBehavior appendTransfurListener(Consumer<IAbstractChangedEntity> nextTransfurLogic) {
+                    return progressThenTransfur(target, source, transfurProgress, () -> {
+                        var variant = transfurLogic.get();
+                        nextTransfurLogic.accept(variant);
+                        return variant;
                     });
                 }
             };
         }
     }
 
-    static AssimilationBehavior instant(Runnable transfurLogic) {
+    static AssimilationBehavior instant(Supplier<IAbstractChangedEntity> transfurLogic) {
         return new AssimilationBehavior() {
             @Override
-            public void attack(float damageMultiplier) {
-                transfurLogic.run();
+            public void stepAssimilate() {
+                transfurLogic.get();
             }
 
             @Override
-            public AssimilationBehavior appendTransfurLogic(Runnable nextTransfurLogic) {
+            public boolean willAssimilate() {
+                return true;
+            }
+
+            @Override
+            public AssimilationBehavior appendTransfurListener(Consumer<IAbstractChangedEntity> nextTransfurLogic) {
                 return instant(() -> {
-                    transfurLogic.run();
-                    nextTransfurLogic.run();
+                    var variant = transfurLogic.get();
+                    nextTransfurLogic.accept(variant);
+                    return variant;
                 });
             }
         };
