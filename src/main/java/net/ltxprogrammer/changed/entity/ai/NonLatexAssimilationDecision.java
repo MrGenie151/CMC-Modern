@@ -36,6 +36,18 @@ public record NonLatexAssimilationDecision<T extends ChangedEntity>(TransfurVari
         return new NonLatexAssimilationDecision<>(transfurVariant, cause, source, transfurProgress, extraDamage, postTransfurListener);
     }
 
+    public static <T extends ChangedEntity> NonLatexAssimilationDecision<T> fromBlockOrItem(TransfurVariant<T> transfurVariant, TransfurCause cause,
+                                                                               float transfurProgress,
+                                                                               float extraDamage) {
+        return of(transfurVariant, cause, null, transfurProgress, extraDamage, entity -> {});
+    }
+
+    public static <T extends ChangedEntity> NonLatexAssimilationDecision<T> fromBlockOrItem(TransfurVariant<T> transfurVariant, TransfurCause cause,
+                                                                               float transfurProgress,
+                                                                               float extraDamage, Consumer<IAbstractChangedEntity> postTransfurListener) {
+        return of(transfurVariant, cause, null, transfurProgress, extraDamage, postTransfurListener);
+    }
+
     public AssimilationBehavior assimilateVictimBehavior(LivingEntity target) {
         final var sourceEntity = source != null ? source.getEntity() : null;
         return AssimilationBehavior.progressThenTransfur(target,

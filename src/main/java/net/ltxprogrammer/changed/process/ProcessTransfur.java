@@ -302,46 +302,6 @@ public class ProcessTransfur {
                 context,
                 amount
         ));
-
-        /*if (entity instanceof Player player)
-            return progressPlayerTransfur(player, amount, transfurVariant, context);
-        else {
-            if (entity.isDeadOrDying() || entity.isRemoved())
-                return false;
-
-            amount = LatexProtectionEnchantment.getLatexProtection(entity, amount);
-            float health = entity.getHealth();
-            float scale = 20.0f / Math.max(0.1f, (float)ProcessTransfur.getEntityTransfurTolerance(entity));
-
-            if (entity.getType().is(ChangedTags.EntityTypes.HUMANOIDS)) {
-                if (health <= amount * scale && health > 0.0F) {
-                    ProcessTransfur.transfur(entity, entity.level(), transfurVariant, false, context);
-                    return true;
-                }
-
-                else {
-                    entity.hurt(ChangedDamageSources.entityTransfur(entity.level().registryAccess(), context.source()), amount * scale);
-                    return false;
-                }
-            }
-
-            else {
-                List<TransfurVariant<?>> mobFusion = ChangedFusions.INSTANCE.getFusionsFor(transfurVariant, entity.getClass()).toList();
-
-                if (mobFusion.isEmpty())
-                    return false;
-
-                if (health <= amount * scale && health > 0.0F) {
-                    ProcessTransfur.transfur(entity, entity.level(), Util.getRandom(mobFusion, entity.getRandom()), false, context);
-                    return true;
-                }
-
-                else {
-                    entity.hurt(ChangedDamageSources.entityTransfur(entity.level().registryAccess(), context.source()), amount * scale);
-                    return false;
-                }
-            }
-        }*/
     }
 
     public static boolean progressTransfur(LivingEntity entity, LatexAssimilationDecision<?> decision) {

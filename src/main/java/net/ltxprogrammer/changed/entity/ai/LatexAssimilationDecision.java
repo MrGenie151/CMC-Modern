@@ -43,12 +43,52 @@ public record LatexAssimilationDecision<T extends ChangedEntity>(DecisionStrengt
         return new LatexAssimilationDecision<>(DecisionStrength.LOW, method, transfurVariant, context, damage, postTransfurListener);
     }
 
+    public static <T extends ChangedEntity> LatexAssimilationDecision<T> weakReplication(TransfurVariant<T> transfurVariant, TransfurContext context, float damage) {
+        return weakReplication(transfurVariant, context, damage, entity -> {});
+    }
+
+    public static <T extends ChangedEntity> LatexAssimilationDecision<T> weakReplication(TransfurVariant<T> transfurVariant, TransfurContext context, float damage, Consumer<IAbstractChangedEntity> postTransfurListener) {
+        return new LatexAssimilationDecision<>(DecisionStrength.LOW, Method.REPLICATION, transfurVariant, context, damage, postTransfurListener);
+    }
+
+    public static <T extends ChangedEntity> LatexAssimilationDecision<T> weakAbsorption(TransfurVariant<T> transfurVariant, TransfurContext context, float damage) {
+        return weakAbsorption(transfurVariant, context, damage, entity -> {});
+    }
+
+    public static <T extends ChangedEntity> LatexAssimilationDecision<T> weakAbsorption(TransfurVariant<T> transfurVariant, TransfurContext context, float damage, Consumer<IAbstractChangedEntity> postTransfurListener) {
+        return new LatexAssimilationDecision<>(DecisionStrength.LOW, Method.ABSORPTION, transfurVariant, context, damage, postTransfurListener);
+    }
+
+    public static <T extends ChangedEntity> LatexAssimilationDecision<T> fromBlockOrItem(TransfurVariant<T> transfurVariant, TransfurContext context, float damage) {
+        return weakAbsorption(transfurVariant, context, damage, entity -> {});
+    }
+
+    public static <T extends ChangedEntity> LatexAssimilationDecision<T> fromBlockOrItem(TransfurVariant<T> transfurVariant, TransfurContext context, float damage, Consumer<IAbstractChangedEntity> postTransfurListener) {
+        return weakAbsorption(transfurVariant, context, damage, postTransfurListener);
+    }
+
     public static <T extends ChangedEntity> LatexAssimilationDecision<T> strong(Method method, TransfurVariant<T> transfurVariant, TransfurContext context, float damage) {
         return strong(method, transfurVariant, context, damage, entity -> {});
     }
 
     public static <T extends ChangedEntity> LatexAssimilationDecision<T> strong(Method method, TransfurVariant<T> transfurVariant, TransfurContext context, float damage, Consumer<IAbstractChangedEntity> postTransfurListener) {
         return new LatexAssimilationDecision<>(DecisionStrength.HIGH, method, transfurVariant, context, damage, postTransfurListener);
+    }
+
+    public static <T extends ChangedEntity> LatexAssimilationDecision<T> strongReplication(TransfurVariant<T> transfurVariant, TransfurContext context, float damage) {
+        return strongReplication(transfurVariant, context, damage, entity -> {});
+    }
+
+    public static <T extends ChangedEntity> LatexAssimilationDecision<T> strongReplication(TransfurVariant<T> transfurVariant, TransfurContext context, float damage, Consumer<IAbstractChangedEntity> postTransfurListener) {
+        return new LatexAssimilationDecision<>(DecisionStrength.HIGH, Method.REPLICATION, transfurVariant, context, damage, postTransfurListener);
+    }
+
+    public static <T extends ChangedEntity> LatexAssimilationDecision<T> strongAbsorption(TransfurVariant<T> transfurVariant, TransfurContext context, float damage) {
+        return strongAbsorption(transfurVariant, context, damage, entity -> {});
+    }
+
+    public static <T extends ChangedEntity> LatexAssimilationDecision<T> strongAbsorption(TransfurVariant<T> transfurVariant, TransfurContext context, float damage, Consumer<IAbstractChangedEntity> postTransfurListener) {
+        return new LatexAssimilationDecision<>(DecisionStrength.HIGH, Method.ABSORPTION, transfurVariant, context, damage, postTransfurListener);
     }
 
     protected AssimilationBehavior transfurByReplication(LivingEntity target, IAbstractChangedEntity transfurSource) {

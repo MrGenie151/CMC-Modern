@@ -472,13 +472,11 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
         IAbstractChangedEntity self = IAbstractChangedEntity.forEntity(this);
 
         return switch (cause) {
-            case GRAB_REPLICATE -> LatexAssimilationDecision.strong(LatexAssimilationDecision.Method.REPLICATION,
-                    getTransfurVariant(LatexAssimilationDecision.Method.REPLICATION),
+            case GRAB_REPLICATE -> LatexAssimilationDecision.strongReplication(getTransfurVariant(LatexAssimilationDecision.Method.REPLICATION),
                     self.replicate(),
                     this.computeTransfurDamage(),
                     this::onReplicateOther);
-            case GRAB_ABSORB -> LatexAssimilationDecision.strong(LatexAssimilationDecision.Method.ABSORPTION,
-                    getTransfurVariant(LatexAssimilationDecision.Method.ABSORPTION),
+            case GRAB_ABSORB -> LatexAssimilationDecision.strongAbsorption(getTransfurVariant(LatexAssimilationDecision.Method.ABSORPTION),
                     self.absorb(),
                     this.computeTransfurDamage());
             default -> null;
