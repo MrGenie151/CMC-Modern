@@ -286,7 +286,7 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
     public HairStyle getDefaultHairStyle() {
         if (this.getValidHairStyles() != null) {
             var styles = this.getValidHairStyles();
-            return styles.isEmpty() ? HairStyle.BALD.get() :  styles.get(level().random.nextInt(styles.size()));
+            return styles.isEmpty() ? HairStyle.BALD.get() : styles.get(this.random.nextInt(styles.size()));
         }
 
         else
