@@ -65,7 +65,7 @@ public record ImmediateTransfurDecision<T extends ChangedEntity>(TransfurVariant
 
     public AssimilationBehavior transfurTargetBehavior(LivingEntity target) {
         final var sourceEntity = source != null ? source.getEntity() : null;
-        return AssimilationBehavior.instant(() -> {
+        return AssimilationBehavior.instant(target.level(), () -> {
             var newEntity = transfurVariant.replaceEntity(target, sourceEntity);
             postTransfurListener.accept(newEntity);
             return newEntity;

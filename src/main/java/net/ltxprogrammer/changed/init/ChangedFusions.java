@@ -111,7 +111,7 @@ public class ChangedFusions extends SimplePreparableReloadListener<List<ChangedF
 
     private AssimilationBehavior getLatexFusionBehaviorForChangedEntity(TransfurVariant<?> fusionVariant, IAbstractChangedEntity assimVictim, IAbstractChangedEntity transfurSource) {
         if (transfurSource.isPlayer() || !assimVictim.isPlayer()) {
-            return AssimilationBehavior.instant(() -> {
+            return AssimilationBehavior.instant(assimVictim.getLevel(), () -> {
                 transfurSource.replaceVariant(fusionVariant);
                 ChangedSounds.broadcastSound(transfurSource.getEntity(), ChangedSounds.LATEX_FUSE_ENTITY, 1f, 1f);
                 killOrDiscard(assimVictim.getEntity(), transfurSource);
@@ -120,7 +120,7 @@ public class ChangedFusions extends SimplePreparableReloadListener<List<ChangedF
                 return transfurSource;
             });
         } else {
-            return AssimilationBehavior.instant(() -> {
+            return AssimilationBehavior.instant(assimVictim.getLevel(), () -> {
                 assimVictim.replaceVariant(fusionVariant);
                 ChangedSounds.broadcastSound(assimVictim.getEntity(), ChangedSounds.LATEX_FUSE_ENTITY, 1f, 1f);
                 killOrDiscard(transfurSource.getEntity(), assimVictim);
@@ -132,7 +132,7 @@ public class ChangedFusions extends SimplePreparableReloadListener<List<ChangedF
     }
 
     private AssimilationBehavior getLatexFusionBehaviorForLatexEntity(TransfurVariant<?> fusionVariant, IAbstractChangedEntity assimVictim, ILatexAssimilatedEntity transfurSource) {
-        return AssimilationBehavior.instant(() -> {
+        return AssimilationBehavior.instant(assimVictim.getLevel(), () -> {
             assimVictim.replaceVariant(fusionVariant);
             ChangedSounds.broadcastSound(assimVictim.getEntity(), ChangedSounds.LATEX_FUSE_ENTITY, 1f, 1f);
             killOrDiscard(transfurSource.getEntity(), assimVictim);
@@ -177,7 +177,7 @@ public class ChangedFusions extends SimplePreparableReloadListener<List<ChangedF
             if (instance != null && instance.ageAsVariant > level.getGameRules().getInt(ChangedGameRules.RULE_FUSABILITY_DURATION_PLAYER))
                 return null;
 
-            return AssimilationBehavior.instant(() -> {
+            return AssimilationBehavior.instant(assimVictim.level(), () -> {
                 sourceLatex.replaceVariant(fusionVariant);
                 ChangedSounds.broadcastSound(sourceLatex.getEntity(), ChangedSounds.LATEX_FUSE_ENTITY, 1f, 1f);
                 killOrDiscard(assimVictim, sourceLatex);
@@ -188,7 +188,7 @@ public class ChangedFusions extends SimplePreparableReloadListener<List<ChangedF
         } else {
             final ILatexAssimilatedEntity sourceLatex = transfurSource.right().get();
 
-            return AssimilationBehavior.instant(() -> {
+            return AssimilationBehavior.instant(assimVictim.level(), () -> {
                 var newEntity = fusionVariant.replaceEntity(assimVictim, sourceLatex.getEntity());
                 ChangedSounds.broadcastSound(sourceLatex.getEntity(), ChangedSounds.LATEX_FUSE_ENTITY, 1f, 1f);
                 killOrDiscard(sourceLatex.getEntity(), newEntity);

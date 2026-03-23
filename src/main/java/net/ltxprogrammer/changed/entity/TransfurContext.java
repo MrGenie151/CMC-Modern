@@ -43,20 +43,20 @@ public record TransfurContext(TransfurCause cause,
         );
     }
 
-    public static TransfurContext playerLatexHazard(Player player, TransfurCause cause) {
-        return new TransfurContext(cause, Either.left(IAbstractChangedEntity.forPlayer(player)));
+    public static TransfurContext playerLatexHazard(@Nullable Player player, TransfurCause cause) {
+        return new TransfurContext(cause, player == null ? null : Either.left(IAbstractChangedEntity.forPlayer(player)));
     }
 
-    public static TransfurContext npcLatexHazard(ChangedEntity latex, TransfurCause cause) {
-        return new TransfurContext(cause, Either.left(IAbstractChangedEntity.forEntity(latex)));
+    public static TransfurContext npcLatexHazard(@Nullable ChangedEntity latex, TransfurCause cause) {
+        return new TransfurContext(cause, latex == null ? null : Either.left(IAbstractChangedEntity.forEntity(latex)));
     }
 
-    public static TransfurContext latexHazard(IAbstractChangedEntity entity, TransfurCause cause) {
-        return new TransfurContext(cause, Either.left(entity));
+    public static TransfurContext latexHazard(@Nullable IAbstractChangedEntity entity, TransfurCause cause) {
+        return new TransfurContext(cause, entity == null ? null : Either.left(entity));
     }
 
-    public static TransfurContext latexHazard(ILatexAssimilatedEntity entity, TransfurCause cause) {
-        return new TransfurContext(cause, Either.right(entity));
+    public static TransfurContext latexHazard(@Nullable ILatexAssimilatedEntity entity, TransfurCause cause) {
+        return new TransfurContext(cause, entity == null ? null : Either.right(entity));
     }
 
     public static TransfurContext hazard(TransfurCause cause) {

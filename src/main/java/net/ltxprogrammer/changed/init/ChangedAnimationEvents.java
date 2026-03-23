@@ -3,6 +3,8 @@ package net.ltxprogrammer.changed.init;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.ltxprogrammer.changed.Changed;
+import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
+import net.ltxprogrammer.changed.ability.ILatexAssimilatedEntity;
 import net.ltxprogrammer.changed.entity.TransfurContext;
 import net.ltxprogrammer.changed.entity.animation.*;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
@@ -54,7 +56,8 @@ public class ChangedAnimationEvents {
         if (context.source() != null)
             Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> livingEntity),
                     AnimationEventPacket.Builder.of(livingEntity, TRANSFUR.get(), AnimationCategory.TRANSFUR,
-                            new TransfurAnimationParameters(variant, context.cause())).addEntity(context.source().getEntity()).build());
+                            new TransfurAnimationParameters(variant, context.cause())).addEntity(context.source()
+                            .map(IAbstractChangedEntity::getEntity, ILatexAssimilatedEntity::getEntity)).build());
         else
             Changed.PACKET_HANDLER.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> livingEntity),
                     AnimationEventPacket.Builder.of(livingEntity, TRANSFUR.get(), AnimationCategory.TRANSFUR,

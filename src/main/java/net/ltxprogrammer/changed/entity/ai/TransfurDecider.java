@@ -1,6 +1,7 @@
 package net.ltxprogrammer.changed.entity.ai;
 
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
+import net.ltxprogrammer.changed.ability.ILatexAssimilatedEntity;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.TransfurCause;
 import net.ltxprogrammer.changed.entity.TransfurContext;
@@ -27,14 +28,22 @@ public interface TransfurDecider<T extends LivingEntity> {
     }
 
     static <T extends LivingEntity, V extends ChangedEntity> TransfurDecider<T> simpleMobDecider(TransfurVariant<V> variant, float damage, BiConsumer<T, IAbstractChangedEntity> postTransfurListener) {
-        return (assimilatedMob, target) -> LatexAssimilationDecision.weak(LatexAssimilationDecision.Method.ABSORPTION, variant,
-                TransfurContext.hazard(TransfurCause.GRAB_ABSORB), damage,
-                transfurredEntity -> postTransfurListener.accept(assimilatedMob, transfurredEntity));
+        return (assimilatedMob, target) -> {
+            ILatexAssimilatedEntity self = ILatexAssimilatedEntity.forEntity(assimilatedMob);
+
+            return LatexAssimilationDecision.weakAbsorption(variant,
+                    TransfurContext.latexHazard(self, TransfurCause.GRAB_ABSORB), damage,
+                    transfurredEntity -> postTransfurListener.accept(assimilatedMob, transfurredEntity));
+        };
     }
 
     static <T extends LivingEntity, V extends ChangedEntity> TransfurDecider<T> simpleMobDecider(RegistryObject<TransfurVariant<V>> variant, float damage, BiConsumer<T, IAbstractChangedEntity> postTransfurListener) {
-        return (assimilatedMob, target) -> LatexAssimilationDecision.weak(LatexAssimilationDecision.Method.ABSORPTION, variant.get(),
-                TransfurContext.hazard(TransfurCause.GRAB_ABSORB), damage,
-                transfurredEntity -> postTransfurListener.accept(assimilatedMob, transfurredEntity));
+        return (assimilatedMob, target) -> {
+            ILatexAssimilatedEntity self = ILatexAssimilatedEntity.forEntity(assimilatedMob);
+
+            return LatexAssimilationDecision.weakAbsorption(variant.get(),
+                    TransfurContext.latexHazard(self, TransfurCause.GRAB_ABSORB), damage,
+                    transfurredEntity -> postTransfurListener.accept(assimilatedMob, transfurredEntity));
+        };
     }
 }

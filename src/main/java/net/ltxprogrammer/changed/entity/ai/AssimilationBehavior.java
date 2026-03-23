@@ -6,6 +6,7 @@ import net.ltxprogrammer.changed.world.enchantments.LatexProtectionEnchantment;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -20,6 +21,9 @@ public interface AssimilationBehavior {
             @Override
             public void stepAssimilate() {
                 boolean justHit = player.invulnerableTime == 20 && player.hurtDuration == 10;
+
+                if (player.isSpectator() || player.isCreative())
+                    return;
 
                 if (player.invulnerableTime > 10 && !justHit)
                     return;
@@ -44,6 +48,9 @@ public interface AssimilationBehavior {
             @Override
             public boolean willAssimilate() {
                 boolean justHit = player.invulnerableTime == 20 && player.hurtDuration == 10;
+
+                if (player.isSpectator() || player.isCreative())
+                    return false;
 
                 if (player.invulnerableTime > 10 && !justHit)
                     return false;
@@ -76,6 +83,9 @@ public interface AssimilationBehavior {
             return new AssimilationBehavior() {
                 @Override
                 public void stepAssimilate() {
+                    if (target.level().isClientSide)
+                        return;
+
                     float scaledDamage = LatexProtectionEnchantment.getLatexProtection(target, transfurProgress);
                     float scale = 20.0f / Math.max(0.1f, (float)ProcessTransfur.getEntityTransfurTolerance(target));
 
@@ -116,10 +126,13 @@ public interface AssimilationBehavior {
         }
     }
 
-    static AssimilationBehavior instant(Supplier<IAbstractChangedEntity> transfurLogic) {
+    static AssimilationBehavior instant(Level level, Supplier<IAbstractChangedEntity> transfurLogic) {
         return new AssimilationBehavior() {
             @Override
             public void stepAssimilate() {
+                if (level.isClientSide)
+                    return;
+
                 transfurLogic.get();
             }
 
@@ -130,7 +143,7 @@ public interface AssimilationBehavior {
 
             @Override
             public AssimilationBehavior appendTransfurListener(Consumer<IAbstractChangedEntity> nextTransfurLogic) {
-                return instant(() -> {
+                return instant(level, () -> {
                     var variant = transfurLogic.get();
                     nextTransfurLogic.accept(variant);
                     return variant;

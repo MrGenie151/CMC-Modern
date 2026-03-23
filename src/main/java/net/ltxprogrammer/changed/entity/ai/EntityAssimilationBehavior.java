@@ -3,11 +3,13 @@ package net.ltxprogrammer.changed.entity.ai;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.ability.ILatexAssimilatedEntity;
+import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.TransfurContext;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.init.ChangedAnimationEvents;
 import net.ltxprogrammer.changed.init.ChangedGameRules;
 import net.ltxprogrammer.changed.init.ChangedSounds;
+import net.ltxprogrammer.changed.init.ChangedTags;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -86,11 +88,18 @@ public interface EntityAssimilationBehavior<T extends LivingEntity> {
                     }
                 }
             };
+
+            entity.targetSelector.addGoal(/* Priority */ -1, targetGoal);
+            entity.goalSelector.addGoal(/* Priority */ -1, assimilateGoal);
+
+            ChangedSounds.broadcastSound(entity, ChangedSounds.TRANSFUR_BY_LATEX, 1.0f, 1.0f);
+
+            // TODO save assimilation state in mob data, and reinject goals on load.
         }
 
         @Override
         public @Nullable AssimilationBehavior latexAssimilateVictimBehavior(T assimilationVictim, @NotNull LatexAssimilationDecision<?> decision) {
-            return AssimilationBehavior.instant(() -> {
+            return AssimilationBehavior.instant(assimilationVictim.level(), () -> {
                 assimilate(assimilationVictim);
                 return null;
             });
@@ -148,16 +157,25 @@ public interface EntityAssimilationBehavior<T extends LivingEntity> {
 
         @Override
         public @Nullable AssimilationBehavior latexAssimilateVictimBehavior(T assimilationVictim, @NotNull LatexAssimilationDecision<?> decision) {
+            if (assimilationVictim instanceof ChangedEntity)
+                return null;
+
             return decision.latexAssimilateVictimBehavior(assimilationVictim);
         }
 
         @Override
         public @Nullable AssimilationBehavior nonLatexAssimilateVictimBehavior(T assimilationVictim, @NotNull NonLatexAssimilationDecision<?> decision) {
+            if (assimilationVictim instanceof ChangedEntity)
+                return null;
+
             return decision.assimilateVictimBehavior(assimilationVictim);
         }
 
         @Override
         public @Nullable AssimilationBehavior immediateTransfurTargetBehavior(T assimilateTarget, @NotNull ImmediateTransfurDecision<?> decision) {
+            if (assimilateTarget instanceof ChangedEntity)
+                return null;
+
             return decision.transfurTargetBehavior(assimilateTarget);
         }
     }
@@ -220,8 +238,31 @@ public interface EntityAssimilationBehavior<T extends LivingEntity> {
             return newAbstractedEntity;
         }
 
+        protected boolean isPlayerTransfurred(Player player) {
+            return ProcessTransfur.getPlayerTransfurVariant(player) != null;
+        }
+
+        /* TODO (0.17.0): Use isPlayerLatexTransfurred() and isPlayerNonLatexTransfurred()
+        #1587 - Non-latex transfurs variants can still be assimilated
+         */
+        protected boolean isPlayerLatexTransfurred(Player player) {
+            return ProcessTransfur.isPlayerLatex(player);
+        }
+
+        protected boolean isPlayerNonLatexTransfurred(Player player) {
+            var variant = ProcessTransfur.getPlayerTransfurVariant(player);
+            return variant != null && !variant.getParent().getEntityType().is(ChangedTags.EntityTypes.LATEX);
+        }
+
+        protected boolean isPlayerNotTransfurred(Player player) {
+            return !isPlayerTransfurred(player);
+        }
+
         @Override
         public @Nullable AssimilationBehavior latexAssimilateVictimBehavior(Player assimilationVictim, @NotNull LatexAssimilationDecision<?> decision) {
+            if (isPlayerTransfurred(assimilationVictim))
+                return null;
+
             // Cannot override absorption behavior if absorbing latex is actually a player.
             if (decision.context().isFromPlayer() && decision.method() == LatexAssimilationDecision.Method.ABSORPTION)
                 return super.latexAssimilateVictimBehavior(assimilationVictim, decision);
@@ -245,6 +286,9 @@ public interface EntityAssimilationBehavior<T extends LivingEntity> {
 
         @Override
         public @Nullable AssimilationBehavior nonLatexAssimilateVictimBehavior(Player assimilationVictim, @NotNull NonLatexAssimilationDecision<?> decision) {
+            if (isPlayerTransfurred(assimilationVictim))
+                return null;
+
             return AssimilationBehavior.progressPlayerThenTransfur(assimilationVictim, decision.transfurProgress(), () -> {
                 var newEntity = this.transfurPlayer(assimilationVictim, decision.transfurVariant(), TransfurContext.latexHazard(decision.source(), decision.cause()), false);
                 decision.postTransfurListener().accept(newEntity);
@@ -254,7 +298,10 @@ public interface EntityAssimilationBehavior<T extends LivingEntity> {
 
         @Override
         public @Nullable AssimilationBehavior immediateTransfurTargetBehavior(Player assimilateTarget, @NotNull ImmediateTransfurDecision<?> decision) {
-            return AssimilationBehavior.instant(() -> {
+            if (isPlayerTransfurred(assimilateTarget))
+                return null;
+
+            return AssimilationBehavior.instant(assimilateTarget.level(), () -> {
                 var newEntity = this.transfurPlayer(assimilateTarget, decision.transfurVariant(), TransfurContext.latexHazard(decision.source(), decision.cause()), decision.initialKeepConscious());
                 decision.postTransfurListener().accept(newEntity);
                 return newEntity;
