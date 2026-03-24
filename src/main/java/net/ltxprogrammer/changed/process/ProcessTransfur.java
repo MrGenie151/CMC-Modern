@@ -3,6 +3,7 @@ package net.ltxprogrammer.changed.process;
 import com.mojang.logging.LogUtils;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
+import net.ltxprogrammer.changed.ability.ILatexAssimilatedEntity;
 import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.entity.ai.*;
 import net.ltxprogrammer.changed.entity.latex.LatexType;
@@ -95,7 +96,11 @@ public class ProcessTransfur {
         if (behavior == null)
             return null;
 
-        return behavior.latexAssimilateVictimBehavior(assimilationVictim, decision);
+        var event = new TransfurEvents.LatexAssimilationDecisionEvent(assimilationVictim, decision);
+        if (Changed.postModEvent(event))
+            return null;
+
+        return behavior.latexAssimilateVictimBehavior(assimilationVictim, event.getDecision());
     }
 
     /**
@@ -109,7 +114,11 @@ public class ProcessTransfur {
         if (behavior == null)
             return null;
 
-        return behavior.nonLatexAssimilateVictimBehavior(assimilationVictim, decision);
+        var event = new TransfurEvents.NonLatexAssimilationDecisionEvent(assimilationVictim, decision);
+        if (Changed.postModEvent(event))
+            return null;
+
+        return behavior.nonLatexAssimilateVictimBehavior(assimilationVictim, event.getDecision());
     }
 
     /**
@@ -123,11 +132,18 @@ public class ProcessTransfur {
         if (behavior == null)
             return null;
 
+        var event = new TransfurEvents.ImmediateTransfurDecisionEvent(assimilationTarget, decision);
+        if (Changed.postModEvent(event))
+            return null;
+
         return behavior.immediateTransfurTargetBehavior(assimilationTarget, decision);
     }
 
     // Intended to apply statuses on the source entity
     public static void onAbsorbEntity(IAbstractChangedEntity source) {
+        if (Changed.postModEvent(new TransfurEvents.AbsorbedEntityEvent(source)))
+            return;
+
         source.getEntity().heal(14.0f); // Heal 7 hearts
         if (source.getEntity() instanceof Player player) {
             player.getFoodData().eat(Foods.COOKED_BEEF.getNutrition(), Foods.COOKED_BEEF.getSaturationModifier()); // Equivalent to eating one Cooked beef
@@ -138,7 +154,10 @@ public class ProcessTransfur {
     }
 
     // Intended to apply statuses on the source entity
-    public static void onReplicateEntity(IAbstractChangedEntity source) {
+    public static void onAssimilateEntity(IAbstractChangedEntity source) {
+        if (Changed.postModEvent(new TransfurEvents.AssimilatedEntityEvent(source)))
+            return;
+
         source.getEntity().heal(4.0f); // Heal 2 hearts
         if (source.getEntity() instanceof Player player) {
             player.getFoodData().eat(Foods.COOKIE.getNutrition(), Foods.COOKIE.getSaturationModifier()); // Equivalent to eating one Cookie
@@ -147,10 +166,20 @@ public class ProcessTransfur {
 
     public static void onNewlyTransfurred(IAbstractChangedEntity entity) {
         forceNearbyToRetarget(entity.getLevel(), entity.getEntity());
+        if (Changed.postModEvent(new TransfurEvents.NewlyTransfurredEntityEvent(entity)))
+            return;
+
         entity.getEntity().heal(10.0f); // Heal 5 hearts
         if (entity.getEntity() instanceof Player player) {
             player.getFoodData().eat(10, 1f); // Not really equivalent to anything, but more than cooked meat
         }
+    }
+
+    public static void onNewlyAssimilated(ILatexAssimilatedEntity entity) {
+        if (Changed.postModEvent(new TransfurEvents.NewlyAssimilatedEntityEvent(entity)))
+            return;
+
+        entity.getEntity().heal(10.0f); // Heal 5 hearts
     }
 
     public static void setPlayerTransfurProgress(Player player, float progress) {
@@ -201,92 +230,6 @@ public class ProcessTransfur {
         }
 
         return amount;
-    }
-/*
-
-    protected static boolean progressPlayerTransfur(Player player, float amount, TransfurVariant<?> transfurVariant, TransfurContext context) {
-        if (player.isCreative() || player.isSpectator() || ProcessTransfur.isPlayerPermTransfurred(player))
-            return false;
-        if (player.isDeadOrDying() || player.isRemoved())
-            return false;
-        boolean justHit = player.invulnerableTime == 20 && player.hurtDuration == 10;
-
-        if (player.invulnerableTime > 10 && !justHit) {
-            return false;
-        }
-
-        else {
-            amount = LatexProtectionEnchantment.getLatexProtection(player, amount);
-            if (ChangedCompatibility.isPlayerUsedByOtherMod(player)) {
-                setPlayerTransfurProgress(player, 0.0f);
-                var damageSource = player.level().damageSources().mobAttack(context.source() == null ? transfurVariant.getEntityType().create(player.level()) : context.source().getEntity());
-                player.hurt(damageSource, amount);
-                return false;
-            }
-
-            if (amount <= 0.0f)
-                return false;
-
-            player.invulnerableTime = 20;
-            player.hurtDuration = 10;
-            player.hurtTime = player.hurtDuration;
-            player.setLastHurtByMob(null);
-
-            float old = getPlayerTransfurProgress(player);
-            float next = old + amount;
-            float max = (float)ProcessTransfur.getEntityTransfurTolerance(player);
-            setPlayerTransfurProgress(player, next);
-            if (next >= max && old < max) {
-                if (TransfurVariant.getPublicTransfurVariants().anyMatch(transfurVariant::equals))
-                    transfur(player, player.level(), transfurVariant, false, context);
-
-                return true;
-            }
-
-            return false;
-        }
-    }
-*/
-
-    public static boolean willTransfur(LivingEntity entity, float amount) {
-        amount = LatexProtectionEnchantment.getLatexProtection(entity, amount);
-
-        if (entity instanceof Player player) {
-            if (player.isCreative() || player.isSpectator() || ProcessTransfur.isPlayerPermTransfurred(player))
-                return false;
-            boolean justHit = player.invulnerableTime == 20 && player.hurtDuration == 10;
-
-            if (player.invulnerableTime > 10 && !justHit) {
-                return getPlayerTransfurProgress(player) >= ProcessTransfur.getEntityTransfurTolerance(player);
-            }
-
-            else {
-                /*player.invulnerableTime = 20;
-                player.hurtDuration = 10;
-                player.hurtTime = player.hurtDuration;*/
-
-                float next = getPlayerTransfurProgress(player) + amount;
-                return next >= ProcessTransfur.getEntityTransfurTolerance(player);
-            }
-        }
-        else {
-            float health = entity.getHealth();
-            float scale = 20.0f / Math.max(0.1f, (float)ProcessTransfur.getEntityTransfurTolerance(entity));
-
-            if (entity.getType().is(ChangedTags.EntityTypes.HUMANOIDS)) {
-                if (health <= amount * scale && health > 0.0F) {
-                    return true;
-                }
-
-                else {
-                    return false;
-                }
-            }
-
-            else {
-                return health <= amount * scale && health > 0.0F;
-            }
-        }
     }
 
     @Deprecated
@@ -342,11 +285,27 @@ public class ProcessTransfur {
     public static void tickPlayerTransfurProgress(Player player) {
         if (isPlayerTransfurred(player))
             return;
+        if (player.level().isClientSide)
+            return;
+
         var progress = getPlayerTransfurProgress(player);
-        if (!player.level().isClientSide && progress > 0) {
+        if (progress <= 0) {
+            var event = new TransfurEvents.TickPlayerTransfurProgressEvent(player, progress, 0f);
+            if (Changed.postModEvent(event))
+                return;
+
+            setPlayerTransfurProgress(player, Math.max(progress + event.getDeltaProgress(), 0));
+        }
+
+        else {
             int deltaTicks = Math.max(((player.tickCount - player.getLastHurtByMobTimestamp()) / 8) - 20, 0);
-            float nextTicks = Math.max(progress - (deltaTicks * 0.001f), 0);
-            setPlayerTransfurProgress(player, nextTicks);
+            float scaledDeltaTicks = Math.max(-(deltaTicks * 0.001f), 0);
+
+            var event = new TransfurEvents.TickPlayerTransfurProgressEvent(player, progress, scaledDeltaTicks);
+            if (Changed.postModEvent(event))
+                return;
+
+            setPlayerTransfurProgress(player, Math.max(progress + event.getDeltaProgress(), 0));
         }
     }
 
@@ -515,8 +474,10 @@ public class ProcessTransfur {
         if (oldVariant != null && oldVariant.getChangedEntity() != null)
             oldVariant.getChangedEntity().discard();
         TransfurVariantInstance<?> instance = TransfurVariantInstance.variantFor(variant, player);
-        if (instance != null)
+        if (instance != null) {
             preProcess.accept(instance);
+            Changed.postModEvent(new TransfurEvents.PreProcessTransfurVariantInstanceEvent(player, variant, context, instance, progress, temporaryFromSuit));
+        }
         playerDataExtension.setTransfurVariant(instance);
 
         if (instance != null) {

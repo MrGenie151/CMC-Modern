@@ -10,6 +10,7 @@ import net.ltxprogrammer.changed.init.ChangedDamageSources;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -97,6 +98,7 @@ public record LatexAssimilationDecision<T extends ChangedEntity>(DecisionStrengt
                 transfurProgress,
                 () -> {
                     var newEntity = transfurVariant.replaceEntity(target, transfurSource);
+                    ProcessTransfur.onAssimilateEntity(transfurSource);
                     postTransfurListener.accept(newEntity);
                     return newEntity;
                 });
@@ -154,6 +156,10 @@ public record LatexAssimilationDecision<T extends ChangedEntity>(DecisionStrengt
                     postTransfurListener.accept(newEntity);
                     return newEntity;
                 });
+    }
+
+    public LatexAssimilationDecision<?> withTransfurVariant(TransfurVariant<?> newTransfurVariant) {
+        return new LatexAssimilationDecision<>(decisionStrength, method, newTransfurVariant, context, transfurProgress, postTransfurListener);
     }
 
     public LatexAssimilationDecision<T> withTransfurProgress(float newProgress) {

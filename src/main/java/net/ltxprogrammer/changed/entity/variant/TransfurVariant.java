@@ -10,6 +10,7 @@ import net.ltxprogrammer.changed.ability.ILatexAssimilatedEntity;
 import net.ltxprogrammer.changed.entity.*;
 import net.ltxprogrammer.changed.init.*;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
+import net.ltxprogrammer.changed.process.TransfurEvents;
 import net.ltxprogrammer.changed.util.Color3;
 import net.ltxprogrammer.changed.util.EntityUtil;
 import net.minecraft.client.Minecraft;
@@ -225,6 +226,11 @@ public class TransfurVariant<T extends ChangedEntity> {
 
     public IAbstractChangedEntity replaceEntity(@NotNull LivingEntity entity, @Nullable LivingEntity cause) {
         var newEntity = spawnAtEntity(entity);
+        var event = new TransfurEvents.ReplaceEntityEvent(entity, this, cause, newEntity);
+        Changed.postModEvent(event);
+
+        cause = event.getCauseOfReplacement();
+
         if (entity.hasCustomName()) {
             newEntity.setCustomName(entity.getCustomName());
             newEntity.setCustomNameVisible(entity.isCustomNameVisible());
@@ -245,8 +251,6 @@ public class TransfurVariant<T extends ChangedEntity> {
                 newEntity.discard();
                 var instance = ProcessTransfur.setPlayerTransfurVariant(player, this, TransfurContext.hazard(TransfurCause.GRAB_REPLICATE), 1.0f);
                 instance.willSurviveTransfur = true;
-
-                ProcessTransfur.forceNearbyToRetarget(player.level(), player);
 
                 ProcessTransfur.onNewlyTransfurred(IAbstractChangedEntity.forPlayer(player));
                 return IAbstractChangedEntity.forPlayer(player);

@@ -71,4 +71,8 @@ public record ImmediateTransfurDecision<T extends ChangedEntity>(TransfurVariant
             return newEntity;
         });
     }
+
+    public ImmediateTransfurDecision<?> withTransfurVariant(TransfurVariant<?> newTransfurVariant) {
+        return new ImmediateTransfurDecision<>(newTransfurVariant, cause, source, initialKeepConscious, postTransfurListener);
+    }
 }

@@ -93,6 +93,7 @@ public interface EntityAssimilationBehavior<T extends LivingEntity> {
             entity.goalSelector.addGoal(/* Priority */ -1, assimilateGoal);
 
             ChangedSounds.broadcastSound(entity, ChangedSounds.TRANSFUR_BY_LATEX, 1.0f, 1.0f);
+            ProcessTransfur.onNewlyAssimilated(abstracted);
 
             // TODO save assimilation state in mob data, and reinject goals on load.
         }
@@ -271,11 +272,14 @@ public interface EntityAssimilationBehavior<T extends LivingEntity> {
             return switch (decision.method()) {
                 case REPLICATION -> AssimilationBehavior.progressPlayerThenTransfur(assimilationVictim, decision.transfurProgress(), () -> {
                     var newEntity = this.transfurPlayer(assimilationVictim, decision.transfurVariant(), decision.context(), false);
+                    if (decision.context().source() != null)
+                        decision.context().source().ifLeft(ProcessTransfur::onAssimilateEntity);
                     decision.postTransfurListener().accept(newEntity);
                     return newEntity;
                 });
                 case ABSORPTION -> AssimilationBehavior.progressPlayerThenTransfur(assimilationVictim, decision.transfurProgress(), () -> {
                     var newEntity = this.transfurPlayer(assimilationVictim, decision.transfurVariant(), decision.context(), false);
+                    // Intentionally don't call ProcessTransfur.onAbsorbEntity because the player will get buffs from ProcessTransfur.onNewlyTransfurred()
                     decision.postTransfurListener().accept(newEntity);
                     if (decision.context().source() != null)
                         decision.context().source().map(IAbstractChangedEntity::getEntity, ILatexAssimilatedEntity::getEntity).discard();

@@ -32,7 +32,7 @@ public interface TransfurDecider<T extends LivingEntity> {
             ILatexAssimilatedEntity self = ILatexAssimilatedEntity.forEntity(assimilatedMob);
 
             return LatexAssimilationDecision.weakAbsorption(variant,
-                    TransfurContext.latexHazard(self, TransfurCause.GRAB_ABSORB), damage,
+                    self.absorb(), damage,
                     transfurredEntity -> postTransfurListener.accept(assimilatedMob, transfurredEntity));
         };
     }
@@ -42,7 +42,7 @@ public interface TransfurDecider<T extends LivingEntity> {
             ILatexAssimilatedEntity self = ILatexAssimilatedEntity.forEntity(assimilatedMob);
 
             return LatexAssimilationDecision.weakAbsorption(variant.get(),
-                    TransfurContext.latexHazard(self, TransfurCause.GRAB_ABSORB), damage,
+                    self.absorb(), damage,
                     transfurredEntity -> postTransfurListener.accept(assimilatedMob, transfurredEntity));
         };
     }

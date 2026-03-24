@@ -60,6 +60,10 @@ public record NonLatexAssimilationDecision<T extends ChangedEntity>(TransfurVari
                 });
     }
 
+    public NonLatexAssimilationDecision<?> withTransfurVariant(TransfurVariant<?> newTransfurVariant) {
+        return new NonLatexAssimilationDecision<>(newTransfurVariant, cause, source, transfurProgress, extraDamage, postTransfurListener);
+    }
+
     public NonLatexAssimilationDecision<T> withTransfurProgress(float newProgress) {
         return new NonLatexAssimilationDecision<>(transfurVariant, cause, source, newProgress, extraDamage, postTransfurListener);
     }
