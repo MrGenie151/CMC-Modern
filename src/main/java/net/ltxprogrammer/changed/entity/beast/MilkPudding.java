@@ -1,5 +1,6 @@
 package net.ltxprogrammer.changed.entity.beast;
 
+import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.TransfurCause;
 import net.ltxprogrammer.changed.entity.ai.LatexAssimilationDecision;
@@ -50,9 +51,11 @@ public class MilkPudding extends ChangedEntity {
 
     @Override
     public LatexAssimilationDecision<?> makeLatexAssimilationDecision(TransfurCause cause, LivingEntity targetEntity) {
+        IAbstractChangedEntity self = IAbstractChangedEntity.forEntity(this);
+
         return LatexAssimilationDecision.weak(LatexAssimilationDecision.Method.ABSORPTION,
                 ChangedTransfurVariants.Gendered.WHITE_LATEX_WOLVES.getRandomVariant(random),
-                getAbsorbContext(),
+                self.absorb(),
                 this.computeTransfurDamage());
     }
 

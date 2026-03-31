@@ -1,22 +1,18 @@
 package net.ltxprogrammer.changed.init;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.mojang.datafixers.util.Either;
 import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.ability.ILatexAssimilatedEntity;
-import net.ltxprogrammer.changed.client.animations.AnimationDefinition;
 import net.ltxprogrammer.changed.entity.TransfurContext;
 import net.ltxprogrammer.changed.entity.ai.AssimilationBehavior;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
-import net.ltxprogrammer.changed.util.EntityUtil;
+import net.ltxprogrammer.changed.process.TransfurEvents;
 import net.ltxprogrammer.changed.util.ResourceUtil;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -25,10 +21,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -110,34 +102,62 @@ public class ChangedFusions extends SimplePreparableReloadListener<List<ChangedF
     }
 
     private AssimilationBehavior getLatexFusionBehaviorForChangedEntity(TransfurVariant<?> fusionVariant, IAbstractChangedEntity assimVictim, IAbstractChangedEntity transfurSource) {
+        var event = new TransfurEvents.ChangedEntityFusionWithChangedEntityDecisionEvent(transfurSource, assimVictim, fusionVariant);
+        if (Changed.postModEvent(event))
+            return null;
+        final TransfurVariant<?> newFusionVariant = event.getFusionVariant();
+
         if (transfurSource.isPlayer() || !assimVictim.isPlayer()) {
             return AssimilationBehavior.instant(assimVictim.getLevel(), () -> {
-                transfurSource.replaceVariant(fusionVariant);
+                IAbstractChangedEntity oldSourceEntity = transfurSource.copyAbstraction();
+
+                transfurSource.replaceVariant(newFusionVariant);
+
+                if (!Changed.postModEvent(new TransfurEvents.ChangedEntityFusionWithChangedEntityEvent(oldSourceEntity, assimVictim, transfurSource, newFusionVariant)))
+                    ProcessTransfur.onNewlyFused(transfurSource);
+
                 ChangedSounds.broadcastSound(transfurSource.getEntity(), ChangedSounds.LATEX_FUSE_ENTITY, 1f, 1f);
                 killOrDiscard(assimVictim.getEntity(), transfurSource);
 
-                ChangedAnimationEvents.broadcastTransfurAnimation(transfurSource.getEntity(), fusionVariant, transfurSource.absorb());
+                ChangedAnimationEvents.broadcastTransfurAnimation(transfurSource.getEntity(), newFusionVariant, transfurSource.absorb());
                 return transfurSource;
             });
         } else {
             return AssimilationBehavior.instant(assimVictim.getLevel(), () -> {
-                assimVictim.replaceVariant(fusionVariant);
+                IAbstractChangedEntity oldAssimEntity = assimVictim.copyAbstraction();
+
+                assimVictim.replaceVariant(newFusionVariant);
+
+                if (!Changed.postModEvent(new TransfurEvents.ChangedEntityFusionWithChangedEntityEvent(transfurSource, oldAssimEntity, assimVictim, newFusionVariant)))
+                    ProcessTransfur.onNewlyFused(assimVictim);
+
                 ChangedSounds.broadcastSound(assimVictim.getEntity(), ChangedSounds.LATEX_FUSE_ENTITY, 1f, 1f);
                 killOrDiscard(transfurSource.getEntity(), assimVictim);
 
-                ChangedAnimationEvents.broadcastTransfurAnimation(assimVictim.getEntity(), fusionVariant, assimVictim.absorb());
+                ChangedAnimationEvents.broadcastTransfurAnimation(assimVictim.getEntity(), newFusionVariant, assimVictim.absorb());
                 return assimVictim;
             });
         }
     }
 
     private AssimilationBehavior getLatexFusionBehaviorForLatexEntity(TransfurVariant<?> fusionVariant, IAbstractChangedEntity assimVictim, ILatexAssimilatedEntity transfurSource) {
+        var event = new TransfurEvents.AssimilatedEntityFusionWithChangedEntityDecisionEvent(transfurSource, assimVictim, fusionVariant);
+        if (Changed.postModEvent(event))
+            return null;
+        final TransfurVariant<?> newFusionVariant = event.getFusionVariant();
+
         return AssimilationBehavior.instant(assimVictim.getLevel(), () -> {
-            assimVictim.replaceVariant(fusionVariant);
+            IAbstractChangedEntity oldAssimEntity = assimVictim.copyAbstraction();
+
+            assimVictim.replaceVariant(newFusionVariant);
+
+            if (!Changed.postModEvent(new TransfurEvents.AssimilatedEntityFusionWithChangedEntityEvent(transfurSource, oldAssimEntity, assimVictim, newFusionVariant)))
+                ProcessTransfur.onNewlyFused(assimVictim);
+
             ChangedSounds.broadcastSound(assimVictim.getEntity(), ChangedSounds.LATEX_FUSE_ENTITY, 1f, 1f);
             killOrDiscard(transfurSource.getEntity(), assimVictim);
 
-            ChangedAnimationEvents.broadcastTransfurAnimation(assimVictim.getEntity(), fusionVariant, assimVictim.absorb());
+            ChangedAnimationEvents.broadcastTransfurAnimation(assimVictim.getEntity(), newFusionVariant, assimVictim.absorb());
             return assimVictim;
         });
     }
@@ -177,23 +197,43 @@ public class ChangedFusions extends SimplePreparableReloadListener<List<ChangedF
             if (instance != null && instance.ageAsVariant > level.getGameRules().getInt(ChangedGameRules.RULE_FUSABILITY_DURATION_PLAYER))
                 return null;
 
+            var event = new TransfurEvents.ChangedEntityFusionWithMobDecisionEvent(sourceLatex, assimVictim, fusionVariant);
+            if (Changed.postModEvent(event))
+                return null;
+            final TransfurVariant<?> newFusionVariant = event.getFusionVariant();
+
             return AssimilationBehavior.instant(assimVictim.level(), () -> {
-                sourceLatex.replaceVariant(fusionVariant);
+                IAbstractChangedEntity oldSourceEntity = sourceLatex.copyAbstraction();
+
+                sourceLatex.replaceVariant(newFusionVariant);
+
+                if (!Changed.postModEvent(new TransfurEvents.ChangedEntityFusionWithMobEvent(oldSourceEntity, assimVictim, sourceLatex, newFusionVariant)))
+                    ProcessTransfur.onNewlyFused(sourceLatex);
+
                 ChangedSounds.broadcastSound(sourceLatex.getEntity(), ChangedSounds.LATEX_FUSE_ENTITY, 1f, 1f);
                 killOrDiscard(assimVictim, sourceLatex);
 
-                ChangedAnimationEvents.broadcastTransfurAnimation(sourceLatex.getEntity(), fusionVariant, sourceLatex.absorb());
+                ChangedAnimationEvents.broadcastTransfurAnimation(sourceLatex.getEntity(), newFusionVariant, sourceLatex.absorb());
                 return sourceLatex;
             });
         } else {
             final ILatexAssimilatedEntity sourceLatex = transfurSource.right().get();
 
+            var event = new TransfurEvents.AssimilatedEntityFusionWithMobDecisionEvent(sourceLatex, assimVictim, fusionVariant);
+            if (Changed.postModEvent(event))
+                return null;
+            final TransfurVariant<?> newFusionVariant = event.getFusionVariant();
+
             return AssimilationBehavior.instant(assimVictim.level(), () -> {
-                var newEntity = fusionVariant.replaceEntity(assimVictim, sourceLatex.getEntity());
+                var newEntity = newFusionVariant.replaceEntity(assimVictim, sourceLatex.getEntity());
+
+                if (!Changed.postModEvent(new TransfurEvents.AssimilatedEntityFusionWithMobEvent(sourceLatex, assimVictim, newEntity, newFusionVariant)))
+                    ProcessTransfur.onNewlyFused(newEntity);
+
                 ChangedSounds.broadcastSound(sourceLatex.getEntity(), ChangedSounds.LATEX_FUSE_ENTITY, 1f, 1f);
                 killOrDiscard(sourceLatex.getEntity(), newEntity);
 
-                ChangedAnimationEvents.broadcastTransfurAnimation(newEntity.getEntity(), fusionVariant, sourceLatex.absorb());
+                ChangedAnimationEvents.broadcastTransfurAnimation(newEntity.getEntity(), newFusionVariant, sourceLatex.absorb());
                 return newEntity;
             });
         }

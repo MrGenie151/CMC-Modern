@@ -75,4 +75,8 @@ public record ImmediateTransfurDecision<T extends ChangedEntity>(TransfurVariant
     public ImmediateTransfurDecision<?> withTransfurVariant(TransfurVariant<?> newTransfurVariant) {
         return new ImmediateTransfurDecision<>(newTransfurVariant, cause, source, initialKeepConscious, postTransfurListener);
     }
+
+    public ImmediateTransfurDecision<T> appendTransfurListener(Consumer<IAbstractChangedEntity> listener) {
+        return new ImmediateTransfurDecision<>(transfurVariant, cause, source, initialKeepConscious, postTransfurListener.andThen(listener));
+    }
 }

@@ -182,6 +182,16 @@ public class ProcessTransfur {
         entity.getEntity().heal(10.0f); // Heal 5 hearts
     }
 
+    public static void onNewlyFused(IAbstractChangedEntity entity) {
+        if (Changed.postModEvent(new TransfurEvents.NewlyFusedEntityEvent(entity)))
+            return;
+
+        entity.getEntity().heal(10.0f); // Heal 5 hearts
+        if (entity.getEntity() instanceof Player player) {
+            player.getFoodData().eat(10, 1f); // Not really equivalent to anything, but more than cooked meat
+        }
+    }
+
     public static void setPlayerTransfurProgress(Player player, float progress) {
         if (!(player instanceof PlayerDataExtension ext))
             return;

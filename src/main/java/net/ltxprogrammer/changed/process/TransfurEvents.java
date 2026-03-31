@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class TransfurEvents {
     /**
@@ -44,6 +45,23 @@ public class TransfurEvents {
         public final @NotNull IAbstractChangedEntity entity;
 
         public NewlyTransfurredEntityEvent(@NotNull IAbstractChangedEntity entity) {
+            this.entity = entity;
+        }
+
+        @Override
+        public boolean isCancelable() {
+            return true;
+        }
+    }
+
+    /**
+     * Fired whenever two entities fuse into one. Use {@link LatexFusionEvent} to track the original entities.
+     * Canceling this event will prevent the entity from receiving the default buffs.
+     */
+    public static class NewlyFusedEntityEvent extends Event {
+        public final @NotNull IAbstractChangedEntity entity;
+
+        public NewlyFusedEntityEvent(@NotNull IAbstractChangedEntity entity) {
             this.entity = entity;
         }
 
@@ -150,6 +168,7 @@ public class TransfurEvents {
 
         public abstract @NotNull TransfurVariant<?> getTransfurVariant();
         public abstract void setTransfurVariant(@NotNull TransfurVariant<?> transfurVariant);
+        public abstract void appendTransfurListener(Consumer<IAbstractChangedEntity> listener);
         public abstract @NotNull TransfurCause getTransfurCause();
         public abstract @Nullable LivingEntity getSourceEntity();
 
@@ -182,6 +201,11 @@ public class TransfurEvents {
         @Override
         public void setTransfurVariant(@NotNull TransfurVariant<?> transfurVariant) {
             decision = decision.withTransfurVariant(transfurVariant);
+        }
+
+        @Override
+        public void appendTransfurListener(Consumer<IAbstractChangedEntity> listener) {
+            decision = decision.appendTransfurListener(listener);
         }
 
         @Override
@@ -235,6 +259,11 @@ public class TransfurEvents {
         }
 
         @Override
+        public void appendTransfurListener(Consumer<IAbstractChangedEntity> listener) {
+            decision = decision.appendTransfurListener(listener);
+        }
+
+        @Override
         public @NotNull TransfurCause getTransfurCause() {
             return decision.cause();
         }
@@ -282,6 +311,11 @@ public class TransfurEvents {
         @Override
         public void setTransfurVariant(@NotNull TransfurVariant<?> transfurVariant) {
             decision = decision.withTransfurVariant(transfurVariant);
+        }
+
+        @Override
+        public void appendTransfurListener(Consumer<IAbstractChangedEntity> listener) {
+            decision = decision.appendTransfurListener(listener);
         }
 
         @Override
@@ -399,6 +433,326 @@ public class TransfurEvents {
         @Override
         public boolean isCancelable() {
             return false;
+        }
+    }
+
+    /**
+     * Fired after a latex fusion variant has been decided. Use this event to change the variant the entity fuses into.
+     * Canceling this event will deny the fusion decision.
+     */
+    public static abstract class LatexFusionDecisionEvent extends Event {
+        public final @NotNull TransfurVariant<?> originalFusionVariant;
+        protected @NotNull TransfurVariant<?> fusionVariant;
+
+        protected LatexFusionDecisionEvent(@NotNull TransfurVariant<?> originalFusionVariant) {
+            this.originalFusionVariant = originalFusionVariant;
+            this.fusionVariant = originalFusionVariant;
+        }
+
+        public abstract @NotNull LivingEntity getSourceEntity();
+        public abstract @NotNull LivingEntity getTargetEntity();
+
+        public @NotNull TransfurVariant<?> getOriginalFusionVariant() {
+            return originalFusionVariant;
+        }
+
+        public @NotNull TransfurVariant<?> getFusionVariant() {
+            return fusionVariant;
+        }
+
+        public void setFusionVariant(@NotNull TransfurVariant<?> fusionVariant) {
+            this.fusionVariant = fusionVariant;
+        }
+
+        @Override
+        public boolean isCancelable() {
+            return true;
+        }
+    }
+
+    /**
+     * Fired after a latex fusion has been decided for a ChangedEntity/Transfurred player.
+     * Canceling this event will deny the fusion decision.
+     */
+    public static abstract class LatexFusionWithChangedEntityDecisionEvent extends LatexFusionDecisionEvent {
+        public final @NotNull IAbstractChangedEntity targetEntity;
+
+        protected LatexFusionWithChangedEntityDecisionEvent(@NotNull IAbstractChangedEntity targetEntity, @NotNull TransfurVariant<?> fusionVariant) {
+            super(fusionVariant);
+            this.targetEntity = targetEntity;
+        }
+
+        @Override
+        public @NotNull LivingEntity getTargetEntity() {
+            return targetEntity.getEntity();
+        }
+
+        public @NotNull IAbstractChangedEntity getAbstractedTargetEntity() {
+            return targetEntity;
+        }
+    }
+
+    /**
+     * Fired after a latex fusion has been decided for a mob.
+     * Canceling this event will deny the fusion decision.
+     */
+    public static abstract class LatexFusionWithMobDecisionEvent extends LatexFusionDecisionEvent {
+        public final @NotNull LivingEntity targetEntity;
+
+        protected LatexFusionWithMobDecisionEvent(@NotNull LivingEntity targetEntity, @NotNull TransfurVariant<?> fusionVariant) {
+            super(fusionVariant);
+            this.targetEntity = targetEntity;
+        }
+
+        @Override
+        public @NotNull LivingEntity getTargetEntity() {
+            return targetEntity;
+        }
+    }
+
+    /**
+     * Fired after a latex fusion variant has been decided from a ChangedEntity.
+     * Canceling this event will deny the fusion decision.
+     */
+    public static class ChangedEntityFusionWithChangedEntityDecisionEvent extends LatexFusionWithChangedEntityDecisionEvent {
+        public final @NotNull IAbstractChangedEntity sourceEntity;
+
+        public ChangedEntityFusionWithChangedEntityDecisionEvent(@NotNull IAbstractChangedEntity sourceEntity, @NotNull IAbstractChangedEntity targetEntity, @NotNull TransfurVariant<?> fusionVariant) {
+            super(targetEntity, fusionVariant);
+            this.sourceEntity = sourceEntity;
+        }
+
+        @Override
+        public @NotNull LivingEntity getSourceEntity() {
+            return sourceEntity.getEntity();
+        }
+
+        public @NotNull IAbstractChangedEntity getAbstractedSourceEntity() {
+            return sourceEntity;
+        }
+    }
+
+    /**
+     * Fired after a latex fusion variant has been decided from an assimilated mob.
+     * Canceling this event will deny the fusion decision.
+     */
+    public static class AssimilatedEntityFusionWithChangedEntityDecisionEvent extends LatexFusionWithChangedEntityDecisionEvent {
+        public final @NotNull ILatexAssimilatedEntity sourceEntity;
+
+        public AssimilatedEntityFusionWithChangedEntityDecisionEvent(@NotNull ILatexAssimilatedEntity sourceEntity, @NotNull IAbstractChangedEntity targetEntity, @NotNull TransfurVariant<?> fusionVariant) {
+            super(targetEntity, fusionVariant);
+            this.sourceEntity = sourceEntity;
+        }
+
+        @Override
+        public @NotNull LivingEntity getSourceEntity() {
+            return sourceEntity.getEntity();
+        }
+
+        public @NotNull ILatexAssimilatedEntity getAbstractedSourceEntity() {
+            return sourceEntity;
+        }
+    }
+
+    /**
+     * Fired after a latex fusion variant has been decided from a ChangedEntity.
+     * Canceling this event will deny the fusion decision.
+     */
+    public static class ChangedEntityFusionWithMobDecisionEvent extends LatexFusionWithMobDecisionEvent {
+        public final @NotNull IAbstractChangedEntity sourceEntity;
+
+        public ChangedEntityFusionWithMobDecisionEvent(@NotNull IAbstractChangedEntity sourceEntity, @NotNull LivingEntity targetEntity, @NotNull TransfurVariant<?> fusionVariant) {
+            super(targetEntity, fusionVariant);
+            this.sourceEntity = sourceEntity;
+        }
+
+        @Override
+        public @NotNull LivingEntity getSourceEntity() {
+            return sourceEntity.getEntity();
+        }
+
+        public @NotNull IAbstractChangedEntity getAbstractedSourceEntity() {
+            return sourceEntity;
+        }
+    }
+
+    /**
+     * Fired after a latex fusion variant has been decided from an assimilated mob.
+     * Canceling this event will deny the fusion decision.
+     */
+    public static class AssimilatedEntityFusionWithMobDecisionEvent extends LatexFusionWithMobDecisionEvent {
+        public final @NotNull ILatexAssimilatedEntity sourceEntity;
+
+        public AssimilatedEntityFusionWithMobDecisionEvent(@NotNull ILatexAssimilatedEntity sourceEntity, @NotNull LivingEntity targetEntity, @NotNull TransfurVariant<?> fusionVariant) {
+            super(targetEntity, fusionVariant);
+            this.sourceEntity = sourceEntity;
+        }
+
+        @Override
+        public @NotNull LivingEntity getSourceEntity() {
+            return sourceEntity.getEntity();
+        }
+
+        public @NotNull ILatexAssimilatedEntity getAbstractedSourceEntity() {
+            return sourceEntity;
+        }
+    }
+
+    /**
+     * Fired whenever a latex entity fuses with another latex entity.
+     * Canceling this event will prevent the entity from receiving the default buffs.
+     */
+    public static abstract class LatexFusionEvent extends Event {
+        public final @NotNull IAbstractChangedEntity fusionEntity;
+        public final @NotNull TransfurVariant<?> fusionVariant;
+
+        protected LatexFusionEvent(@NotNull IAbstractChangedEntity fusionEntity, @NotNull TransfurVariant<?> fusionVariant) {
+            this.fusionEntity = fusionEntity;
+            this.fusionVariant = fusionVariant;
+        }
+
+        public abstract @NotNull LivingEntity getSourceEntity();
+        public abstract @NotNull LivingEntity getTargetEntity();
+
+        public @NotNull IAbstractChangedEntity getFusionEntity() {
+            return fusionEntity;
+        }
+
+        public @NotNull TransfurVariant<?> getFusionVariant() {
+            return fusionVariant;
+        }
+
+        @Override
+        public boolean isCancelable() {
+            return true;
+        }
+    }
+
+    /**
+     * Fired after a latex fusion has been decided for a ChangedEntity/Transfurred player.
+     * Canceling this event will prevent the entity from receiving the default buffs.
+     */
+    public static abstract class LatexFusionWithChangedEntityEvent extends LatexFusionEvent {
+        public final @NotNull IAbstractChangedEntity targetEntity;
+
+        protected LatexFusionWithChangedEntityEvent(@NotNull IAbstractChangedEntity targetEntity, @NotNull IAbstractChangedEntity fusionEntity, @NotNull TransfurVariant<?> fusionVariant) {
+            super(fusionEntity, fusionVariant);
+            this.targetEntity = targetEntity;
+        }
+
+        @Override
+        public @NotNull LivingEntity getTargetEntity() {
+            return targetEntity.getEntity();
+        }
+
+        public @NotNull IAbstractChangedEntity getAbstractedTargetEntity() {
+            return targetEntity;
+        }
+    }
+
+    /**
+     * Fired after a latex fusion has been decided for a mob.
+     * Canceling this event will prevent the entity from receiving the default buffs.
+     */
+    public static abstract class LatexFusionWithMobEvent extends LatexFusionEvent {
+        public final @NotNull LivingEntity targetEntity;
+
+        protected LatexFusionWithMobEvent(@NotNull LivingEntity targetEntity, @NotNull IAbstractChangedEntity fusionEntity, @NotNull TransfurVariant<?> fusionVariant) {
+            super(fusionEntity, fusionVariant);
+            this.targetEntity = targetEntity;
+        }
+
+        @Override
+        public @NotNull LivingEntity getTargetEntity() {
+            return targetEntity;
+        }
+    }
+
+    /**
+     * Fired after a ChangedEntity/Transfurred player fused with another ChangedEntity/Transfurred player
+     * Canceling this event will prevent the entity from receiving the default buffs.
+     */
+    public static class ChangedEntityFusionWithChangedEntityEvent extends LatexFusionWithChangedEntityEvent {
+        public final @NotNull IAbstractChangedEntity sourceEntity;
+
+        public ChangedEntityFusionWithChangedEntityEvent(@NotNull IAbstractChangedEntity sourceEntity, @NotNull IAbstractChangedEntity targetEntity, @NotNull IAbstractChangedEntity fusionEntity, @NotNull TransfurVariant<?> fusionVariant) {
+            super(targetEntity, fusionEntity, fusionVariant);
+            this.sourceEntity = sourceEntity;
+        }
+
+        @Override
+        public @NotNull LivingEntity getSourceEntity() {
+            return sourceEntity.getEntity();
+        }
+
+        public @NotNull IAbstractChangedEntity getAbstractedSourceEntity() {
+            return sourceEntity;
+        }
+    }
+
+    /**
+     * Fired after a latex assimilated mob fused with a ChangedEntity/Transfurred player
+     * Canceling this event will prevent the entity from receiving the default buffs.
+     */
+    public static class AssimilatedEntityFusionWithChangedEntityEvent extends LatexFusionWithChangedEntityEvent {
+        public final @NotNull ILatexAssimilatedEntity sourceEntity;
+
+        public AssimilatedEntityFusionWithChangedEntityEvent(@NotNull ILatexAssimilatedEntity sourceEntity, @NotNull IAbstractChangedEntity targetEntity, @NotNull IAbstractChangedEntity fusionEntity, @NotNull TransfurVariant<?> fusionVariant) {
+            super(targetEntity, fusionEntity, fusionVariant);
+            this.sourceEntity = sourceEntity;
+        }
+
+        @Override
+        public @NotNull LivingEntity getSourceEntity() {
+            return sourceEntity.getEntity();
+        }
+
+        public @NotNull ILatexAssimilatedEntity getAbstractedSourceEntity() {
+            return sourceEntity;
+        }
+    }
+
+    /**
+     * Fired after a ChangedEntity/Transfurred player fused with a mob
+     * Canceling this event will prevent the entity from receiving the default buffs.
+     */
+    public static class ChangedEntityFusionWithMobEvent extends LatexFusionWithMobEvent {
+        public final @NotNull IAbstractChangedEntity sourceEntity;
+
+        public ChangedEntityFusionWithMobEvent(@NotNull IAbstractChangedEntity sourceEntity, @NotNull LivingEntity targetEntity, @NotNull IAbstractChangedEntity fusionEntity, @NotNull TransfurVariant<?> fusionVariant) {
+            super(targetEntity, fusionEntity, fusionVariant);
+            this.sourceEntity = sourceEntity;
+        }
+
+        @Override
+        public @NotNull LivingEntity getSourceEntity() {
+            return sourceEntity.getEntity();
+        }
+
+        public @NotNull IAbstractChangedEntity getAbstractedSourceEntity() {
+            return sourceEntity;
+        }
+    }
+
+    /**
+     * Fired after a latex assimilated mob fused with another mob
+     * Canceling this event will prevent the entity from receiving the default buffs.
+     */
+    public static class AssimilatedEntityFusionWithMobEvent extends LatexFusionWithMobEvent {
+        public final @NotNull ILatexAssimilatedEntity sourceEntity;
+
+        public AssimilatedEntityFusionWithMobEvent(@NotNull ILatexAssimilatedEntity sourceEntity, @NotNull LivingEntity targetEntity, @NotNull IAbstractChangedEntity fusionEntity, @NotNull TransfurVariant<?> fusionVariant) {
+            super(targetEntity, fusionEntity, fusionVariant);
+            this.sourceEntity = sourceEntity;
+        }
+
+        @Override
+        public @NotNull LivingEntity getSourceEntity() {
+            return sourceEntity.getEntity();
+        }
+
+        public @NotNull ILatexAssimilatedEntity getAbstractedSourceEntity() {
+            return sourceEntity;
         }
     }
 }

@@ -72,6 +72,11 @@ public interface IAbstractChangedEntity {
     void setEyeStyle(EyeStyle style);
     void causeFoodExhaustion(float exhaustion);
 
+    /**
+     * Creates a copy of this abstraction.
+     */
+    IAbstractChangedEntity copyAbstraction();
+
     default boolean hasTransfurMode() {
         final TransfurMode mode = getTransfurMode();
         return mode != TransfurMode.NONE;
@@ -296,6 +301,11 @@ public interface IAbstractChangedEntity {
             @Override
             public void causeFoodExhaustion(float exhaustion) {
                 player.causeFoodExhaustion(exhaustion);
+            }
+
+            @Override
+            public IAbstractChangedEntity copyAbstraction() {
+                return forPlayerWithVariant(player, instance.get());
             }
         };
     }
@@ -529,6 +539,11 @@ public interface IAbstractChangedEntity {
             @Override
             public void causeFoodExhaustion(float exhaustion) {
 
+            }
+
+            @Override
+            public IAbstractChangedEntity copyAbstraction() {
+                return forEntity(cached.get());
             }
         };
     }

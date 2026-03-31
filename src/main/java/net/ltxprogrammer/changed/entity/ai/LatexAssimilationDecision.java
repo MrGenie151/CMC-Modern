@@ -165,4 +165,8 @@ public record LatexAssimilationDecision<T extends ChangedEntity>(DecisionStrengt
     public LatexAssimilationDecision<T> withTransfurProgress(float newProgress) {
         return new LatexAssimilationDecision<>(decisionStrength, method, transfurVariant, context, newProgress, postTransfurListener);
     }
+
+    public LatexAssimilationDecision<T> appendTransfurListener(Consumer<IAbstractChangedEntity> listener) {
+        return new LatexAssimilationDecision<>(decisionStrength, method, transfurVariant, context, transfurProgress, postTransfurListener.andThen(listener));
+    }
 }

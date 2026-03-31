@@ -556,27 +556,19 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
                 return false;
         }
 
-        TransfurVariant<?> targetVariant = TransfurVariant.getEntityVariant(livingEntity);
-        TransfurVariant<?> selfVariant = getSelfVariant();
-        if (ChangedFusions.INSTANCE.getFusionDefinitions().anyMatch(fusionDefinition ->
-                fusionDefinition.matches(selfVariant, livingEntity.getClass()) ||
-                fusionDefinition.matches(targetVariant, this.getClass()) ||
-                fusionDefinition.matches(selfVariant, targetVariant))) { // Fusion definition exists for target and this entity
-            if (!(livingEntity instanceof Player player))
-                return true; // Always fuse with NPCs
-            if (livingEntity.level().getGameRules().getBoolean(ChangedGameRules.RULE_NPC_WANT_FUSE_PLAYER)) {
-                var instance = ProcessTransfur.getPlayerTransfurVariant(player);
-                if (instance == null || instance.ageAsVariant < livingEntity.level().getGameRules().getInt(ChangedGameRules.RULE_FUSABILITY_DURATION_PLAYER))
-                    return true;
-            }
-        }
-
-        if (!livingEntity.getType().is(ChangedTags.EntityTypes.HUMANOIDS) && !(livingEntity instanceof ChangedEntity))
-            return false;
+        LatexAssimilationDecision<?> decision = switch (this.getTransfurMode()) {
+            case REPLICATION -> this.makeLatexAssimilationDecision(TransfurCause.GRAB_REPLICATE, livingEntity);
+            case ABSORPTION -> this.makeLatexAssimilationDecision(TransfurCause.GRAB_ABSORB, livingEntity);
+            default -> null;
+        };
+        AssimilationBehavior behavior = ProcessTransfur.computeAssimilationBehavior(livingEntity, decision);
+        if (behavior != null)
+            return true;
 
         return getLatexType().isHostileTo(LatexType.getEntityLatexType(livingEntity));
     }
 
+    @Deprecated
     public TransfurContext getReplicateContext() {
         if (underlyingPlayer == null)
             return TransfurContext.npcLatexHazard(this, TransfurCause.GRAB_REPLICATE);
@@ -584,6 +576,7 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
             return TransfurContext.playerLatexHazard(underlyingPlayer, TransfurCause.GRAB_REPLICATE);
     }
 
+    @Deprecated
     public TransfurContext getAbsorbContext() {
         if (underlyingPlayer == null)
             return TransfurContext.npcLatexHazard(this, TransfurCause.GRAB_ABSORB);
