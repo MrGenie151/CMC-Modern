@@ -595,6 +595,12 @@ public class ProcessTransfur {
         return TransfurVariant.getEntityVariant(entity) != null;
     }
 
+    public static boolean isMobAssimilated(LivingEntity entity) {
+        if (entity instanceof PathFinderMobDataExtension ext)
+            return ext.isLatexAssimilated();
+        return false;
+    }
+
     private static void bonusHurt(LivingEntity entity, DamageSource source, float damage, boolean overrideImmunity) {
         if (!entity.isInvulnerableTo(source) || overrideImmunity) {
             boolean justHit = entity.invulnerableTime == 20 && entity.hurtDuration == 10;

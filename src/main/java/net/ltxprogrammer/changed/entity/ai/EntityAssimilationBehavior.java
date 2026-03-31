@@ -4,6 +4,7 @@ import net.ltxprogrammer.changed.Changed;
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.ability.ILatexAssimilatedEntity;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
+import net.ltxprogrammer.changed.entity.PathFinderMobDataExtension;
 import net.ltxprogrammer.changed.entity.TransfurContext;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.init.ChangedAnimationEvents;
@@ -47,9 +48,8 @@ public interface EntityAssimilationBehavior<T extends LivingEntity> {
             this.decider = decider;
         }
 
-        protected void assimilate(T entity) {
-            // TODO have the assimilated mob drip latex particles
-
+        public void assimilate(T entity) {
+            ((PathFinderMobDataExtension)entity).markAsLatexAssimilated(true);
             final ILatexAssimilatedEntity abstracted = ILatexAssimilatedEntity.forEntity(entity, decider);
 
             final Function<LivingEntity, LatexAssimilationDecision<?>> qualifiedDecider = decider.withAssimilatedMob(entity);
@@ -94,8 +94,6 @@ public interface EntityAssimilationBehavior<T extends LivingEntity> {
 
             ChangedSounds.broadcastSound(entity, ChangedSounds.TRANSFUR_BY_LATEX, 1.0f, 1.0f);
             ProcessTransfur.onNewlyAssimilated(abstracted);
-
-            // TODO save assimilation state in mob data, and reinject goals on load.
         }
 
         @Override
