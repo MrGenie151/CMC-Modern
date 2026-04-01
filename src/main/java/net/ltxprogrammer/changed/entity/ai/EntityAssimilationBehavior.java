@@ -106,13 +106,18 @@ public interface EntityAssimilationBehavior<T extends LivingEntity> {
 
         @Override
         public @Nullable AssimilationBehavior nonLatexAssimilateVictimBehavior(T assimilationVictim, @NotNull NonLatexAssimilationDecision<?> decision) {
-            // TODO defer behavior choice to next-in-line behavior (humanoid)
-            return null;
+            var nextBehavior = ProcessTransfur.getDefaultEntityAssimilationBehavior(assimilationVictim);
+            if (nextBehavior == null)
+                return null;
+            return nextBehavior.nonLatexAssimilateVictimBehavior(assimilationVictim, decision);
         }
 
         @Override
         public @Nullable AssimilationBehavior immediateTransfurTargetBehavior(T assimilateTarget, @NotNull ImmediateTransfurDecision<?> decision) {
-            return null;
+            return AssimilationBehavior.instant(assimilateTarget.level(), () -> {
+                assimilate(assimilateTarget);
+                return null;
+            });
         }
     }
 
@@ -134,20 +139,27 @@ public interface EntityAssimilationBehavior<T extends LivingEntity> {
 
                 return newDecision.latexAssimilateVictimBehavior(assimilationVictim);
             } else {
-                // TODO defer behavior choice to next-in-line behavior (humanoid/assimilate)
-                return null;
+                var nextBehavior = ProcessTransfur.getDefaultEntityAssimilationBehavior(assimilationVictim);
+                if (nextBehavior == null)
+                    return null;
+                return nextBehavior.latexAssimilateVictimBehavior(assimilationVictim, decision);
             }
         }
 
         @Override
         public @Nullable AssimilationBehavior nonLatexAssimilateVictimBehavior(T assimilationVictim, @NotNull NonLatexAssimilationDecision<?> decision) {
-            // TODO defer behavior choice to next-in-line behavior (humanoid/assimilate)
-            return null;
+            var nextBehavior = ProcessTransfur.getDefaultEntityAssimilationBehavior(assimilationVictim);
+            if (nextBehavior == null)
+                return null;
+            return nextBehavior.nonLatexAssimilateVictimBehavior(assimilationVictim, decision);
         }
 
         @Override
         public @Nullable AssimilationBehavior immediateTransfurTargetBehavior(T assimilateTarget, @NotNull ImmediateTransfurDecision<?> decision) {
-            return null;
+            var nextBehavior = ProcessTransfur.getDefaultEntityAssimilationBehavior(assimilateTarget);
+            if (nextBehavior == null)
+                return null;
+            return nextBehavior.immediateTransfurTargetBehavior(assimilateTarget, decision);
         }
     }
 

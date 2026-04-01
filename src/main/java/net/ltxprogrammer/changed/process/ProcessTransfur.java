@@ -67,18 +67,21 @@ public class ProcessTransfur {
         ASSIMILATED_MOB_TRANSFUR_LOGIC.put(entityType.getId(), entityAssimilationBehavior);
     }
 
+    public static <T extends LivingEntity> EntityAssimilationBehavior<T> getDefaultEntityAssimilationBehavior(T entity) {
+        if (entity instanceof Player)
+            return (EntityAssimilationBehavior<T>) EntityAssimilationBehavior.defaultPlayer();
+        else if (entity.getType().is(ChangedTags.EntityTypes.HUMANOIDS))
+            return (EntityAssimilationBehavior<T>) EntityAssimilationBehavior.defaultHumanoid();
+        else
+            return null;
+    }
+
     public static <T extends LivingEntity> EntityAssimilationBehavior<T> getEntityAssimilationBehavior(T entity) {
         if (entity == null)
             return null;
         var key = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
-        if (!ASSIMILATED_MOB_TRANSFUR_LOGIC.containsKey(key)) {
-            if (entity instanceof Player)
-                return (EntityAssimilationBehavior<T>) EntityAssimilationBehavior.defaultPlayer();
-            else if (entity.getType().is(ChangedTags.EntityTypes.HUMANOIDS))
-                return (EntityAssimilationBehavior<T>) EntityAssimilationBehavior.defaultHumanoid();
-            else
-                return null;
-        }
+        if (!ASSIMILATED_MOB_TRANSFUR_LOGIC.containsKey(key))
+            return getDefaultEntityAssimilationBehavior(entity);
         return (EntityAssimilationBehavior<T>) ASSIMILATED_MOB_TRANSFUR_LOGIC.get(key);
     }
 
