@@ -386,6 +386,11 @@ public class TransfurEvents {
         public boolean isTemporaryFromSuit() {
             return temporaryFromSuit;
         }
+
+        @Override
+        public boolean isCancelable() {
+            return false;
+        }
     }
 
     /**
