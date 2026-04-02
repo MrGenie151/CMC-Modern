@@ -371,6 +371,28 @@ public interface EntityAssimilationBehavior<T extends LivingEntity> {
         return new ReplaceSelfWithVariant<>(variant, traitMapper);
     }
 
+    static <T extends LivingEntity> EntityAssimilationBehavior<T> conditionalAssimilation(Predicate<T> predicate) {
+        return new EntityAssimilationBehavior<T>() {
+            @Override
+            public @Nullable AssimilationBehavior latexAssimilateVictimBehavior(T assimilationVictim, @NotNull LatexAssimilationDecision<?> decision) {
+                var behavior = ProcessTransfur.getDefaultEntityAssimilationBehavior(assimilationVictim);
+                return behavior != null && predicate.test(assimilationVictim) ? behavior.latexAssimilateVictimBehavior(assimilationVictim, decision) : null;
+            }
+
+            @Override
+            public @Nullable AssimilationBehavior nonLatexAssimilateVictimBehavior(T assimilationVictim, @NotNull NonLatexAssimilationDecision<?> decision) {
+                var behavior = ProcessTransfur.getDefaultEntityAssimilationBehavior(assimilationVictim);
+                return behavior != null && predicate.test(assimilationVictim) ? behavior.nonLatexAssimilateVictimBehavior(assimilationVictim, decision) : null;
+            }
+
+            @Override
+            public @Nullable AssimilationBehavior immediateTransfurTargetBehavior(T assimilateTarget, @NotNull ImmediateTransfurDecision<?> decision) {
+                var behavior = ProcessTransfur.getDefaultEntityAssimilationBehavior(assimilateTarget);
+                return behavior != null && predicate.test(assimilateTarget) ? behavior.immediateTransfurTargetBehavior(assimilateTarget, decision) : null;
+            }
+        };
+    }
+
     static EntityAssimilationBehavior<LivingEntity> defaultHumanoid() {
         return HumanoidAssimilationBehavior.INSTANCE;
     }
