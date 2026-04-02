@@ -8,6 +8,8 @@ import net.ltxprogrammer.changed.entity.TransfurContext;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.init.ChangedDamageSources;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
@@ -92,9 +94,23 @@ public record LatexAssimilationDecision<T extends ChangedEntity>(DecisionStrengt
         return new LatexAssimilationDecision<>(DecisionStrength.HIGH, Method.ABSORPTION, transfurVariant, context, damage, postTransfurListener);
     }
 
+    public DamageSource getDamageSource(RegistryAccess registryAccess) {
+        if (context.source() == null)
+            return ChangedDamageSources.entityTransfur(registryAccess, (LivingEntity)null);
+
+        final var sourceEntity = context.source().map(IAbstractChangedEntity::getEntity, ILatexAssimilatedEntity::getEntity);
+        if (context.source().right().isPresent())
+            return ChangedDamageSources.entityAbsorb(registryAccess, sourceEntity);
+
+        return switch (method) {
+            case REPLICATION -> ChangedDamageSources.entityTransfur(registryAccess, sourceEntity);
+            case ABSORPTION -> ChangedDamageSources.entityAbsorb(registryAccess, sourceEntity);
+        };
+    }
+
     protected AssimilationBehavior transfurByReplication(LivingEntity target, IAbstractChangedEntity transfurSource) {
         return AssimilationBehavior.progressThenTransfur(target,
-                ChangedDamageSources.entityTransfur(target.level().registryAccess(), transfurSource.getEntity()),
+                this.getDamageSource(target.level().registryAccess()),
                 transfurProgress,
                 () -> {
                     var newEntity = transfurVariant.replaceEntity(target, transfurSource);
@@ -106,7 +122,7 @@ public record LatexAssimilationDecision<T extends ChangedEntity>(DecisionStrengt
 
     protected AssimilationBehavior transfurByAbsorption(LivingEntity target, IAbstractChangedEntity transfurSource) {
         return AssimilationBehavior.progressThenTransfur(target,
-                ChangedDamageSources.entityAbsorb(target.level().registryAccess(), transfurSource.getEntity()),
+                this.getDamageSource(target.level().registryAccess()),
                 transfurProgress,
                 () -> {
                     if (target instanceof Player player) {
@@ -124,7 +140,7 @@ public record LatexAssimilationDecision<T extends ChangedEntity>(DecisionStrengt
 
     protected AssimilationBehavior transfurByAbsorption(LivingEntity target, ILatexAssimilatedEntity transfurSource) {
         return AssimilationBehavior.progressThenTransfur(target,
-                ChangedDamageSources.entityAbsorb(target.level().registryAccess(), transfurSource.getEntity()),
+                this.getDamageSource(target.level().registryAccess()),
                 transfurProgress,
                 () -> {
                     var newEntity = transfurVariant.replaceEntity(target, transfurSource);
@@ -149,7 +165,7 @@ public record LatexAssimilationDecision<T extends ChangedEntity>(DecisionStrengt
             return entityLatexAssimilateVictimBehavior(target, context.source());
 
         return AssimilationBehavior.progressThenTransfur(target,
-                ChangedDamageSources.entityTransfur(target.level().registryAccess(), (LivingEntity)null),
+                this.getDamageSource(target.level().registryAccess()),
                 transfurProgress,
                 () -> {
                     var newEntity = transfurVariant.replaceEntity(target, (LivingEntity)null);

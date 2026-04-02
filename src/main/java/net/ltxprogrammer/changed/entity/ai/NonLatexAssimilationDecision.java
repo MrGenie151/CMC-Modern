@@ -1,10 +1,13 @@
 package net.ltxprogrammer.changed.entity.ai;
 
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
+import net.ltxprogrammer.changed.ability.ILatexAssimilatedEntity;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.TransfurCause;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.init.ChangedDamageSources;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,10 +51,15 @@ public record NonLatexAssimilationDecision<T extends ChangedEntity>(TransfurVari
         return of(transfurVariant, cause, null, transfurProgress, extraDamage, postTransfurListener);
     }
 
+    public DamageSource getDamageSource(RegistryAccess registryAccess) {
+        final var sourceEntity = source != null ? source.getEntity() : null;
+        return ChangedDamageSources.entityTransfur(registryAccess, sourceEntity);
+    }
+
     public AssimilationBehavior assimilateVictimBehavior(LivingEntity target) {
         final var sourceEntity = source != null ? source.getEntity() : null;
         return AssimilationBehavior.progressThenTransfur(target,
-                ChangedDamageSources.entityTransfur(target.level().registryAccess(), sourceEntity),
+                this.getDamageSource(target.level().registryAccess()),
                 transfurProgress,
                 () -> {
                     var newEntity = transfurVariant.replaceEntity(target, sourceEntity);

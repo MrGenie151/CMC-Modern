@@ -1,6 +1,7 @@
 package net.ltxprogrammer.changed.entity.ai;
 
 import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
+import net.ltxprogrammer.changed.init.ChangedDamageSources;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
 import net.ltxprogrammer.changed.world.enchantments.LatexProtectionEnchantment;
 import net.minecraft.world.damagesource.DamageSource;
@@ -16,7 +17,7 @@ public interface AssimilationBehavior {
     boolean willAssimilate();
     AssimilationBehavior appendTransfurListener(Consumer<IAbstractChangedEntity> transfurLogic);
 
-    static AssimilationBehavior progressPlayerThenTransfur(Player player, float transfurProgress, Supplier<IAbstractChangedEntity> transfurLogic) {
+    static AssimilationBehavior progressPlayerThenTransfur(Player player, DamageSource source, float transfurProgress, Supplier<IAbstractChangedEntity> transfurLogic) {
         return new AssimilationBehavior() {
             @Override
             public void stepAssimilate() {
@@ -43,6 +44,10 @@ public interface AssimilationBehavior {
                 ProcessTransfur.setPlayerTransfurProgress(player, next);
                 if (next >= max && old < max)
                     transfurLogic.get();
+                else {
+                    player.level().broadcastDamageEvent(player, source);
+                    player.playHurtSound(source);
+                }
             }
 
             @Override
@@ -67,7 +72,7 @@ public interface AssimilationBehavior {
 
             @Override
             public AssimilationBehavior appendTransfurListener(Consumer<IAbstractChangedEntity> nextTransfurLogic) {
-                return progressPlayerThenTransfur(player, transfurProgress, () -> {
+                return progressPlayerThenTransfur(player, source, transfurProgress, () -> {
                     var variant = transfurLogic.get();
                     nextTransfurLogic.accept(variant);
                     return variant;
@@ -78,7 +83,7 @@ public interface AssimilationBehavior {
 
     static AssimilationBehavior progressThenTransfur(LivingEntity target, DamageSource source, float transfurProgress, Supplier<IAbstractChangedEntity> transfurLogic) {
         if (target instanceof Player player) {
-            return progressPlayerThenTransfur(player, transfurProgress, transfurLogic);
+            return progressPlayerThenTransfur(player, source, transfurProgress, transfurLogic);
         } else {
             return new AssimilationBehavior() {
                 @Override
