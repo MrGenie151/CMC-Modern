@@ -566,7 +566,9 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
         if (behavior != null)
             return true;
 
-        return getLatexType().isHostileTo(LatexType.getEntityLatexType(livingEntity));
+        var targetLatexType = LatexType.getEntityLatexType(livingEntity);
+
+        return targetLatexType != null && getLatexType().isHostileTo(targetLatexType);
     }
 
     @Deprecated
