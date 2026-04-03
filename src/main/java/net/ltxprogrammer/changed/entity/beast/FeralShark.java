@@ -8,6 +8,7 @@ import net.ltxprogrammer.changed.entity.ai.LatexAssimilationDecision;
 import net.ltxprogrammer.changed.entity.variant.EntityShape;
 import net.ltxprogrammer.changed.entity.variant.TransfurVariant;
 import net.ltxprogrammer.changed.init.ChangedTransfurVariants;
+import net.ltxprogrammer.changed.util.LevelUtil;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityDimensions;
@@ -47,15 +48,20 @@ public class FeralShark extends AbstractAquaticEntity {
     }
 
     @Override
-    protected TransfurVariant<?> getTransfurVariant() {
-        return this.level().getSeaLevel() - 6 > this.getBlockY() ? ChangedTransfurVariants.Gendered.LATEX_MERMAID_SHARKS.getRandomVariant(this.random) : ChangedTransfurVariants.LATEX_SHARK.get();
+    protected TransfurVariant<?> getTransfurVariant(LatexAssimilationDecision.Method method) {
+        return LevelUtil.getDepthFromSurfaceOfWater(this.level(), this.position(), 7) > 6 ?
+                ChangedTransfurVariants.Gendered.LATEX_MERMAID_SHARKS.getRandomVariant(this.random) :
+                ChangedTransfurVariants.LATEX_SHARK.get();
     }
 
     @Override
     public @Nullable LatexAssimilationDecision<?> makeLatexAssimilationDecision(TransfurCause cause, LivingEntity targetEntity) {
         IAbstractChangedEntity self = IAbstractChangedEntity.forEntity(this);
 
-        return LatexAssimilationDecision.weakAbsorption(this.getTransfurVariant(), self.absorb(), this.computeTransfurDamage());
+        return LatexAssimilationDecision.weakAbsorption(
+                this.getTransfurVariant(LatexAssimilationDecision.Method.ABSORPTION),
+                self.absorb(),
+                this.computeTransfurDamage());
     }
 
     protected PathNavigation createNavigation(Level p_28362_) {
