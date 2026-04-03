@@ -123,11 +123,11 @@ public interface EntityAssimilationBehavior<T extends LivingEntity> {
         }
     }
 
-    class ReplaceSelfWithVariant<T extends LivingEntity> implements EntityAssimilationBehavior<T> {
-        public final Supplier<TransfurVariant<?>> variant;
+    class ReplaceSelfWithVariant<T extends LivingEntity, V extends ChangedEntity> implements EntityAssimilationBehavior<T> {
+        public final Supplier<TransfurVariant<V>> variant;
         public final BiConsumer<T, IAbstractChangedEntity> traitMapper;
 
-        public ReplaceSelfWithVariant(Supplier<TransfurVariant<?>> variant, BiConsumer<T, IAbstractChangedEntity> traitMapper) {
+        public ReplaceSelfWithVariant(Supplier<TransfurVariant<V>> variant, BiConsumer<T, IAbstractChangedEntity> traitMapper) {
             this.variant = variant;
             this.traitMapper = traitMapper;
         }
@@ -365,19 +365,19 @@ public interface EntityAssimilationBehavior<T extends LivingEntity> {
         return new InjectEntityWithTransfurGoals<>(mustSeeTarget, mustReachTarget, speedModifier, followingTargetEvenIfNotSeen, decider);
     }
 
-    static <T extends LivingEntity> EntityAssimilationBehavior<T> uniqueVariant(TransfurVariant<?> variant) {
+    static <T extends LivingEntity, V extends ChangedEntity> EntityAssimilationBehavior<T> uniqueVariant(TransfurVariant<V> variant) {
         return uniqueVariant(variant, (oldEntity, newEntity) -> {});
     }
 
-    static <T extends LivingEntity> EntityAssimilationBehavior<T> uniqueVariant(TransfurVariant<?> variant, BiConsumer<T, IAbstractChangedEntity> traitMapper) {
+    static <T extends LivingEntity, V extends ChangedEntity> EntityAssimilationBehavior<T> uniqueVariant(TransfurVariant<V> variant, BiConsumer<T, IAbstractChangedEntity> traitMapper) {
         return new ReplaceSelfWithVariant<>(() -> variant, traitMapper);
     }
 
-    static <T extends LivingEntity> EntityAssimilationBehavior<T> uniqueVariant(RegistryObject<TransfurVariant<?>> variant) {
+    static <T extends LivingEntity, V extends ChangedEntity> EntityAssimilationBehavior<T> uniqueVariant(RegistryObject<TransfurVariant<V>> variant) {
         return uniqueVariant(variant, (oldEntity, newEntity) -> {});
     }
 
-    static <T extends LivingEntity> EntityAssimilationBehavior<T> uniqueVariant(RegistryObject<TransfurVariant<?>> variant, BiConsumer<T, IAbstractChangedEntity> traitMapper) {
+    static <T extends LivingEntity, V extends ChangedEntity> EntityAssimilationBehavior<T> uniqueVariant(RegistryObject<TransfurVariant<V>> variant, BiConsumer<T, IAbstractChangedEntity> traitMapper) {
         return new ReplaceSelfWithVariant<>(variant, traitMapper);
     }
 
