@@ -18,6 +18,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static net.ltxprogrammer.changed.init.ChangedGameRules.RULE_KEEP_BRAIN;
 
@@ -122,10 +124,10 @@ public interface EntityAssimilationBehavior<T extends LivingEntity> {
     }
 
     class ReplaceSelfWithVariant<T extends LivingEntity> implements EntityAssimilationBehavior<T> {
-        public final TransfurVariant<?> variant;
+        public final Supplier<TransfurVariant<?>> variant;
         public final BiConsumer<T, IAbstractChangedEntity> traitMapper;
 
-        public ReplaceSelfWithVariant(TransfurVariant<?> variant, BiConsumer<T, IAbstractChangedEntity> traitMapper) {
+        public ReplaceSelfWithVariant(Supplier<TransfurVariant<?>> variant, BiConsumer<T, IAbstractChangedEntity> traitMapper) {
             this.variant = variant;
             this.traitMapper = traitMapper;
         }
@@ -134,7 +136,7 @@ public interface EntityAssimilationBehavior<T extends LivingEntity> {
         public @Nullable AssimilationBehavior latexAssimilateVictimBehavior(T assimilationVictim, @NotNull LatexAssimilationDecision<?> decision) {
             if (decision.decisionStrength() == LatexAssimilationDecision.DecisionStrength.LOW) {
                 // Override a low strength latex transfur decision with a unique variant for this entity
-                var newDecision = LatexAssimilationDecision.strong(decision.method(), variant, decision.context(), decision.transfurProgress(),
+                var newDecision = LatexAssimilationDecision.strong(decision.method(), variant.get(), decision.context(), decision.transfurProgress(),
                         replaced -> traitMapper.accept(assimilationVictim, replaced));
 
                 return newDecision.latexAssimilateVictimBehavior(assimilationVictim);
@@ -364,10 +366,18 @@ public interface EntityAssimilationBehavior<T extends LivingEntity> {
     }
 
     static <T extends LivingEntity> EntityAssimilationBehavior<T> uniqueVariant(TransfurVariant<?> variant) {
-        return uniqueVariant(variant, (oldEntity, newEntity) -> {});
+        return uniqueVariant(() -> variant, (oldEntity, newEntity) -> {});
     }
 
     static <T extends LivingEntity> EntityAssimilationBehavior<T> uniqueVariant(TransfurVariant<?> variant, BiConsumer<T, IAbstractChangedEntity> traitMapper) {
+        return uniqueVariant(() -> variant, traitMapper);
+    }
+
+    static <T extends LivingEntity> EntityAssimilationBehavior<T> uniqueVariant(Supplier<TransfurVariant<?>> variant) {
+        return uniqueVariant(variant, (oldEntity, newEntity) -> {});
+    }
+
+    static <T extends LivingEntity> EntityAssimilationBehavior<T> uniqueVariant(Supplier<TransfurVariant<?>> variant, BiConsumer<T, IAbstractChangedEntity> traitMapper) {
         return new ReplaceSelfWithVariant<>(variant, traitMapper);
     }
 
