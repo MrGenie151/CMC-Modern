@@ -30,10 +30,11 @@ import net.ltxprogrammer.changed.world.LatexCoverHitResult;
 import net.ltxprogrammer.changed.world.LatexCoverState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.BeeRenderer;
+import net.minecraft.client.renderer.entity.*;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -207,6 +208,11 @@ public class EventHandlerClient {
         }
     }
 
+    public static <T extends LivingEntity, M extends EntityModel<T>, R extends LivingEntityRenderer<T, M>> void addLatexParticles(EntityRenderersEvent.AddLayers event, EntityType<T> entityType) {
+        R renderer = event.getRenderer(entityType);
+        renderer.addLayer(new LatexParticlesLayer<>(renderer, renderer.getModel()));
+    }
+
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public static void addChangedLayers(EntityRenderersEvent.AddLayers event) {
@@ -216,10 +222,8 @@ public class EventHandlerClient {
                 renderer.addLayer(new GasMaskLayer<>(renderer, event.getEntityModels()));
             }
         });
-        {
-            BeeRenderer beeRenderer = event.getRenderer(EntityType.BEE);
-            beeRenderer.addLayer(new LatexParticlesLayer<>(beeRenderer, beeRenderer.getModel()));
-        }
+        addLatexParticles(event, EntityType.BEE);
+        addLatexParticles(event, EntityType.RABBIT);
     }
 
     @OnlyIn(Dist.CLIENT)

@@ -97,7 +97,6 @@ public interface EntityAssimilationBehavior<T extends LivingEntity> {
             entity.targetSelector.addGoal(/* Priority */ -1, targetGoal);
             entity.goalSelector.addGoal(/* Priority */ -1, assimilateGoal);
 
-            ChangedSounds.broadcastSound(entity, ChangedSounds.TRANSFUR_BY_LATEX, 1.0f, 1.0f);
             ProcessTransfur.onNewlyAssimilated(abstracted);
         }
 
@@ -106,6 +105,7 @@ public interface EntityAssimilationBehavior<T extends LivingEntity> {
             if (!ProcessTransfur.isMobAssimilated(assimilationVictim)) {
                 return AssimilationBehavior.instant(assimilationVictim.level(), () -> {
                     assimilate(assimilationVictim);
+                    ChangedSounds.broadcastSound(assimilationVictim, ChangedSounds.TRANSFUR_BY_LATEX, 1.0f, 1.0f);
                     return null;
                 });
             } else {
