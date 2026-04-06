@@ -211,13 +211,7 @@ public class CommandTransfur {
         } catch (IllegalArgumentException ex) {
             throw NOT_CAUSE.create();
         }
-        final TransfurContext context;
-        if (source.getEntity() instanceof Player sourcePlayer)
-            context = TransfurContext.playerLatexHazard(sourcePlayer, transfurCause);
-        else if (source.getEntity() instanceof ChangedEntity sourceNpc)
-            context = TransfurContext.npcLatexHazard(sourceNpc, transfurCause);
-        else
-            context = null;
+        final TransfurContext context = TransfurContext.hazard(transfurCause);
 
         if (form.equals(RANDOM_VARIANT))
             form = Util.getRandom(TransfurVariant.getPublicTransfurVariants().collect(Collectors.toList()), player.getRandom()).getFormId();
