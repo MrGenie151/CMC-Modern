@@ -597,7 +597,8 @@ public abstract class ChangedEntity extends Monster implements EntityShape.Provi
         if (!(entity instanceof LivingEntity target))
             return false;
 
-        LatexAssimilationDecision<?> decision = switch (this.getTransfurMode()) {
+        IAbstractChangedEntity self = IAbstractChangedEntity.forEntity(this);
+        LatexAssimilationDecision<?> decision = switch (self.getTransfurMode()) {
             case REPLICATION -> this.makeLatexAssimilationDecision(TransfurCause.GRAB_REPLICATE, target);
             case ABSORPTION -> this.makeLatexAssimilationDecision(TransfurCause.GRAB_ABSORB, target);
             default -> null;
