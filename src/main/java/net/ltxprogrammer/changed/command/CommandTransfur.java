@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.ltxprogrammer.changed.Changed;
+import net.ltxprogrammer.changed.ability.IAbstractChangedEntity;
 import net.ltxprogrammer.changed.entity.ChangedEntity;
 import net.ltxprogrammer.changed.entity.TransfurCause;
 import net.ltxprogrammer.changed.entity.TransfurContext;
@@ -19,6 +20,7 @@ import net.ltxprogrammer.changed.init.ChangedItems;
 import net.ltxprogrammer.changed.init.ChangedRegistry;
 import net.ltxprogrammer.changed.item.Syringe;
 import net.ltxprogrammer.changed.process.ProcessTransfur;
+import net.ltxprogrammer.changed.process.TransfurEvents;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
@@ -288,9 +290,10 @@ public class CommandTransfur {
 
     private static int untransfurPlayer(CommandSourceStack source, ServerPlayer player) {
         return ProcessTransfur.ifPlayerTransfurred(player, variant -> {
-            variant.unhookAll(player);
-            ProcessTransfur.removePlayerTransfurVariant(player);
-            ProcessTransfur.setPlayerTransfurProgress(player, 0.0f);
+            var event = new TransfurEvents.UntransfurPlayerByCommandEvent(source, player, variant, null);
+            if (Changed.postModEvent(event))
+                return;
+            TransfurEvents.finalizeUntransfurPlayerEvent(event);
         }) ? Command.SINGLE_SUCCESS : 0;
     }
 
